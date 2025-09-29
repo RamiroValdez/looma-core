@@ -1,5 +1,4 @@
 package com.amool.hexagonal.adapters.out.persistence.entity;
-
 import java.time.LocalDateTime;
 import java.util.HashSet;
 import java.util.Set;
@@ -39,6 +38,4 @@ public class ChapterEntity {
     // Usuario adquiere capítulos
     @ManyToMany(mappedBy = "acquiredChapterEntities")
     private Set<UserEntity> usersWhoAcquired = new HashSet<>();
-
-
 }

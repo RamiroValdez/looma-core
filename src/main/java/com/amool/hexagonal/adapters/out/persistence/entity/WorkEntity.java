@@ -1,3 +1,4 @@
+
 package com.amool.hexagonal.adapters.out.persistence.entity;
 
 import java.time.LocalDate;
@@ -60,4 +61,5 @@ public class WorkEntity {
     // Suscripción a obras
     @ManyToMany(mappedBy = "subscribedWorks")
     private Set<UserEntity> subscribers = new HashSet<>();
+  
 }
