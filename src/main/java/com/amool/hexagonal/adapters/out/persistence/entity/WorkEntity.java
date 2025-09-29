@@ -1,4 +1,8 @@
+<<<<<<<< HEAD:src/main/java/com/amool/hexagonal/adapters/out/persistence/entity/WorkEntity.java
 package com.amool.hexagonal.adapters.out.persistence.entity;
+========
+package com.amool.hexagonal.adapters.out.persistence;
+>>>>>>>> origin/feature/mapeo_de_base_de_datos_sql:src/main/java/com/amool/hexagonal/adapters/out/persistence/Work.java
 
 import java.time.LocalDate;
 import java.util.HashSet;
@@ -7,8 +11,13 @@ import java.util.Set;
 import jakarta.persistence.*;
 
 @Entity
+<<<<<<<< HEAD:src/main/java/com/amool/hexagonal/adapters/out/persistence/entity/WorkEntity.java
 @Table(name = "work")
 public class WorkEntity {
+========
+@Table(name = "piece")
+public class Work {
+>>>>>>>> origin/feature/mapeo_de_base_de_datos_sql:src/main/java/com/amool/hexagonal/adapters/out/persistence/Work.java
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -39,18 +48,31 @@ public class WorkEntity {
     private LocalDate publicationDate;
 
     @ManyToOne
+<<<<<<<< HEAD:src/main/java/com/amool/hexagonal/adapters/out/persistence/entity/WorkEntity.java
     @JoinColumn(name = "creador_id", nullable = false)
     private UserEntity creator;
 
     @ManyToOne
     @JoinColumn(name = "format_id", nullable = false)
     private FormatEntity formatEntity;
+========
+    @JoinColumn(name = "author_id", nullable = false)
+    private User creator;
+
+    @ManyToOne
+    @JoinColumn(name = "format_id", nullable = false)
+    private Format format;
+>>>>>>>> origin/feature/mapeo_de_base_de_datos_sql:src/main/java/com/amool/hexagonal/adapters/out/persistence/Work.java
 
     // Relations
 
     // Usuario guarda obras
     @ManyToMany(mappedBy = "savedWorks")
+<<<<<<<< HEAD:src/main/java/com/amool/hexagonal/adapters/out/persistence/entity/WorkEntity.java
     private Set<UserEntity> usersWhoSaved = new HashSet<>();
+========
+    private Set<User> usersWhoSaved = new HashSet<>();
+>>>>>>>> origin/feature/mapeo_de_base_de_datos_sql:src/main/java/com/amool/hexagonal/adapters/out/persistence/Work.java
 
     public Set<UserEntity> getUsersWhoSaved() {
         return usersWhoSaved;
@@ -63,7 +85,11 @@ public class WorkEntity {
     // Obra tiene categorías
     @ManyToMany
     @JoinTable(name = "work_category", joinColumns = @JoinColumn(name = "work_id"), inverseJoinColumns = @JoinColumn(name = "category_id"))
+<<<<<<<< HEAD:src/main/java/com/amool/hexagonal/adapters/out/persistence/entity/WorkEntity.java
     private Set<CategoryEntity> categories = new HashSet<>();
+========
+    private Set<Category> categories = new HashSet<>();
+>>>>>>>> origin/feature/mapeo_de_base_de_datos_sql:src/main/java/com/amool/hexagonal/adapters/out/persistence/Work.java
 
     public Set<CategoryEntity> getCategories() {
         return categories;
@@ -75,7 +101,11 @@ public class WorkEntity {
 
     // Suscripción a obras
     @ManyToMany(mappedBy = "subscribedWorks")
+<<<<<<<< HEAD:src/main/java/com/amool/hexagonal/adapters/out/persistence/entity/WorkEntity.java
     private Set<UserEntity> subscribers = new HashSet<>();
+========
+    private Set<User> subscribers = new HashSet<>();
+>>>>>>>> origin/feature/mapeo_de_base_de_datos_sql:src/main/java/com/amool/hexagonal/adapters/out/persistence/Work.java
 
     public Set<UserEntity> getSubscribers() {
         return subscribers;

@@ -1,4 +1,8 @@
+<<<<<<<< HEAD:src/main/java/com/amool/hexagonal/adapters/out/persistence/entity/CategoryEntity.java
 package com.amool.hexagonal.adapters.out.persistence.entity;
+========
+package com.amool.hexagonal.adapters.out.persistence;
+>>>>>>>> origin/feature/mapeo_de_base_de_datos_sql:src/main/java/com/amool/hexagonal/adapters/out/persistence/Category.java
 
 import java.util.HashSet;
 import java.util.Set;
@@ -20,7 +24,19 @@ public class CategoryEntity {
 
     // Obra tiene categorías
     @ManyToMany(mappedBy = "categories")
+<<<<<<<< HEAD:src/main/java/com/amool/hexagonal/adapters/out/persistence/entity/CategoryEntity.java
     private Set<WorkEntity> workEntities = new HashSet<>();
+========
+    private Set<Work> works = new HashSet<>();
+
+    public Set<Work> getWorks() {
+        return works;
+    }
+
+    public void setWorks(Set<Work> works) {
+        this.works = works;
+    }
+>>>>>>>> origin/feature/mapeo_de_base_de_datos_sql:src/main/java/com/amool/hexagonal/adapters/out/persistence/Category.java
 
     // Formato compone categorías
     @ManyToMany(mappedBy = "categories")
@@ -57,3 +73,4 @@ public class CategoryEntity {
     }
 
 }
+

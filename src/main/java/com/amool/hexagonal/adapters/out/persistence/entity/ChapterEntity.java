@@ -1,4 +1,8 @@
+<<<<<<<< HEAD:src/main/java/com/amool/hexagonal/adapters/out/persistence/entity/ChapterEntity.java
 package com.amool.hexagonal.adapters.out.persistence.entity;
+========
+package com.amool.hexagonal.adapters.out.persistence;
+>>>>>>>> origin/feature/mapeo_de_base_de_datos_sql:src/main/java/com/amool/hexagonal/adapters/out/persistence/Chapter.java
 
 import java.time.LocalDateTime;
 import java.util.HashSet;
@@ -20,19 +24,31 @@ public class ChapterEntity {
     @Column(name = "price", nullable = false)
     private Double price;
 
+<<<<<<<< HEAD:src/main/java/com/amool/hexagonal/adapters/out/persistence/entity/ChapterEntity.java
     @Column(name = "last_update", nullable = false)
+========
+    @Column(name = "last_modified", nullable = false)
+>>>>>>>> origin/feature/mapeo_de_base_de_datos_sql:src/main/java/com/amool/hexagonal/adapters/out/persistence/Chapter.java
     private LocalDateTime lastModified;
 
     @ManyToOne
     @JoinColumn(name = "work_id", nullable = false)
+<<<<<<<< HEAD:src/main/java/com/amool/hexagonal/adapters/out/persistence/entity/ChapterEntity.java
     private WorkEntity workEntity;
+========
+    private Work work;
+>>>>>>>> origin/feature/mapeo_de_base_de_datos_sql:src/main/java/com/amool/hexagonal/adapters/out/persistence/Chapter.java
 
     @Column(name = "likes", nullable = false)
     private Long likes;
 
     @ManyToOne
     @JoinColumn(name = "language_id", nullable = false)
+<<<<<<<< HEAD:src/main/java/com/amool/hexagonal/adapters/out/persistence/entity/ChapterEntity.java
     private LanguageEntity languageEntity;
+========
+    private Language language;
+>>>>>>>> origin/feature/mapeo_de_base_de_datos_sql:src/main/java/com/amool/hexagonal/adapters/out/persistence/Chapter.java
 
     // Relations
 
@@ -82,12 +98,21 @@ public class ChapterEntity {
         this.lastModified = lastModified;
     }
 
+<<<<<<<< HEAD:src/main/java/com/amool/hexagonal/adapters/out/persistence/entity/ChapterEntity.java
      public WorkEntity getPiece() {
         return workEntity;
     }
 
     public void setPiece(WorkEntity workEntity) {
         this.workEntity = workEntity;
+========
+     public Work getPiece() {
+        return piece;
+    }
+
+    public void setPiece(Work piece) {
+        this.piece = piece;
+>>>>>>>> origin/feature/mapeo_de_base_de_datos_sql:src/main/java/com/amool/hexagonal/adapters/out/persistence/Chapter.java
     }
 
     public Long getLikes() {

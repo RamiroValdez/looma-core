@@ -1,4 +1,8 @@
+<<<<<<<< HEAD:src/main/java/com/amool/hexagonal/adapters/out/persistence/entity/LanguageEntity.java
 package com.amool.hexagonal.adapters.out.persistence.entity;
+========
+package com.amool.hexagonal.adapters.out.persistence;
+>>>>>>>> origin/feature/mapeo_de_base_de_datos_sql:src/main/java/com/amool/hexagonal/adapters/out/persistence/Language.java
 
 import java.util.HashSet;
 import java.util.Set;
