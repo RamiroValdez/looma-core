@@ -25,7 +25,7 @@ public class Chapter {
 
     @ManyToOne
     @JoinColumn(name = "piece_id", nullable = false)
-    private Piece piece;
+    private Work piece;
 
     @Column(name = "likes", nullable = false)
     private Long likes;
@@ -82,11 +82,11 @@ public class Chapter {
         this.lastModified = lastModified;
     }
 
-     public Piece getPiece() {
+     public Work getPiece() {
         return piece;
     }
 
-    public void setPiece(Piece piece) {
+    public void setPiece(Work piece) {
         this.piece = piece;
     }
 

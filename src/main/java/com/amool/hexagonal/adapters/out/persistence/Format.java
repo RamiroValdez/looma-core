@@ -20,7 +20,7 @@ public class Format {
 
     // Categoría compone formatos
     @ManyToMany
-    @JoinTable(name = "comp_formato", joinColumns = @JoinColumn(name = "formato_id"), inverseJoinColumns = @JoinColumn(name = "categoria_id"))
+    @JoinTable(name = "comp_format", joinColumns = @JoinColumn(name = "format_id"), inverseJoinColumns = @JoinColumn(name = "category_id"))
     private Set<Category> categories = new HashSet<>();
 
     public Set<Category> getCategories() {

@@ -20,14 +20,14 @@ public class Category {
 
     // Obra tiene categorías
     @ManyToMany(mappedBy = "categories")
-    private Set<Piece> pieces = new HashSet<>();
+    private Set<Work> works = new HashSet<>();
 
-    public Set<Piece> getPieces() {
-        return pieces;
+    public Set<Work> getWorks() {
+        return works;
     }
 
-    public void setPieces(Set<Piece> pieces) {
-        this.pieces = pieces;
+    public void setWorks(Set<Work> works) {
+        this.works = works;
     }
 
     // Formato compone categorías

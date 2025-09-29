@@ -8,7 +8,7 @@ import jakarta.persistence.*;
 
 @Entity
 @Table(name = "piece")
-public class Piece {
+public class Work {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -39,7 +39,7 @@ public class Piece {
     private LocalDate publicationDate;
 
     @ManyToOne
-    @JoinColumn(name = "creador_id", nullable = false)
+    @JoinColumn(name = "author_id", nullable = false)
     private User creator;
 
     @ManyToOne
@@ -49,7 +49,7 @@ public class Piece {
     // Relations
 
     // Usuario guarda obras
-    @ManyToMany(mappedBy = "savedPieces")
+    @ManyToMany(mappedBy = "savedWorks")
     private Set<User> usersWhoSaved = new HashSet<>();
 
     public Set<User> getUsersWhoSaved() {
@@ -62,7 +62,7 @@ public class Piece {
 
     // Obra tiene categorías
     @ManyToMany
-    @JoinTable(name = "obra_categoria", joinColumns = @JoinColumn(name = "obra_id"), inverseJoinColumns = @JoinColumn(name = "categoria_id"))
+    @JoinTable(name = "work_category", joinColumns = @JoinColumn(name = "work_id"), inverseJoinColumns = @JoinColumn(name = "category_id"))
     private Set<Category> categories = new HashSet<>();
 
     public Set<Category> getCategories() {
@@ -74,7 +74,7 @@ public class Piece {
     }
 
     // Suscripción a obras
-    @ManyToMany(mappedBy = "subscribedPieces")
+    @ManyToMany(mappedBy = "subscribedWorks")
     private Set<User> subscribers = new HashSet<>();
 
     public Set<User> getSubscribers() {

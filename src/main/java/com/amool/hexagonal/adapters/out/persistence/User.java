@@ -35,15 +35,15 @@ public class User {
 
     // Usuario guarda obras
     @ManyToMany
-    @JoinTable(name = "user_saved_piece", joinColumns = @JoinColumn(name = "user_id"), inverseJoinColumns = @JoinColumn(name = "piece_id"))
-    private Set<Piece> savedPieces = new HashSet<>();
+    @JoinTable(name = "user_saved_work", joinColumns = @JoinColumn(name = "user_id"), inverseJoinColumns = @JoinColumn(name = "work_id"))
+    private Set<Work> savedWorks = new HashSet<>();
 
-    public Set<Piece> getSavedPieces() {
-        return savedPieces;
+    public Set<Work> getSavedWorks() {
+        return savedWorks;
     }
 
-    public void setSavedPieces(Set<Piece> savedPieces) {
-        this.savedPieces = savedPieces;
+    public void setSavedWorks(Set<Work> savedWorks) {
+        this.savedWorks = savedWorks;
     }
 
     // Usuario adquiere capítulos
@@ -85,15 +85,15 @@ public class User {
 
     // Suscripción a obras
     @ManyToMany
-    @JoinTable(name = "suscription_piece", joinColumns = @JoinColumn(name = "user_id"), inverseJoinColumns = @JoinColumn(name = "piece_id"))
-    private Set<Piece> subscribedPieces = new HashSet<>();
+    @JoinTable(name = "suscription_work", joinColumns = @JoinColumn(name = "user_id"), inverseJoinColumns = @JoinColumn(name = "piece_id"))
+    private Set<Work> subscribedWorks = new HashSet<>();
 
-    public Set<Piece> getSubscribedPieces() {
-        return subscribedPieces;
+    public Set<Work> getSubscribedWorks() {
+        return subscribedWorks;
     }
 
-    public void setSubscribedPieces(Set<Piece> subscribedPieces) {
-        this.subscribedPieces = subscribedPieces;
+    public void setSubscribedWorks(Set<Work> subscribedWorks) {
+        this.subscribedWorks = subscribedWorks;
     }
 
     // Usuario prefiere idiomas
