@@ -1,4 +1,4 @@
-package com.amool.hexagonal.domain;
+package com.amool.hexagonal.adapters.out.persistence;
 
 import java.util.HashSet;
 import java.util.Set;
@@ -35,7 +35,7 @@ public class User {
 
     // Usuario guarda obras
     @ManyToMany
-    @JoinTable(name = "guardado_usuario_obra", joinColumns = @JoinColumn(name = "usuario_id"), inverseJoinColumns = @JoinColumn(name = "obra_id"))
+    @JoinTable(name = "user_saved_piece", joinColumns = @JoinColumn(name = "user_id"), inverseJoinColumns = @JoinColumn(name = "piece_id"))
     private Set<Piece> savedPieces = new HashSet<>();
 
     public Set<Piece> getSavedPieces() {
@@ -48,7 +48,7 @@ public class User {
 
     // Usuario adquiere capítulos
     @ManyToMany
-    @JoinTable(name = "usuario_capitulo", joinColumns = @JoinColumn(name = "usuario_id"), inverseJoinColumns = @JoinColumn(name = "capitulo_id"))
+    @JoinTable(name = "user_acquired_chapter", joinColumns = @JoinColumn(name = "user_id"), inverseJoinColumns = @JoinColumn(name = "chapter_id"))
     private Set<Chapter> acquiredChapters = new HashSet<>();
 
     public Set<Chapter> getAcquiredChapters() {
@@ -61,7 +61,7 @@ public class User {
 
     // Suscripción a autores
     @ManyToMany
-    @JoinTable(name = "suscripcion_autor", joinColumns = @JoinColumn(name = "usuario_id"), inverseJoinColumns = @JoinColumn(name = "autor_id"))
+    @JoinTable(name = "user_subscribed_author", joinColumns = @JoinColumn(name = "user_id"), inverseJoinColumns = @JoinColumn(name = "author_id"))
     private Set<User> subscribedAuthors = new HashSet<>();
 
     @ManyToMany(mappedBy = "subscribedAuthors")
@@ -85,7 +85,7 @@ public class User {
 
     // Suscripción a obras
     @ManyToMany
-    @JoinTable(name = "suscripcion_obra", joinColumns = @JoinColumn(name = "usuario_id"), inverseJoinColumns = @JoinColumn(name = "obra_id"))
+    @JoinTable(name = "suscription_piece", joinColumns = @JoinColumn(name = "user_id"), inverseJoinColumns = @JoinColumn(name = "piece_id"))
     private Set<Piece> subscribedPieces = new HashSet<>();
 
     public Set<Piece> getSubscribedPieces() {
@@ -98,7 +98,7 @@ public class User {
 
     // Usuario prefiere idiomas
     @ManyToMany
-    @JoinTable(name = "preferencia_idioma", joinColumns = @JoinColumn(name = "usuario_id"), inverseJoinColumns = @JoinColumn(name = "idioma_id"))
+    @JoinTable(name = "preference_language", joinColumns = @JoinColumn(name = "user_id"), inverseJoinColumns = @JoinColumn(name = "language_id"))
     private Set<Language> preferredLanguages = new HashSet<>();
 
     public Set<Language> getPreferredLanguages() {
@@ -111,7 +111,7 @@ public class User {
 
     // Usuario prefiere categorías
     @ManyToMany
-    @JoinTable(name = "preferencia_categoria", joinColumns = @JoinColumn(name = "usuario_id"), inverseJoinColumns = @JoinColumn(name = "categoria_id"))
+    @JoinTable(name = "preference_category", joinColumns = @JoinColumn(name = "user_id"), inverseJoinColumns = @JoinColumn(name = "category_id"))
     private Set<Category> preferredCategories = new HashSet<>();
 
     public Set<Category> getPreferredCategories() {

@@ -1,4 +1,4 @@
-package com.amool.hexagonal.domain;
+package com.amool.hexagonal.adapters.out.persistence;
 
 import java.util.HashSet;
 import java.util.Set;
@@ -73,3 +73,4 @@ public class Category {
     }
 
 }
+

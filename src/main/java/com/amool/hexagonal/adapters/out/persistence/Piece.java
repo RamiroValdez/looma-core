@@ -1,4 +1,4 @@
-package com.amool.hexagonal.domain;
+package com.amool.hexagonal.adapters.out.persistence;
 
 import java.time.LocalDate;
 import java.util.HashSet;
@@ -35,7 +35,7 @@ public class Piece {
     @Column(name = "likes", nullable = false)
     private Integer likes;
 
-    @Column(name = "fecha_creacion")
+    @Column(name = "publication_date")
     private LocalDate publicationDate;
 
     @ManyToOne
@@ -43,7 +43,7 @@ public class Piece {
     private User creator;
 
     @ManyToOne
-    @JoinColumn(name = "formato_id", nullable = false)
+    @JoinColumn(name = "format_id", nullable = false)
     private Format format;
 
     // Relations

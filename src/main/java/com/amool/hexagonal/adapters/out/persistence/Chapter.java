@@ -1,4 +1,4 @@
-package com.amool.hexagonal.domain;
+package com.amool.hexagonal.adapters.out.persistence;
 
 import java.time.LocalDateTime;
 import java.util.HashSet;
@@ -20,18 +20,18 @@ public class Chapter {
     @Column(name = "price", nullable = false)
     private Double price;
 
-    @Column(name = "ultima_actualizacion", nullable = false)
+    @Column(name = "last_modified", nullable = false)
     private LocalDateTime lastModified;
 
     @ManyToOne
-    @JoinColumn(name = "obra_id", nullable = false)
+    @JoinColumn(name = "piece_id", nullable = false)
     private Piece piece;
 
     @Column(name = "likes", nullable = false)
     private Long likes;
 
     @ManyToOne
-    @JoinColumn(name = "idioma_id", nullable = false)
+    @JoinColumn(name = "language_id", nullable = false)
     private Language language;
 
     // Relations
