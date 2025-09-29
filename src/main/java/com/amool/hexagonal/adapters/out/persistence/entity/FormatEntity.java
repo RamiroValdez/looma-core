@@ -1,4 +1,4 @@
-package com.amool.hexagonal.domain;
+package com.amool.hexagonal.adapters.out.persistence.entity;
 
 import java.util.HashSet;
 import java.util.Set;
@@ -7,7 +7,7 @@ import jakarta.persistence.*;
 
 @Entity
 @Table(name = "format")
-public class Format {
+public class FormatEntity {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -20,14 +20,14 @@ public class Format {
 
     // Categoría compone formatos
     @ManyToMany
-    @JoinTable(name = "comp_formato", joinColumns = @JoinColumn(name = "formato_id"), inverseJoinColumns = @JoinColumn(name = "categoria_id"))
-    private Set<Category> categories = new HashSet<>();
+    @JoinTable(name = "category_format", joinColumns = @JoinColumn(name = "format_id"), inverseJoinColumns = @JoinColumn(name = "category_id"))
+    private Set<CategoryEntity> categories = new HashSet<>();
 
-    public Set<Category> getCategories() {
+    public Set<CategoryEntity> getCategories() {
         return categories;
     }
 
-    public void setCategories(Set<Category> categories) {
+    public void setCategories(Set<CategoryEntity> categories) {
         this.categories = categories;
     }
 

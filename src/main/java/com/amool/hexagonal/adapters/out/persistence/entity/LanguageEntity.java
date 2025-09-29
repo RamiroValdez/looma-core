@@ -1,4 +1,4 @@
-package com.amool.hexagonal.domain;
+package com.amool.hexagonal.adapters.out.persistence.entity;
 
 import java.util.HashSet;
 import java.util.Set;
@@ -7,7 +7,7 @@ import jakarta.persistence.*;
 
 @Entity
 @Table(name = "language")
-public class Language {
+public class LanguageEntity {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -18,14 +18,14 @@ public class Language {
 
     // Relations
     // Usuario prefiere idiomas
-    @ManyToMany(mappedBy = "preferredLanguages")
-    private Set<User> users = new HashSet<>();
+    @ManyToMany(mappedBy = "preferredLanguageEntities")
+    private Set<UserEntity> users = new HashSet<>();
 
-    public Set<User> getUsers() {
+    public Set<UserEntity> getUsers() {
         return users;
     }
 
-    public void setUsers(Set<User> users) {
+    public void setUsers(Set<UserEntity> users) {
         this.users = users;
     }
     

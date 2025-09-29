@@ -1,4 +1,4 @@
-package com.amool.hexagonal.domain;
+package com.amool.hexagonal.adapters.out.persistence.entity;
 
 import java.util.HashSet;
 import java.util.Set;
@@ -7,7 +7,7 @@ import jakarta.persistence.*;
 
 @Entity
 @Table(name = "category")
-public class Category {
+public class CategoryEntity {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -20,37 +20,21 @@ public class Category {
 
     // Obra tiene categorías
     @ManyToMany(mappedBy = "categories")
-    private Set<Piece> pieces = new HashSet<>();
-
-    public Set<Piece> getPieces() {
-        return pieces;
-    }
-
-    public void setPieces(Set<Piece> pieces) {
-        this.pieces = pieces;
-    }
+    private Set<WorkEntity> workEntities = new HashSet<>();
 
     // Formato compone categorías
     @ManyToMany(mappedBy = "categories")
-    private Set<Format> formats = new HashSet<>();
-
-    public Set<Format> getFormats() {
-        return formats;
-    }
-
-    public void setFormats(Set<Format> formats) {
-        this.formats = formats;
-    }
+    private Set<FormatEntity> formatEntities = new HashSet<>();
 
     // Usuario prefiere categorías
     @ManyToMany(mappedBy = "preferredCategories")
-    private Set<User> usersWhoPrefer = new HashSet<>();
+    private Set<UserEntity> usersWhoPrefer = new HashSet<>();
 
-    public Set<User> getUsersWhoPrefer() {
+    public Set<UserEntity> getUsersWhoPrefer() {
         return usersWhoPrefer;
     }
 
-    public void setUsersWhoPrefer(Set<User> usersWhoPrefer) {
+    public void setUsersWhoPrefer(Set<UserEntity> usersWhoPrefer) {
         this.usersWhoPrefer = usersWhoPrefer;
     }
 

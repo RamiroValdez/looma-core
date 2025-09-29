@@ -1,4 +1,4 @@
-package com.amool.hexagonal.domain;
+package com.amool.hexagonal.adapters.out.persistence.entity;
 
 import java.time.LocalDate;
 import java.util.HashSet;
@@ -7,8 +7,8 @@ import java.util.Set;
 import jakarta.persistence.*;
 
 @Entity
-@Table(name = "piece")
-public class Piece {
+@Table(name = "work")
+public class WorkEntity {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -35,53 +35,53 @@ public class Piece {
     @Column(name = "likes", nullable = false)
     private Integer likes;
 
-    @Column(name = "fecha_creacion")
+    @Column(name = "publication_date")
     private LocalDate publicationDate;
 
     @ManyToOne
     @JoinColumn(name = "creador_id", nullable = false)
-    private User creator;
+    private UserEntity creator;
 
     @ManyToOne
-    @JoinColumn(name = "formato_id", nullable = false)
-    private Format format;
+    @JoinColumn(name = "format_id", nullable = false)
+    private FormatEntity formatEntity;
 
     // Relations
 
     // Usuario guarda obras
-    @ManyToMany(mappedBy = "savedPieces")
-    private Set<User> usersWhoSaved = new HashSet<>();
+    @ManyToMany(mappedBy = "savedWorks")
+    private Set<UserEntity> usersWhoSaved = new HashSet<>();
 
-    public Set<User> getUsersWhoSaved() {
+    public Set<UserEntity> getUsersWhoSaved() {
         return usersWhoSaved;
     }
 
-    public void setUsersWhoSaved(Set<User> usersWhoSaved) {
+    public void setUsersWhoSaved(Set<UserEntity> usersWhoSaved) {
         this.usersWhoSaved = usersWhoSaved;
     }
 
     // Obra tiene categorías
     @ManyToMany
-    @JoinTable(name = "obra_categoria", joinColumns = @JoinColumn(name = "obra_id"), inverseJoinColumns = @JoinColumn(name = "categoria_id"))
-    private Set<Category> categories = new HashSet<>();
+    @JoinTable(name = "work_category", joinColumns = @JoinColumn(name = "work_id"), inverseJoinColumns = @JoinColumn(name = "category_id"))
+    private Set<CategoryEntity> categories = new HashSet<>();
 
-    public Set<Category> getCategories() {
+    public Set<CategoryEntity> getCategories() {
         return categories;
     }
 
-    public void setCategories(Set<Category> categories) {
+    public void setCategories(Set<CategoryEntity> categories) {
         this.categories = categories;
     }
 
     // Suscripción a obras
-    @ManyToMany(mappedBy = "subscribedPieces")
-    private Set<User> subscribers = new HashSet<>();
+    @ManyToMany(mappedBy = "subscribedWorks")
+    private Set<UserEntity> subscribers = new HashSet<>();
 
-    public Set<User> getSubscribers() {
+    public Set<UserEntity> getSubscribers() {
         return subscribers;
     }
 
-    public void setSubscribers(Set<User> subscribers) {
+    public void setSubscribers(Set<UserEntity> subscribers) {
         this.subscribers = subscribers;
     }
 
@@ -151,20 +151,20 @@ public class Piece {
         this.likes = likes;
     }
 
-    public User getCreator() {
+    public UserEntity getCreator() {
         return creator;
     }
 
-    public void setCreator(User creator) {
+    public void setCreator(UserEntity creator) {
         this.creator = creator;
     }
 
-    public Format getFormat() {
-        return format;
+    public FormatEntity getFormat() {
+        return formatEntity;
     }
 
-    public void setFormat(Format format) {
-        this.format = format;
+    public void setFormat(FormatEntity formatEntity) {
+        this.formatEntity = formatEntity;
     }
 
     public LocalDate getPublicationDate() {

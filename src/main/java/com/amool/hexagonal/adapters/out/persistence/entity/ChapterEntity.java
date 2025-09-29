@@ -1,4 +1,4 @@
-package com.amool.hexagonal.domain;
+package com.amool.hexagonal.adapters.out.persistence.entity;
 
 import java.time.LocalDateTime;
 import java.util.HashSet;
@@ -8,7 +8,7 @@ import jakarta.persistence.*;
 
 @Entity
 @Table(name = "chapter")
-public class Chapter {
+public class ChapterEntity {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -20,31 +20,31 @@ public class Chapter {
     @Column(name = "price", nullable = false)
     private Double price;
 
-    @Column(name = "ultima_actualizacion", nullable = false)
+    @Column(name = "last_update", nullable = false)
     private LocalDateTime lastModified;
 
     @ManyToOne
-    @JoinColumn(name = "obra_id", nullable = false)
-    private Piece piece;
+    @JoinColumn(name = "work_id", nullable = false)
+    private WorkEntity workEntity;
 
     @Column(name = "likes", nullable = false)
     private Long likes;
 
     @ManyToOne
-    @JoinColumn(name = "idioma_id", nullable = false)
-    private Language language;
+    @JoinColumn(name = "language_id", nullable = false)
+    private LanguageEntity languageEntity;
 
     // Relations
 
     // Usuario adquiere capítulos
-    @ManyToMany(mappedBy = "acquiredChapters")
-    private Set<User> usersWhoAcquired = new HashSet<>();
+    @ManyToMany(mappedBy = "acquiredChapterEntities")
+    private Set<UserEntity> usersWhoAcquired = new HashSet<>();
 
-    public Set<User> getUsersWhoAcquired() {
+    public Set<UserEntity> getUsersWhoAcquired() {
         return usersWhoAcquired;
     }
 
-    public void setUsersWhoAcquired(Set<User> usersWhoAcquired) {
+    public void setUsersWhoAcquired(Set<UserEntity> usersWhoAcquired) {
         this.usersWhoAcquired = usersWhoAcquired;
     }
 
@@ -82,12 +82,12 @@ public class Chapter {
         this.lastModified = lastModified;
     }
 
-     public Piece getPiece() {
-        return piece;
+     public WorkEntity getPiece() {
+        return workEntity;
     }
 
-    public void setPiece(Piece piece) {
-        this.piece = piece;
+    public void setPiece(WorkEntity workEntity) {
+        this.workEntity = workEntity;
     }
 
     public Long getLikes() {
@@ -98,11 +98,11 @@ public class Chapter {
         this.likes = likes;
     }
 
-    public Language getLanguage() {
-        return language;
+    public LanguageEntity getLanguage() {
+        return languageEntity;
     }
 
-    public void setLanguage(Language language) {
-        this.language = language;
+    public void setLanguage(LanguageEntity languageEntity) {
+        this.languageEntity = languageEntity;
     }
 }
