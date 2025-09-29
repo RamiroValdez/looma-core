@@ -32,30 +32,4 @@ public class FormatEntity {
     private Set<Category> categories = new HashSet<>();
 >>>>>>>> origin/feature/mapeo_de_base_de_datos_sql:src/main/java/com/amool/hexagonal/adapters/out/persistence/Format.java
 
-    public Set<CategoryEntity> getCategories() {
-        return categories;
-    }
-
-    public void setCategories(Set<CategoryEntity> categories) {
-        this.categories = categories;
-    }
-
-    // Getters y setters
-
-    public Long getId() {
-        return id;
-    }
-
-    public void setId(Long id) {
-        this.id = id;
-    }
-
-    public String getName() {
-        return name;
-    }
-
-    public void setName(String name) {
-        this.name = name;
-    }
-
 }

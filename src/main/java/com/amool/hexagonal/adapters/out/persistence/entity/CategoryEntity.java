@@ -46,31 +46,6 @@ public class CategoryEntity {
     @ManyToMany(mappedBy = "preferredCategories")
     private Set<UserEntity> usersWhoPrefer = new HashSet<>();
 
-    public Set<UserEntity> getUsersWhoPrefer() {
-        return usersWhoPrefer;
-    }
-
-    public void setUsersWhoPrefer(Set<UserEntity> usersWhoPrefer) {
-        this.usersWhoPrefer = usersWhoPrefer;
-    }
-
-    // Getters y setters
-
-    public Long getId() {
-        return id;
-    }
-
-    public void setId(Long id) {
-        this.id = id;
-    }
-
-    public String getName() {
-        return name;
-    }
-
-    public void setName(String name) {
-        this.name = name;
-    }
 
 }
 
