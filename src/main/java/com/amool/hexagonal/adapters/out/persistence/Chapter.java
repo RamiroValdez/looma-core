@@ -24,8 +24,8 @@ public class Chapter {
     private LocalDateTime lastModified;
 
     @ManyToOne
-    @JoinColumn(name = "piece_id", nullable = false)
-    private Work piece;
+    @JoinColumn(name = "work_id", nullable = false)
+    private Work work;
 
     @Column(name = "likes", nullable = false)
     private Long likes;
