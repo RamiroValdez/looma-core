@@ -1,4 +1,4 @@
-package com.amool.loomacore.config;
+package com.amool.hexagonal.config;
 
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
