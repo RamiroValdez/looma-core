@@ -1,5 +1,4 @@
 package com.amool.hexagonal.adapters.out.persistence.entity;
-package com.amool.hexagonal.adapters.out.persistence;
 
 import java.util.HashSet;
 import java.util.Set;
@@ -22,16 +21,6 @@ public class CategoryEntity {
     // Obra tiene categorías
     @ManyToMany(mappedBy = "categories")
     private Set<WorkEntity> workEntities = new HashSet<>();
-
-    private Set<WorkEntity> works = new HashSet<>();
-
-    public Set<WorkEntity> getWorks() {
-        return works;
-    }
-
-    public void setWorks(Set<WorkEntity> works) {
-        this.works = works;
-    }
 
     // Formato compone categorías
     @ManyToMany(mappedBy = "categories")

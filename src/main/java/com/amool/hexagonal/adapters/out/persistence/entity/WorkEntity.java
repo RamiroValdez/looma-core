@@ -4,7 +4,6 @@ package com.amool.hexagonal.adapters.out.persistence.entity;
 import java.time.LocalDate;
 import java.util.HashSet;
 import java.util.Set;
-
 import jakarta.persistence.*;
 
 @Entity
