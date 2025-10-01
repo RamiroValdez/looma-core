@@ -30,6 +30,20 @@ public class CategoryEntity {
     @ManyToMany(mappedBy = "preferredCategories")
     private Set<UserEntity> usersWhoPrefer = new HashSet<>();
 
+    // Getters y Setters
+    public Long getId() { return id; }
+    public void setId(Long id) { this.id = id; }
 
+    public String getName() { return name; }
+    public void setName(String name) { this.name = name; }
+
+    public Set<WorkEntity> getWorkEntities() { return workEntities; }
+    public void setWorkEntities(Set<WorkEntity> workEntities) { this.workEntities = workEntities; }
+
+    public Set<FormatEntity> getFormatEntities() { return formatEntities; }
+    public void setFormatEntities(Set<FormatEntity> formatEntities) { this.formatEntities = formatEntities; }
+
+    public Set<UserEntity> getUsersWhoPrefer() { return usersWhoPrefer; }
+    public void setUsersWhoPrefer(Set<UserEntity> usersWhoPrefer) { this.usersWhoPrefer = usersWhoPrefer; }
 }
 
