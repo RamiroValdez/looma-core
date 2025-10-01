@@ -1,6 +1,6 @@
-package com.amool.hexagonal.adapters.in.rest.dtos;
+package com.amool.hexagonal.domain.model;
 
-public class CategoryDto {
+public class Format {
     private Long id;
     private String name;
 

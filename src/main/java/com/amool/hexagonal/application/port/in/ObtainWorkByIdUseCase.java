@@ -1,9 +1,8 @@
 package com.amool.hexagonal.application.port.in;
-
-import com.amool.hexagonal.adapters.in.rest.dtos.WorkResponseDto;
+import com.amool.hexagonal.domain.model.Work;
 
 public interface ObtainWorkByIdUseCase {
 
-    WorkResponseDto execute(Long workId);
+    Work execute(Long workId);
 
 }

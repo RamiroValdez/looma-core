@@ -1,5 +1,6 @@
 package com.amool.hexagonal.adapters.out.persistence;
 
+import com.amool.hexagonal.adapters.out.persistence.entity.WorkEntity;
 import com.amool.hexagonal.adapters.out.persistence.mappers.WorkMapper;
 import com.amool.hexagonal.application.port.out.ObtainWorkByIdPort;
 import com.amool.hexagonal.domain.model.Work;
@@ -15,8 +16,17 @@ public class WorksPersistenceAdapter implements ObtainWorkByIdPort {
 
     @Override
     public Work execute(Long workId) {
-
-        WorkEntity entity = entityManager.find(WorkEntity.class, workId);
+        // Usar query con JOIN FETCH para evitar N+1 y duplicados
+        String jpql = "SELECT DISTINCT w FROM WorkEntity w " +
+                      "LEFT JOIN FETCH w.creator " +
+                      "LEFT JOIN FETCH w.formatEntity " +
+                      "LEFT JOIN FETCH w.chapters " +
+                      "LEFT JOIN FETCH w.categories " +
+                      "WHERE w.id = :workId";
+        
+        WorkEntity entity = entityManager.createQuery(jpql, WorkEntity.class)
+                .setParameter("workId", workId)
+                .getSingleResult();
 
         if (entity == null) {
             return null;
