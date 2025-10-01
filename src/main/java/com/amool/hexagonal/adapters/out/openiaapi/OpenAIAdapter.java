@@ -1,44 +1,42 @@
 package com.amool.hexagonal.adapters.out.openiaapi;
 
-import com.amool.hexagonal.application.port.out.OpenIAPort;
+import com.amool.hexagonal.application.port.out.OpenAIPort;
 import org.springframework.ai.chat.messages.SystemMessage;
 import org.springframework.ai.chat.messages.UserMessage;
 import org.springframework.ai.chat.model.ChatModel;
 import org.springframework.ai.chat.prompt.Prompt;
 import org.springframework.ai.openai.OpenAiChatOptions;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Service;
+import org.springframework.stereotype.Component;
 
 import java.util.List;
 
-@Service
-public class OpenIAAdapter implements OpenIAPort {
+@Component
+public class OpenAIAdapter implements OpenAIPort {
 
     private final ChatModel chatModel;
 
     @Autowired
-    public OpenIAAdapter(ChatModel chatModel) {
+    public OpenAIAdapter(ChatModel chatModel) {
         this.chatModel = chatModel;
     }
 
     @Override
-    public String getOpenIAResponse(String userPrompt) {
+    public String getOpenAIResponse(String userPrompt,  String systemPrompt, String model,  Double temperature) {
 
-        SystemMessage systemMessage = new SystemMessage("You are a assintant to translate text to spanish");
+        SystemMessage systemMessage = new SystemMessage(systemPrompt);
         UserMessage userMessage = new UserMessage(userPrompt);
 
 
         OpenAiChatOptions chatOptions = OpenAiChatOptions.builder()
-                .model("gpt-4o-mini")
-                .temperature(0.7)
+                .model(model)
+                .temperature(temperature)
                 .build();
 
 
         Prompt prompt = new Prompt(List.of(systemMessage, userMessage), chatOptions);
 
-        String responseContent = chatModel.call(prompt).getResult().getOutput().getText();
-
-        return responseContent;
+        return chatModel.call(prompt).getResult().getOutput().getText();
 
     }
 
