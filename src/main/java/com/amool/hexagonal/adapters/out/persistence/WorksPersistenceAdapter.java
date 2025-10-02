@@ -7,6 +7,8 @@ import com.amool.hexagonal.domain.model.Work;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.PersistenceContext;
 import org.springframework.stereotype.Repository;
+import java.util.List;
+import java.util.stream.Collectors;
 
 @Repository
 public class WorksPersistenceAdapter implements ObtainWorkByIdPort {
@@ -36,6 +38,18 @@ public class WorksPersistenceAdapter implements ObtainWorkByIdPort {
 
         return work;
     }
-}
 
-// Controller -> Interface (Use Case) -> Service (Use Case Implementation) -> Interface (Port) -> Adapter (Persistence) -> Database
+    @Override
+    public List<Work> getWorksByUserId(Long userId) {
+        String jpql = "SELECT DISTINCT w FROM WorkEntity w " +
+                      "WHERE w.creator.id = :userId";
+        
+        List<WorkEntity> entities = entityManager.createQuery(jpql, WorkEntity.class)
+                .setParameter("userId", userId)
+                .getResultList();
+
+        return entities.stream()
+                .map(WorkMapper::toDomain)
+                .collect(Collectors.toList());
+    }
+}
