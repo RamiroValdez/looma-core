@@ -20,7 +20,6 @@ public class WorkMapper {
         work.setLikes(entity.getLikes());
         work.setPublicationDate(entity.getPublicationDate());
         
-        // Mapear relaciones
         work.setCreator(UserMapper.toDomain(entity.getCreator()));
         work.setFormat(FormatMapper.toDomain(entity.getFormatEntity()));
         work.setChapters(ChapterMapper.toDomainList(entity.getChapters()));

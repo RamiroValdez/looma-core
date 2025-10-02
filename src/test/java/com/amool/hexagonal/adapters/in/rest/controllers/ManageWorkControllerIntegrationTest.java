@@ -18,10 +18,7 @@ import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
-/**
- * Test de integración para ManageWorkController
- * Verifica el comportamiento del controlador con dependencias mockeadas
- */
+
 @WebMvcTest(controllers = ManageWorkController.class)
 @AutoConfigureMockMvc(addFilters = false)
 public class ManageWorkControllerIntegrationTest {
@@ -34,7 +31,6 @@ public class ManageWorkControllerIntegrationTest {
 
     @Test
     public void testGetWorkById_ShouldReturnWork_WhenWorkExists() throws Exception {
-        // Arrange
         Long workId = 1L;
         
         User creator = new User();
@@ -62,7 +58,6 @@ public class ManageWorkControllerIntegrationTest {
 
         when(obtainWorkByIdUseCase.execute(workId)).thenReturn(work);
 
-        // Act & Assert
         mockMvc.perform(get("/api/manage-work/" + workId))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.id").value(workId))
@@ -77,11 +72,9 @@ public class ManageWorkControllerIntegrationTest {
 
     @Test
     public void testGetWorkById_ShouldReturnNull_WhenWorkDoesNotExist() throws Exception {
-        // Arrange
         Long workId = 999L;
         when(obtainWorkByIdUseCase.execute(workId)).thenReturn(null);
 
-        // Act & Assert
         mockMvc.perform(get("/api/manage-work/" + workId))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$").doesNotExist());
