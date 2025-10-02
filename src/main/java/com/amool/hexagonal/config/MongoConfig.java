@@ -22,7 +22,6 @@ public class MongoConfig {
         String dbName = mongoTemplate.getDb().getName();
         MongoDatabase db = mongoClient.getDatabase(dbName);
         
-        // Create chapter_contents collection only if it doesn't exist
         if (!db.listCollectionNames().into(new java.util.ArrayList<>()).contains("chapter_contents")) {
             db.createCollection("chapter_contents");
             System.out.println("Created empty 'chapter_contents' collection");
