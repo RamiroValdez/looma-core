@@ -4,9 +4,11 @@ import com.mongodb.client.MongoClient;
 import com.mongodb.client.MongoDatabase;
 import jakarta.annotation.PostConstruct;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.context.annotation.Profile;
 import org.springframework.data.mongodb.core.MongoTemplate;
 
 @Configuration
+@Profile("!test")
 public class MongoConfig {
 
     private final MongoTemplate mongoTemplate;

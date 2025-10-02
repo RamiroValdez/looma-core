@@ -1,6 +1,5 @@
 package com.amool.hexagonal.adapters.out.mongodb;
 
-import com.amool.hexagonal.adapters.in.rest.dto.UpdateChapterContentRequest;
 import com.amool.hexagonal.adapters.out.mongodb.document.ChapterContentDocument;
 import com.amool.hexagonal.adapters.out.mongodb.repository.MongoChapterContentRepository;
 import com.amool.hexagonal.application.port.out.LoadChapterContentPort;
