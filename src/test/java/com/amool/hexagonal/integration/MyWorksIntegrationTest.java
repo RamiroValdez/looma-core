@@ -53,14 +53,12 @@ class MyWorksIntegrationTest {
     @Autowired
     private EntityManager entityManager;
 
-    // Mock chapter-related ports to avoid instantiating Mongo adapters in the context
     @MockBean
     private LoadChapterContentPort loadChapterContentPort;
 
     @MockBean
     private LoadChapterPort loadChapterPort;
 
-    // Provide mocks for Mongo infrastructure to avoid real bean creation
     @MockBean
     private MongoChapterContentRepository mongoChapterContentRepository;
 
@@ -70,7 +68,6 @@ class MyWorksIntegrationTest {
     @MockBean
     private SaveChapterContentPort saveChapterContentPort;
 
-    // Mock MongoClient required by MongoConfig
     @MockBean
     private MongoClient mongoClient;
 
