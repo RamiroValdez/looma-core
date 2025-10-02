@@ -10,7 +10,6 @@ public interface ObtainWorkByIdUseCase {
 
     List<Work> getWorksByUserId(Long userId);
 
-    // Clearer names (preferred going forward)
     default Optional<Work> getById(Long workId) {
         return execute(workId);
     }
