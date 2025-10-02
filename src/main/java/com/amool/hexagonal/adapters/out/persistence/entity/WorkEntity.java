@@ -48,26 +48,20 @@ public class WorkEntity {
     @JoinColumn(name = "format_id", nullable = false)
     private FormatEntity formatEntity;
 
-    // Relations
 
-    // Obra tiene capítulos
     @OneToMany(mappedBy = "workEntity", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<ChapterEntity> chapters = new ArrayList<>();
 
-    // Usuario guarda obras
     @ManyToMany(mappedBy = "savedWorks")
     private Set<UserEntity> usersWhoSaved = new HashSet<>();
 
-    // Obra tiene categorías
     @ManyToMany
     @JoinTable(name = "work_category", joinColumns = @JoinColumn(name = "work_id"), inverseJoinColumns = @JoinColumn(name = "category_id"))
     private Set<CategoryEntity> categories = new HashSet<>();
 
-    // Suscripción a obras
     @ManyToMany(mappedBy = "subscribedWorks")
     private Set<UserEntity> subscribers = new HashSet<>();
 
-    // Getters y Setters
     public Long getId() { return id; }
     public void setId(Long id) { this.id = id; }
 

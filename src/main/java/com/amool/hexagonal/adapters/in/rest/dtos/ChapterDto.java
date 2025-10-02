@@ -9,7 +9,6 @@ public class ChapterDto {
     private Long likes;
     private LocalDateTime lastModified;
 
-    // Getters y Setters
     public Long getId() { return id; }
     public void setId(Long id) { this.id = id; }
 

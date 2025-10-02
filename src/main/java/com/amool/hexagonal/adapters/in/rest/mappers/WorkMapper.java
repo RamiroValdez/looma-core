@@ -2,6 +2,7 @@ package com.amool.hexagonal.adapters.in.rest.mappers;
 
 import com.amool.hexagonal.adapters.in.rest.dtos.WorkResponseDto;
 import com.amool.hexagonal.domain.model.Work;
+import java.util.stream.Collectors;
 
 public class WorkMapper {
 
@@ -20,8 +21,12 @@ public class WorkMapper {
         dto.setLikes(work.getLikes());
         dto.setCreator(CreatorMapper.toDto(work.getCreator()));
         dto.setFormat(FormatMapper.toDto(work.getFormat()));
-        dto.setChapters(ChapterMapper.toDtoList(work.getChapters()));
-        dto.setCategories(CategoryMapper.toDtoList(work.getCategories()));
+        dto.setChapters(work.getChapters().stream()
+                .map(ChapterMapper::toDto)
+                .collect(Collectors.toList()));
+        dto.setCategories(work.getCategories().stream()
+                .map(CategoryMapper::toDto)
+                .collect(Collectors.toList()));
         if (work.getPublicationDate() != null) {
             dto.setPublicationDate(java.sql.Date.valueOf(work.getPublicationDate()));
         }

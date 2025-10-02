@@ -33,13 +33,9 @@ public class ChapterEntity {
     @JoinColumn(name = "language_id", nullable = false)
     private LanguageEntity languageEntity;
 
-    // Relations
-
-    // Usuario adquiere capítulos
     @ManyToMany(mappedBy = "acquiredChapterEntities")
     private Set<UserEntity> usersWhoAcquired = new HashSet<>();
 
-    // Getters y Setters
     public Long getId() { return id; }
     public void setId(Long id) { this.id = id; }
 
