@@ -1,29 +1,33 @@
 package com.amool.hexagonal.application.port.service;
 
-import com.amool.hexagonal.adapters.out.openiaapi.OpenAIAdapter;
+
 import com.amool.hexagonal.application.port.in.CreateLanguageVersionUseCase;
+import com.amool.hexagonal.application.port.out.GoogleTranslatePort;
+import com.amool.hexagonal.application.port.out.OpenAIPort;
 import org.springframework.core.io.ClassPathResource;
 import org.springframework.stereotype.Service;
 
 @Service
 public class TranslationSystemService implements CreateLanguageVersionUseCase {
 
-    private final OpenAIAdapter openAIPort;
+    private final OpenAIPort openAIPort;
+    private final GoogleTranslatePort googleTranslatePort;
 
-    public TranslationSystemService(OpenAIAdapter openAIPort) {
+    public TranslationSystemService(OpenAIPort openAIPort, GoogleTranslatePort googleTranslatePort) {
+        this.googleTranslatePort = googleTranslatePort;
         this.openAIPort = openAIPort;
     }
 
     @Override
     public String execute(String sourceLanguage, String targetLanguage , String originalText) {
 
-        String translationText = this.sendTextToTranslate(originalText);
+        String translationText = this.sendTextToTranslate(originalText, targetLanguage);
 
         return this.createPromptToCompareAndCreateVersion(originalText,translationText,sourceLanguage,targetLanguage);
     }
 
-    private String sendTextToTranslate(String originalText){
-        return "";
+    private String sendTextToTranslate(String originalText, String targetLanguage){
+        return this.googleTranslatePort.translateText(originalText, targetLanguage);
     }
 
     private String createPromptToCompareAndCreateVersion(String originalText, String translationText, String sourceLanguage, String targetLanguage){
