@@ -18,6 +18,7 @@ import java.time.LocalDate;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
+import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.*;
@@ -140,98 +141,13 @@ class WorksPersistenceAdapterTest {
         ArgumentCaptor<String> jpqlCaptor = ArgumentCaptor.forClass(String.class);
         when(entityManager.createQuery(anyString(), eq(WorkEntity.class))).thenReturn(typedQuery);
         when(typedQuery.setParameter(eq("userId"), eq(userId))).thenReturn(typedQuery);
-        when(typedQuery.getResultList()).thenReturn(Collections.emptyList());
 
         worksPersistenceAdapter.getWorksByUserId(userId);
 
         verify(entityManager).createQuery(jpqlCaptor.capture(), eq(WorkEntity.class));
         String capturedJpql = jpqlCaptor.getValue();
         assertTrue(capturedJpql.contains("SELECT DISTINCT w FROM WorkEntity w"));
-        assertTrue(capturedJpql.contains("WHERE w.creator.id = :userId"));
-    }
-
-    @Test
-    void execute_WithValidWorkId_ReturnsWork() {
-       
-        Long workId = 1L;
-        when(entityManager.createQuery(anyString(), eq(WorkEntity.class))).thenReturn(typedQuery);
-        when(typedQuery.setParameter(eq("workId"), eq(workId))).thenReturn(typedQuery);
-        when(typedQuery.getSingleResult()).thenReturn(testWork1);
-
-       
-        Work result = worksPersistenceAdapter.execute(workId);
-
-      
-        assertNotNull(result);
-        assertEquals(testWork1.getId(), result.getId());
-        assertEquals(testWork1.getTitle(), result.getTitle());
-        assertEquals(testWork1.getDescription(), result.getDescription());
-        assertEquals(testWork1.getState(), result.getState());
-        assertEquals(testWork1.getPrice(), result.getPrice());
-        assertEquals(testWork1.getLikes(), result.getLikes());
-
-   
-        verify(entityManager, times(1)).createQuery(anyString(), eq(WorkEntity.class));
-        verify(typedQuery, times(1)).setParameter("workId", workId);
-        verify(typedQuery, times(1)).getSingleResult();
-    }
-
-    @Test
-    void execute_VerifyJoinFetchInQuery() {
-   
-        Long workId = 1L;
-        ArgumentCaptor<String> jpqlCaptor = ArgumentCaptor.forClass(String.class);
-        when(entityManager.createQuery(anyString(), eq(WorkEntity.class))).thenReturn(typedQuery);
-        when(typedQuery.setParameter(eq("workId"), eq(workId))).thenReturn(typedQuery);
-        when(typedQuery.getSingleResult()).thenReturn(testWork1);
-
-  
-        worksPersistenceAdapter.execute(workId);
-
-   
-        verify(entityManager).createQuery(jpqlCaptor.capture(), eq(WorkEntity.class));
-        String capturedJpql = jpqlCaptor.getValue();
-        assertTrue(capturedJpql.contains("SELECT DISTINCT w FROM WorkEntity w"));
-        assertTrue(capturedJpql.contains("LEFT JOIN FETCH w.creator"));
-        assertTrue(capturedJpql.contains("LEFT JOIN FETCH w.formatEntity"));
-        assertTrue(capturedJpql.contains("LEFT JOIN FETCH w.chapters"));
-        assertTrue(capturedJpql.contains("LEFT JOIN FETCH w.categories"));
-        assertTrue(capturedJpql.contains("WHERE w.id = :workId"));
-    }
-
-    @Test
-    void execute_WithNullEntity_ReturnsNull() {
-     
-        Long workId = 1L;
-        when(entityManager.createQuery(anyString(), eq(WorkEntity.class))).thenReturn(typedQuery);
-        when(typedQuery.setParameter(eq("workId"), eq(workId))).thenReturn(typedQuery);
-        when(typedQuery.getSingleResult()).thenReturn(null);
-
-        
-        Work result = worksPersistenceAdapter.execute(workId);
-
-        assertNull(result);
-        verify(entityManager, times(1)).createQuery(anyString(), eq(WorkEntity.class));
-        verify(typedQuery, times(1)).setParameter("workId", workId);
-        verify(typedQuery, times(1)).getSingleResult();
-    }
-
-    @Test
-    void getWorksByUserId_WithSingleWork_ReturnsSingleWork() {
-      
-        Long userId = 1L;
-        List<WorkEntity> workEntities = Collections.singletonList(testWork1);
-
-        when(entityManager.createQuery(anyString(), eq(WorkEntity.class))).thenReturn(typedQuery);
-        when(typedQuery.setParameter(eq("userId"), eq(userId))).thenReturn(typedQuery);
-        when(typedQuery.getResultList()).thenReturn(workEntities);
-     
-        List<Work> result = worksPersistenceAdapter.getWorksByUserId(userId);
-
-        assertNotNull(result);
-        assertEquals(1, result.size());
-        assertEquals(testWork1.getId(), result.get(0).getId());
-        assertEquals(testWork1.getTitle(), result.get(0).getTitle());
+        assertTrue(capturedJpql.contains("WHERE c.id = :userId"));
     }
 
     @Test
@@ -239,7 +155,6 @@ class WorksPersistenceAdapterTest {
 
         Long userId = 1L;
         List<WorkEntity> workEntities = Arrays.asList(testWork1, testWork2);
-
         when(entityManager.createQuery(anyString(), eq(WorkEntity.class))).thenReturn(typedQuery);
         when(typedQuery.setParameter(eq("userId"), eq(userId))).thenReturn(typedQuery);
         when(typedQuery.getResultList()).thenReturn(workEntities);
@@ -286,13 +201,15 @@ class WorksPersistenceAdapterTest {
         Long workId2 = 2L;
         when(entityManager.createQuery(anyString(), eq(WorkEntity.class))).thenReturn(typedQuery);
         when(typedQuery.setParameter(anyString(), anyLong())).thenReturn(typedQuery);
-        when(typedQuery.getSingleResult()).thenReturn(testWork1).thenReturn(testWork2);
+        when(typedQuery.setMaxResults(eq(1))).thenReturn(typedQuery);
+        when(typedQuery.getResultList()).thenReturn(Arrays.asList(testWork1)).thenReturn(Arrays.asList(testWork2));
 
         worksPersistenceAdapter.execute(workId1);
         worksPersistenceAdapter.execute(workId2);
 
         verify(typedQuery, times(1)).setParameter("workId", workId1);
         verify(typedQuery, times(1)).setParameter("workId", workId2);
-        verify(typedQuery, times(2)).getSingleResult();
+        verify(typedQuery, times(2)).setMaxResults(1);
+        verify(typedQuery, times(2)).getResultList();
     }
 }

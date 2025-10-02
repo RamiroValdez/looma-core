@@ -6,7 +6,7 @@ import com.amool.hexagonal.adapters.out.persistence.WorksPersistenceAdapter;
 import com.amool.hexagonal.adapters.out.persistence.entity.WorkEntity;
 import com.amool.hexagonal.adapters.out.persistence.entity.UserEntity;
 import com.amool.hexagonal.adapters.out.persistence.entity.FormatEntity;
-import com.amool.hexagonal.application.port.service.ObtainWorkByIdService;
+import com.amool.hexagonal.application.service.ObtainWorkByIdService;
 import jakarta.persistence.EntityManager;
 import jakarta.transaction.Transactional;
 import org.junit.jupiter.api.BeforeEach;
@@ -14,6 +14,18 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.ActiveProfiles;
+import org.springframework.boot.autoconfigure.mongo.MongoAutoConfiguration;
+import org.springframework.boot.autoconfigure.data.mongo.MongoDataAutoConfiguration;
+import org.springframework.boot.autoconfigure.EnableAutoConfiguration;
+import org.springframework.boot.autoconfigure.data.mongo.MongoRepositoriesAutoConfiguration;
+import org.springframework.test.context.TestPropertySource;
+import org.springframework.boot.test.mock.mockito.MockBean;
+import com.amool.hexagonal.application.port.out.LoadChapterContentPort;
+import com.amool.hexagonal.application.port.out.LoadChapterPort;
+import com.amool.hexagonal.application.port.out.SaveChapterContentPort;
+import com.amool.hexagonal.adapters.out.mongodb.repository.MongoChapterContentRepository;
+import org.springframework.data.mongodb.core.MongoTemplate;
+import com.mongodb.client.MongoClient;
 
 import java.time.LocalDate;
 import java.util.List;
@@ -21,7 +33,11 @@ import java.util.List;
 import static org.junit.jupiter.api.Assertions.*;
 
 @SpringBootTest
+@EnableAutoConfiguration(exclude = {MongoAutoConfiguration.class, MongoDataAutoConfiguration.class, MongoRepositoriesAutoConfiguration.class})
 @ActiveProfiles("test")
+@TestPropertySource(properties = {
+    "spring.data.mongodb.repositories.enabled=false"
+})
 @Transactional
 class MyWorksIntegrationTest {
 
@@ -36,6 +52,27 @@ class MyWorksIntegrationTest {
 
     @Autowired
     private EntityManager entityManager;
+
+    // Mock chapter-related ports to avoid instantiating Mongo adapters in the context
+    @MockBean
+    private LoadChapterContentPort loadChapterContentPort;
+
+    @MockBean
+    private LoadChapterPort loadChapterPort;
+
+    // Provide mocks for Mongo infrastructure to avoid real bean creation
+    @MockBean
+    private MongoChapterContentRepository mongoChapterContentRepository;
+
+    @MockBean
+    private MongoTemplate mongoTemplate;
+
+    @MockBean
+    private SaveChapterContentPort saveChapterContentPort;
+
+    // Mock MongoClient required by MongoConfig
+    @MockBean
+    private MongoClient mongoClient;
 
     private UserEntity testUser;
     private FormatEntity testFormat;

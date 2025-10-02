@@ -11,6 +11,7 @@ import org.springframework.test.web.servlet.MockMvc;
 
 import java.time.LocalDate;
 import java.util.ArrayList;
+import java.util.Optional;
 
 import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
@@ -53,7 +54,7 @@ public class ManageWorkControllerIntegrationTest {
         work.setChapters(new ArrayList<>());
         work.setCategories(new ArrayList<>());
 
-        when(obtainWorkByIdUseCase.execute(workId)).thenReturn(work);
+        when(obtainWorkByIdUseCase.execute(workId)).thenReturn(Optional.of(work));
 
     
         mockMvc.perform(get("/api/manage-work/" + workId))
@@ -69,14 +70,12 @@ public class ManageWorkControllerIntegrationTest {
     }
 
     @Test
-    public void testGetWorkById_ShouldReturnNull_WhenWorkDoesNotExist() throws Exception {
- 
+    public void testGetWorkById_ShouldReturn404_WhenWorkDoesNotExist() throws Exception {
         Long workId = 999L;
-        when(obtainWorkByIdUseCase.execute(workId)).thenReturn(null);
+        when(obtainWorkByIdUseCase.execute(workId)).thenReturn(Optional.empty());
 
    
         mockMvc.perform(get("/api/manage-work/" + workId))
-                .andExpect(status().isOk())
-                .andExpect(jsonPath("$").doesNotExist());
+                .andExpect(status().isNotFound());
     }
 }

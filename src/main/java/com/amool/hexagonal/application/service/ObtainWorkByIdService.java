@@ -1,28 +1,32 @@
-package com.amool.hexagonal.application.port.service;
+package com.amool.hexagonal.application.service;
 
 import com.amool.hexagonal.application.port.in.ObtainWorkByIdUseCase;
 import com.amool.hexagonal.application.port.out.ObtainWorkByIdPort;
 import com.amool.hexagonal.domain.model.Work;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+
 import java.util.List;
+import java.util.Optional;
 
 @Service
 public class ObtainWorkByIdService implements ObtainWorkByIdUseCase {
 
-    private ObtainWorkByIdPort obtainWorkByIdPort;
+    private final ObtainWorkByIdPort obtainWorkByIdPort;
 
     public ObtainWorkByIdService(ObtainWorkByIdPort obtainWorkByIdPort) {
         this.obtainWorkByIdPort = obtainWorkByIdPort;
     }
 
     @Override
-    public Work execute(Long workId) {
+    @Transactional(readOnly = true)
+    public Optional<Work> execute(Long workId) {
         return obtainWorkByIdPort.execute(workId);
     }
 
     @Override
+    @Transactional(readOnly = true)
     public List<Work> getWorksByUserId(Long userId) {
         return obtainWorkByIdPort.getWorksByUserId(userId);
     }
-
 }
