@@ -1,4 +1,4 @@
-package com.amool.hexagonal.adapters.in.rest;
+package com.amool.hexagonal.adapters.in.rest.controllers;
 
 import com.amool.hexagonal.adapters.in.rest.dto.ChapterWithContentDto;
 import com.amool.hexagonal.adapters.in.rest.dto.UpdateChapterContentRequest;
@@ -12,7 +12,6 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import java.util.List;
-import java.util.Map;
 import java.util.Optional;
 
 @RestController
