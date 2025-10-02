@@ -28,7 +28,6 @@ public class ManageWorkControllerIntegrationTest {
 
     @Test
     public void testGetWorkById_ShouldReturnWork_WhenWorkExists() throws Exception {
-        // Arrange
         Long workId = 1L;
         
         User creator = new User();

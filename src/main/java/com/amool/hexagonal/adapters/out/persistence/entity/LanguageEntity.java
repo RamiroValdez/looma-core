@@ -16,12 +16,9 @@ public class LanguageEntity {
     @Column(name = "name", nullable = false)
     private String name;
 
-    // Relations
-    // Usuario prefiere idiomas
     @ManyToMany(mappedBy = "preferredLanguageEntities")
     private Set<UserEntity> users = new HashSet<>();
 
-    // Getters y Setters
     public Long getId() { return id; }
     public void setId(Long id) { this.id = id; }
 

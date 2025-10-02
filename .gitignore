@@ -37,4 +37,4 @@ out/
 .vscode/
 
 # Environment files
-.env.development
+.env

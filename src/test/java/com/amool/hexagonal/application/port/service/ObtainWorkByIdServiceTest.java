@@ -11,10 +11,7 @@ import org.mockito.MockitoAnnotations;
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
 
-/**
- * Test unitario para ObtainWorkByIdService
- * Verifica la lógica del caso de uso sin dependencias externas
- */
+
 public class ObtainWorkByIdServiceTest {
 
     @Mock
@@ -30,7 +27,6 @@ public class ObtainWorkByIdServiceTest {
 
     @Test
     public void testExecute_ShouldReturnWork_WhenWorkExists() {
-        // Arrange
         Long workId = 1L;
         Work expectedWork = new Work();
         expectedWork.setId(workId);
@@ -38,10 +34,8 @@ public class ObtainWorkByIdServiceTest {
         
         when(obtainWorkByIdPort.execute(workId)).thenReturn(expectedWork);
 
-        // Act
         Work result = obtainWorkByIdService.execute(workId);
 
-        // Assert
         assertNotNull(result);
         assertEquals(workId, result.getId());
         assertEquals("Test Work", result.getTitle());
@@ -50,14 +44,11 @@ public class ObtainWorkByIdServiceTest {
 
     @Test
     public void testExecute_ShouldReturnNull_WhenWorkDoesNotExist() {
-        // Arrange
         Long workId = 999L;
         when(obtainWorkByIdPort.execute(workId)).thenReturn(null);
 
-        // Act
         Work result = obtainWorkByIdService.execute(workId);
 
-        // Assert
         assertNull(result);
         verify(obtainWorkByIdPort, times(1)).execute(workId);
     }

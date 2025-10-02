@@ -10,15 +10,10 @@ import java.util.HashSet;
 
 import static org.junit.jupiter.api.Assertions.*;
 
-/**
- * Test unitario para WorkMapper de persistencia
- * Verifica el mapeo correcto de Entity → Domain
- */
 public class WorkMapperTest {
 
     @Test
     public void testToDomain_ShouldMapAllFields() {
-        // Arrange
         UserEntity creator = new UserEntity();
         creator.setId(1L);
         creator.setName("John");
@@ -46,10 +41,8 @@ public class WorkMapperTest {
         entity.setChapters(new ArrayList<>());
         entity.setCategories(new HashSet<>());
 
-        // Act
         Work work = WorkMapper.toDomain(entity);
 
-        // Assert
         assertNotNull(work);
         assertEquals(1L, work.getId());
         assertEquals("Test Work", work.getTitle());
@@ -61,7 +54,6 @@ public class WorkMapperTest {
         assertEquals(500, work.getLikes());
         assertEquals(LocalDate.of(2024, 1, 15), work.getPublicationDate());
         
-        // Verificar relaciones
         assertNotNull(work.getCreator());
         assertEquals("John", work.getCreator().getName());
         assertNotNull(work.getFormat());
@@ -72,10 +64,7 @@ public class WorkMapperTest {
 
     @Test
     public void testToDomain_ShouldReturnNull_WhenEntityIsNull() {
-        // Act
         Work work = WorkMapper.toDomain(null);
-
-        // Assert
         assertNull(work);
     }
 }

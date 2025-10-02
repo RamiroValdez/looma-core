@@ -18,7 +18,6 @@ public class WorksPersistenceAdapter implements ObtainWorkByIdPort {
 
     @Override
     public Work execute(Long workId) {
-        // Usar query con JOIN FETCH para evitar N+1 y duplicados
         String jpql = "SELECT DISTINCT w FROM WorkEntity w " +
                       "LEFT JOIN FETCH w.creator " +
                       "LEFT JOIN FETCH w.formatEntity " +
