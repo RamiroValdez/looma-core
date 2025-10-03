@@ -1,4 +1,4 @@
-package com.amool.hexagonal.adapters.in.rest.dto;
+package com.amool.hexagonal.adapters.in.rest.dtos;
 
 import com.amool.hexagonal.application.port.in.GetChapterUseCase.ChapterWithContent;
 import com.amool.hexagonal.domain.model.Chapter;

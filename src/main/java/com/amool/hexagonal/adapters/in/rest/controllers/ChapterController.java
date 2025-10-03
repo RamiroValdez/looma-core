@@ -1,7 +1,7 @@
 package com.amool.hexagonal.adapters.in.rest.controllers;
 
-import com.amool.hexagonal.adapters.in.rest.dto.ChapterWithContentDto;
-import com.amool.hexagonal.adapters.in.rest.dto.UpdateChapterContentRequest;
+import com.amool.hexagonal.adapters.in.rest.dtos.ChapterWithContentDto;
+import com.amool.hexagonal.adapters.in.rest.dtos.UpdateChapterContentRequest;
 import com.amool.hexagonal.adapters.in.rest.mappers.ChapterMapper;
 import com.amool.hexagonal.application.port.in.GetChapterUseCase;
 import com.amool.hexagonal.application.port.out.LoadChapterContentPort;

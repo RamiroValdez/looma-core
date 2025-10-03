@@ -1,4 +1,4 @@
-package com.amool.hexagonal.adapters.in.rest.dto;
+package com.amool.hexagonal.adapters.in.rest.dtos;
 
 import jakarta.validation.constraints.NotBlank;
 
