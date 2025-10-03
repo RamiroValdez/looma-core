@@ -52,7 +52,6 @@ class MyWorksControllerTest {
         testWork1.setPublicationDate(LocalDate.of(2025, 1, 1));
         testWork1.setCreator(testUser);
 
-
         testWork2 = new Work();
         testWork2.setId(2L);
         testWork2.setTitle("Test Work 2");

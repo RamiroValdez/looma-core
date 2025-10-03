@@ -17,6 +17,7 @@ public class WorkResponseDto {
     FormatDto format;
     List<ChapterDto> chapters;
     List<CategoryDto> categories;
+    List<TagDto> tags;
 
     public Long getId() {
         return id;
@@ -96,5 +97,12 @@ public class WorkResponseDto {
     }
     public void setCategories(List<CategoryDto> categories) {
         this.categories = categories;
+    }
+    public List<TagDto> getTags() {
+        return tags;
+    }
+    
+    public void setTags(List<TagDto> tags) {
+        this.tags = tags;
     }
 }

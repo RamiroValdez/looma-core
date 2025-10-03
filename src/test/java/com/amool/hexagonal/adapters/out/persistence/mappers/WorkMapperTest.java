@@ -40,6 +40,7 @@ public class WorkMapperTest {
         entity.setFormatEntity(format);
         entity.setChapters(new ArrayList<>());
         entity.setCategories(new HashSet<>());
+        entity.setTags(new ArrayList<>());
 
         Work work = WorkMapper.toDomain(entity);
 
@@ -60,6 +61,7 @@ public class WorkMapperTest {
         assertEquals("Novel", work.getFormat().getName());
         assertNotNull(work.getChapters());
         assertNotNull(work.getCategories());
+        assertNotNull(work.getTags());
     }
 
     @Test

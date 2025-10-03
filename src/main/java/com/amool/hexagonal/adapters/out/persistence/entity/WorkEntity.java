@@ -62,6 +62,9 @@ public class WorkEntity {
     @ManyToMany(mappedBy = "subscribedWorks")
     private Set<UserEntity> subscribers = new HashSet<>();
 
+    @OneToMany(mappedBy = "workEntity", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<TagEntity> tags = new ArrayList<>();
+
     public Long getId() { return id; }
     public void setId(Long id) { this.id = id; }
 
@@ -100,11 +103,13 @@ public class WorkEntity {
 
     public Set<CategoryEntity> getCategories() { return categories; }
     public void setCategories(Set<CategoryEntity> categories) { this.categories = categories; }
-
     public Set<UserEntity> getSubscribers() { return subscribers; }
     public void setSubscribers(Set<UserEntity> subscribers) { this.subscribers = subscribers; }
 
     public List<ChapterEntity> getChapters() { return chapters; }
     public void setChapters(List<ChapterEntity> chapters) { this.chapters = chapters; }
-  
+    
+    public List<TagEntity> getTags() { return tags; }
+    public void setTags(List<TagEntity> tags) { this.tags = tags; }
 }
+

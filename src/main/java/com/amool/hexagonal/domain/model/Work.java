@@ -18,6 +18,7 @@ public class Work {
     private Format format;
     private List<Chapter> chapters = new ArrayList<>();
     private List<Category> categories = new ArrayList<>();
+    private List<Tag> tags = new ArrayList<>();
     
     public Long getId() { return id; }
     public void setId(Long id) { this.id = id; }
@@ -58,4 +59,6 @@ public class Work {
     public List<Category> getCategories() { return categories; }
     public void setCategories(List<Category> categories) { this.categories = categories; }
     
+    public List<Tag> getTags() { return tags; }
+    public void setTags(List<Tag> tags) { this.tags = tags; }
 }
