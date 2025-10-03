@@ -1,6 +1,6 @@
 package com.amool.hexagonal.application.service;
 
-import com.amool.hexagonal.application.port.in.GetChapterUseCase;
+import com.amool.hexagonal.application.port.in.ChapterService;
 import com.amool.hexagonal.application.port.out.LoadChapterContentPort;
 import com.amool.hexagonal.application.port.out.LoadChapterPort;
 import org.springframework.stereotype.Service;
@@ -10,13 +10,13 @@ import java.util.Optional;
 
 @Service
 @Transactional(readOnly = true)
-public class GetChapterService implements GetChapterUseCase {
+public class ChapterServiceImpl implements ChapterService {
 
     private final LoadChapterPort loadChapterPort;
     private final LoadChapterContentPort loadChapterContentPort;
 
-    public GetChapterService(LoadChapterPort loadChapterPort,
-                             LoadChapterContentPort loadChapterContentPort) {
+    public ChapterServiceImpl(LoadChapterPort loadChapterPort,
+                              LoadChapterContentPort loadChapterContentPort) {
         this.loadChapterPort = loadChapterPort;
         this.loadChapterContentPort = loadChapterContentPort;
     }

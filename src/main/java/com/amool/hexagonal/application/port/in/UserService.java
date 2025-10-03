@@ -4,6 +4,6 @@ import com.amool.hexagonal.domain.model.User;
 
 import java.util.Optional;
 
-public interface GetUserByIdUseCase {
+public interface UserService {
     Optional<User> getById(Long userId);
 }

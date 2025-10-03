@@ -2,7 +2,7 @@ package com.amool.hexagonal.adapters.in.rest.controllers;
 
 import com.amool.hexagonal.adapters.in.rest.dtos.WorkResponseDto;
 import com.amool.hexagonal.adapters.in.rest.mappers.WorkMapper;
-import com.amool.hexagonal.application.port.in.ObtainWorkByIdUseCase;
+import com.amool.hexagonal.application.port.in.WorkService;
 import com.amool.hexagonal.domain.model.Work;
 
 import java.util.List;
@@ -17,15 +17,15 @@ import org.springframework.web.bind.annotation.RestController;
 @RequestMapping("/api/my-works")
 public class MyWorksController {
 
-    private ObtainWorkByIdUseCase obtainWorkByIdUseCase;
+    private WorkService workService;
 
-    public MyWorksController(ObtainWorkByIdUseCase obtainWorkByIdUseCase) {
-        this.obtainWorkByIdUseCase = obtainWorkByIdUseCase;
+    public MyWorksController(WorkService workService) {
+        this.workService = workService;
     }
 
     @GetMapping("/{userId}")
     public List<WorkResponseDto> getWorksByUserId(@PathVariable Long userId) {
-        List<Work> works = obtainWorkByIdUseCase.getWorksByUserId(userId);
+        List<Work> works = workService.getWorksByUserId(userId);
         return works.stream()
                 .map(WorkMapper::toDto)
                 .collect(Collectors.toList());

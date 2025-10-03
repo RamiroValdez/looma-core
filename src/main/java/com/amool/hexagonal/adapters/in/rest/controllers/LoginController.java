@@ -2,7 +2,7 @@ package com.amool.hexagonal.adapters.in.rest.controllers;
 
 import com.amool.hexagonal.adapters.in.rest.dtos.LoginRequest;
 import com.amool.hexagonal.adapters.in.rest.dtos.AuthResponse;
-import com.amool.hexagonal.application.port.in.LoginUseCase;
+import com.amool.hexagonal.application.port.in.CredentialsService;
 import com.amool.hexagonal.security.JwtService;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -14,17 +14,17 @@ import org.springframework.web.bind.annotation.RestController;
 @RequestMapping("/api/auth")
 public class LoginController {
 
-    private final LoginUseCase loginUseCase;
+    private final CredentialsService credentialsService;
     private final JwtService jwtService;
 
-    public LoginController(LoginUseCase loginUseCase, JwtService jwtService) {
-        this.loginUseCase = loginUseCase;
+    public LoginController(CredentialsService credentialsService, JwtService jwtService) {
+        this.credentialsService = credentialsService;
         this.jwtService = jwtService;
     }
 
     @PostMapping("/login")
     public ResponseEntity<AuthResponse> login(@RequestBody LoginRequest request) {
-        return loginUseCase.login(request.getEmail(), request.getPassword())
+        return credentialsService.login(request.getEmail(), request.getPassword())
                 .map(user -> {
                     var claims = new java.util.HashMap<String, Object>();
                     claims.put("userId", user.getId());

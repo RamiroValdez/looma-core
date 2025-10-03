@@ -1,6 +1,6 @@
 package com.amool.hexagonal.adapters.in.rest.controllers;
 
-import com.amool.hexagonal.application.port.in.GetUserByIdUseCase;
+import com.amool.hexagonal.application.port.in.UserService;
 import com.amool.hexagonal.domain.model.User;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -27,7 +27,7 @@ class UserControllerWebTest {
     private MockMvc mockMvc;
 
     @MockBean
-    private GetUserByIdUseCase getUserByIdUseCase;
+    private UserService userService;
 
     @Test
     @DisplayName("GET /api/users/{id} returns 200 with user when found")
@@ -39,7 +39,7 @@ class UserControllerWebTest {
         user.setUsername("jdoe");
         user.setEmail("jdoe@example.com");
         user.setPhoto("pic");
-        when(getUserByIdUseCase.getById(eq(5L))).thenReturn(Optional.of(user));
+        when(userService.getById(eq(5L))).thenReturn(Optional.of(user));
 
         mockMvc.perform(get("/api/users/5").accept(MediaType.APPLICATION_JSON))
                 .andExpect(status().isOk())
@@ -54,7 +54,7 @@ class UserControllerWebTest {
     @Test
     @DisplayName("GET /api/users/{id} returns 404 when not found")
     void getUser_notFound_returns404() throws Exception {
-        when(getUserByIdUseCase.getById(eq(99L))).thenReturn(Optional.empty());
+        when(userService.getById(eq(99L))).thenReturn(Optional.empty());
 
         mockMvc.perform(get("/api/users/99").accept(MediaType.APPLICATION_JSON))
                 .andExpect(status().isNotFound());

@@ -3,7 +3,7 @@ package com.amool.hexagonal.adapters.in.rest.controllers;
 import com.amool.hexagonal.adapters.in.rest.dtos.ChapterWithContentDto;
 import com.amool.hexagonal.adapters.in.rest.dtos.UpdateChapterContentRequest;
 import com.amool.hexagonal.adapters.in.rest.mappers.ChapterMapper;
-import com.amool.hexagonal.application.port.in.GetChapterUseCase;
+import com.amool.hexagonal.application.port.in.ChapterService;
 import com.amool.hexagonal.application.port.out.LoadChapterContentPort;
 import com.amool.hexagonal.application.port.out.SaveChapterContentPort;
 import com.amool.hexagonal.application.port.out.LoadWorkOwnershipPort;
@@ -23,7 +23,7 @@ import com.amool.hexagonal.security.JwtUserPrincipal;
 @RequiredArgsConstructor
 public class ChapterController {
 
-    private final GetChapterUseCase getChapterUseCase;
+    private final ChapterService chapterService;
     private final LoadChapterContentPort loadChapterContentPort;
     private final SaveChapterContentPort saveChapterContentPort;
     private final LoadWorkOwnershipPort loadWorkOwnershipPort;
@@ -34,7 +34,7 @@ public class ChapterController {
             @PathVariable String chapterId,
             @RequestParam(required = false, defaultValue = "es") String language) {
         
-        return getChapterUseCase.getChapterWithContent(Long.valueOf(bookId), Long.valueOf(chapterId), language)
+        return chapterService.getChapterWithContent(Long.valueOf(bookId), Long.valueOf(chapterId), language)
                 .map(chapterWithContent -> {
                     Optional<ChapterContent> chapterContent = loadChapterContentPort.loadContent(bookId, chapterId, language);
                     

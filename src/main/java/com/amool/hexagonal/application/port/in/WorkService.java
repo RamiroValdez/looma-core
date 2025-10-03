@@ -4,14 +4,14 @@ import com.amool.hexagonal.domain.model.Work;
 import java.util.Optional;
 import java.util.List;
 
-public interface ObtainWorkByIdUseCase {
+public interface WorkService {
 
-    Optional<Work> execute(Long workId);
+    Optional<Work> obtainWorkById(Long workId);
 
     List<Work> getWorksByUserId(Long userId);
 
     default Optional<Work> getById(Long workId) {
-        return execute(workId);
+        return obtainWorkById(workId);
     }
 
     default List<Work> getByCreatorId(Long userId) {

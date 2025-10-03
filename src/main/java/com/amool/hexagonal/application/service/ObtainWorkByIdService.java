@@ -1,6 +1,6 @@
 package com.amool.hexagonal.application.service;
 
-import com.amool.hexagonal.application.port.in.ObtainWorkByIdUseCase;
+import com.amool.hexagonal.application.port.in.WorkService;
 import com.amool.hexagonal.application.port.out.ObtainWorkByIdPort;
 import com.amool.hexagonal.domain.model.Work;
 import org.springframework.stereotype.Service;
@@ -10,7 +10,7 @@ import java.util.List;
 import java.util.Optional;
 
 @Service
-public class ObtainWorkByIdService implements ObtainWorkByIdUseCase {
+public class ObtainWorkByIdService implements WorkService {
 
     private final ObtainWorkByIdPort obtainWorkByIdPort;
 
@@ -20,7 +20,7 @@ public class ObtainWorkByIdService implements ObtainWorkByIdUseCase {
 
     @Override
     @Transactional(readOnly = true)
-    public Optional<Work> execute(Long workId) {
+    public Optional<Work> obtainWorkById(Long workId) {
         return obtainWorkByIdPort.execute(workId);
     }
 

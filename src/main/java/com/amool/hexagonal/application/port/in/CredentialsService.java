@@ -4,6 +4,6 @@ import com.amool.hexagonal.domain.model.User;
 
 import java.util.Optional;
 
-public interface LoginUseCase {
+public interface CredentialsService {
     Optional<User> login(String email, String password);
 }

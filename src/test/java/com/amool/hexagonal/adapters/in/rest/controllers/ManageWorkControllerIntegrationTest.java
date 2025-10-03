@@ -1,6 +1,6 @@
 package com.amool.hexagonal.adapters.in.rest.controllers;
 
-import com.amool.hexagonal.application.port.in.ObtainWorkByIdUseCase;
+import com.amool.hexagonal.application.port.in.WorkService;
 import com.amool.hexagonal.application.port.out.LoadWorkOwnershipPort;
 import com.amool.hexagonal.domain.model.*;
 import org.junit.jupiter.api.Test;
@@ -28,7 +28,7 @@ public class ManageWorkControllerIntegrationTest {
     private MockMvc mockMvc;
 
     @MockBean
-    private ObtainWorkByIdUseCase obtainWorkByIdUseCase;
+    private WorkService workService;
 
     @MockBean
     private LoadWorkOwnershipPort loadWorkOwnershipPort;
@@ -68,7 +68,7 @@ public class ManageWorkControllerIntegrationTest {
         work.setChapters(new ArrayList<>());
         work.setCategories(new ArrayList<>());
 
-        when(obtainWorkByIdUseCase.execute(workId)).thenReturn(Optional.of(work));
+        when(workService.obtainWorkById(workId)).thenReturn(Optional.of(work));
 
     
         mockMvc.perform(get("/api/manage-work/" + workId))
@@ -88,7 +88,7 @@ public class ManageWorkControllerIntegrationTest {
         Long workId = 999L;
         setAuthenticatedUser(999L);
         when(loadWorkOwnershipPort.isOwner(999L, 999L)).thenReturn(true);
-        when(obtainWorkByIdUseCase.execute(workId)).thenReturn(Optional.empty());
+        when(workService.obtainWorkById(workId)).thenReturn(Optional.empty());
 
    
         mockMvc.perform(get("/api/manage-work/" + workId))

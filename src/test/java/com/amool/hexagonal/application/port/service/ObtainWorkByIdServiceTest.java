@@ -35,7 +35,7 @@ public class ObtainWorkByIdServiceTest {
         expectedWork.setTitle("Test Work");
         when(obtainWorkByIdPort.execute(workId)).thenReturn(Optional.of(expectedWork));
 
-        Optional<Work> result = obtainWorkByIdService.execute(workId);
+        Optional<Work> result = obtainWorkByIdService.obtainWorkById(workId);
 
         assertTrue(result.isPresent());
         assertEquals(workId, result.get().getId());
@@ -48,7 +48,7 @@ public class ObtainWorkByIdServiceTest {
         Long workId = 999L;
         when(obtainWorkByIdPort.execute(workId)).thenReturn(Optional.empty());
 
-        Optional<Work> result = obtainWorkByIdService.execute(workId);
+        Optional<Work> result = obtainWorkByIdService.obtainWorkById(workId);
 
         assertTrue(result.isEmpty());
         verify(obtainWorkByIdPort, times(1)).execute(workId);
