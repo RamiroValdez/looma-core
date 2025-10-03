@@ -55,6 +55,10 @@ public class ManageWorkControllerIntegrationTest {
         format.setId(1L);
         format.setName("Novel");
 
+        Language originalLanguage = new Language();
+        originalLanguage.setId(1L);
+        originalLanguage.setName("Español");
+
         Work work = new Work();
         work.setId(workId);
         work.setTitle("Test Work");
@@ -65,6 +69,7 @@ public class ManageWorkControllerIntegrationTest {
         work.setPublicationDate(LocalDate.of(2024, 1, 15));
         work.setCreator(creator);
         work.setFormat(format);
+        work.setOriginalLanguage(originalLanguage);
         work.setChapters(new ArrayList<>());
         work.setCategories(new ArrayList<>());
         work.setTags(new ArrayList<>());
@@ -81,7 +86,8 @@ public class ManageWorkControllerIntegrationTest {
                 .andExpect(jsonPath("$.price").value(29.99))
                 .andExpect(jsonPath("$.likes").value(500))
                 .andExpect(jsonPath("$.creator.name").value("John"))
-                .andExpect(jsonPath("$.format.name").value("Novel"));
+                .andExpect(jsonPath("$.format.name").value("Novel"))
+                .andExpect(jsonPath("$.originalLanguage.name").value("Español"));
     }
 
     @Test

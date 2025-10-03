@@ -48,6 +48,10 @@ public class WorkEntity {
     @JoinColumn(name = "format_id", nullable = false)
     private FormatEntity formatEntity;
 
+    @ManyToOne
+    @JoinColumn(name = "original_language_id", nullable = false)
+    private LanguageEntity originalLanguageEntity;
+
 
     @OneToMany(mappedBy = "workEntity", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<ChapterEntity> chapters = new ArrayList<>();
@@ -97,6 +101,9 @@ public class WorkEntity {
 
     public FormatEntity getFormatEntity() { return formatEntity; }
     public void setFormatEntity(FormatEntity formatEntity) { this.formatEntity = formatEntity; }
+
+    public LanguageEntity getOriginalLanguageEntity() { return originalLanguageEntity; }
+    public void setOriginalLanguageEntity(LanguageEntity originalLanguageEntity) { this.originalLanguageEntity = originalLanguageEntity; }
 
     public Set<UserEntity> getUsersWhoSaved() { return usersWhoSaved; }
     public void setUsersWhoSaved(Set<UserEntity> usersWhoSaved) { this.usersWhoSaved = usersWhoSaved; }

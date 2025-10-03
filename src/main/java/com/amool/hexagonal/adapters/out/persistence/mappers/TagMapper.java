@@ -4,7 +4,6 @@ import com.amool.hexagonal.adapters.out.persistence.entity.TagEntity;
 import com.amool.hexagonal.domain.model.Tag;
 
 import java.util.List;
-import java.util.Set;
 import java.util.stream.Collectors;
 
 public class TagMapper {

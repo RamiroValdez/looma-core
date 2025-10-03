@@ -6,6 +6,7 @@ import com.amool.hexagonal.adapters.out.persistence.WorksPersistenceAdapter;
 import com.amool.hexagonal.adapters.out.persistence.entity.WorkEntity;
 import com.amool.hexagonal.adapters.out.persistence.entity.UserEntity;
 import com.amool.hexagonal.adapters.out.persistence.entity.FormatEntity;
+import com.amool.hexagonal.adapters.out.persistence.entity.LanguageEntity;
 import com.amool.hexagonal.application.service.ObtainWorkByIdService;
 import jakarta.persistence.EntityManager;
 import jakarta.transaction.Transactional;
@@ -73,6 +74,7 @@ class MyWorksIntegrationTest {
 
     private UserEntity testUser;
     private FormatEntity testFormat;
+    private LanguageEntity testLanguage;
     private WorkEntity testWork1;
     private WorkEntity testWork2;
 
@@ -93,6 +95,11 @@ class MyWorksIntegrationTest {
         entityManager.persist(testFormat);
 
         
+        testLanguage = new LanguageEntity();
+        testLanguage.setName("Español");
+        entityManager.persist(testLanguage);
+
+        
         testWork1 = new WorkEntity();
         testWork1.setTitle("Test Work 1");
         testWork1.setDescription("Description 1");
@@ -102,6 +109,7 @@ class MyWorksIntegrationTest {
         testWork1.setPublicationDate(LocalDate.now());
         testWork1.setCreator(testUser);
         testWork1.setFormatEntity(testFormat);
+        testWork1.setOriginalLanguageEntity(testLanguage);
         entityManager.persist(testWork1);
 
         testWork2 = new WorkEntity();
@@ -113,6 +121,7 @@ class MyWorksIntegrationTest {
         testWork2.setPublicationDate(LocalDate.now());
         testWork2.setCreator(testUser);
         testWork2.setFormatEntity(testFormat);
+        testWork2.setOriginalLanguageEntity(testLanguage);
         entityManager.persist(testWork2);
 
         entityManager.flush();

@@ -21,6 +21,7 @@ public class WorkMapper {
         dto.setLikes(work.getLikes());
         dto.setCreator(CreatorMapper.toDto(work.getCreator()));
         dto.setFormat(FormatMapper.toDto(work.getFormat()));
+        dto.setOriginalLanguage(LanguageMapper.toDto(work.getOriginalLanguage()));
         dto.setChapters(work.getChapters().stream()
                 .map(ChapterMapper::toDto)
                 .collect(Collectors.toList()));
