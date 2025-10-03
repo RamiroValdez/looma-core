@@ -1,8 +1,8 @@
 package com.amool.hexagonal.adapters.in.rest.mappers;
 
 import com.amool.hexagonal.adapters.in.rest.dtos.ChapterDto;
-import com.amool.hexagonal.adapters.in.rest.dto.ChapterWithContentDto;
-import com.amool.hexagonal.application.port.in.GetChapterUseCase.ChapterWithContent;
+import com.amool.hexagonal.adapters.in.rest.dtos.ChapterWithContentDto;
+import com.amool.hexagonal.application.service.ChapterWithContent;
 import com.amool.hexagonal.domain.model.Chapter;
 import org.junit.jupiter.api.Test;
 

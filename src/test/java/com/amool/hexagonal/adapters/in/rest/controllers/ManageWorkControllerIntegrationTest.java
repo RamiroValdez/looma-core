@@ -1,6 +1,6 @@
 package com.amool.hexagonal.adapters.in.rest.controllers;
 
-import com.amool.hexagonal.application.port.in.ObtainWorkByIdUseCase;
+import com.amool.hexagonal.application.port.in.WorkService;
 import com.amool.hexagonal.domain.model.*;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -25,7 +25,7 @@ public class ManageWorkControllerIntegrationTest {
     private MockMvc mockMvc;
 
     @MockitoBean
-    private ObtainWorkByIdUseCase obtainWorkByIdUseCase;
+    private WorkService workService;
 
     @Test
     public void testGetWorkById_ShouldReturnWork_WhenWorkExists() throws Exception {
@@ -54,7 +54,7 @@ public class ManageWorkControllerIntegrationTest {
         work.setChapters(new ArrayList<>());
         work.setCategories(new ArrayList<>());
 
-        when(obtainWorkByIdUseCase.execute(workId)).thenReturn(Optional.of(work));
+        when(workService.execute(workId)).thenReturn(Optional.of(work));
 
     
         mockMvc.perform(get("/api/manage-work/" + workId))
@@ -72,7 +72,7 @@ public class ManageWorkControllerIntegrationTest {
     @Test
     public void testGetWorkById_ShouldReturn404_WhenWorkDoesNotExist() throws Exception {
         Long workId = 999L;
-        when(obtainWorkByIdUseCase.execute(workId)).thenReturn(Optional.empty());
+        when(workService.execute(workId)).thenReturn(Optional.empty());
 
    
         mockMvc.perform(get("/api/manage-work/" + workId))

@@ -6,7 +6,7 @@ import com.amool.hexagonal.adapters.out.persistence.WorksPersistenceAdapter;
 import com.amool.hexagonal.adapters.out.persistence.entity.WorkEntity;
 import com.amool.hexagonal.adapters.out.persistence.entity.UserEntity;
 import com.amool.hexagonal.adapters.out.persistence.entity.FormatEntity;
-import com.amool.hexagonal.application.service.ObtainWorkByIdService;
+import com.amool.hexagonal.application.service.WorkServiceImpl;
 import jakarta.persistence.EntityManager;
 import jakarta.transaction.Transactional;
 import org.junit.jupiter.api.BeforeEach;
@@ -45,7 +45,7 @@ class MyWorksIntegrationTest {
     private MyWorksController myWorksController;
 
     @Autowired
-    private ObtainWorkByIdService obtainWorkByIdService;
+    private WorkServiceImpl workServiceImpl;
 
     @Autowired
     private WorksPersistenceAdapter worksPersistenceAdapter;
@@ -166,7 +166,7 @@ class MyWorksIntegrationTest {
     @Test
     void testServiceLayer_GetWorksByUserId_CallsPersistenceAdapter() {
         
-        var works = obtainWorkByIdService.getWorksByUserId(testUser.getId());
+        var works = workServiceImpl.getWorksByUserId(testUser.getId());
 
         
         assertNotNull(works);

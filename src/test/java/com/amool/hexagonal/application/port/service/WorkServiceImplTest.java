@@ -7,20 +7,20 @@ import org.junit.jupiter.api.Test;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
-import com.amool.hexagonal.application.service.ObtainWorkByIdService;
+import com.amool.hexagonal.application.service.WorkServiceImpl;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
 
 import java.util.Optional;
 
-public class ObtainWorkByIdServiceTest {
+public class WorkServiceImplTest {
 
     @Mock
     private ObtainWorkByIdPort obtainWorkByIdPort;
 
     @InjectMocks
-    private ObtainWorkByIdService obtainWorkByIdService;
+    private WorkServiceImpl workServiceImpl;
 
     @BeforeEach
     public void setup() {
@@ -35,7 +35,7 @@ public class ObtainWorkByIdServiceTest {
         expectedWork.setTitle("Test Work");
         when(obtainWorkByIdPort.execute(workId)).thenReturn(Optional.of(expectedWork));
 
-        Optional<Work> result = obtainWorkByIdService.execute(workId);
+        Optional<Work> result = workServiceImpl.execute(workId);
 
         assertTrue(result.isPresent());
         assertEquals(workId, result.get().getId());
@@ -48,7 +48,7 @@ public class ObtainWorkByIdServiceTest {
         Long workId = 999L;
         when(obtainWorkByIdPort.execute(workId)).thenReturn(Optional.empty());
 
-        Optional<Work> result = obtainWorkByIdService.execute(workId);
+        Optional<Work> result = workServiceImpl.execute(workId);
 
         assertTrue(result.isEmpty());
         verify(obtainWorkByIdPort, times(1)).execute(workId);

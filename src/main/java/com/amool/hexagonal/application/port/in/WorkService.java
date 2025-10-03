@@ -4,7 +4,7 @@ import com.amool.hexagonal.domain.model.Work;
 import java.util.Optional;
 import java.util.List;
 
-public interface ObtainWorkByIdUseCase {
+public interface WorkService {
 
     Optional<Work> execute(Long workId);
 
