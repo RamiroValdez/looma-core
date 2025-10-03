@@ -19,11 +19,12 @@ public class WorkMapper {
         work.setPrice(entity.getPrice());
         work.setLikes(entity.getLikes());
         work.setPublicationDate(entity.getPublicationDate());
-        
         work.setCreator(UserMapper.toDomain(entity.getCreator()));
         work.setFormat(FormatMapper.toDomain(entity.getFormatEntity()));
+        work.setOriginalLanguage(LanguageMapper.toDomain(entity.getOriginalLanguageEntity()));
         work.setChapters(ChapterMapper.toDomainList(entity.getChapters()));
         work.setCategories(CategoryMapper.toDomainList(entity.getCategories()));
+        work.setTags(TagMapper.toDomainList(entity.getTags()));
 
         return work;
     }

@@ -26,6 +26,10 @@ public class WorkMapperTest {
         format.setId(1L);
         format.setName("Novel");
 
+        LanguageEntity originalLanguage = new LanguageEntity();
+        originalLanguage.setId(1L);
+        originalLanguage.setName("Español");
+
         WorkEntity entity = new WorkEntity();
         entity.setId(1L);
         entity.setTitle("Test Work");
@@ -38,6 +42,7 @@ public class WorkMapperTest {
         entity.setPublicationDate(LocalDate.of(2024, 1, 15));
         entity.setCreator(creator);
         entity.setFormatEntity(format);
+        entity.setOriginalLanguageEntity(originalLanguage);
         entity.setChapters(new ArrayList<>());
         entity.setCategories(new HashSet<>());
         entity.setTags(new ArrayList<>());
@@ -59,6 +64,8 @@ public class WorkMapperTest {
         assertEquals("John", work.getCreator().getName());
         assertNotNull(work.getFormat());
         assertEquals("Novel", work.getFormat().getName());
+        assertNotNull(work.getOriginalLanguage());
+        assertEquals("Español", work.getOriginalLanguage().getName());
         assertNotNull(work.getChapters());
         assertNotNull(work.getCategories());
         assertNotNull(work.getTags());

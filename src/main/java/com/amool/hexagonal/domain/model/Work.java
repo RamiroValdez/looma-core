@@ -16,6 +16,7 @@ public class Work {
     private LocalDate publicationDate;
     private User creator;
     private Format format;
+    private Language originalLanguage;
     private List<Chapter> chapters = new ArrayList<>();
     private List<Category> categories = new ArrayList<>();
     private List<Tag> tags = new ArrayList<>();
@@ -52,6 +53,9 @@ public class Work {
     
     public Format getFormat() { return format; }
     public void setFormat(Format format) { this.format = format; }
+
+    public Language getOriginalLanguage() { return originalLanguage; }
+    public void setOriginalLanguage(Language originalLanguage) { this.originalLanguage = originalLanguage; }
     
     public List<Chapter> getChapters() { return chapters; }
     public void setChapters(List<Chapter> chapters) { this.chapters = chapters; }
