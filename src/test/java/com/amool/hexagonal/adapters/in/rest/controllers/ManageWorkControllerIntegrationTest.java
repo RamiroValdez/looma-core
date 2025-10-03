@@ -1,12 +1,15 @@
 package com.amool.hexagonal.adapters.in.rest.controllers;
 
 import com.amool.hexagonal.application.port.in.ObtainWorkByIdUseCase;
+import com.amool.hexagonal.application.port.out.LoadWorkOwnershipPort;
 import com.amool.hexagonal.domain.model.*;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
-import org.springframework.test.context.bean.override.mockito.MockitoBean;
+import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.test.web.servlet.MockMvc;
 
 import java.time.LocalDate;
@@ -24,12 +27,23 @@ public class ManageWorkControllerIntegrationTest {
     @Autowired
     private MockMvc mockMvc;
 
-    @MockitoBean
+    @MockBean
     private ObtainWorkByIdUseCase obtainWorkByIdUseCase;
+
+    @MockBean
+    private LoadWorkOwnershipPort loadWorkOwnershipPort;
+
+    private void setAuthenticatedUser(Long userId) {
+        var principal = new com.amool.hexagonal.security.JwtUserPrincipal(userId, "u@e.com", "Name", "Surname", "user");
+        var auth = new UsernamePasswordAuthenticationToken(principal, null, java.util.Collections.emptyList());
+        SecurityContextHolder.getContext().setAuthentication(auth);
+    }
 
     @Test
     public void testGetWorkById_ShouldReturnWork_WhenWorkExists() throws Exception {
         Long workId = 1L;
+        setAuthenticatedUser(1L);
+        when(loadWorkOwnershipPort.isOwner(1L, 1L)).thenReturn(true);
         
         User creator = new User();
         creator.setId(1L);
@@ -72,6 +86,8 @@ public class ManageWorkControllerIntegrationTest {
     @Test
     public void testGetWorkById_ShouldReturn404_WhenWorkDoesNotExist() throws Exception {
         Long workId = 999L;
+        setAuthenticatedUser(999L);
+        when(loadWorkOwnershipPort.isOwner(999L, 999L)).thenReturn(true);
         when(obtainWorkByIdUseCase.execute(workId)).thenReturn(Optional.empty());
 
    

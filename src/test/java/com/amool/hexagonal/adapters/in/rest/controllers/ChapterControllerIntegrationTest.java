@@ -4,6 +4,7 @@ import com.amool.hexagonal.adapters.in.rest.controllers.ChapterController;
 import com.amool.hexagonal.application.port.out.LoadChapterContentPort;
 import com.amool.hexagonal.application.port.out.SaveChapterContentPort;
 import com.amool.hexagonal.application.port.in.GetChapterUseCase;
+import com.amool.hexagonal.application.port.out.LoadWorkOwnershipPort;
 import com.amool.hexagonal.domain.model.Chapter;
 import com.amool.hexagonal.domain.model.ChapterContent;
 import org.junit.jupiter.api.Test;
@@ -38,6 +39,9 @@ public class ChapterControllerIntegrationTest {
     
     @MockBean
     private SaveChapterContentPort saveChapterContentPort;
+
+    @MockBean
+    private LoadWorkOwnershipPort loadWorkOwnershipPort;
 
     @Test
     public void getChapter_ShouldReturnChapterWithContent() throws Exception {

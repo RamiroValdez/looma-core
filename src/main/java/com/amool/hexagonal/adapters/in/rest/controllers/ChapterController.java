@@ -6,6 +6,7 @@ import com.amool.hexagonal.adapters.in.rest.mappers.ChapterMapper;
 import com.amool.hexagonal.application.port.in.GetChapterUseCase;
 import com.amool.hexagonal.application.port.out.LoadChapterContentPort;
 import com.amool.hexagonal.application.port.out.SaveChapterContentPort;
+import com.amool.hexagonal.application.port.out.LoadWorkOwnershipPort;
 import com.amool.hexagonal.domain.model.ChapterContent;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -13,6 +14,9 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import java.util.List;
 import java.util.Optional;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
+import com.amool.hexagonal.security.JwtUserPrincipal;
 
 @RestController
 @RequestMapping("/api")
@@ -22,6 +26,7 @@ public class ChapterController {
     private final GetChapterUseCase getChapterUseCase;
     private final LoadChapterContentPort loadChapterContentPort;
     private final SaveChapterContentPort saveChapterContentPort;
+    private final LoadWorkOwnershipPort loadWorkOwnershipPort;
 
     @GetMapping("/books/{bookId}/chapters/{chapterId}")
     public ResponseEntity<ChapterWithContentDto> getChapter(
@@ -46,17 +51,25 @@ public class ChapterController {
                 .map(ResponseEntity::ok)
                 .orElse(ResponseEntity.<ChapterWithContentDto>notFound().build());
     }
-    
     @PostMapping("/books/{bookId}/chapters/{chapterId}/content")
     public ResponseEntity<ChapterContent> updateChapterContent(
             @PathVariable String bookId,
             @PathVariable String chapterId,
             @Valid @RequestBody UpdateChapterContentRequest request) {
-        
+
         if (!bookId.equals(request.workId()) || !chapterId.equals(request.chapterId())) {
             return ResponseEntity.badRequest().build();
         }
-        
+
+        Authentication auth = SecurityContextHolder.getContext().getAuthentication();
+        if (auth == null || !(auth.getPrincipal() instanceof JwtUserPrincipal principal)) {
+            return ResponseEntity.status(401).build();
+        }
+        Long workIdLong = Long.valueOf(bookId);
+        boolean isOwner = loadWorkOwnershipPort.isOwner(workIdLong, principal.getUserId());
+        if (!isOwner) {
+            return ResponseEntity.status(403).build();
+        }
         ChapterContent updated = saveChapterContentPort.saveContent(
             request.workId(),
             request.chapterId(),
@@ -65,5 +78,7 @@ public class ChapterController {
         );
         return ResponseEntity.ok(updated);
     }
+
+    
 
 }
