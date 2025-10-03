@@ -67,6 +67,7 @@ public class ManageWorkControllerIntegrationTest {
         work.setFormat(format);
         work.setChapters(new ArrayList<>());
         work.setCategories(new ArrayList<>());
+        work.setTags(new ArrayList<>());
 
         when(workService.obtainWorkById(workId)).thenReturn(Optional.of(work));
 

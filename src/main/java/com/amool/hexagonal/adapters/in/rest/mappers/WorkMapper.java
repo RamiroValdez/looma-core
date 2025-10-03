@@ -27,6 +27,9 @@ public class WorkMapper {
         dto.setCategories(work.getCategories().stream()
                 .map(CategoryMapper::toDto)
                 .collect(Collectors.toList()));
+        dto.setTags(work.getTags().stream()
+                .map(TagMapper::toDto)
+                .collect(Collectors.toList()));
         if (work.getPublicationDate() != null) {
             dto.setPublicationDate(java.sql.Date.valueOf(work.getPublicationDate()));
         }
