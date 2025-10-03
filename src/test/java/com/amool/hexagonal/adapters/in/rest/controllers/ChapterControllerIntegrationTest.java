@@ -1,9 +1,9 @@
 package com.amool.hexagonal.adapters.in.rest.controllers;
 
-import com.amool.hexagonal.adapters.in.rest.controllers.ChapterController;
 import com.amool.hexagonal.application.port.out.LoadChapterContentPort;
 import com.amool.hexagonal.application.port.out.SaveChapterContentPort;
-import com.amool.hexagonal.application.port.in.GetChapterUseCase;
+import com.amool.hexagonal.application.port.in.ChapterService;
+import com.amool.hexagonal.application.port.out.LoadWorkOwnershipPort;
 import com.amool.hexagonal.domain.model.Chapter;
 import com.amool.hexagonal.domain.model.ChapterContent;
 import org.junit.jupiter.api.Test;
@@ -18,7 +18,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 
-import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
@@ -31,13 +30,16 @@ public class ChapterControllerIntegrationTest {
     private MockMvc mockMvc;
 
     @MockBean
-    private GetChapterUseCase getChapterUseCase;
+    private ChapterService chapterService;
 
     @MockBean
     private LoadChapterContentPort loadChapterContentPort;
     
     @MockBean
     private SaveChapterContentPort saveChapterContentPort;
+
+    @MockBean
+    private LoadWorkOwnershipPort loadWorkOwnershipPort;
 
     @Test
     public void getChapter_ShouldReturnChapterWithContent() throws Exception {
@@ -54,8 +56,8 @@ public class ChapterControllerIntegrationTest {
         ChapterContent content = new ChapterContent("1", "1", 
             Map.of("es", "Contenido en español"), "es");
         
-        when(getChapterUseCase.getChapterWithContent(1L, 1L, language))
-            .thenReturn(Optional.of(new GetChapterUseCase.ChapterWithContent(chapter, "Contenido en español")));
+        when(chapterService.getChapterWithContent(1L, 1L, language))
+            .thenReturn(Optional.of(new ChapterService.ChapterWithContent(chapter, "Contenido en español")));
             
         when(loadChapterContentPort.loadContent(bookId, chapterId, language))
             .thenReturn(Optional.of(content));
@@ -80,7 +82,7 @@ public class ChapterControllerIntegrationTest {
         String chapterId = "999";
         String language = "es";
         
-        when(getChapterUseCase.getChapterWithContent(999L, 999L, language))
+        when(chapterService.getChapterWithContent(999L, 999L, language))
             .thenReturn(Optional.empty());
 
         mockMvc.perform(get("/api/books/{bookId}/chapters/{chapterId}", bookId, chapterId)

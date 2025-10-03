@@ -1,7 +1,7 @@
 package com.amool.hexagonal.adapters.in.rest.controllers;
 
 import com.amool.hexagonal.adapters.in.rest.dtos.WorkResponseDto;
-import com.amool.hexagonal.application.port.in.ObtainWorkByIdUseCase;
+import com.amool.hexagonal.application.port.in.WorkService;
 import com.amool.hexagonal.domain.model.User;
 import com.amool.hexagonal.domain.model.Work;
 import org.junit.jupiter.api.BeforeEach;
@@ -24,7 +24,7 @@ import static org.mockito.Mockito.*;
 class MyWorksControllerTest {
 
     @Mock
-    private ObtainWorkByIdUseCase obtainWorkByIdUseCase;
+    private WorkService workService;
 
     @InjectMocks
     private MyWorksController myWorksController;
@@ -69,7 +69,7 @@ class MyWorksControllerTest {
 
         Long userId = 1L;
         List<Work> works = Arrays.asList(testWork1, testWork2);
-        when(obtainWorkByIdUseCase.getWorksByUserId(userId)).thenReturn(works);
+        when(workService.getWorksByUserId(userId)).thenReturn(works);
 
         List<WorkResponseDto> result = myWorksController.getWorksByUserId(userId);
 
@@ -92,14 +92,14 @@ class MyWorksControllerTest {
         assertEquals(testWork2.getPrice(), dto2.getPrice());
         assertEquals(testWork2.getLikes(), dto2.getLikes());
 
-        verify(obtainWorkByIdUseCase, times(1)).getWorksByUserId(userId);
+        verify(workService, times(1)).getWorksByUserId(userId);
     }
 
     @Test
     void getWorksByUserId_WithNoWorks_ReturnsEmptyList() {
 
         Long userId = 1L;
-        when(obtainWorkByIdUseCase.getWorksByUserId(userId)).thenReturn(Collections.emptyList());
+        when(workService.getWorksByUserId(userId)).thenReturn(Collections.emptyList());
 
         
         List<WorkResponseDto> result = myWorksController.getWorksByUserId(userId);
@@ -107,7 +107,7 @@ class MyWorksControllerTest {
        
         assertNotNull(result);
         assertTrue(result.isEmpty());
-        verify(obtainWorkByIdUseCase, times(1)).getWorksByUserId(userId);
+        verify(workService, times(1)).getWorksByUserId(userId);
     }
 
     @Test
@@ -115,7 +115,7 @@ class MyWorksControllerTest {
      
         Long userId = 1L;
         List<Work> works = Collections.singletonList(testWork1);
-        when(obtainWorkByIdUseCase.getWorksByUserId(userId)).thenReturn(works);
+        when(workService.getWorksByUserId(userId)).thenReturn(works);
 
         
         List<WorkResponseDto> result = myWorksController.getWorksByUserId(userId);
@@ -124,7 +124,7 @@ class MyWorksControllerTest {
         assertEquals(1, result.size());
         assertEquals(testWork1.getId(), result.get(0).getId());
         assertEquals(testWork1.getTitle(), result.get(0).getTitle());
-        verify(obtainWorkByIdUseCase, times(1)).getWorksByUserId(userId);
+        verify(workService, times(1)).getWorksByUserId(userId);
     }
 
     @Test
@@ -132,7 +132,7 @@ class MyWorksControllerTest {
       
         Long userId = 1L;
         List<Work> works = Arrays.asList(testWork1, testWork2);
-        when(obtainWorkByIdUseCase.getWorksByUserId(userId)).thenReturn(works);
+        when(workService.getWorksByUserId(userId)).thenReturn(works);
 
       
         List<WorkResponseDto> result = myWorksController.getWorksByUserId(userId);
@@ -145,7 +145,7 @@ class MyWorksControllerTest {
             assertEquals(work.getId(), dto.getId());
             assertEquals(work.getTitle(), dto.getTitle());
         }
-        verify(obtainWorkByIdUseCase, times(1)).getWorksByUserId(userId);
+        verify(workService, times(1)).getWorksByUserId(userId);
     }
 
     @Test
@@ -153,14 +153,14 @@ class MyWorksControllerTest {
        
         Long userId1 = 1L;
         Long userId2 = 2L;
-        when(obtainWorkByIdUseCase.getWorksByUserId(anyLong())).thenReturn(Collections.emptyList());
+        when(workService.getWorksByUserId(anyLong())).thenReturn(Collections.emptyList());
 
         myWorksController.getWorksByUserId(userId1);
         myWorksController.getWorksByUserId(userId2);
 
-        verify(obtainWorkByIdUseCase, times(1)).getWorksByUserId(userId1);
-        verify(obtainWorkByIdUseCase, times(1)).getWorksByUserId(userId2);
-        verify(obtainWorkByIdUseCase, times(2)).getWorksByUserId(anyLong());
+        verify(workService, times(1)).getWorksByUserId(userId1);
+        verify(workService, times(1)).getWorksByUserId(userId2);
+        verify(workService, times(2)).getWorksByUserId(anyLong());
     }
 
     @Test
@@ -168,7 +168,7 @@ class MyWorksControllerTest {
 
         Long userId = 1L;
         List<Work> works = Arrays.asList(testWork1, null, testWork2);
-        when(obtainWorkByIdUseCase.getWorksByUserId(userId)).thenReturn(works);
+        when(workService.getWorksByUserId(userId)).thenReturn(works);
 
        
         List<WorkResponseDto> result = myWorksController.getWorksByUserId(userId);
@@ -178,6 +178,6 @@ class MyWorksControllerTest {
         assertNotNull(result.get(0));
         assertNull(result.get(1)); 
         assertNotNull(result.get(2));
-        verify(obtainWorkByIdUseCase, times(1)).getWorksByUserId(userId);
+        verify(workService, times(1)).getWorksByUserId(userId);
     }
 }

@@ -1,16 +1,15 @@
 package com.amool.hexagonal.adapters.in.rest.mappers;
 
-import com.amool.hexagonal.adapters.in.rest.dto.ChapterWithContentDto;
+import com.amool.hexagonal.adapters.in.rest.dtos.ChapterWithContentDto;
 import com.amool.hexagonal.adapters.in.rest.dtos.ChapterDto;
-import com.amool.hexagonal.application.port.in.GetChapterUseCase.ChapterWithContent;
-import com.amool.hexagonal.domain.model.Chapter;
+import com.amool.hexagonal.application.port.in.ChapterService;
 
 import java.util.List;
 
 public class ChapterMapper {
-    public static ChapterWithContentDto toDto(com.amool.hexagonal.application.port.in.GetChapterUseCase.ChapterWithContent chapterWithContent, 
-                                           String content,
-                                           List<String> availableLanguages) {
+    public static ChapterWithContentDto toDto(ChapterService.ChapterWithContent chapterWithContent,
+                                              String content,
+                                              List<String> availableLanguages) {
         if (chapterWithContent == null || chapterWithContent.chapter() == null) {
             return null;
         }

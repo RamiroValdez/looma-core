@@ -7,10 +7,12 @@ import org.junit.jupiter.api.Test;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
+import com.amool.hexagonal.application.service.ObtainWorkByIdService;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
 
+import java.util.Optional;
 
 public class ObtainWorkByIdServiceTest {
 
@@ -31,25 +33,24 @@ public class ObtainWorkByIdServiceTest {
         Work expectedWork = new Work();
         expectedWork.setId(workId);
         expectedWork.setTitle("Test Work");
-        
-        when(obtainWorkByIdPort.execute(workId)).thenReturn(expectedWork);
+        when(obtainWorkByIdPort.execute(workId)).thenReturn(Optional.of(expectedWork));
 
-        Work result = obtainWorkByIdService.execute(workId);
+        Optional<Work> result = obtainWorkByIdService.obtainWorkById(workId);
 
-        assertNotNull(result);
-        assertEquals(workId, result.getId());
-        assertEquals("Test Work", result.getTitle());
+        assertTrue(result.isPresent());
+        assertEquals(workId, result.get().getId());
+        assertEquals("Test Work", result.get().getTitle());
         verify(obtainWorkByIdPort, times(1)).execute(workId);
     }
 
     @Test
     public void testExecute_ShouldReturnNull_WhenWorkDoesNotExist() {
         Long workId = 999L;
-        when(obtainWorkByIdPort.execute(workId)).thenReturn(null);
+        when(obtainWorkByIdPort.execute(workId)).thenReturn(Optional.empty());
 
-        Work result = obtainWorkByIdService.execute(workId);
+        Optional<Work> result = obtainWorkByIdService.obtainWorkById(workId);
 
-        assertNull(result);
+        assertTrue(result.isEmpty());
         verify(obtainWorkByIdPort, times(1)).execute(workId);
     }
 }

@@ -1,6 +1,6 @@
 package com.amool.hexagonal.application.port.out;
 
-import com.amool.hexagonal.adapters.in.rest.dto.UpdateChapterContentRequest;
+import com.amool.hexagonal.adapters.in.rest.dtos.UpdateChapterContentRequest;
 import com.amool.hexagonal.domain.model.ChapterContent;
 
 public interface SaveChapterContentPort {
