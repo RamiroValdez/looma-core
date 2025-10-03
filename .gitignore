@@ -33,8 +33,11 @@ out/
 /nbdist/
 /.nb-gradle/
 
+# Environment variables
+.env
+
 ### VS Code ###
 .vscode/
 
 # Environment files
-.env.development
+.env
