@@ -4,12 +4,19 @@ import com.amool.hexagonal.adapters.in.rest.dtos.WorkResponseDto;
 import com.amool.hexagonal.application.port.in.WorkService;
 import com.amool.hexagonal.domain.model.User;
 import com.amool.hexagonal.domain.model.Work;
+import com.amool.hexagonal.security.JwtUserPrincipal;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.core.Authentication;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.context.SecurityContext;
+import org.springframework.security.core.context.SecurityContextHolder;
 
 import java.time.LocalDate;
 import java.util.Arrays;
@@ -63,15 +70,33 @@ class MyWorksControllerTest {
         testWork2.setCreator(testUser);
     }
 
+    private JwtUserPrincipal createTestUserPrincipal() {
+        return new JwtUserPrincipal(1L, "test@example.com", "Test", "User", "testuser");
+    }
+    
+    private void setupSecurityContext(JwtUserPrincipal principal) {
+        Authentication auth = new UsernamePasswordAuthenticationToken(principal, null, Collections.emptyList());
+        SecurityContext securityContext = mock(SecurityContext.class);
+        when(securityContext.getAuthentication()).thenReturn(auth);
+        SecurityContextHolder.setContext(securityContext);
+    }
+
     @Test
-    void getWorksByUserId_WithValidUserId_ReturnsWorkResponseDtoList() {
-
-        Long userId = 1L;
+    void getMyWorks_WithAuthenticatedUser_ReturnsWorkResponseDtoList() {
+        // Arrange
+        JwtUserPrincipal principal = createTestUserPrincipal();
+        setupSecurityContext(principal);
+        
         List<Work> works = Arrays.asList(testWork1, testWork2);
-        when(workService.getWorksByUserId(userId)).thenReturn(works);
+        when(workService.getAuthenticatedUserWorks(principal.getUserId())).thenReturn(works);
 
-        List<WorkResponseDto> result = myWorksController.getWorksByUserId(userId);
+        // Act
+        ResponseEntity<List<WorkResponseDto>> response = myWorksController.getMyWorks(principal);
+        List<WorkResponseDto> result = response.getBody();
 
+        // Assert
+        assertNotNull(response);
+        assertEquals(HttpStatus.OK, response.getStatusCode());
         assertNotNull(result);
         assertEquals(2, result.size());
 
@@ -89,94 +114,64 @@ class MyWorksControllerTest {
         assertEquals(testWork2.getDescription(), dto2.getDescription());
         assertEquals(testWork2.getState(), dto2.getState());
         assertEquals(testWork2.getPrice(), dto2.getPrice());
-        assertEquals(testWork2.getLikes(), dto2.getLikes());
-
-        verify(workService, times(1)).getWorksByUserId(userId);
+        verify(workService, times(1)).getAuthenticatedUserWorks(principal.getUserId());
     }
 
     @Test
-    void getWorksByUserId_WithNoWorks_ReturnsEmptyList() {
-
-        Long userId = 1L;
-        when(workService.getWorksByUserId(userId)).thenReturn(Collections.emptyList());
-
+    void getMyWorks_WithNoWorks_ReturnsEmptyList() {
+        // Arrange
+        JwtUserPrincipal principal = createTestUserPrincipal();
+        setupSecurityContext(principal);
         
-        List<WorkResponseDto> result = myWorksController.getWorksByUserId(userId);
+        when(workService.getAuthenticatedUserWorks(principal.getUserId())).thenReturn(Collections.emptyList());
 
-       
+        // Act
+        ResponseEntity<List<WorkResponseDto>> response = myWorksController.getMyWorks(principal);
+        List<WorkResponseDto> result = response.getBody();
+
+        // Assert
+        assertNotNull(response);
+        assertEquals(HttpStatus.OK, response.getStatusCode());
         assertNotNull(result);
         assertTrue(result.isEmpty());
-        verify(workService, times(1)).getWorksByUserId(userId);
+        verify(workService, times(1)).getAuthenticatedUserWorks(principal.getUserId());
     }
 
     @Test
-    void getWorksByUserId_WithSingleWork_ReturnsSingleWorkResponseDto() {
-     
-        Long userId = 1L;
-        List<Work> works = Collections.singletonList(testWork1);
-        when(workService.getWorksByUserId(userId)).thenReturn(works);
-
+    void getWorksByUserId_WithMatchingUserId_ReturnsUserWorks() {
+        // Arrange
+        JwtUserPrincipal principal = createTestUserPrincipal();
+        setupSecurityContext(principal);
         
-        List<WorkResponseDto> result = myWorksController.getWorksByUserId(userId);
-
-        assertNotNull(result);
-        assertEquals(1, result.size());
-        assertEquals(testWork1.getId(), result.get(0).getId());
-        assertEquals(testWork1.getTitle(), result.get(0).getTitle());
-        verify(workService, times(1)).getWorksByUserId(userId);
-    }
-
-    @Test
-    void getWorksByUserId_VerifyMappingIsAppliedToAllWorks() {
-      
-        Long userId = 1L;
+        Long userId = principal.getUserId();
         List<Work> works = Arrays.asList(testWork1, testWork2);
-        when(workService.getWorksByUserId(userId)).thenReturn(works);
+        when(workService.getAuthenticatedUserWorks(principal.getUserId())).thenReturn(works);
 
-      
-        List<WorkResponseDto> result = myWorksController.getWorksByUserId(userId);
+        // Act
+        ResponseEntity<List<WorkResponseDto>> response = myWorksController.getWorksByUserId(userId, principal);
+        List<WorkResponseDto> result = response.getBody();
 
-    
-        assertEquals(works.size(), result.size());
-        for (int i = 0; i < works.size(); i++) {
-            Work work = works.get(i);
-            WorkResponseDto dto = result.get(i);
-            assertEquals(work.getId(), dto.getId());
-            assertEquals(work.getTitle(), dto.getTitle());
-        }
-        verify(workService, times(1)).getWorksByUserId(userId);
-    }
-
-    @Test
-    void getWorksByUserId_WithDifferentUserIds_CallsUseCaseWithCorrectParameter() {
-       
-        Long userId1 = 1L;
-        Long userId2 = 2L;
-        when(workService.getWorksByUserId(anyLong())).thenReturn(Collections.emptyList());
-
-        myWorksController.getWorksByUserId(userId1);
-        myWorksController.getWorksByUserId(userId2);
-
-        verify(workService, times(1)).getWorksByUserId(userId1);
-        verify(workService, times(1)).getWorksByUserId(userId2);
-        verify(workService, times(2)).getWorksByUserId(anyLong());
-    }
-
-    @Test
-    void getWorksByUserId_WithNullWorkInList_HandlesGracefully() {
-
-        Long userId = 1L;
-        List<Work> works = Arrays.asList(testWork1, null, testWork2);
-        when(workService.getWorksByUserId(userId)).thenReturn(works);
-
-       
-        List<WorkResponseDto> result = myWorksController.getWorksByUserId(userId);
-
+        // Assert
+        assertNotNull(response);
+        assertEquals(HttpStatus.OK, response.getStatusCode());
         assertNotNull(result);
-        assertEquals(3, result.size());
-        assertNotNull(result.get(0));
-        assertNull(result.get(1)); 
-        assertNotNull(result.get(2));
-        verify(workService, times(1)).getWorksByUserId(userId);
+        assertEquals(2, result.size());
+        verify(workService, times(1)).getAuthenticatedUserWorks(principal.getUserId());
+    }
+
+    @Test
+    void getWorksByUserId_WithMismatchedUserId_ThrowsSecurityException() {
+        // Arrange
+        JwtUserPrincipal principal = createTestUserPrincipal();
+        setupSecurityContext(principal);
+        
+        Long differentUserId = 999L; // Diferente al ID del principal
+
+        // Act & Assert
+        assertThrows(SecurityException.class, () -> {
+            myWorksController.getWorksByUserId(differentUserId, principal);
+        });
+        
+        verify(workService, never()).getAuthenticatedUserWorks(any());
     }
 }

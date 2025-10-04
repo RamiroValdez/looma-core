@@ -29,4 +29,13 @@ public class ObtainWorkByIdService implements WorkService {
     public List<Work> getWorksByUserId(Long userId) {
         return obtainWorkByIdPort.getWorksByUserId(userId);
     }
+    
+    @Override
+    @Transactional(readOnly = true)
+    public List<Work> getAuthenticatedUserWorks(Long authenticatedUserId) {
+        if (authenticatedUserId == null) {
+            throw new SecurityException("Usuario no autenticado");
+        }
+        return obtainWorkByIdPort.getWorksByUserId(authenticatedUserId);
+    }
 }

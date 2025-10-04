@@ -3,6 +3,7 @@ package com.amool.hexagonal.integration;
 import com.amool.hexagonal.adapters.in.rest.controllers.MyWorksController;
 import com.amool.hexagonal.adapters.in.rest.dtos.WorkResponseDto;
 import com.amool.hexagonal.adapters.out.persistence.WorksPersistenceAdapter;
+import com.amool.hexagonal.security.JwtUserPrincipal;
 import com.amool.hexagonal.adapters.out.persistence.entity.WorkEntity;
 import com.amool.hexagonal.adapters.out.persistence.entity.UserEntity;
 import com.amool.hexagonal.adapters.out.persistence.entity.FormatEntity;
@@ -21,6 +22,11 @@ import org.springframework.boot.autoconfigure.EnableAutoConfiguration;
 import org.springframework.boot.autoconfigure.data.mongo.MongoRepositoriesAutoConfiguration;
 import org.springframework.test.context.TestPropertySource;
 import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.http.ResponseEntity;
+import org.springframework.http.HttpStatus;
+import org.springframework.security.test.context.support.WithMockUser;
+import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.core.context.SecurityContextHolder;
 import com.amool.hexagonal.application.port.out.LoadChapterContentPort;
 import com.amool.hexagonal.application.port.out.LoadChapterPort;
 import com.amool.hexagonal.application.port.out.SaveChapterContentPort;
@@ -129,15 +135,31 @@ class MyWorksIntegrationTest {
     }
 
     @Test
+    @WithMockUser(username = "testuser", roles = {"USER"})
     void testCompleteFlow_GetWorksByUserId_ReturnsWorks() {
+        // Configurar el contexto de seguridad
+        JwtUserPrincipal principal = new JwtUserPrincipal(
+            testUser.getId(), 
+            "test@example.com", 
+            "Test", 
+            "User", 
+            "testuser"
+        );
         
-        List<WorkResponseDto> result = myWorksController.getWorksByUserId(testUser.getId());
+        SecurityContextHolder.getContext().setAuthentication(
+            new UsernamePasswordAuthenticationToken(principal, null, List.of(() -> "ROLE_USER"))
+        );
+        
+        // Llamar al controlador con el usuario autenticado
+        ResponseEntity<List<WorkResponseDto>> response = myWorksController.getWorksByUserId(testUser.getId(), principal);
+        List<WorkResponseDto> result = response.getBody();
 
-        
+        // Verificaciones
+        assertNotNull(response);
+        assertEquals(HttpStatus.OK, response.getStatusCode());
         assertNotNull(result);
         assertEquals(2, result.size());
 
-        
         WorkResponseDto work1 = result.stream()
                 .filter(w -> w.getTitle().equals("Test Work 1"))
                 .findFirst()
@@ -163,15 +185,31 @@ class MyWorksIntegrationTest {
     }
 
     @Test
+    @WithMockUser(username = "nonexistent", roles = {"USER"})
     void testCompleteFlow_GetWorksByNonExistentUserId_ReturnsEmptyList() {
+        JwtUserPrincipal mockPrincipal = new JwtUserPrincipal(
+            99999L, 
+            "nonexistent@example.com", 
+            "Nonexistent", 
+            "User", 
+            "nonexistent"
+        );
         
-        List<WorkResponseDto> result = myWorksController.getWorksByUserId(99999L);
-
+        // Configurar el contexto de seguridad
+        SecurityContextHolder.getContext().setAuthentication(
+            new UsernamePasswordAuthenticationToken(mockPrincipal, null, List.of(() -> "ROLE_USER"))
+        );
         
+        // Llamar al controlador con el usuario autenticado
+        ResponseEntity<List<WorkResponseDto>> response = myWorksController.getWorksByUserId(99999L, mockPrincipal);
+        List<WorkResponseDto> result = response.getBody();
+        
+        assertNotNull(response);
+        assertEquals(HttpStatus.OK, response.getStatusCode());
         assertNotNull(result);
         assertTrue(result.isEmpty());
     }
-
+    
     @Test
     void testServiceLayer_GetWorksByUserId_CallsPersistenceAdapter() {
         
@@ -202,8 +240,9 @@ class MyWorksIntegrationTest {
     }
 
     @Test
+    @WithMockUser(username = "emptyuser", roles = {"USER"})
     void testCompleteFlow_UserWithNoWorks_ReturnsEmptyList() {
-        
+        // Crear un usuario sin obras
         UserEntity userWithNoWorks = new UserEntity();
         userWithNoWorks.setName("Empty");
         userWithNoWorks.setSurname("User");
@@ -213,8 +252,26 @@ class MyWorksIntegrationTest {
         entityManager.persist(userWithNoWorks);
         entityManager.flush();
         
-        List<WorkResponseDto> result = myWorksController.getWorksByUserId(userWithNoWorks.getId());
+        // Configurar el contexto de seguridad
+        JwtUserPrincipal principal = new JwtUserPrincipal(
+            userWithNoWorks.getId(),
+            "empty@example.com",
+            "Empty",
+            "User",
+            "emptyuser"
+        );
+        
+        SecurityContextHolder.getContext().setAuthentication(
+            new UsernamePasswordAuthenticationToken(principal, null, List.of(() -> "ROLE_USER"))
+        );
+        
+        // Llamar al controlador con el usuario autenticado
+        ResponseEntity<List<WorkResponseDto>> response = myWorksController.getWorksByUserId(userWithNoWorks.getId(), principal);
+        List<WorkResponseDto> result = response.getBody();
 
+        // Verificaciones
+        assertNotNull(response);
+        assertEquals(HttpStatus.OK, response.getStatusCode());
         assertNotNull(result);
         assertTrue(result.isEmpty());
     }

@@ -12,6 +12,8 @@ import com.amool.hexagonal.application.service.ObtainWorkByIdService;
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
 
+import java.util.Arrays;
+import java.util.List;
 import java.util.Optional;
 
 public class ObtainWorkByIdServiceTest {
@@ -52,5 +54,66 @@ public class ObtainWorkByIdServiceTest {
 
         assertTrue(result.isEmpty());
         verify(obtainWorkByIdPort, times(1)).execute(workId);
+    }
+    
+    @Test
+    public void testGetAuthenticatedUserWorks_ShouldReturnUserWorks_WhenUserIsAuthenticated() {
+        // Arrange
+        Long userId = 1L;
+        Work work1 = new Work();
+        work1.setId(1L);
+        work1.setTitle("Work 1");
+        
+        Work work2 = new Work();
+        work2.setId(2L);
+        work2.setTitle("Work 2");
+        
+        List<Work> expectedWorks = Arrays.asList(work1, work2);
+        when(obtainWorkByIdPort.getWorksByUserId(userId)).thenReturn(expectedWorks);
+        
+        // Act
+        List<Work> result = obtainWorkByIdService.getAuthenticatedUserWorks(userId);
+        
+        // Assert
+        assertNotNull(result);
+        assertEquals(2, result.size());
+        assertEquals("Work 1", result.get(0).getTitle());
+        assertEquals("Work 2", result.get(1).getTitle());
+        verify(obtainWorkByIdPort, times(1)).getWorksByUserId(userId);
+    }
+    
+    @Test
+    public void testGetAuthenticatedUserWorks_ShouldThrowSecurityException_WhenUserIdIsNull() {
+        // Arrange
+        Long userId = null;
+        
+        // Act & Assert
+        SecurityException exception = assertThrows(SecurityException.class, () -> {
+            obtainWorkByIdService.getAuthenticatedUserWorks(userId);
+        });
+        
+        assertEquals("Usuario no autenticado", exception.getMessage());
+        verify(obtainWorkByIdPort, never()).getWorksByUserId(any());
+    }
+    
+    @Test
+    public void testGetWorksByUserId_ShouldReturnWorksForUser() {
+        // Arrange
+        Long userId = 1L;
+        Work work1 = new Work();
+        work1.setId(1L);
+        work1.setTitle("Work 1");
+        
+        List<Work> expectedWorks = Arrays.asList(work1);
+        when(obtainWorkByIdPort.getWorksByUserId(userId)).thenReturn(expectedWorks);
+        
+        // Act
+        List<Work> result = obtainWorkByIdService.getWorksByUserId(userId);
+        
+        // Assert
+        assertNotNull(result);
+        assertEquals(1, result.size());
+        assertEquals("Work 1", result.get(0).getTitle());
+        verify(obtainWorkByIdPort, times(1)).getWorksByUserId(userId);
     }
 }
