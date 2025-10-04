@@ -9,11 +9,14 @@ public interface WorkService {
     Optional<Work> obtainWorkById(Long workId);
 
     List<Work> getWorksByUserId(Long userId);
+    
+    List<Work> getAuthenticatedUserWorks(Long authenticatedUserId);
 
     default Optional<Work> getById(Long workId) {
         return obtainWorkById(workId);
     }
 
+    @Deprecated
     default List<Work> getByCreatorId(Long userId) {
         return getWorksByUserId(userId);
     }
