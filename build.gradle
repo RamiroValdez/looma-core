@@ -34,6 +34,8 @@ dependencies {
     runtimeOnly 'io.jsonwebtoken:jjwt-jackson:0.11.5'
     implementation 'org.springframework.boot:spring-boot-starter-validation'
     implementation 'me.paulschwarz:spring-dotenv:4.0.0'
+    implementation 'org.springframework.ai:spring-ai-starter-model-openai'
+    implementation 'com.google.cloud:google-cloud-translate:2.74.0'
     developmentOnly 'org.springframework.boot:spring-boot-devtools'
     runtimeOnly 'com.h2database:h2'
     runtimeOnly 'org.postgresql:postgresql'
