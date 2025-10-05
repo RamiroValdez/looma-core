@@ -20,7 +20,9 @@ public class Work {
     private List<Chapter> chapters = new ArrayList<>();
     private List<Category> categories = new ArrayList<>();
     private List<Tag> tags = new ArrayList<>();
-    
+
+    public Work() {}
+
     public Long getId() { return id; }
     public void setId(Long id) { this.id = id; }
     
