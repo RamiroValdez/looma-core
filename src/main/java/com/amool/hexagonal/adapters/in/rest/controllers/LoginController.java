@@ -33,7 +33,16 @@ public class LoginController {
                     claims.put("surname", user.getSurname());
                     claims.put("username", user.getUsername());
                     String token = jwtService.generateToken(claims);
-                    return ResponseEntity.ok(new AuthResponse(token));
+                    return ResponseEntity.ok(
+                            new AuthResponse(
+                                    token,
+                                    user.getId(),
+                                    user.getEmail(),
+                                    user.getName(),
+                                    user.getSurname(),
+                                    user.getUsername()
+                            )
+                    );
                 })
                 .orElseGet(() -> ResponseEntity.status(401).build());
     }
