@@ -19,12 +19,12 @@ public class CategoryController {
         this.categoryService = categoryService;
     }
 
-    @GetMapping("/{obtain-all}")
+    @GetMapping("/obtain-all")
     public ResponseEntity<List<CategoryDto>> obtainAllCategories() {
         return categoryService.obtainAllCategories()
                 .map(CategoryMapper::toDtoList)
                 .map(ResponseEntity::ok)
                 .orElseGet(() -> ResponseEntity.notFound().build());
     }
-    
+
 }

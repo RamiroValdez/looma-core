@@ -57,8 +57,13 @@ public class CategoryPersistenceAdapterTest {
         // Assert
         assertNotNull(result);
         assertEquals(2, result.size());
-        assertEquals("Fiction", result.get(0).getName());
-        assertEquals("Science", result.get(1).getName());
+
+        List<String> categoryNames = result.stream()
+                .map(Category::getName)
+                .toList();
+        assertTrue(categoryNames.contains("Fiction"));
+        assertTrue(categoryNames.contains("Science"));
+
         verify(entityManager, times(1)).createQuery(anyString(), eq(CategoryEntity.class));
         verify(typedQuery, times(1)).getResultList();
     }
@@ -80,7 +85,7 @@ public class CategoryPersistenceAdapterTest {
     }
 
     @Test
-    public void findAllCategories_ShouldReturnCategoriesOrderedByName() {
+    public void findAllCategories_ShouldReturnAllCategories_WhenCategoriesExist() {
         // Arrange
         CategoryEntity entity1 = new CategoryEntity();
         entity1.setId(1L);
@@ -105,11 +110,16 @@ public class CategoryPersistenceAdapterTest {
         // Assert
         assertNotNull(result);
         assertEquals(3, result.size());
-        assertEquals("Adventure", result.get(0).getName());
-        assertEquals("Biography", result.get(1).getName());
-        assertEquals("Comedy", result.get(2).getName());
+
+        List<String> categoryNames = result.stream()
+                .map(Category::getName)
+                .toList();
+        assertTrue(categoryNames.contains("Adventure"));
+        assertTrue(categoryNames.contains("Biography"));
+        assertTrue(categoryNames.contains("Comedy"));
+
         verify(entityManager, times(1)).createQuery(
-            "SELECT c FROM CategoryEntity c ORDER BY c.name", 
+            "SELECT c FROM CategoryEntity c",
             CategoryEntity.class
         );
     }

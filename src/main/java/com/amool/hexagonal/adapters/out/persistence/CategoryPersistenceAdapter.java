@@ -22,7 +22,7 @@ public class CategoryPersistenceAdapter implements CategoryPort {
     @Transactional(readOnly = true)
     public List<Category> findAllCategories() {
         List<CategoryEntity> categoryEntities = entityManager
-                .createQuery("SELECT c FROM CategoryEntity c ORDER BY c.name", CategoryEntity.class)
+                .createQuery("SELECT c FROM CategoryEntity c", CategoryEntity.class)
                 .getResultList();
         
         return categoryEntities.stream()
