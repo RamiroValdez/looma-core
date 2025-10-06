@@ -33,6 +33,15 @@ public class ChapterEntity {
     @JoinColumn(name = "language_id", nullable = false)
     private LanguageEntity languageEntity;
 
+    @Column(name = "publication_status", nullable = false)
+    private String publicationStatus; // "Borrador", "Programado", "Publicado"
+
+    @Column(name = "scheduled_publication_date")
+    private LocalDateTime scheduledPublicationDate;
+
+    @Column(name = "published_at")
+    private LocalDateTime publishedAt;
+
     @OneToMany(mappedBy = "chapterEntity", cascade = CascadeType.ALL)
     private Set<VersionEntity> versions = new HashSet<>();
 
@@ -59,6 +68,15 @@ public class ChapterEntity {
 
     public LanguageEntity getLanguageEntity() { return languageEntity; }
     public void setLanguageEntity(LanguageEntity languageEntity) { this.languageEntity = languageEntity; }
+
+    public String getPublicationStatus() { return publicationStatus; }
+    public void setPublicationStatus(String publicationStatus) { this.publicationStatus = publicationStatus; }
+
+    public LocalDateTime getScheduledPublicationDate() { return scheduledPublicationDate; }
+    public void setScheduledPublicationDate(LocalDateTime scheduledPublicationDate) { this.scheduledPublicationDate = scheduledPublicationDate; }
+
+    public LocalDateTime getPublishedAt() { return publishedAt; }
+    public void setPublishedAt(LocalDateTime publishedAt) { this.publishedAt = publishedAt; }
 
     public Set<UserEntity> getUsersWhoAcquired() { return usersWhoAcquired; }
     public void setUsersWhoAcquired(Set<UserEntity> usersWhoAcquired) { this.usersWhoAcquired = usersWhoAcquired; }

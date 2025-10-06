@@ -8,6 +8,9 @@ public class ChapterDto {
     private Double price;
     private Long likes;
     private LocalDateTime lastModified;
+    private String publicationStatus;
+    private LocalDateTime scheduledPublicationDate;
+    private LocalDateTime publishedAt;
 
     public Long getId() { return id; }
     public void setId(Long id) { this.id = id; }
@@ -23,4 +26,13 @@ public class ChapterDto {
 
     public LocalDateTime getLastModified() { return lastModified; }
     public void setLastModified(LocalDateTime lastModified) { this.lastModified = lastModified; }
+
+    public String getPublicationStatus() { return publicationStatus; }
+    public void setPublicationStatus(String publicationStatus) { this.publicationStatus = publicationStatus; }
+
+    public LocalDateTime getScheduledPublicationDate() { return scheduledPublicationDate; }
+    public void setScheduledPublicationDate(LocalDateTime scheduledPublicationDate) { this.scheduledPublicationDate = scheduledPublicationDate; }
+
+    public LocalDateTime getPublishedAt() { return publishedAt; }
+    public void setPublishedAt(LocalDateTime publishedAt) { this.publishedAt = publishedAt; }
 }

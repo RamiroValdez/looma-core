@@ -10,6 +10,9 @@ public class Chapter {
     private Long likes;
     private LocalDateTime lastModified;
     private Long bookId;
+    private String publicationStatus;
+    private LocalDateTime scheduledPublicationDate;
+    private LocalDateTime publishedAt;
     
     public Long getId() { return id; }
     public void setId(Long id) { this.id = id; }
@@ -31,4 +34,13 @@ public class Chapter {
     
     public Long getBookId() { return bookId; }
     public void setBookId(Long bookId) { this.bookId = bookId; }
+
+    public String getPublicationStatus() { return publicationStatus; }
+    public void setPublicationStatus(String publicationStatus) { this.publicationStatus = publicationStatus; }
+
+    public LocalDateTime getScheduledPublicationDate() { return scheduledPublicationDate; }
+    public void setScheduledPublicationDate(LocalDateTime scheduledPublicationDate) { this.scheduledPublicationDate = scheduledPublicationDate; }
+
+    public LocalDateTime getPublishedAt() { return publishedAt; }
+    public void setPublishedAt(LocalDateTime publishedAt) { this.publishedAt = publishedAt; }
 }
