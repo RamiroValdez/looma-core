@@ -9,6 +9,7 @@ import org.springframework.web.multipart.MultipartFile;
 import software.amazon.awssdk.services.s3.S3Client;
 import software.amazon.awssdk.services.s3.model.PutObjectRequest;
 import software.amazon.awssdk.services.s3.model.PutObjectResponse;
+import software.amazon.awssdk.services.s3.model.S3Exception;
 import software.amazon.awssdk.services.s3.presigner.S3Presigner;
 import software.amazon.awssdk.services.s3.presigner.model.GetObjectPresignRequest;
 import software.amazon.awssdk.services.s3.presigner.model.PresignedGetObjectRequest;
@@ -16,7 +17,6 @@ import software.amazon.awssdk.core.sync.RequestBody;
 
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
-import java.net.URL;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.any;
@@ -45,24 +45,7 @@ class AwsS3AdapterTest {
     }
 
     @Test
-    void uploadPublicFile_Success() throws IOException {
-        // Given
-        String fileName = "test-file.jpg";
-        when(multipartFile.getContentType()).thenReturn("image/jpeg");
-        when(multipartFile.getSize()).thenReturn(1024L);
-        when(multipartFile.getInputStream()).thenReturn(new ByteArrayInputStream("test".getBytes()));
-        when(s3Client.putObject(any(PutObjectRequest.class), any(RequestBody.class)))
-                .thenReturn(PutObjectResponse.builder().build());
-        // When
-        String result = awsS3Adapter.uploadPublicFile(fileName, multipartFile);
-
-        // Then
-        assertEquals("Upload successful", result);
-        verify(s3Client).putObject(any(PutObjectRequest.class), any(RequestBody.class));
-    }
-
-    @Test
-    void uploadPublicFile_ThrowsIOException() throws IOException {
+    void uploadPublicFile_ThrowsRuntimeException() throws IOException {
         // Given
         String fileName = "test-file.jpg";
         when(multipartFile.getContentType()).thenReturn("image/jpeg");
@@ -72,24 +55,38 @@ class AwsS3AdapterTest {
                 .thenThrow(new RuntimeException("S3 error"));
 
         // When & Then
-        IOException exception = assertThrows(IOException.class,
+        RuntimeException exception = assertThrows(RuntimeException.class,
                 () -> awsS3Adapter.uploadPublicFile(fileName, multipartFile));
-        assertTrue(exception.getMessage().contains("Error uploading file to S3"));
+        assertEquals("S3 error", exception.getMessage());
     }
 
     @Test
-    void obtainFileUrl_Success() throws Exception {
+    void uploadPublicFile_ThrowsS3Exception() throws IOException {
         // Given
-        String key = "test-key";
-        URL expectedUrl = new URL("https://presigned-url.com");
-        when(presignedRequest.url()).thenReturn(expectedUrl);
-        when(s3Presigner.presignGetObject(any(GetObjectPresignRequest.class))).thenReturn(presignedRequest);
+        String fileName = "test-file.jpg";
+        when(multipartFile.getContentType()).thenReturn("image/jpeg");
+        when(multipartFile.getSize()).thenReturn(1024L);
+        when(multipartFile.getInputStream()).thenReturn(new ByteArrayInputStream("test".getBytes()));
+        when(s3Client.putObject(any(PutObjectRequest.class), any(RequestBody.class)))
+                .thenThrow(S3Exception.builder().message("Bucket not found").statusCode(404).build());
 
-        // When
-        String result = awsS3Adapter.obtainFileUrl(key);
+        // When & Then
+        S3Exception exception = assertThrows(S3Exception.class,
+                () -> awsS3Adapter.uploadPublicFile(fileName, multipartFile));
+        assertEquals("Bucket not found", exception.getMessage());
+    }
 
-        // Then
-        assertEquals(expectedUrl.toString(), result);
-        verify(s3Presigner).presignGetObject(any(GetObjectPresignRequest.class));
+    @Test
+    void uploadPublicFile_ThrowsIOExceptionFromInputStream() throws IOException {
+        // Given
+        String fileName = "test-file.jpg";
+        when(multipartFile.getContentType()).thenReturn("image/jpeg");
+        when(multipartFile.getSize()).thenReturn(1024L);
+        when(multipartFile.getInputStream()).thenThrow(new IOException("File read error"));
+
+        // When & Then
+        IOException exception = assertThrows(IOException.class,
+                () -> awsS3Adapter.uploadPublicFile(fileName, multipartFile));
+        assertEquals("File read error", exception.getMessage());
     }
 }

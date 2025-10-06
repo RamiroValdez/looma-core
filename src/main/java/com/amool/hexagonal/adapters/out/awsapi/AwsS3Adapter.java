@@ -21,6 +21,8 @@ public class AwsS3Adapter implements AwsS3Port {
 
     private final String bucketName = System.getenv("AWS_S3_BUCKET");
 
+    private final String region = System.getenv("AWS_REGION");
+
     AwsS3Adapter(S3Client s3Client, S3Presigner s3Presigner) {
         this.s3Presigner = s3Presigner;
         this.s3Client = s3Client;
@@ -28,7 +30,6 @@ public class AwsS3Adapter implements AwsS3Port {
 
     @Override
     public String uploadPublicFile(String fileName, MultipartFile file) throws IOException {
-        try {
              s3Client.putObject(
                     PutObjectRequest.builder()
                             .bucket(bucketName)
@@ -42,15 +43,10 @@ public class AwsS3Adapter implements AwsS3Port {
             );
 
             return "Upload successful";
-
-        } catch (Exception e) {
-            throw new IOException("Error uploading file to S3: " + e.getMessage(), e);
-        }
     }
 
     @Override
     public String uploadPrivateFile(String fileName, MultipartFile file) throws IOException {
-        try {
             s3Client.putObject(
                     PutObjectRequest.builder()
                             .bucket(bucketName)
@@ -63,24 +59,27 @@ public class AwsS3Adapter implements AwsS3Port {
             );
 
             return "Upload successful";
-
-        } catch (Exception e) {
-            throw new IOException("Error uploading file to S3: " + e.getMessage(), e);
-        }
     }
+
+   @Override
+   public String obtainFilePresignedUrl(String key) {
+
+           GetObjectRequest getObjectRequest = GetObjectRequest.builder()
+                   .bucket(bucketName)
+                   .key(key)
+                   .build();
+
+           GetObjectPresignRequest presignRequest = GetObjectPresignRequest.builder()
+                   .signatureDuration(Duration.ofMinutes(15))
+                   .getObjectRequest(getObjectRequest)
+                   .build();
+
+           return s3Presigner.presignGetObject(presignRequest).url().toString();
+   }
 
     @Override
-    public String obtainFileUrl(String key) {
-        GetObjectRequest getObjectRequest = GetObjectRequest.builder()
-                .bucket(bucketName)
-                .key(key)
-                .build();
-
-        GetObjectPresignRequest presignRequest = GetObjectPresignRequest.builder()
-                .signatureDuration(Duration.ofMinutes(15))
-                .getObjectRequest(getObjectRequest)
-                .build();
-
-        return s3Presigner.presignGetObject(presignRequest).url().toString();
+    public String obtainPublicUrl(String fileName) {
+        return String.format("https://%s.s3.%s.amazonaws.com/%s", bucketName, region, fileName);
     }
+
 }

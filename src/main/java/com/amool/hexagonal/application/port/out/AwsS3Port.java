@@ -10,6 +10,8 @@ public interface AwsS3Port {
 
     String uploadPrivateFile(String fileName, MultipartFile file) throws IOException;
 
-    String obtainFileUrl(String key);
+    String obtainFilePresignedUrl(String key) throws RuntimeException;
+
+    String obtainPublicUrl(String fileName);
 
 }
