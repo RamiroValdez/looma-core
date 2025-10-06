@@ -14,15 +14,12 @@ public class CategoryMapperTest {
 
     @Test
     public void toDto_ShouldMapCategoryToCategoryDto() {
-        // Arrange
         Category category = new Category();
         category.setId(1L);
         category.setName("Fiction");
 
-        // Act
         CategoryDto result = CategoryMapper.toDto(category);
 
-        // Assert
         assertNotNull(result);
         assertEquals(1L, result.getId());
         assertEquals("Fiction", result.getName());
@@ -30,16 +27,13 @@ public class CategoryMapperTest {
 
     @Test
     public void toDto_ShouldReturnNull_WhenCategoryIsNull() {
-        // Act
         CategoryDto result = CategoryMapper.toDto(null);
 
-        // Assert
         assertNull(result);
     }
 
     @Test
     public void toDtoList_ShouldMapCategoryListToCategoryDtoList() {
-        // Arrange
         Category category1 = new Category();
         category1.setId(1L);
         category1.setName("Fiction");
@@ -50,10 +44,8 @@ public class CategoryMapperTest {
 
         List<Category> categories = Arrays.asList(category1, category2);
 
-        // Act
         List<CategoryDto> result = CategoryMapper.toDtoList(categories);
 
-        // Assert
         assertNotNull(result);
         assertEquals(2, result.size());
         assertEquals(1L, result.get(0).getId());
@@ -64,39 +56,31 @@ public class CategoryMapperTest {
 
     @Test
     public void toDtoList_ShouldReturnEmptyList_WhenCategoryListIsEmpty() {
-        // Arrange
         List<Category> categories = Collections.emptyList();
 
-        // Act
         List<CategoryDto> result = CategoryMapper.toDtoList(categories);
 
-        // Assert
         assertNotNull(result);
         assertTrue(result.isEmpty());
     }
 
     @Test
     public void toDtoList_ShouldReturnNull_WhenCategoryListIsNull() {
-        // Act
         List<CategoryDto> result = CategoryMapper.toDtoList(null);
 
-        // Assert
         assertNull(result);
     }
 
     @Test
     public void toDtoList_ShouldHandleNullElementsInList() {
-        // Arrange
         Category category1 = new Category();
         category1.setId(1L);
         category1.setName("Fiction");
 
         List<Category> categories = Arrays.asList(category1, null);
 
-        // Act
         List<CategoryDto> result = CategoryMapper.toDtoList(categories);
 
-        // Assert
         assertNotNull(result);
         assertEquals(2, result.size());
         assertNotNull(result.get(0));

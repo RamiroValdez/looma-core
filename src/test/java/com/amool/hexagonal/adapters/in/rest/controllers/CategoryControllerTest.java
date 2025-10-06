@@ -31,7 +31,6 @@ public class CategoryControllerTest {
 
     @Test
     public void obtainAllCategories_ShouldReturnCategories_WhenCategoriesExist() throws Exception {
-        // Arrange
         Category category1 = new Category();
         category1.setId(1L);
         category1.setName("Fiction");
@@ -43,7 +42,6 @@ public class CategoryControllerTest {
         List<Category> categories = Arrays.asList(category1, category2);
         when(categoryService.obtainAllCategories()).thenReturn(Optional.of(categories));
 
-        // Act & Assert
         mockMvc.perform(get("/api/category/{obtain-all}", "obtain-all")
                 .contentType(MediaType.APPLICATION_JSON))
             .andExpect(status().isOk())
@@ -57,10 +55,8 @@ public class CategoryControllerTest {
 
     @Test
     public void obtainAllCategories_ShouldReturnNotFound_WhenNoCategoriesExist() throws Exception {
-        // Arrange
         when(categoryService.obtainAllCategories()).thenReturn(Optional.empty());
 
-        // Act & Assert
         mockMvc.perform(get("/api/category/{obtain-all}", "obtain-all")
                 .contentType(MediaType.APPLICATION_JSON))
             .andExpect(status().isNotFound());
@@ -68,10 +64,8 @@ public class CategoryControllerTest {
 
     @Test
     public void obtainAllCategories_ShouldReturnEmptyArray_WhenServiceReturnsEmptyList() throws Exception {
-        // Arrange
         when(categoryService.obtainAllCategories()).thenReturn(Optional.of(Collections.emptyList()));
 
-        // Act & Assert
         mockMvc.perform(get("/api/category/{obtain-all}", "obtain-all")
                 .contentType(MediaType.APPLICATION_JSON))
             .andExpect(status().isOk())
@@ -81,7 +75,6 @@ public class CategoryControllerTest {
 
     @Test
     public void obtainAllCategories_ShouldReturnSingleCategory_WhenOnlyOneCategoryExists() throws Exception {
-        // Arrange
         Category category = new Category();
         category.setId(1L);
         category.setName("Fantasy");
@@ -89,7 +82,6 @@ public class CategoryControllerTest {
         List<Category> categories = Collections.singletonList(category);
         when(categoryService.obtainAllCategories()).thenReturn(Optional.of(categories));
 
-        // Act & Assert
         mockMvc.perform(get("/api/category/{obtain-all}", "obtain-all")
                 .contentType(MediaType.APPLICATION_JSON))
             .andExpect(status().isOk())

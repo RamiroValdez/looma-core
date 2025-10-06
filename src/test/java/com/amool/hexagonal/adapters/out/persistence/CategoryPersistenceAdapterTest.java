@@ -37,7 +37,6 @@ public class CategoryPersistenceAdapterTest {
 
     @Test
     public void findAllCategories_ShouldReturnCategories_WhenCategoriesExist() {
-        // Arrange
         CategoryEntity entity1 = new CategoryEntity();
         entity1.setId(1L);
         entity1.setName("Fiction");
@@ -51,10 +50,8 @@ public class CategoryPersistenceAdapterTest {
         when(entityManager.createQuery(anyString(), eq(CategoryEntity.class))).thenReturn(typedQuery);
         when(typedQuery.getResultList()).thenReturn(entities);
 
-        // Act
         List<Category> result = categoryPersistenceAdapter.findAllCategories();
 
-        // Assert
         assertNotNull(result);
         assertEquals(2, result.size());
 
@@ -70,14 +67,11 @@ public class CategoryPersistenceAdapterTest {
 
     @Test
     public void findAllCategories_ShouldReturnEmptyList_WhenNoCategoriesExist() {
-        // Arrange
         when(entityManager.createQuery(anyString(), eq(CategoryEntity.class))).thenReturn(typedQuery);
         when(typedQuery.getResultList()).thenReturn(Collections.emptyList());
 
-        // Act
         List<Category> result = categoryPersistenceAdapter.findAllCategories();
 
-        // Assert
         assertNotNull(result);
         assertTrue(result.isEmpty());
         verify(entityManager, times(1)).createQuery(anyString(), eq(CategoryEntity.class));
@@ -86,7 +80,6 @@ public class CategoryPersistenceAdapterTest {
 
     @Test
     public void findAllCategories_ShouldReturnAllCategories_WhenCategoriesExist() {
-        // Arrange
         CategoryEntity entity1 = new CategoryEntity();
         entity1.setId(1L);
         entity1.setName("Adventure");
@@ -104,10 +97,8 @@ public class CategoryPersistenceAdapterTest {
         when(entityManager.createQuery(anyString(), eq(CategoryEntity.class))).thenReturn(typedQuery);
         when(typedQuery.getResultList()).thenReturn(entities);
 
-        // Act
         List<Category> result = categoryPersistenceAdapter.findAllCategories();
 
-        // Assert
         assertNotNull(result);
         assertEquals(3, result.size());
 
@@ -126,7 +117,6 @@ public class CategoryPersistenceAdapterTest {
 
     @Test
     public void findAllCategories_ShouldMapEntityToDomainCorrectly() {
-        // Arrange
         CategoryEntity entity = new CategoryEntity();
         entity.setId(42L);
         entity.setName("Test Category");
@@ -136,10 +126,8 @@ public class CategoryPersistenceAdapterTest {
         when(entityManager.createQuery(anyString(), eq(CategoryEntity.class))).thenReturn(typedQuery);
         when(typedQuery.getResultList()).thenReturn(entities);
 
-        // Act
         List<Category> result = categoryPersistenceAdapter.findAllCategories();
 
-        // Assert
         assertNotNull(result);
         assertEquals(1, result.size());
         Category category = result.get(0);

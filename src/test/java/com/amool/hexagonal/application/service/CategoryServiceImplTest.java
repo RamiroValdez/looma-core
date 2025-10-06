@@ -31,7 +31,6 @@ public class CategoryServiceImplTest {
 
     @Test
     public void obtainAllCategories_ShouldReturnCategories_WhenCategoriesExist() {
-        // Arrange
         Category category1 = new Category();
         category1.setId(1L);
         category1.setName("Fiction");
@@ -43,10 +42,8 @@ public class CategoryServiceImplTest {
         List<Category> expectedCategories = Arrays.asList(category1, category2);
         when(categoryPort.findAllCategories()).thenReturn(expectedCategories);
 
-        // Act
         Optional<List<Category>> result = categoryService.obtainAllCategories();
 
-        // Assert
         assertTrue(result.isPresent());
         assertEquals(2, result.get().size());
         assertEquals("Fiction", result.get().get(0).getName());
@@ -56,20 +53,16 @@ public class CategoryServiceImplTest {
 
     @Test
     public void obtainAllCategories_ShouldReturnEmpty_WhenNoCategoriesExist() {
-        // Arrange
         when(categoryPort.findAllCategories()).thenReturn(Collections.emptyList());
 
-        // Act
         Optional<List<Category>> result = categoryService.obtainAllCategories();
 
-        // Assert
         assertTrue(result.isEmpty());
         verify(categoryPort, times(1)).findAllCategories();
     }
 
     @Test
     public void obtainAllCategories_ShouldReturnSingleCategory_WhenOnlyOneCategoryExists() {
-        // Arrange
         Category category = new Category();
         category.setId(1L);
         category.setName("Fantasy");
@@ -77,10 +70,8 @@ public class CategoryServiceImplTest {
         List<Category> expectedCategories = Collections.singletonList(category);
         when(categoryPort.findAllCategories()).thenReturn(expectedCategories);
 
-        // Act
         Optional<List<Category>> result = categoryService.obtainAllCategories();
 
-        // Assert
         assertTrue(result.isPresent());
         assertEquals(1, result.get().size());
         assertEquals("Fantasy", result.get().get(0).getName());
