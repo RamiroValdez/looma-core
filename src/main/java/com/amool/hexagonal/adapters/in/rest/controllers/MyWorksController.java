@@ -6,6 +6,7 @@ import com.amool.hexagonal.application.port.in.WorkService;
 import com.amool.hexagonal.domain.model.Work;
 import com.amool.hexagonal.security.JwtUserPrincipal;
 
+
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -27,10 +28,12 @@ public class MyWorksController {
     public MyWorksController(WorkService workService) {
         this.workService = workService;
     }
-
-    @GetMapping("/me")
-    @PreAuthorize("isAuthenticated()")
-    public ResponseEntity<List<WorkResponseDto>> getMyWorks(@AuthenticationPrincipal JwtUserPrincipal principal) {
+    
+    @GetMapping("/{userId}")
+    @PreAuthorize("isAuthenticated() and #userId == principal.userId")
+    public ResponseEntity<List<WorkResponseDto>> getWorksByUserId(
+            @PathVariable Long userId, 
+            @AuthenticationPrincipal JwtUserPrincipal principal) {
         try {
             List<Work> works = workService.getAuthenticatedUserWorks(principal.getUserId());
             List<WorkResponseDto> response = works.stream()
@@ -40,19 +43,6 @@ public class MyWorksController {
         } catch (Exception e) {
             throw new UnauthorizedAccessException("No se pudo obtener las obras del usuario autenticado: " + e.getMessage(), e);
         }
-    }
-    
-    @GetMapping("/{userId}")
-    @PreAuthorize("isAuthenticated() and #userId == principal.userId")
-    public ResponseEntity<List<WorkResponseDto>> getWorksByUserId(
-            @PathVariable Long userId, 
-            @AuthenticationPrincipal JwtUserPrincipal principal) {
-        
-        if (!userId.equals(principal.getUserId())) {
-            throw new UnauthorizedAccessException("No tienes permiso para acceder a los recursos de otro usuario");
-        }
-        
-        return getMyWorks(principal);
     }
 
 }
