@@ -29,9 +29,24 @@ public class ChapterEntity {
     @Column(name = "likes", nullable = false)
     private Long likes;
 
+    @Column(name = "allow_ai_translation", nullable = false)
+    private Boolean allowAiTranslation;
+
     @ManyToOne
     @JoinColumn(name = "language_id", nullable = false)
     private LanguageEntity languageEntity;
+
+    @Column(name = "publication_status", nullable = false)
+    private String publicationStatus; // "Borrador", "Programado", "Publicado"
+
+    @Column(name = "scheduled_publication_date")
+    private LocalDateTime scheduledPublicationDate;
+
+    @Column(name = "published_at")
+    private LocalDateTime publishedAt;
+
+    @OneToMany(mappedBy = "chapterEntity", cascade = CascadeType.ALL)
+    private Set<VersionEntity> versions = new HashSet<>();
 
     @ManyToMany(mappedBy = "acquiredChapterEntities")
     private Set<UserEntity> usersWhoAcquired = new HashSet<>();
@@ -54,9 +69,24 @@ public class ChapterEntity {
     public Long getLikes() { return likes; }
     public void setLikes(Long likes) { this.likes = likes; }
 
+    public Boolean getAllowAiTranslation() { return allowAiTranslation; }
+    public void setAllowAiTranslation(Boolean allowAiTranslation) { this.allowAiTranslation = allowAiTranslation; }
+
     public LanguageEntity getLanguageEntity() { return languageEntity; }
     public void setLanguageEntity(LanguageEntity languageEntity) { this.languageEntity = languageEntity; }
 
+    public String getPublicationStatus() { return publicationStatus; }
+    public void setPublicationStatus(String publicationStatus) { this.publicationStatus = publicationStatus; }
+
+    public LocalDateTime getScheduledPublicationDate() { return scheduledPublicationDate; }
+    public void setScheduledPublicationDate(LocalDateTime scheduledPublicationDate) { this.scheduledPublicationDate = scheduledPublicationDate; }
+
+    public LocalDateTime getPublishedAt() { return publishedAt; }
+    public void setPublishedAt(LocalDateTime publishedAt) { this.publishedAt = publishedAt; }
+
     public Set<UserEntity> getUsersWhoAcquired() { return usersWhoAcquired; }
     public void setUsersWhoAcquired(Set<UserEntity> usersWhoAcquired) { this.usersWhoAcquired = usersWhoAcquired; }
+
+    public Set<VersionEntity> getVersions() { return versions; }
+    public void setVersions(Set<VersionEntity> versions) { this.versions = versions; }
 }
