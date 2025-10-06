@@ -33,6 +33,9 @@ public class ChapterEntity {
     @JoinColumn(name = "language_id", nullable = false)
     private LanguageEntity languageEntity;
 
+    @OneToMany(mappedBy = "chapterEntity", cascade = CascadeType.ALL)
+    private Set<VersionEntity> versions = new HashSet<>();
+
     @ManyToMany(mappedBy = "acquiredChapterEntities")
     private Set<UserEntity> usersWhoAcquired = new HashSet<>();
 
@@ -59,4 +62,7 @@ public class ChapterEntity {
 
     public Set<UserEntity> getUsersWhoAcquired() { return usersWhoAcquired; }
     public void setUsersWhoAcquired(Set<UserEntity> usersWhoAcquired) { this.usersWhoAcquired = usersWhoAcquired; }
+
+    public Set<VersionEntity> getVersions() { return versions; }
+    public void setVersions(Set<VersionEntity> versions) { this.versions = versions; }
 }
