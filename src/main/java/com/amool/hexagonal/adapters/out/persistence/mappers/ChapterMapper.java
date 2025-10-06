@@ -23,6 +23,7 @@ public class ChapterMapper {
             chapter.setBookId(entity.getWorkEntity().getId());
         }
 
+        chapter.setAllowAiTranslation(entity.getAllowAiTranslation());
         chapter.setPublicationStatus(entity.getPublicationStatus());
         chapter.setScheduledPublicationDate(entity.getScheduledPublicationDate());
         chapter.setPublishedAt(entity.getPublishedAt());

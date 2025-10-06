@@ -8,6 +8,7 @@ public class ChapterDto {
     private Double price;
     private Long likes;
     private LocalDateTime lastModified;
+    private Boolean allowAiTranslation;
     private String publicationStatus;
     private LocalDateTime scheduledPublicationDate;
     private LocalDateTime publishedAt;
@@ -26,6 +27,9 @@ public class ChapterDto {
 
     public LocalDateTime getLastModified() { return lastModified; }
     public void setLastModified(LocalDateTime lastModified) { this.lastModified = lastModified; }
+
+    public Boolean getAllowAiTranslation() { return allowAiTranslation; }
+    public void setAllowAiTranslation(Boolean allowAiTranslation) { this.allowAiTranslation = allowAiTranslation; }
 
     public String getPublicationStatus() { return publicationStatus; }
     public void setPublicationStatus(String publicationStatus) { this.publicationStatus = publicationStatus; }

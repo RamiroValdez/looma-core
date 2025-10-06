@@ -29,6 +29,9 @@ public class ChapterEntity {
     @Column(name = "likes", nullable = false)
     private Long likes;
 
+    @Column(name = "allow_ai_translation", nullable = false)
+    private Boolean allowAiTranslation;
+
     @ManyToOne
     @JoinColumn(name = "language_id", nullable = false)
     private LanguageEntity languageEntity;
@@ -65,6 +68,9 @@ public class ChapterEntity {
 
     public Long getLikes() { return likes; }
     public void setLikes(Long likes) { this.likes = likes; }
+
+    public Boolean getAllowAiTranslation() { return allowAiTranslation; }
+    public void setAllowAiTranslation(Boolean allowAiTranslation) { this.allowAiTranslation = allowAiTranslation; }
 
     public LanguageEntity getLanguageEntity() { return languageEntity; }
     public void setLanguageEntity(LanguageEntity languageEntity) { this.languageEntity = languageEntity; }
