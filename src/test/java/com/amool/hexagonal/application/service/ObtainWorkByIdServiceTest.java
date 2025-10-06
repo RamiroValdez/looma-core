@@ -1,4 +1,4 @@
-package com.amool.hexagonal.application.port.service;
+package com.amool.hexagonal.application.service;
 
 import com.amool.hexagonal.application.port.out.ObtainWorkByIdPort;
 import com.amool.hexagonal.domain.model.Work;
@@ -7,7 +7,6 @@ import org.junit.jupiter.api.Test;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
-import com.amool.hexagonal.application.service.ObtainWorkByIdService;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
