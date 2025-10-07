@@ -1,13 +1,14 @@
 package com.amool.hexagonal.adapters.in.rest.controllers;
 
 import com.amool.hexagonal.application.port.in.WorkService;
+import com.amool.hexagonal.application.port.in.ChapterService;
 import com.amool.hexagonal.application.port.out.LoadWorkOwnershipPort;
 import com.amool.hexagonal.domain.model.*;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
-import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.test.web.servlet.MockMvc;
@@ -27,10 +28,13 @@ public class ManageWorkControllerIntegrationTest {
     @Autowired
     private MockMvc mockMvc;
 
-    @MockBean
+    @MockitoBean
     private WorkService workService;
 
-    @MockBean
+    @MockitoBean
+    private ChapterService chapterService;
+
+    @MockitoBean
     private LoadWorkOwnershipPort loadWorkOwnershipPort;
 
     private void setAuthenticatedUser(Long userId) {
@@ -44,7 +48,7 @@ public class ManageWorkControllerIntegrationTest {
         Long workId = 1L;
         setAuthenticatedUser(1L);
         when(loadWorkOwnershipPort.isOwner(1L, 1L)).thenReturn(true);
-        
+
         User creator = new User();
         creator.setId(1L);
         creator.setName("John");
@@ -76,7 +80,6 @@ public class ManageWorkControllerIntegrationTest {
 
         when(workService.obtainWorkById(workId)).thenReturn(Optional.of(work));
 
-    
         mockMvc.perform(get("/api/manage-work/" + workId))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.id").value(workId))
@@ -97,7 +100,6 @@ public class ManageWorkControllerIntegrationTest {
         when(loadWorkOwnershipPort.isOwner(999L, 999L)).thenReturn(true);
         when(workService.obtainWorkById(workId)).thenReturn(Optional.empty());
 
-   
         mockMvc.perform(get("/api/manage-work/" + workId))
                 .andExpect(status().isNotFound());
     }

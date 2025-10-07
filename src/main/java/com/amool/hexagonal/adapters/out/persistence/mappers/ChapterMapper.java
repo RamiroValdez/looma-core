@@ -20,7 +20,7 @@ public class ChapterMapper {
         chapter.setLastModified(entity.getLastModified());
 
         if (entity.getWorkEntity() != null) {
-            chapter.setBookId(entity.getWorkEntity().getId());
+            chapter.setWorkId(entity.getWorkEntity().getId());
         }
 
         chapter.setAllowAiTranslation(entity.getAllowAiTranslation());

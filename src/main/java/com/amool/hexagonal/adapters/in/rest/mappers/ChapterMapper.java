@@ -16,7 +16,6 @@ public class ChapterMapper {
         return new ChapterWithContentDto(
             chapterWithContent.chapter().getId(),
             chapterWithContent.chapter().getTitle(),
-            chapterWithContent.chapter().getDescription(),
             chapterWithContent.chapter().getPrice(),
             content,
             availableLanguages

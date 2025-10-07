@@ -50,7 +50,6 @@ public class ChapterControllerIntegrationTest {
         Chapter chapter = new Chapter();
         chapter.setId(1L);
         chapter.setTitle("Capítulo 1");
-        chapter.setDescription("Descripción del capítulo");
         chapter.setPrice(9.99);
         
         ChapterContent content = new ChapterContent("1", "1", 
@@ -71,6 +70,7 @@ public class ChapterControllerIntegrationTest {
             .andExpect(status().isOk())
             .andExpect(jsonPath("$.id").value(1))
             .andExpect(jsonPath("$.title").value("Capítulo 1"))
+            .andExpect(jsonPath("$.price").value(9.99))
             .andExpect(jsonPath("$.content").value("Contenido en español"))
             .andExpect(jsonPath("$.availableLanguages[0]").value("es"))
             .andExpect(jsonPath("$.availableLanguages[1]").value("en"));

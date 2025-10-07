@@ -7,7 +7,6 @@ import java.util.List;
 public record ChapterWithContentDto(
     Long id,
     String title,
-    String description,
     Double price,
     String content,
     List<String> availableLanguages
@@ -17,7 +16,6 @@ public record ChapterWithContentDto(
         return new ChapterWithContentDto(
             chapter.getId(),
             chapter.getTitle(),
-            chapter.getDescription(),
             chapter.getPrice(),
             chapterWithContent.content(),
             availableLanguages

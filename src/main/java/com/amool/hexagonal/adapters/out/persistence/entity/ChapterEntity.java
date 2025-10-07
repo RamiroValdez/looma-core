@@ -13,13 +13,13 @@ public class ChapterEntity {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @Column(name = "title", nullable = false)
+    @Column(name = "title")
     private String title;
 
-    @Column(name = "price", nullable = false)
+    @Column(name = "price")  
     private Double price;
 
-    @Column(name = "last_update", nullable = false)
+    @Column(name = "last_update") 
     private LocalDateTime lastModified;
 
     @ManyToOne
@@ -27,17 +27,17 @@ public class ChapterEntity {
     private WorkEntity workEntity;
 
     @Column(name = "likes", nullable = false)
-    private Long likes;
+    private Long likes = 0L;  
 
     @Column(name = "allow_ai_translation", nullable = false)
-    private Boolean allowAiTranslation;
+    private Boolean allowAiTranslation = true; 
 
     @ManyToOne
-    @JoinColumn(name = "language_id", nullable = false)
+    @JoinColumn(name = "language_id") 
     private LanguageEntity languageEntity;
 
-    @Column(name = "publication_status", nullable = false)
-    private String publicationStatus; // "Borrador", "Programado", "Publicado"
+    @Column(name = "publication_status")  
+    private String publicationStatus = "DRAFT"; 
 
     @Column(name = "scheduled_publication_date")
     private LocalDateTime scheduledPublicationDate;
