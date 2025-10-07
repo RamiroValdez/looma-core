@@ -59,8 +59,6 @@ class ChapterServiceImplUnitTest {
         var entityManagerField = ChapterServiceImpl.class.getDeclaredField("entityManager");
         entityManagerField.setAccessible(true);
         entityManagerField.set(chapterService, entityManager);
-
-        when(mockSavedChapter.getId()).thenReturn(1L);
     }
 
     @Test
@@ -69,13 +67,13 @@ class ChapterServiceImplUnitTest {
         Long languageId = 456L;
 
         when(saveChapterPort.saveChapter(any(Chapter.class))).thenReturn(mockSavedChapter);
+        when(mockSavedChapter.getId()).thenReturn(1L);
 
-        Chapter result = chapterService.createEmptyChapter(workId, languageId);
+        Chapter result = chapterService.createEmptyChapter(workId, languageId, "TEXT");
 
         assertNotNull(result);
         assertEquals(1L, result.getId());
 
-        verify(saveChapterPort).saveChapter(any(Chapter.class));
         verify(saveChapterPort).saveChapter(argThat(chapter -> {
             assertEquals(workId, chapter.getWorkId());
             assertEquals(languageId, chapter.getLanguageId());
@@ -84,13 +82,14 @@ class ChapterServiceImplUnitTest {
     }
 
     @Test
-    void createEmptyChapter_ShouldSaveEmptyContentInMongoDB() {
+    void createEmptyChapter_WithTextContent_ShouldSaveEmptyContentInMongoDB() {
         Long workId = 123L;
         Long languageId = 456L;
 
         when(saveChapterPort.saveChapter(any(Chapter.class))).thenReturn(mockSavedChapter);
+        when(mockSavedChapter.getId()).thenReturn(1L);
 
-        chapterService.createEmptyChapter(workId, languageId);
+        chapterService.createEmptyChapter(workId, languageId, "TEXT");
 
         verify(saveChapterContentPort).saveContent(
             eq(workId.toString()),
@@ -101,56 +100,35 @@ class ChapterServiceImplUnitTest {
     }
 
     @Test
-    void createEmptyChapter_WithSpanishLanguage_ShouldUseEsCode() {
+    void createEmptyChapter_WithImagesContent_ShouldNotSaveContentInMongoDB() {
         Long workId = 123L;
         Long languageId = 456L;
 
-        when(mockLanguageEntity.getName()).thenReturn("Español");
-        when(entityManager.find(LanguageEntity.class, languageId)).thenReturn(mockLanguageEntity);
         when(saveChapterPort.saveChapter(any(Chapter.class))).thenReturn(mockSavedChapter);
 
-        chapterService.createEmptyChapter(workId, languageId);
+        chapterService.createEmptyChapter(workId, languageId, "IMAGES");
 
-        verify(saveChapterContentPort).saveContent(
+        verify(saveChapterContentPort, never()).saveContent(
             anyString(),
             anyString(),
-            eq("es"),
+            anyString(),
             anyString()
         );
     }
 
     @Test
-    void createEmptyChapter_WithEnglishLanguage_ShouldUseEnCode() {
+    void createEmptyChapter_WithNullContentType_ShouldNotSaveContentInMongoDB() {
         Long workId = 123L;
         Long languageId = 456L;
 
-        when(mockLanguageEntity.getName()).thenReturn("English");
-        when(entityManager.find(LanguageEntity.class, languageId)).thenReturn(mockLanguageEntity);
         when(saveChapterPort.saveChapter(any(Chapter.class))).thenReturn(mockSavedChapter);
 
-        chapterService.createEmptyChapter(workId, languageId);
+        chapterService.createEmptyChapter(workId, languageId, null);
 
-        verify(saveChapterContentPort).saveContent(
+        verify(saveChapterContentPort, never()).saveContent(
             anyString(),
             anyString(),
-            eq("en"),
-            anyString()
-        );
-    }
-
-    @Test
-    void createEmptyChapter_WithNullLanguageId_ShouldUseDefaultLanguage() {
-        Long workId = 123L;
-        Long languageId = null;
-
-        when(saveChapterPort.saveChapter(any(Chapter.class))).thenReturn(mockSavedChapter);
-
-        chapterService.createEmptyChapter(workId, languageId);
-
-        verify(saveChapterContentPort).saveContent(
             anyString(),
-            anyString(),
-            eq("es"),
             anyString()
         );
     }

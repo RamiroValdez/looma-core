@@ -39,13 +39,13 @@ public class ManageWorkController {
         try {
             Chapter chapter = chapterService.createEmptyChapter(
                 request.getWorkId(),
-                request.getLanguageId()
+                request.getLanguageId(),
+                request.getContentType()
             );
 
             CreateEmptyChapterResponse response = new CreateEmptyChapterResponse();
             response.setChapterId(chapter.getId());
             response.setContentType(request.getContentType());
-
             String editorUrl = buildEditorUrl(chapter.getId(), request.getContentType());
             response.setEditorUrl(editorUrl);
 

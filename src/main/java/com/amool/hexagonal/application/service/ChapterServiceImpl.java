@@ -45,22 +45,23 @@ public class ChapterServiceImpl implements ChapterService {
     }
 
     @Override
-    public Chapter createEmptyChapter(Long workId, Long languageId) {
+    public Chapter createEmptyChapter(Long workId, Long languageId, String contentType) {
         Chapter chapter = new Chapter();
         chapter.setWorkId(workId);
         chapter.setLanguageId(languageId);
 
         Chapter savedChapter = saveChapterPort.saveChapter(chapter);
 
-        String languageCode = getLanguageCodeFromLanguageId(languageId);
-
-        String emptyContent = ""; 
-        saveChapterContentPort.saveContent(
-            workId.toString(),
-            savedChapter.getId().toString(),
-            languageCode,
-            emptyContent
-        );
+        if ("TEXT".equals(contentType)) {
+            String languageCode = getLanguageCodeFromLanguageId(languageId);
+            String emptyContent = ""; 
+            saveChapterContentPort.saveContent(
+                workId.toString(),
+                savedChapter.getId().toString(),
+                languageCode,
+                emptyContent
+            );
+        }
 
         return savedChapter;
     }
