@@ -41,7 +41,7 @@ class AwsS3AdapterTest {
 
     @BeforeEach
     void setUp() {
-        awsS3Adapter = new AwsS3Adapter(s3Client, s3Presigner);
+        awsS3Adapter = new AwsS3Adapter(s3Client, s3Presigner, "test-bucket", "us-east-1");
     }
 
     @Test

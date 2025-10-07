@@ -1,5 +1,6 @@
 package com.amool.hexagonal.config;
 
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import software.amazon.awssdk.auth.credentials.AwsBasicCredentials;
@@ -11,11 +12,20 @@ import software.amazon.awssdk.services.s3.presigner.S3Presigner;
 @Configuration
 public class AwsConfig {
 
-        private final String ACCESS_KEY = System.getenv("AWS_ACCESS_KEY");
+        private String ACCESS_KEY;
 
-        private final String SECRET_KEY = System.getenv("AWS_SECRET");
+        private String SECRET_KEY;
 
-        private final String REGION = System.getenv("AWS_REGION");
+        private String REGION;
+
+        public AwsConfig(
+                @Value("${AWS_ACCESS_KEY}") String accessKey,
+                @Value("${AWS_SECRET}") String secretKey,
+                @Value("${AWS_REGION}") String region) {
+            this.ACCESS_KEY = accessKey;
+            this.SECRET_KEY = secretKey;
+            this.REGION = region;
+        }
 
         @Bean
         public S3Client s3Client() {
