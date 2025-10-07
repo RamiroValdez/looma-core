@@ -3,22 +3,37 @@ package com.amool.hexagonal.application.service;
 import com.amool.hexagonal.application.port.in.ChapterService;
 import com.amool.hexagonal.application.port.out.LoadChapterContentPort;
 import com.amool.hexagonal.application.port.out.LoadChapterPort;
+import com.amool.hexagonal.application.port.out.SaveChapterPort;
+import com.amool.hexagonal.application.port.out.SaveChapterContentPort;
+import com.amool.hexagonal.domain.model.Chapter;
+import com.amool.hexagonal.adapters.out.persistence.entity.LanguageEntity;
+import jakarta.persistence.EntityManager;
+import jakarta.persistence.PersistenceContext;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.Optional;
 
 @Service
-@Transactional(readOnly = true)
+@Transactional
 public class ChapterServiceImpl implements ChapterService {
 
     private final LoadChapterPort loadChapterPort;
     private final LoadChapterContentPort loadChapterContentPort;
+    private final SaveChapterPort saveChapterPort;
+    private final SaveChapterContentPort saveChapterContentPort;
+
+    @PersistenceContext
+    private EntityManager entityManager;
 
     public ChapterServiceImpl(LoadChapterPort loadChapterPort,
-                              LoadChapterContentPort loadChapterContentPort) {
+                              LoadChapterContentPort loadChapterContentPort,
+                              SaveChapterPort saveChapterPort,
+                              SaveChapterContentPort saveChapterContentPort) {
         this.loadChapterPort = loadChapterPort;
         this.loadChapterContentPort = loadChapterContentPort;
+        this.saveChapterPort = saveChapterPort;
+        this.saveChapterContentPort = saveChapterContentPort;
     }
 
     @Override
@@ -27,5 +42,49 @@ public class ChapterServiceImpl implements ChapterService {
                 .flatMap(chapter -> loadChapterContentPort
                         .loadContent(bookId.toString(), chapterId.toString(), language)
                         .map(content -> new ChapterWithContent(chapter, content.getContent(language))));
+    }
+
+    @Override
+    public Chapter createEmptyChapter(Long workId, Long languageId) {
+        Chapter chapter = new Chapter();
+        chapter.setWorkId(workId);
+        chapter.setLanguageId(languageId);
+
+        Chapter savedChapter = saveChapterPort.saveChapter(chapter);
+
+        String languageCode = getLanguageCodeFromLanguageId(languageId);
+
+        String emptyContent = ""; 
+        saveChapterContentPort.saveContent(
+            workId.toString(),
+            savedChapter.getId().toString(),
+            languageCode,
+            emptyContent
+        );
+
+        return savedChapter;
+    }
+
+    private String getLanguageCodeFromLanguageId(Long languageId) {
+        if (languageId == null) {
+            return "es";
+        }
+
+        LanguageEntity languageEntity = entityManager.find(LanguageEntity.class, languageId);
+        if (languageEntity == null) {
+            return "es"; 
+        }
+
+        String languageName = languageEntity.getName().toLowerCase().trim();
+
+        return switch (languageName) {
+            case "español", "spanish" -> "es";
+            case "english", "inglés" -> "en";
+            case "french", "francés" -> "fr";
+            case "german", "alemán" -> "de";
+            case "italian", "italiano" -> "it";
+            case "portuguese", "portugués" -> "pt";
+            default -> "es"; 
+        };
     }
 }

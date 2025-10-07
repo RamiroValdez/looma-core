@@ -5,11 +5,11 @@ import java.time.LocalDateTime;
 public class Chapter {
     private Long id;
     private String title;
-    private String description;
     private Double price;
     private Long likes;
     private LocalDateTime lastModified;
-    private Long bookId;
+    private Long workId;
+    private Long languageId; 
     private Boolean allowAiTranslation;
     private String publicationStatus;
     private LocalDateTime scheduledPublicationDate;
@@ -20,10 +20,7 @@ public class Chapter {
     
     public String getTitle() { return title; }
     public void setTitle(String title) { this.title = title; }
-    
-    public String getDescription() { return description; }
-    public void setDescription(String description) { this.description = description; }
-    
+
     public Double getPrice() { return price; }
     public void setPrice(Double price) { this.price = price; }
     
@@ -33,9 +30,12 @@ public class Chapter {
     public LocalDateTime getLastModified() { return lastModified; }
     public void setLastModified(LocalDateTime lastModified) { this.lastModified = lastModified; }
 
-    public Long getBookId() { return bookId; }
-    public void setBookId(Long bookId) { this.bookId = bookId; }
-
+    public Long getWorkId() { return workId; }
+    public void setWorkId(Long workId) { this.workId = workId; }
+    
+    public Long getLanguageId() { return languageId; }
+    public void setLanguageId(Long languageId) { this.languageId = languageId; }
+    
     public Boolean getAllowAiTranslation() { return allowAiTranslation; }
     public void setAllowAiTranslation(Boolean allowAiTranslation) { this.allowAiTranslation = allowAiTranslation; }
 

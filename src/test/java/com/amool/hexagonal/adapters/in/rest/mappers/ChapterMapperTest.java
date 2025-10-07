@@ -18,7 +18,6 @@ class ChapterMapperTest {
         Chapter chapter = new Chapter();
         chapter.setId(1L);
         chapter.setTitle("Capítulo 1");
-        chapter.setDescription("Descripción");
         chapter.setPrice(9.99);
         chapter.setLikes(10L);
         chapter.setLastModified(LocalDateTime.now());
@@ -45,7 +44,6 @@ class ChapterMapperTest {
         Chapter chapter = new Chapter();
         chapter.setId(1L);
         chapter.setTitle("Capítulo 1");
-        chapter.setDescription("Descripción");
         chapter.setPrice(9.99);
         
         ChapterWithContent chapterWithContent = new ChapterWithContent(chapter, "Contenido");
@@ -57,7 +55,6 @@ class ChapterMapperTest {
         assertNotNull(result);
         assertEquals(chapter.getId(), result.id());
         assertEquals(chapter.getTitle(), result.title());
-        assertEquals(chapter.getDescription(), result.description());
         assertEquals(chapter.getPrice(), result.price());
         assertEquals(content, result.content());
         assertEquals(availableLanguages, result.availableLanguages());
