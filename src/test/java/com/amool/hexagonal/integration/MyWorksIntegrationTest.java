@@ -21,6 +21,7 @@ import org.springframework.boot.autoconfigure.data.mongo.MongoDataAutoConfigurat
 import org.springframework.boot.autoconfigure.EnableAutoConfiguration;
 import org.springframework.boot.autoconfigure.data.mongo.MongoRepositoriesAutoConfiguration;
 import org.springframework.test.context.TestPropertySource;
+import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.http.ResponseEntity;
 import org.springframework.http.HttpStatus;
@@ -30,6 +31,7 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import com.amool.hexagonal.application.port.out.LoadChapterContentPort;
 import com.amool.hexagonal.application.port.out.LoadChapterPort;
 import com.amool.hexagonal.application.port.out.SaveChapterContentPort;
+import com.amool.hexagonal.application.port.out.SaveChapterPort;
 import com.amool.hexagonal.adapters.out.mongodb.repository.MongoChapterContentRepository;
 import org.springframework.data.mongodb.core.MongoTemplate;
 import com.mongodb.client.MongoClient;
@@ -60,24 +62,26 @@ class MyWorksIntegrationTest {
     @Autowired
     private EntityManager entityManager;
 
-    @MockBean
+    @MockitoBean
     private LoadChapterContentPort loadChapterContentPort;
 
-    @MockBean
+    @MockitoBean
     private LoadChapterPort loadChapterPort;
 
-    @MockBean
-    private MongoChapterContentRepository mongoChapterContentRepository;
-
-    @MockBean
-    private MongoTemplate mongoTemplate;
-
-    @MockBean
+    @MockitoBean
     private SaveChapterContentPort saveChapterContentPort;
 
-    @MockBean
-    private MongoClient mongoClient;
+    @MockitoBean
+    private SaveChapterPort saveChapterPort;
 
+    @MockitoBean
+    private MongoChapterContentRepository mongoChapterContentRepository;
+
+    @MockitoBean
+    private MongoTemplate mongoTemplate;
+
+    @MockitoBean
+    private MongoClient mongoClient;
     private UserEntity testUser;
     private FormatEntity testFormat;
     private LanguageEntity testLanguage;
