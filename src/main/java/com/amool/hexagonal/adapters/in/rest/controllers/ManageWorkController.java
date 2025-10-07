@@ -7,7 +7,9 @@ import com.amool.hexagonal.adapters.in.rest.mappers.WorkMapper;
 import com.amool.hexagonal.application.port.in.ChapterService;
 import com.amool.hexagonal.application.port.in.WorkService;
 import com.amool.hexagonal.domain.model.Chapter;
+
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
@@ -23,6 +25,7 @@ public class ManageWorkController {
     }
 
     @GetMapping("/{workId}")
+    @PreAuthorize("isAuthenticated()")
     public ResponseEntity<WorkResponseDto> getWorkById(@PathVariable Long workId) {
         return workService.obtainWorkById(workId)
                 .map(WorkMapper::toDto)
@@ -31,6 +34,7 @@ public class ManageWorkController {
     }
 
     @PostMapping("/create-chapter")
+    @PreAuthorize("isAuthenticated()")
     public ResponseEntity<CreateEmptyChapterResponse> createEmptyChapter(@RequestBody CreateEmptyChapterRequest request) {
         try {
             Chapter chapter = chapterService.createEmptyChapter(
