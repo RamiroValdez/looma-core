@@ -5,17 +5,19 @@ import com.amool.hexagonal.adapters.out.persistence.mappers.LanguageMapper;
 import com.amool.hexagonal.adapters.out.persistence.repository.LanguageRepository;
 import com.amool.hexagonal.application.port.out.LoadLanguagePort;
 import com.amool.hexagonal.domain.model.Language;
-import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
 
 import java.util.List;
 import java.util.stream.Collectors;
 
 @Component
-@RequiredArgsConstructor
 public class LanguagePersistenceAdapter implements LoadLanguagePort {
 
     private final LanguageRepository languageRepository;
+
+    public LanguagePersistenceAdapter(LanguageRepository languageRepository) {
+        this.languageRepository = languageRepository;
+    }
 
     @Override
     public List<Language> loadAllLanguages() {

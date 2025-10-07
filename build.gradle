@@ -39,15 +39,7 @@ dependencies {
     runtimeOnly 'org.postgresql:postgresql'
     testImplementation 'org.springframework.boot:spring-boot-starter-test'
     testImplementation 'org.springframework.security:spring-security-test'
-    testImplementation 'de.flapdoodle.embed:de.flapdoodle.embed.mongo:4.14.0'  
-    testImplementation 'org.testcontainers:mongodb:1.19.7'  
-    testImplementation 'org.testcontainers:junit-jupiter:1.19.7'
     testRuntimeOnly 'org.junit.platform:junit-platform-launcher'
-
-    compileOnly 'org.projectlombok:lombok'
-    annotationProcessor 'org.projectlombok:lombok'
-    testCompileOnly 'org.projectlombok:lombok'
-    testAnnotationProcessor 'org.projectlombok:lombok'
 }
 
 dependencyManagement {
