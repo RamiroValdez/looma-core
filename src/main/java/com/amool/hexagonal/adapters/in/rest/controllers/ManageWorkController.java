@@ -46,23 +46,10 @@ public class ManageWorkController {
             CreateEmptyChapterResponse response = new CreateEmptyChapterResponse();
             response.setChapterId(chapter.getId());
             response.setContentType(request.getContentType());
-            String editorUrl = buildEditorUrl(chapter.getId(), request.getContentType());
-            response.setEditorUrl(editorUrl);
-
             return ResponseEntity.ok(response);
 
         } catch (Exception e) {
             return ResponseEntity.badRequest().build();
-        }
-    }
-
-    private String buildEditorUrl(Long chapterId, String contentType) {
-        if ("TEXT".equals(contentType)) {
-            return "/editor/text/" + chapterId;
-        } else if ("IMAGES".equals(contentType)) {
-            return "/editor/images/" + chapterId;
-        } else {
-            return "/editor/" + chapterId; 
         }
     }
 }
