@@ -46,7 +46,17 @@ public class WorkServiceImpl implements WorkService {
     @Override
     @Transactional(readOnly = true)
     public Optional<Work> obtainWorkById(Long workId) {
-        return obtainWorkByIdPort.obtainWorkById(workId);
+        Optional<Work> work = obtainWorkByIdPort.obtainWorkById(workId);
+
+        work.ifPresent(
+            it -> {
+                it.setBanner(this.imagesService.getBannerImageUrl(it.getBanner()));
+                it.setCover(this.imagesService.getCoverImageUrl(it.getCover()));
+                it.getCategories().sort(Comparator.comparing(Category::getName));
+            }
+        );
+
+        return work;
     }
 
     @Override
