@@ -10,7 +10,7 @@ public interface ImagesService {
 
     String getBannerImageUrl(String bannerFilePath);
 
-    Boolean uploadCoverImage(MultipartFile file, String workId) throws IOException;
+    String uploadCoverImage(MultipartFile file, String workId) throws IOException;
 
     String getCoverImageUrl(String coverFilePath);
 

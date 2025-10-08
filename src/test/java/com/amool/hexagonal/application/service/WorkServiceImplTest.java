@@ -15,13 +15,13 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
 
-public class ObtainWorkByIdServiceTest {
+public class WorkServiceImplTest {
 
     @Mock
     private ObtainWorkByIdPort obtainWorkByIdPort;
 
     @InjectMocks
-    private ObtainWorkByIdService obtainWorkByIdService;
+    private WorkServiceImpl workServiceImpl;
 
     @BeforeEach
     public void setup() {
@@ -34,25 +34,25 @@ public class ObtainWorkByIdServiceTest {
         Work expectedWork = new Work();
         expectedWork.setId(workId);
         expectedWork.setTitle("Test Work");
-        when(obtainWorkByIdPort.execute(workId)).thenReturn(Optional.of(expectedWork));
+        when(obtainWorkByIdPort.obtainWorkById(workId)).thenReturn(Optional.of(expectedWork));
 
-        Optional<Work> result = obtainWorkByIdService.obtainWorkById(workId);
+        Optional<Work> result = workServiceImpl.obtainWorkById(workId);
 
         assertTrue(result.isPresent());
         assertEquals(workId, result.get().getId());
         assertEquals("Test Work", result.get().getTitle());
-        verify(obtainWorkByIdPort, times(1)).execute(workId);
+        verify(obtainWorkByIdPort, times(1)).obtainWorkById(workId);
     }
 
     @Test
     public void testExecute_ShouldReturnNull_WhenWorkDoesNotExist() {
         Long workId = 999L;
-        when(obtainWorkByIdPort.execute(workId)).thenReturn(Optional.empty());
+        when(obtainWorkByIdPort.obtainWorkById(workId)).thenReturn(Optional.empty());
 
-        Optional<Work> result = obtainWorkByIdService.obtainWorkById(workId);
+        Optional<Work> result = workServiceImpl.obtainWorkById(workId);
 
         assertTrue(result.isEmpty());
-        verify(obtainWorkByIdPort, times(1)).execute(workId);
+        verify(obtainWorkByIdPort, times(1)).obtainWorkById(workId);
     }
     
     @Test
@@ -71,7 +71,7 @@ public class ObtainWorkByIdServiceTest {
         when(obtainWorkByIdPort.getWorksByUserId(userId)).thenReturn(expectedWorks);
         
         // Act
-        List<Work> result = obtainWorkByIdService.getAuthenticatedUserWorks(userId);
+        List<Work> result = workServiceImpl.getAuthenticatedUserWorks(userId);
         
         // Assert
         assertNotNull(result);
@@ -88,7 +88,7 @@ public class ObtainWorkByIdServiceTest {
         
         // Act & Assert
         SecurityException exception = assertThrows(SecurityException.class, () -> {
-            obtainWorkByIdService.getAuthenticatedUserWorks(userId);
+            workServiceImpl.getAuthenticatedUserWorks(userId);
         });
         
         assertEquals("Usuario no autenticado", exception.getMessage());
@@ -107,7 +107,7 @@ public class ObtainWorkByIdServiceTest {
         when(obtainWorkByIdPort.getWorksByUserId(userId)).thenReturn(expectedWorks);
         
         // Act
-        List<Work> result = obtainWorkByIdService.getWorksByUserId(userId);
+        List<Work> result = workServiceImpl.getWorksByUserId(userId);
         
         // Assert
         assertNotNull(result);

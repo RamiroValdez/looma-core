@@ -2,7 +2,9 @@ package com.amool.hexagonal.domain.model;
 
 import java.time.LocalDate;
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 public class Work {
     private Long id;
@@ -19,7 +21,7 @@ public class Work {
     private Language originalLanguage;
     private List<Chapter> chapters = new ArrayList<>();
     private List<Category> categories = new ArrayList<>();
-    private List<Tag> tags = new ArrayList<>();
+    private Set<Tag> tags = new HashSet<>();
 
     public Work() {}
 
@@ -65,6 +67,6 @@ public class Work {
     public List<Category> getCategories() { return categories; }
     public void setCategories(List<Category> categories) { this.categories = categories; }
     
-    public List<Tag> getTags() { return tags; }
-    public void setTags(List<Tag> tags) { this.tags = tags; }
+    public Set<Tag> getTags() { return tags; }
+    public void setTags(Set<Tag> tags) { this.tags = tags; }
 }

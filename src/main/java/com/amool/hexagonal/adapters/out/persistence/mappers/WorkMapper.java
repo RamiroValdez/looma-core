@@ -24,9 +24,33 @@ public class WorkMapper {
         work.setOriginalLanguage(LanguageMapper.toDomain(entity.getOriginalLanguageEntity()));
         work.setChapters(ChapterMapper.toDomainList(entity.getChapters()));
         work.setCategories(CategoryMapper.toDomainList(entity.getCategories()));
-        work.setTags(TagMapper.toDomainList(entity.getTags()));
+        work.setTags(TagMapper.toDomainSet(entity.getTags()));
 
         return work;
+    }
+
+    public  static WorkEntity toEntity(Work work) {
+        if (work == null) {
+            return null;
+        }
+        WorkEntity entity = new WorkEntity();
+        entity.setId(work.getId());
+        entity.setTitle(work.getTitle());
+        entity.setDescription(work.getDescription());
+        entity.setCover(work.getCover());
+        entity.setBanner(work.getBanner());
+        entity.setState(work.getState());
+        entity.setPrice(work.getPrice());
+        entity.setLikes(work.getLikes());
+        entity.setPublicationDate(work.getPublicationDate());
+        entity.setCreator(UserMapper.toEntity(work.getCreator()));
+        entity.setFormatEntity(FormatMapper.toEntity(work.getFormat()));
+        entity.setOriginalLanguageEntity(LanguageMapper.toEntity(work.getOriginalLanguage()));
+        entity.setChapters(ChapterMapper.toEntityList(work.getChapters()));
+        entity.setCategories(CategoryMapper.toEntitySet(work.getCategories()));
+        entity.setTags(TagMapper.toEntitySet(work.getTags()));
+
+        return entity;
     }
 
 }

@@ -45,7 +45,7 @@ public class WorkMapperTest {
         entity.setOriginalLanguageEntity(originalLanguage);
         entity.setChapters(new ArrayList<>());
         entity.setCategories(new HashSet<>());
-        entity.setTags(new ArrayList<>());
+        entity.setTags(new HashSet<>());
 
         Work work = WorkMapper.toDomain(entity);
 

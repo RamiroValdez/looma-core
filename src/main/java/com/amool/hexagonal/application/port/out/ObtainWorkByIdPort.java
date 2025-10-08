@@ -5,7 +5,7 @@ import java.util.Optional;
 import java.util.List;
 
 public interface ObtainWorkByIdPort {
-    public Optional<Work> execute(Long workId);
+    public Optional<Work> obtainWorkById(Long workId);
 
     public List<Work> getWorksByUserId(Long userId);
 }
