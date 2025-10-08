@@ -1,8 +1,12 @@
 package com.amool.hexagonal.application.port.in;
 
 import com.amool.hexagonal.domain.model.Work;
+import org.springframework.web.multipart.MultipartFile;
+
+import java.io.IOException;
 import java.util.Optional;
 import java.util.List;
+import java.util.Set;
 
 public interface WorkService {
 
@@ -20,4 +24,14 @@ public interface WorkService {
     default List<Work> getByCreatorId(Long userId) {
         return getWorksByUserId(userId);
     }
+
+    Long createWork(String title,
+                    String description,
+                    List<Long> categoryIds,
+                    Long formatId,
+                    Long originalLanguageId,
+                    Set<String> tagIds,
+                    MultipartFile coverFile,
+                    MultipartFile bannerFile,
+                    Long userId) throws IOException;
 }

@@ -1,29 +1,40 @@
 package com.amool.hexagonal.adapters.out.persistence;
 
+import com.amool.hexagonal.adapters.out.persistence.entity.FormatEntity;
 import com.amool.hexagonal.adapters.out.persistence.entity.LanguageEntity;
 import com.amool.hexagonal.adapters.out.persistence.mappers.LanguageMapper;
 import com.amool.hexagonal.adapters.out.persistence.repository.LanguageRepository;
 import com.amool.hexagonal.application.port.out.LoadLanguagePort;
 import com.amool.hexagonal.domain.model.Language;
+import jakarta.persistence.EntityManager;
 import org.springframework.stereotype.Component;
 
 import java.util.List;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 @Component
 public class LanguagePersistenceAdapter implements LoadLanguagePort {
 
-    private final LanguageRepository languageRepository;
+    private final EntityManager entityManager;
 
-    public LanguagePersistenceAdapter(LanguageRepository languageRepository) {
-        this.languageRepository = languageRepository;
+    public LanguagePersistenceAdapter(EntityManager entityManager) {
+        this.entityManager = entityManager;
     }
 
     @Override
     public List<Language> loadAllLanguages() {
-        List<LanguageEntity> languageEntities = languageRepository.findAll();
+        List<LanguageEntity> languageEntities = entityManager
+                .createQuery("SELECT l FROM LanguageEntity l", LanguageEntity.class)
+                .getResultList();
         return languageEntities.stream()
                 .map(LanguageMapper::toDomain)
                 .collect(Collectors.toList());
+    }
+
+    @Override
+    public Optional<Language> loadLanguageById(Long languageId) {
+        LanguageEntity languageEntity = entityManager.find(LanguageEntity.class, languageId);
+        return Optional.ofNullable(LanguageMapper.toDomain(languageEntity));
     }
 }

@@ -3,22 +3,25 @@ package com.amool.hexagonal.adapters.out.persistence;
 import com.amool.hexagonal.adapters.out.persistence.entity.WorkEntity;
 import com.amool.hexagonal.adapters.out.persistence.mappers.WorkMapper;
 import com.amool.hexagonal.application.port.out.ObtainWorkByIdPort;
+import com.amool.hexagonal.application.port.out.WorkPort;
 import com.amool.hexagonal.domain.model.Work;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.PersistenceContext;
-import org.springframework.stereotype.Repository;
+import jakarta.transaction.Transactional;
+import org.springframework.stereotype.Component;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
-@Repository
-public class WorksPersistenceAdapter implements ObtainWorkByIdPort {
+@Component
+@Transactional
+public class WorksPersistenceAdapter implements ObtainWorkByIdPort, WorkPort {
 
     @PersistenceContext
     private EntityManager entityManager;
 
     @Override
-    public Optional<Work> execute(Long workId) {
+    public Optional<Work> obtainWorkById(Long workId) {
         String jpql = "SELECT DISTINCT w FROM WorkEntity w " +
                       "LEFT JOIN FETCH w.creator " +
                       "LEFT JOIN FETCH w.formatEntity " +
@@ -51,5 +54,34 @@ public class WorksPersistenceAdapter implements ObtainWorkByIdPort {
         return entities.stream()
                 .map(WorkMapper::toDomain)
                 .collect(Collectors.toList());
+    }
+
+
+    @Override
+    public Long createWork(Work work) {
+        WorkEntity workEntity = WorkMapper.toEntity(work);
+        entityManager.persist(workEntity);
+        entityManager.flush();
+        return workEntity.getId();
+    }
+
+    @Override
+    public Boolean updateWork(Work work) {
+        try {
+            WorkEntity existingEntity = entityManager.find(WorkEntity.class, work.getId());
+
+            if (existingEntity == null) {
+                return false;
+            }
+
+            WorkEntity updatedEntity = WorkMapper.toEntity(work);
+            updatedEntity.setId(existingEntity.getId());
+
+            entityManager.merge(updatedEntity);
+            entityManager.flush();
+            return true;
+        } catch (Exception e) {
+            return false;
+        }
     }
 }

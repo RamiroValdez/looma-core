@@ -15,6 +15,7 @@ import org.springframework.test.web.servlet.MockMvc;
 
 import java.time.LocalDate;
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.Optional;
 
 import static org.mockito.Mockito.when;
@@ -76,7 +77,7 @@ public class ManageWorkControllerIntegrationTest {
         work.setOriginalLanguage(originalLanguage);
         work.setChapters(new ArrayList<>());
         work.setCategories(new ArrayList<>());
-        work.setTags(new ArrayList<>());
+        work.setTags(new HashSet<>());
 
         when(workService.obtainWorkById(workId)).thenReturn(Optional.of(work));
 

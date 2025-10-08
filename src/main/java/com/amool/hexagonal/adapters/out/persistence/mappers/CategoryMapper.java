@@ -27,4 +27,18 @@ public class CategoryMapper {
                 .map(CategoryMapper::toDomain)
                 .collect(Collectors.toList());
     }
+
+    public static Set<CategoryEntity> toEntitySet(List<Category> categories) {
+        if (categories == null) {
+            return null;
+        }
+        return categories.stream()
+                .map(category -> {
+                    CategoryEntity entity = new CategoryEntity();
+                    entity.setId(category.getId());
+                    entity.setName(category.getName());
+                    return entity;
+                })
+                .collect(Collectors.toSet());
+    }
 }

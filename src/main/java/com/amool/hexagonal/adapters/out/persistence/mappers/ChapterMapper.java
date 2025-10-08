@@ -39,4 +39,25 @@ public class ChapterMapper {
                 .map(ChapterMapper::toDomain)
                 .collect(Collectors.toList());
     }
+
+    public static List<ChapterEntity> toEntityList(List<Chapter> chapters) {
+        if (chapters == null) {
+            return null;
+        }
+        return chapters.stream()
+                .map(chapter -> {
+                    ChapterEntity entity = new ChapterEntity();
+                    entity.setId(chapter.getId());
+                    entity.setTitle(chapter.getTitle());
+                    entity.setPrice(chapter.getPrice());
+                    entity.setLikes(chapter.getLikes());
+                    entity.setLastModified(chapter.getLastModified());
+                    entity.setAllowAiTranslation(chapter.getAllowAiTranslation());
+                    entity.setPublicationStatus(chapter.getPublicationStatus());
+                    entity.setScheduledPublicationDate(chapter.getScheduledPublicationDate());
+                    entity.setPublishedAt(chapter.getPublishedAt());
+                    return entity;
+                })
+                .collect(Collectors.toList());
+    }
 }

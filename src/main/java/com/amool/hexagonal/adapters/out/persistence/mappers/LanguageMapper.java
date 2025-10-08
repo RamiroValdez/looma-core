@@ -14,5 +14,15 @@ public class LanguageMapper {
         language.setName(entity.getName());
         return language;
     }
+
+    public static LanguageEntity toEntity(Language language) {
+        if (language == null) {
+            return null;
+        }
+        LanguageEntity entity = new LanguageEntity();
+        entity.setId(language.getId());
+        entity.setName(language.getName());
+        return entity;
+    }
     
 }

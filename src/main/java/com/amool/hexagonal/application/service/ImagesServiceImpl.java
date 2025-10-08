@@ -14,10 +14,10 @@ import static com.google.common.io.Files.getFileExtension;
 @Service
 public class ImagesServiceImpl implements ImagesService {
 
-    private final String WORK_BANNER_PATH = "/works/{workId}/banner/";
-    private final String WORK_COVER_PATH = "/works/{workId}/cover/";
-    private final String USER_PROFILE_PATH = "/users/profiles/";
-    private final String COMIC_IMAGES_PATH = "/chapters/{chapterId}/";
+    private final String WORK_BANNER_PATH = "works/{workId}/banner/";
+    private final String WORK_COVER_PATH = "works/{workId}/cover/";
+    private final String USER_PROFILE_PATH = "users/profiles/";
+    private final String COMIC_IMAGES_PATH = "chapters/{chapterId}/";
 
     private final AwsS3Service awsS3Service;
 
@@ -32,7 +32,7 @@ public class ImagesServiceImpl implements ImagesService {
             throw new IllegalArgumentException("El archivo no puede estar vacío");
         }
 
-        String fileName = UUID.randomUUID() + getFileExtension(Objects.requireNonNull(file.getOriginalFilename()));
+        String fileName = UUID.randomUUID() + "." + getFileExtension(Objects.requireNonNull(file.getOriginalFilename()));
         String filePath = WORK_BANNER_PATH.replace("{workId}", workId) + fileName;
 
         Boolean result = this.awsS3Service.uploadPublicFile(file, filePath);
@@ -51,16 +51,18 @@ public class ImagesServiceImpl implements ImagesService {
     }
 
     @Override
-    public Boolean uploadCoverImage(MultipartFile file, String workId) throws IOException {
+    public String uploadCoverImage(MultipartFile file, String workId) throws IOException {
 
         if (file == null || file.isEmpty()) {
             throw new IllegalArgumentException("El archivo no puede estar vacío");
         }
 
-        String fileName = UUID.randomUUID() + getFileExtension(Objects.requireNonNull(file.getOriginalFilename()));
+        String fileName = UUID.randomUUID()+ "." + getFileExtension(Objects.requireNonNull(file.getOriginalFilename()));
         String filePath = WORK_COVER_PATH.replace("{workId}", workId) + fileName;
 
-        return this.awsS3Service.uploadPublicFile(file, filePath);
+         this.awsS3Service.uploadPublicFile(file, filePath);
+
+         return filePath;
     }
 
     @Override
@@ -85,7 +87,7 @@ public class ImagesServiceImpl implements ImagesService {
             throw new IllegalArgumentException("El archivo no puede estar vacío");
         }
 
-        String fileName = UUID.randomUUID() + getFileExtension(Objects.requireNonNull(file.getOriginalFilename()));
+        String fileName = UUID.randomUUID()+ "." + getFileExtension(Objects.requireNonNull(file.getOriginalFilename()));
 
         String extension = getFileExtension(Objects.requireNonNull(file.getOriginalFilename()));
 
