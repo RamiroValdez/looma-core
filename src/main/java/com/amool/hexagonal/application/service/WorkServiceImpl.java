@@ -61,7 +61,16 @@ public class WorkServiceImpl implements WorkService {
         if (authenticatedUserId == null) {
             throw new SecurityException("Usuario no autenticado");
         }
-        return obtainWorkByIdPort.getWorksByUserId(authenticatedUserId);
+
+        List<Work> work = this.obtainWorkByIdPort.getWorksByUserId(authenticatedUserId);
+
+        work.forEach(it -> {
+            it.setBanner(this.imagesService.getBannerImageUrl(it.getBanner()));
+            it.setCover(this.imagesService.getCoverImageUrl(it.getCover()));
+            it.getCategories().sort(Comparator.comparing(Category::getName));
+        });
+
+        return work;
     }
 
     @Override
