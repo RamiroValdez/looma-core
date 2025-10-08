@@ -14,10 +14,10 @@ public class ChapterEntity {
     private Long id;
 
     @Column(name = "title")
-    private String title;
+    private String title = "";
 
     @Column(name = "price")  
-    private Double price;
+    private Double price = 0.0;
 
     @Column(name = "last_update") 
     private LocalDateTime lastModified;
