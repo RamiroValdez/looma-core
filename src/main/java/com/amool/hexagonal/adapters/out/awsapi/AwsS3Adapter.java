@@ -8,11 +8,13 @@ import software.amazon.awssdk.services.s3.S3Client;
 import software.amazon.awssdk.core.sync.RequestBody;
 import software.amazon.awssdk.services.s3.model.GetObjectRequest;
 import software.amazon.awssdk.services.s3.model.PutObjectRequest;
+import software.amazon.awssdk.services.s3.model.S3Object;
 import software.amazon.awssdk.services.s3.presigner.S3Presigner;
 import software.amazon.awssdk.services.s3.presigner.model.GetObjectPresignRequest;
 
 import java.io.IOException;
 import java.time.Duration;
+import java.util.List;
 
 @Component
 public class AwsS3Adapter implements AwsS3Port {
@@ -33,7 +35,7 @@ public class AwsS3Adapter implements AwsS3Port {
     }
 
     @Override
-    public String uploadPublicFile(String fileName, MultipartFile file) throws IOException {
+    public Boolean uploadPublicFile(String fileName, MultipartFile file) throws IOException {
 
             s3Client.putObject(
                     PutObjectRequest.builder()
@@ -47,11 +49,11 @@ public class AwsS3Adapter implements AwsS3Port {
                                     )
             );
 
-            return "Upload successful";
+            return true;
     }
 
     @Override
-    public String uploadPrivateFile(String fileName, MultipartFile file) throws IOException {
+    public Boolean uploadPrivateFile(String fileName, MultipartFile file) throws IOException {
             s3Client.putObject(
                     PutObjectRequest.builder()
                             .bucket(bucketName)
@@ -63,7 +65,7 @@ public class AwsS3Adapter implements AwsS3Port {
                     )
             );
 
-            return "Upload successful";
+            return true;
     }
 
    @Override
@@ -85,6 +87,13 @@ public class AwsS3Adapter implements AwsS3Port {
     @Override
     public String obtainPublicUrl(String fileName) {
         return String.format("https://%s.s3.%s.amazonaws.com/%s", bucketName, region, fileName);
+    }
+
+    @Override
+    public List<S3Object> obtainObjectsInPath(String path) {
+        return s3Client.listObjectsV2(builder ->
+                builder.bucket(bucketName).prefix(path)
+        ).contents();
     }
 
 }
