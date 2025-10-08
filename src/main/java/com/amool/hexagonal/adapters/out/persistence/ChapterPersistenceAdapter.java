@@ -47,9 +47,6 @@ public class ChapterPersistenceAdapter implements LoadChapterPort, SaveChapterPo
     public Chapter saveChapter(Chapter chapter) {
         ChapterEntity entity = new ChapterEntity();
 
-        entity.setTitle(chapter.getTitle());
-        entity.setPrice(chapter.getPrice());
-
         entity.setLastModified(chapter.getLastModified() != null ?
             chapter.getLastModified() : LocalDateTime.now());
 
