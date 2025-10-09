@@ -1,11 +1,15 @@
 package com.amool.hexagonal.application.service;
 
 import com.amool.hexagonal.adapters.out.persistence.entity.LanguageEntity;
+import com.amool.hexagonal.adapters.in.rest.dtos.ChapterResponseDto;
 import com.amool.hexagonal.application.port.out.LoadChapterContentPort;
 import com.amool.hexagonal.application.port.out.LoadChapterPort;
+import com.amool.hexagonal.application.port.out.ObtainWorkByIdPort;
 import com.amool.hexagonal.application.port.out.SaveChapterContentPort;
 import com.amool.hexagonal.application.port.out.SaveChapterPort;
 import com.amool.hexagonal.domain.model.Chapter;
+import com.amool.hexagonal.domain.model.ChapterContent;
+import com.amool.hexagonal.domain.model.Work;
 import jakarta.persistence.EntityManager;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -13,6 +17,10 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 import org.mockito.junit.jupiter.MockitoExtension;
+
+import java.util.List;
+import java.util.Map;
+import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.*;
@@ -34,6 +42,9 @@ class ChapterServiceImplUnitTest {
     private SaveChapterContentPort saveChapterContentPort;
 
     @Mock
+    private ObtainWorkByIdPort obtainWorkByIdPort;
+
+    @Mock
     private EntityManager entityManager;
 
     private ChapterServiceImpl chapterService;
@@ -52,7 +63,8 @@ class ChapterServiceImplUnitTest {
             loadChapterPort,
             loadChapterContentPort,
             saveChapterPort,
-            saveChapterContentPort
+            saveChapterContentPort,
+            obtainWorkByIdPort
         );
 
         // Inyectar EntityManager usando reflexión
@@ -131,5 +143,62 @@ class ChapterServiceImplUnitTest {
             anyString(),
             anyString()
         );
+    }
+
+    @Test
+    void getChapterForEdit_ShouldReturnDtoWithContent() {
+        Long chapterId = 1L;
+        Long workId = 10L;
+        Long languageId = 20L;
+
+        Chapter chapter = new Chapter();
+        chapter.setId(chapterId);
+        chapter.setWorkId(workId);
+        chapter.setLanguageId(languageId);
+        chapter.setTitle("Capítulo de prueba");
+        chapter.setPrice(5.5);
+
+        when(loadChapterPort.loadChapterForEdit(chapterId)).thenReturn(Optional.of(chapter));
+
+        when(entityManager.find(LanguageEntity.class, languageId)).thenReturn(mockLanguageEntity);
+        when(mockLanguageEntity.getName()).thenReturn("Spanish");
+
+        ChapterContent chapterContent = new ChapterContent(
+            workId.toString(),
+            chapterId.toString(),
+            Map.of("es", "Contenido ES"),
+            "es"
+        );
+
+        when(loadChapterContentPort.loadContent(workId.toString(), chapterId.toString(), "es"))
+            .thenReturn(Optional.of(chapterContent));
+        when(loadChapterContentPort.getAvailableLanguages(workId.toString(), chapterId.toString()))
+            .thenReturn(List.of("es", "en"));
+
+        Work work = new Work();
+        work.setTitle("Obra prueba");
+        when(obtainWorkByIdPort.obtainWorkById(workId)).thenReturn(Optional.of(work));
+
+        Optional<ChapterResponseDto> result = chapterService.getChapterForEdit(chapterId);
+
+        assertTrue(result.isPresent());
+        ChapterResponseDto dto = result.get();
+        assertEquals(chapterId, dto.getId());
+        assertEquals("Capítulo de prueba", dto.getTitle());
+        assertEquals("Contenido ES", dto.getContent());
+        assertEquals(languageId, dto.getLanguageId());
+        assertEquals(List.of("es", "en"), dto.getAvailableLanguages());
+        assertEquals("Obra prueba", dto.getWorkName());
+    }
+
+    @Test
+    void getChapterForEdit_ShouldReturnEmptyWhenChapterNotFound() {
+        Long chapterId = 999L;
+        when(loadChapterPort.loadChapterForEdit(chapterId)).thenReturn(Optional.empty());
+
+        Optional<ChapterResponseDto> result = chapterService.getChapterForEdit(chapterId);
+
+        assertTrue(result.isEmpty());
+        verify(loadChapterContentPort, never()).loadContent(anyString(), anyString(), anyString());
     }
 }
