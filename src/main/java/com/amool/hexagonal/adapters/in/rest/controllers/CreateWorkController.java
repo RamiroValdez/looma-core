@@ -45,6 +45,4 @@ public class CreateWorkController {
                     return ResponseEntity.badRequest().build();
                 }
     }
-
-
 }

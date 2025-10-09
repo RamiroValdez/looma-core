@@ -10,7 +10,7 @@ import org.springframework.web.bind.annotation.RestController;
 import java.util.List;
 
 @RestController
-@RequestMapping("/api/v1/languages")
+@RequestMapping("/api/languages")
 public class LanguageController {
 
     private final LanguageService languageService;
@@ -19,7 +19,7 @@ public class LanguageController {
         this.languageService = languageService;
     }
 
-    @GetMapping
+    @GetMapping("/obtain-all")
     public ResponseEntity<List<Language>> getAllLanguages() {
         return ResponseEntity.ok(languageService.getAllLanguages());
     }
