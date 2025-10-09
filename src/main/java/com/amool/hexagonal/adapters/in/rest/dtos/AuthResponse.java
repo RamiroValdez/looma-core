@@ -17,7 +17,6 @@ public class AuthResponse {
         this.username = username;
     }
 
-    // Getters
     public String getToken() { return token; }
     public Long getUserId() { return userId; }
     public String getEmail() { return email; }
@@ -25,7 +24,6 @@ public class AuthResponse {
     public String getSurname() { return surname; }
     public String getUsername() { return username; }
 
-    // Setters
     public void setToken(String token) { this.token = token; }
     public void setUserId(Long userId) { this.userId = userId; }
     public void setEmail(String email) { this.email = email; }

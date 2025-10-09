@@ -42,7 +42,6 @@ public class AwsS3ExceptionHandler {
 
     @ExceptionHandler({IOException.class})
     public ResponseEntity<Object> handleFileIOException(IOException ex, WebRequest request) throws IOException {
-        // Solo maneja IOExceptions relacionadas con archivos/S3
         if (ex.getMessage() != null && (ex.getMessage().contains("S3") || ex.getMessage().contains("file"))) {
             Map<String, Object> body = new LinkedHashMap<>();
             body.put("timestamp", LocalDateTime.now());
@@ -53,7 +52,6 @@ public class AwsS3ExceptionHandler {
 
             return new ResponseEntity<>(body, HttpStatus.INTERNAL_SERVER_ERROR);
         }
-        // Re-lanza para que otro handler la maneje
         throw ex;
     }
 }

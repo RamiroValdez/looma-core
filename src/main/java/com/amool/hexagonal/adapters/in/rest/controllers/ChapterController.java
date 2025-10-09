@@ -28,36 +28,35 @@ public class ChapterController {
     private final SaveChapterContentPort saveChapterContentPort;
     private final LoadWorkOwnershipPort loadWorkOwnershipPort;
 
-    @GetMapping("/books/{bookId}/chapters/{chapterId}")
+    @GetMapping("/work/{workId}/chapter/{chapterId}")
     public ResponseEntity<ChapterWithContentDto> getChapter(
-            @PathVariable String bookId,
+            @PathVariable String workId,
             @PathVariable String chapterId,
             @RequestParam(required = false, defaultValue = "es") String language) {
         
-        return chapterService.getChapterWithContent(Long.valueOf(bookId), Long.valueOf(chapterId), language)
+        return chapterService.getChapterWithContent(Long.valueOf(workId), Long.valueOf(chapterId), language)
                 .map(chapterWithContent -> {
-                    Optional<ChapterContent> chapterContent = loadChapterContentPort.loadContent(bookId, chapterId, language);
+                    Optional<ChapterContent> chapterContent = loadChapterContentPort.loadContent(workId, chapterId, language);
                     
-                    List<String> availableLanguages = loadChapterContentPort.getAvailableLanguages(bookId, chapterId);
+                    List<String> availableLanguages = loadChapterContentPort.getAvailableLanguages(workId, chapterId);
                     
                     String content = chapterContent
                             .map(cc -> cc.getContentByLanguage())
                             .map(contentMap -> contentMap.getOrDefault(language, 
                                 contentMap.values().stream().findFirst().orElse("")))
                             .orElse("");
-                    
                     return ChapterMapper.toDto(chapterWithContent, content, availableLanguages);
                 })
                 .map(ResponseEntity::ok)
                 .orElse(ResponseEntity.<ChapterWithContentDto>notFound().build());
     }
-    @PostMapping("/books/{bookId}/chapters/{chapterId}/content")
+    @PostMapping("/work/{workId}/chapter/{chapterId}/content")
     public ResponseEntity<ChapterContent> updateChapterContent(
-            @PathVariable String bookId,
+            @PathVariable String workId,
             @PathVariable String chapterId,
             @Valid @RequestBody UpdateChapterContentRequest request) {
 
-        if (!bookId.equals(request.workId()) || !chapterId.equals(request.chapterId())) {
+        if (!workId.equals(request.workId()) || !chapterId.equals(request.chapterId())) {
             return ResponseEntity.badRequest().build();
         }
 
@@ -65,7 +64,7 @@ public class ChapterController {
         if (auth == null || !(auth.getPrincipal() instanceof JwtUserPrincipal principal)) {
             return ResponseEntity.status(401).build();
         }
-        Long workIdLong = Long.valueOf(bookId);
+        Long workIdLong = Long.valueOf(workId);
         boolean isOwner = loadWorkOwnershipPort.isOwner(workIdLong, principal.getUserId());
         if (!isOwner) {
             return ResponseEntity.status(403).build();
@@ -77,6 +76,26 @@ public class ChapterController {
             request.content()
         );
         return ResponseEntity.ok(updated);
+    }
+
+    @DeleteMapping("/work/{workId}/chapter/{chapterId}/delete")
+    public ResponseEntity<Void> deleteChapter(
+            @PathVariable String workId,
+            @PathVariable String chapterId) {
+
+        Authentication auth = SecurityContextHolder.getContext().getAuthentication();
+        if (auth == null || !(auth.getPrincipal() instanceof JwtUserPrincipal principal)) {
+            return ResponseEntity.status(401).build();
+        }
+
+        Long workIdLong = Long.valueOf(workId);
+        boolean isOwner = loadWorkOwnershipPort.isOwner(workIdLong, principal.getUserId());
+        if (!isOwner) {
+            return ResponseEntity.status(403).build();
+        }
+
+        chapterService.deleteChapter(workIdLong, Long.valueOf(chapterId));
+        return ResponseEntity.noContent().build();
     }
 
     

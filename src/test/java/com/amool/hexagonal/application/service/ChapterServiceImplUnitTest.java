@@ -5,6 +5,8 @@ import com.amool.hexagonal.application.port.out.LoadChapterContentPort;
 import com.amool.hexagonal.application.port.out.LoadChapterPort;
 import com.amool.hexagonal.application.port.out.SaveChapterContentPort;
 import com.amool.hexagonal.application.port.out.SaveChapterPort;
+import com.amool.hexagonal.application.port.out.DeleteChapterPort;
+import com.amool.hexagonal.application.port.out.DeleteChapterContentPort;
 import com.amool.hexagonal.domain.model.Chapter;
 import jakarta.persistence.EntityManager;
 import org.junit.jupiter.api.BeforeEach;
@@ -34,6 +36,12 @@ class ChapterServiceImplUnitTest {
     private SaveChapterContentPort saveChapterContentPort;
 
     @Mock
+    private DeleteChapterPort deleteChapterPort;
+
+    @Mock
+    private DeleteChapterContentPort deleteChapterContentPort;
+
+    @Mock
     private EntityManager entityManager;
 
     private ChapterServiceImpl chapterService;
@@ -52,10 +60,11 @@ class ChapterServiceImplUnitTest {
             loadChapterPort,
             loadChapterContentPort,
             saveChapterPort,
-            saveChapterContentPort
+            saveChapterContentPort,
+            deleteChapterPort,
+            deleteChapterContentPort
         );
 
-        // Inyectar EntityManager usando reflexión
         var entityManagerField = ChapterServiceImpl.class.getDeclaredField("entityManager");
         entityManagerField.setAccessible(true);
         entityManagerField.set(chapterService, entityManager);

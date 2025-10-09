@@ -5,6 +5,8 @@ import com.amool.hexagonal.application.port.out.LoadChapterContentPort;
 import com.amool.hexagonal.application.port.out.LoadChapterPort;
 import com.amool.hexagonal.application.port.out.SaveChapterPort;
 import com.amool.hexagonal.application.port.out.SaveChapterContentPort;
+import com.amool.hexagonal.application.port.out.DeleteChapterPort;
+import com.amool.hexagonal.application.port.out.DeleteChapterContentPort;
 import com.amool.hexagonal.domain.model.Chapter;
 import com.amool.hexagonal.adapters.out.persistence.entity.LanguageEntity;
 import jakarta.persistence.EntityManager;
@@ -22,6 +24,8 @@ public class ChapterServiceImpl implements ChapterService {
     private final LoadChapterContentPort loadChapterContentPort;
     private final SaveChapterPort saveChapterPort;
     private final SaveChapterContentPort saveChapterContentPort;
+    private final DeleteChapterPort deleteChapterPort;
+    private final DeleteChapterContentPort deleteChapterContentPort;
 
     @PersistenceContext
     private EntityManager entityManager;
@@ -29,18 +33,22 @@ public class ChapterServiceImpl implements ChapterService {
     public ChapterServiceImpl(LoadChapterPort loadChapterPort,
                               LoadChapterContentPort loadChapterContentPort,
                               SaveChapterPort saveChapterPort,
-                              SaveChapterContentPort saveChapterContentPort) {
+                              SaveChapterContentPort saveChapterContentPort,
+                              DeleteChapterPort deleteChapterPort,
+                              DeleteChapterContentPort deleteChapterContentPort) {
         this.loadChapterPort = loadChapterPort;
         this.loadChapterContentPort = loadChapterContentPort;
         this.saveChapterPort = saveChapterPort;
         this.saveChapterContentPort = saveChapterContentPort;
+        this.deleteChapterPort = deleteChapterPort;
+        this.deleteChapterContentPort = deleteChapterContentPort;
     }
 
     @Override
-    public Optional<ChapterWithContent> getChapterWithContent(Long bookId, Long chapterId, String language) {
-        return loadChapterPort.loadChapter(bookId, chapterId)
+    public Optional<ChapterWithContent> getChapterWithContent(Long workId, Long chapterId, String language) {
+        return loadChapterPort.loadChapter(workId, chapterId)
                 .flatMap(chapter -> loadChapterContentPort
-                        .loadContent(bookId.toString(), chapterId.toString(), language)
+                        .loadContent(workId.toString(), chapterId.toString(), language)
                         .map(content -> new ChapterWithContent(chapter, content.getContent(language))));
     }
 
@@ -64,6 +72,12 @@ public class ChapterServiceImpl implements ChapterService {
         }
 
         return savedChapter;
+    }
+
+    @Override
+    public void deleteChapter(Long workId, Long chapterId) {
+        deleteChapterContentPort.deleteContent(workId.toString(), chapterId.toString());
+        deleteChapterPort.deleteChapter(workId, chapterId);
     }
 
     private String getLanguageCodeFromLanguageId(Long languageId) {

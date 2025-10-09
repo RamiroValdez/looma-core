@@ -1,6 +1,13 @@
 package com.amool.hexagonal.application.service;
 
 import com.amool.hexagonal.application.port.out.ObtainWorkByIdPort;
+import com.amool.hexagonal.application.port.out.LoadUserPort;
+import com.amool.hexagonal.application.port.out.FormatPort;
+import com.amool.hexagonal.application.port.out.LoadLanguagePort;
+import com.amool.hexagonal.application.port.out.CategoryPort;
+import com.amool.hexagonal.application.port.out.WorkPort;
+import com.amool.hexagonal.application.port.in.ImagesService;
+import com.amool.hexagonal.application.port.in.TagService;
 import com.amool.hexagonal.domain.model.Work;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -20,12 +27,35 @@ public class WorkServiceImplTest {
     @Mock
     private ObtainWorkByIdPort obtainWorkByIdPort;
 
+    @Mock
+    private ImagesService imagesService;
+
+    @Mock
+    private LoadUserPort loadUserPort;
+
+    @Mock
+    private FormatPort formatPort;
+
+    @Mock
+    private LoadLanguagePort loadLanguagePort;
+
+    @Mock
+    private CategoryPort categoryPort;
+
+    @Mock
+    private TagService tagService;
+
+    @Mock
+    private WorkPort workPort;
+
     @InjectMocks
     private WorkServiceImpl workServiceImpl;
 
     @BeforeEach
     public void setup() {
         MockitoAnnotations.openMocks(this);
+        when(imagesService.getBannerImageUrl(any())).thenAnswer(inv -> inv.getArgument(0));
+        when(imagesService.getCoverImageUrl(any())).thenAnswer(inv -> inv.getArgument(0));
     }
 
     @Test
@@ -57,7 +87,6 @@ public class WorkServiceImplTest {
     
     @Test
     public void testGetAuthenticatedUserWorks_ShouldReturnUserWorks_WhenUserIsAuthenticated() {
-        // Arrange
         Long userId = 1L;
         Work work1 = new Work();
         work1.setId(1L);
@@ -70,10 +99,8 @@ public class WorkServiceImplTest {
         List<Work> expectedWorks = Arrays.asList(work1, work2);
         when(obtainWorkByIdPort.getWorksByUserId(userId)).thenReturn(expectedWorks);
         
-        // Act
         List<Work> result = workServiceImpl.getAuthenticatedUserWorks(userId);
         
-        // Assert
         assertNotNull(result);
         assertEquals(2, result.size());
         assertEquals("Work 1", result.get(0).getTitle());
@@ -83,10 +110,8 @@ public class WorkServiceImplTest {
     
     @Test
     public void testGetAuthenticatedUserWorks_ShouldThrowSecurityException_WhenUserIdIsNull() {
-        // Arrange
         Long userId = null;
         
-        // Act & Assert
         SecurityException exception = assertThrows(SecurityException.class, () -> {
             workServiceImpl.getAuthenticatedUserWorks(userId);
         });
@@ -97,7 +122,6 @@ public class WorkServiceImplTest {
     
     @Test
     public void testGetWorksByUserId_ShouldReturnWorksForUser() {
-        // Arrange
         Long userId = 1L;
         Work work1 = new Work();
         work1.setId(1L);
@@ -106,10 +130,8 @@ public class WorkServiceImplTest {
         List<Work> expectedWorks = Arrays.asList(work1);
         when(obtainWorkByIdPort.getWorksByUserId(userId)).thenReturn(expectedWorks);
         
-        // Act
         List<Work> result = workServiceImpl.getWorksByUserId(userId);
         
-        // Assert
         assertNotNull(result);
         assertEquals(1, result.size());
         assertEquals("Work 1", result.get(0).getTitle());
