@@ -41,7 +41,7 @@ public class ChapterServiceImpl implements ChapterService {
                               SaveChapterPort saveChapterPort,
                               SaveChapterContentPort saveChapterContentPort,
                               DeleteChapterPort deleteChapterPort,
-                              DeleteChapterContentPort deleteChapterContentPort) {
+                              DeleteChapterContentPort deleteChapterContentPort,
                               ObtainWorkByIdPort obtainWorkByIdPort) {
         this.loadChapterPort = loadChapterPort;
         this.loadChapterContentPort = loadChapterContentPort;
@@ -126,7 +126,7 @@ public class ChapterServiceImpl implements ChapterService {
                             ? language.trim().toLowerCase()
                             : defaultLanguageCode;
 
-                    if (computedLanguage == null || computedLanguage.isBlank()) {
+                    if (computedLanguage.isBlank()) {
                         computedLanguage = defaultLanguageCode;
                     }
 
