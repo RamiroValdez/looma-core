@@ -40,7 +40,6 @@ public class MyWorksControllerTest {
 
     @Test
     void getWorksByUserId_WithMatchingUserId_ReturnsUserWorks() {
-        // Arrange
         Long userId = 1L;
         Work work1 = new Work();
         work1.setId(1L);
@@ -54,11 +53,9 @@ public class MyWorksControllerTest {
 
         when(workService.getAuthenticatedUserWorks(1L)).thenReturn(Arrays.asList(work1, work2));
 
-        // Act
         ResponseEntity<List<WorkResponseDto>> response =
                 myWorksController.getWorksByUserId(userId, testPrincipal);
 
-        // Assert
         assertEquals(HttpStatus.OK, response.getStatusCode());
         assertNotNull(response.getBody());
         assertEquals(2, response.getBody().size());
@@ -67,15 +64,12 @@ public class MyWorksControllerTest {
 
     @Test
     void getWorksByUserId_WithEmptyResults_ReturnsEmptyArray() {
-        // Arrange
         Long userId = 1L;
         when(workService.getAuthenticatedUserWorks(1L)).thenReturn(Collections.emptyList());
 
-        // Act
         ResponseEntity<List<WorkResponseDto>> response =
                 myWorksController.getWorksByUserId(userId, testPrincipal);
 
-        // Assert
         assertEquals(HttpStatus.OK, response.getStatusCode());
         assertNotNull(response.getBody());
         assertTrue(response.getBody().isEmpty());
@@ -84,12 +78,9 @@ public class MyWorksControllerTest {
 
     @Test
     void getWorksByUserId_WithServiceException_ThrowsUnauthorizedAccessException() {
-        // Arrange
         Long userId = 1L;
         when(workService.getAuthenticatedUserWorks(1L))
                 .thenThrow(new RuntimeException("Database error"));
-
-        // Act & Assert
         assertThrows(UnauthorizedAccessException.class, () -> {
             myWorksController.getWorksByUserId(userId, testPrincipal);
         });

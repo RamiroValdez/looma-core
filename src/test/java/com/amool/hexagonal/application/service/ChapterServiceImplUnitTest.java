@@ -7,6 +7,8 @@ import com.amool.hexagonal.application.port.out.LoadChapterPort;
 import com.amool.hexagonal.application.port.out.ObtainWorkByIdPort;
 import com.amool.hexagonal.application.port.out.SaveChapterContentPort;
 import com.amool.hexagonal.application.port.out.SaveChapterPort;
+import com.amool.hexagonal.application.port.out.DeleteChapterPort;
+import com.amool.hexagonal.application.port.out.DeleteChapterContentPort;
 import com.amool.hexagonal.domain.model.Chapter;
 import com.amool.hexagonal.domain.model.ChapterContent;
 import com.amool.hexagonal.domain.model.Work;
@@ -45,6 +47,12 @@ class ChapterServiceImplUnitTest {
     private ObtainWorkByIdPort obtainWorkByIdPort;
 
     @Mock
+    private DeleteChapterPort deleteChapterPort;
+
+    @Mock
+    private DeleteChapterContentPort deleteChapterContentPort;
+
+    @Mock
     private EntityManager entityManager;
 
     private ChapterServiceImpl chapterService;
@@ -64,10 +72,11 @@ class ChapterServiceImplUnitTest {
             loadChapterContentPort,
             saveChapterPort,
             saveChapterContentPort,
+            deleteChapterPort,
+            deleteChapterContentPort,
             obtainWorkByIdPort
         );
 
-        // Inyectar EntityManager usando reflexión
         var entityManagerField = ChapterServiceImpl.class.getDeclaredField("entityManager");
         entityManagerField.setAccessible(true);
         entityManagerField.set(chapterService, entityManager);

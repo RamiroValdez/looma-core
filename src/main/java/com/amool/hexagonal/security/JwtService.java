@@ -15,9 +15,8 @@ import org.springframework.stereotype.Service;
 @Service
 public class JwtService {
 
-    // For demo purposes only. Move to secure config/ENV and rotate in real environments.
     private static final String SECRET_BASE64 = "bG9vbWEtY29yZS1zZWNyZXQta2V5LXNob3VsZC1iZS1sb25nLWVuY3J5cHRlZA==";
-    private static final long EXP_SECONDS = 3600; // 1h
+    private static final long EXP_SECONDS = 3600;
 
     private Key key() {
         byte[] keyBytes = Decoders.BASE64.decode(SECRET_BASE64);

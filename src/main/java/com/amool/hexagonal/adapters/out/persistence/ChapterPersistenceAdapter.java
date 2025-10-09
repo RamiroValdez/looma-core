@@ -6,6 +6,7 @@ import com.amool.hexagonal.adapters.out.persistence.entity.WorkEntity;
 import com.amool.hexagonal.adapters.out.persistence.mappers.ChapterMapper;
 import com.amool.hexagonal.application.port.out.LoadChapterPort;
 import com.amool.hexagonal.application.port.out.SaveChapterPort;
+import com.amool.hexagonal.application.port.out.DeleteChapterPort;
 import com.amool.hexagonal.domain.model.Chapter;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.PersistenceContext;
@@ -18,7 +19,7 @@ import java.util.Optional;
 
 @Component
 @RequiredArgsConstructor
-public class ChapterPersistenceAdapter implements LoadChapterPort, SaveChapterPort {
+public class ChapterPersistenceAdapter implements LoadChapterPort, SaveChapterPort, DeleteChapterPort {
 
     @PersistenceContext
     private EntityManager entityManager;
@@ -71,5 +72,26 @@ public class ChapterPersistenceAdapter implements LoadChapterPort, SaveChapterPo
     public Optional<Chapter> loadChapterForEdit(Long chapterId) {
         return Optional.ofNullable(entityManager.find(ChapterEntity.class, chapterId))
                 .map(ChapterMapper::toDomain);
+    }
+
+    @Override
+    @Transactional
+    public void deleteChapter(Long workId, Long chapterId) {
+        ChapterEntity chapter = entityManager.find(ChapterEntity.class, chapterId);
+        if (chapter == null) return;
+        WorkEntity work = chapter.getWorkEntity();
+        if (work == null || !work.getId().equals(workId)) {
+            return;
+        }
+
+        if (chapter.getVersions() != null) {
+            chapter.getVersions().clear();
+        }
+        if (chapter.getUsersWhoAcquired() != null) {
+            chapter.getUsersWhoAcquired().forEach(u -> u.getAcquiredChapterEntities().remove(chapter));
+            chapter.getUsersWhoAcquired().clear();
+        }
+
+        entityManager.remove(chapter);
     }
 }

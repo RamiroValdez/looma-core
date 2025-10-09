@@ -46,7 +46,6 @@ class AwsS3AdapterTest {
 
     @Test
     void uploadPublicFile_ThrowsRuntimeException() throws IOException {
-        // Given
         String fileName = "test-file.jpg";
         when(multipartFile.getContentType()).thenReturn("image/jpeg");
         when(multipartFile.getSize()).thenReturn(1024L);
@@ -54,7 +53,6 @@ class AwsS3AdapterTest {
         when(s3Client.putObject(any(PutObjectRequest.class), any(RequestBody.class)))
                 .thenThrow(new RuntimeException("S3 error"));
 
-        // When & Then
         RuntimeException exception = assertThrows(RuntimeException.class,
                 () -> awsS3Adapter.uploadPublicFile(fileName, multipartFile));
         assertEquals("S3 error", exception.getMessage());
@@ -62,7 +60,6 @@ class AwsS3AdapterTest {
 
     @Test
     void uploadPublicFile_ThrowsS3Exception() throws IOException {
-        // Given
         String fileName = "test-file.jpg";
         when(multipartFile.getContentType()).thenReturn("image/jpeg");
         when(multipartFile.getSize()).thenReturn(1024L);
@@ -70,7 +67,6 @@ class AwsS3AdapterTest {
         when(s3Client.putObject(any(PutObjectRequest.class), any(RequestBody.class)))
                 .thenThrow(S3Exception.builder().message("Bucket not found").statusCode(404).build());
 
-        // When & Then
         S3Exception exception = assertThrows(S3Exception.class,
                 () -> awsS3Adapter.uploadPublicFile(fileName, multipartFile));
         assertEquals("Bucket not found", exception.getMessage());
@@ -78,13 +74,11 @@ class AwsS3AdapterTest {
 
     @Test
     void uploadPublicFile_ThrowsIOExceptionFromInputStream() throws IOException {
-        // Given
         String fileName = "test-file.jpg";
         when(multipartFile.getContentType()).thenReturn("image/jpeg");
         when(multipartFile.getSize()).thenReturn(1024L);
         when(multipartFile.getInputStream()).thenThrow(new IOException("File read error"));
 
-        // When & Then
         IOException exception = assertThrows(IOException.class,
                 () -> awsS3Adapter.uploadPublicFile(fileName, multipartFile));
         assertEquals("File read error", exception.getMessage());
