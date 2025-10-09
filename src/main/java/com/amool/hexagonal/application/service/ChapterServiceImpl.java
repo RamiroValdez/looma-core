@@ -98,21 +98,32 @@ public class ChapterServiceImpl implements ChapterService {
     }
 
     @Override
-    public Optional<ChapterResponseDto> getChapterForEdit(Long chapterId) {
+    public Optional<ChapterResponseDto> getChapterForEdit(Long chapterId, String language) {
         return loadChapterPort.loadChapterForEdit(chapterId)
                 .map(chapter -> {
                     String workIdStr = chapter.getWorkId().toString();
                     String chapterIdStr = chapterId.toString();
 
-                    String languageCode = getLanguageCodeFromLanguageId(chapter.getLanguageId());
+                    List<String> availableLanguages = loadChapterContentPort.getAvailableLanguages(workIdStr, chapterIdStr);
+
+                    String defaultLanguageCode = getLanguageCodeFromLanguageId(chapter.getLanguageId());
+
+                    String computedLanguage = (language != null && !language.isBlank())
+                            ? language.trim().toLowerCase()
+                            : defaultLanguageCode;
+
+                    if (computedLanguage == null || computedLanguage.isBlank()) {
+                        computedLanguage = defaultLanguageCode;
+                    }
+
+                    final String selectedLanguage = computedLanguage;
 
                     String content = loadChapterContentPort
-                            .loadContent(workIdStr, chapterIdStr, languageCode)
-                            .map(chapterContent -> chapterContent.getContent(languageCode))
+                            .loadContent(workIdStr, chapterIdStr, selectedLanguage)
+                            .map(chapterContent -> chapterContent.getContent(selectedLanguage))
                             .orElseGet(() -> loadChapterContentPort.loadContent(workIdStr, chapterIdStr)
-                                    .map(chapterContent -> chapterContent.getContent(languageCode))
-                                    .orElse("")
-                            );
+                                    .map(chapterContent -> chapterContent.getContent(selectedLanguage))
+                                    .orElse(""));
 
                     Optional<Work> workOptional = obtainWorkByIdPort.obtainWorkById(chapter.getWorkId());
 
@@ -124,9 +135,7 @@ public class ChapterServiceImpl implements ChapterService {
                             .map(work -> calculateChapterNumber(work, chapter))
                             .orElse(null);
 
-                    List<String> availableLanguages = loadChapterContentPort.getAvailableLanguages(workIdStr, chapterIdStr);
-
-                    return ChapterMapper.toDto(chapter, content, workName, availableLanguages, chapterNumber);
+                    return ChapterMapper.toDto(chapter, content, workName, availableLanguages, chapterNumber, defaultLanguageCode);
                 });
     }
 

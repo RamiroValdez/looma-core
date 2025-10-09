@@ -1,7 +1,6 @@
 package com.amool.hexagonal.adapters.in.rest.mappers;
 
 import com.amool.hexagonal.adapters.in.rest.dtos.ChapterWithContentDto;
-import com.amool.hexagonal.adapters.in.rest.dtos.VersionDto;
 import com.amool.hexagonal.adapters.in.rest.dtos.ChapterDto;
 import com.amool.hexagonal.adapters.in.rest.dtos.ChapterResponseDto;
 import com.amool.hexagonal.application.port.in.ChapterService;
@@ -47,7 +46,8 @@ public class ChapterMapper {
             String content,
             String workName,
             List<String> availableLanguages,
-            Integer chapterNumber
+            Integer chapterNumber,
+            String languageCode
             ) {
 
         if (chapter == null) {
@@ -63,7 +63,7 @@ public class ChapterMapper {
         dto.setLastUpdate(chapter.getLastModified());
         dto.setLikes(chapter.getLikes());
         dto.setAllowAiTranslation(chapter.getAllowAiTranslation());
-        dto.setLanguageId(chapter.getLanguageId());
+        dto.setLanguageCode(languageCode);
         dto.setPublicationStatus(chapter.getPublicationStatus());
         dto.setScheduledPublicationDate(chapter.getScheduledPublicationDate());
         dto.setPublishedAt(chapter.getPublishedAt());

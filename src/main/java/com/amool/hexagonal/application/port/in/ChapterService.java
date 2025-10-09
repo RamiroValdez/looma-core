@@ -10,7 +10,7 @@ public interface ChapterService {
 
     Chapter createEmptyChapter(Long workId, Long languageId, String contentType);
     
-    Optional<ChapterResponseDto> getChapterForEdit(Long chapterId);
+    Optional<ChapterResponseDto> getChapterForEdit(Long chapterId, String language);
 
     record ChapterWithContent(Chapter chapter, String content) {}
 }

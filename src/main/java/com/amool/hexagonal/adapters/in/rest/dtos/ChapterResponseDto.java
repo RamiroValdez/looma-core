@@ -12,7 +12,7 @@ public class ChapterResponseDto {
     LocalDateTime last_update;
     Long likes;
     Boolean allowAiTranslation;
-    Long language_id;
+    String language_code;
     String publicationStatus;
     LocalDateTime scheduledPublicationDate;
     LocalDateTime publishedAt;
@@ -43,8 +43,8 @@ public class ChapterResponseDto {
     public Boolean getAllowAiTranslation() { return allowAiTranslation; }
     public void setAllowAiTranslation(Boolean allowAiTranslation) { this.allowAiTranslation = allowAiTranslation; }
 
-    public Long getLanguageId() { return language_id; }
-    public void setLanguageId(Long language_id) { this.language_id = language_id; }
+    public String getLanguageCode() { return language_code; }
+    public void setLanguageCode(String language_code) { this.language_code = language_code; }
 
     public String getPublicationStatus() { return publicationStatus; }
     public void setPublicationStatus(String publicationStatus) { this.publicationStatus = publicationStatus; }

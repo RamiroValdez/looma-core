@@ -180,14 +180,14 @@ class ChapterServiceImplUnitTest {
         work.setChapters(List.of(chapter));
         when(obtainWorkByIdPort.obtainWorkById(workId)).thenReturn(Optional.of(work));
 
-        Optional<ChapterResponseDto> result = chapterService.getChapterForEdit(chapterId);
+        Optional<ChapterResponseDto> result = chapterService.getChapterForEdit(chapterId, null);
 
         assertTrue(result.isPresent());
         ChapterResponseDto dto = result.get();
         assertEquals(chapterId, dto.getId());
         assertEquals("Capítulo de prueba", dto.getTitle());
         assertEquals("Contenido ES", dto.getContent());
-        assertEquals(languageId, dto.getLanguageId());
+        assertEquals("es", dto.getLanguageCode());
         assertEquals(List.of("es", "en"), dto.getAvailableLanguages());
         assertEquals("Obra prueba", dto.getWorkName());
         assertEquals(1, dto.getChapterNumber());
@@ -198,7 +198,7 @@ class ChapterServiceImplUnitTest {
         Long chapterId = 999L;
         when(loadChapterPort.loadChapterForEdit(chapterId)).thenReturn(Optional.empty());
 
-        Optional<ChapterResponseDto> result = chapterService.getChapterForEdit(chapterId);
+        Optional<ChapterResponseDto> result = chapterService.getChapterForEdit(chapterId, null);
 
         assertTrue(result.isEmpty());
         verify(loadChapterContentPort, never()).loadContent(anyString(), anyString(), anyString());

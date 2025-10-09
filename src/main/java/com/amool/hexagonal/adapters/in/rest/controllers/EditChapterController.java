@@ -21,8 +21,9 @@ public class EditChapterController {
 
     @GetMapping("/{chapterId}")
     @PreAuthorize("isAuthenticated()")
-    public ResponseEntity<ChapterResponseDto> getChapterForEdit(@PathVariable Long chapterId) {
-        return chapterService.getChapterForEdit(chapterId)
+    public ResponseEntity<ChapterResponseDto> getChapterForEdit(@PathVariable Long chapterId,
+                                                                @RequestParam(value = "language", required = false) String language) {
+        return chapterService.getChapterForEdit(chapterId, language)
                 .map(ResponseEntity::ok)
                 .orElseGet(() -> ResponseEntity.notFound().build());
     }
