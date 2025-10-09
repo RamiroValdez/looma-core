@@ -1,10 +1,15 @@
 package com.amool.hexagonal.adapters.in.rest.controllers;
 
 import com.amool.hexagonal.adapters.in.rest.dtos.LoginRequest;
+import com.amool.hexagonal.adapters.in.rest.dtos.UserDto;
 import com.amool.hexagonal.adapters.in.rest.dtos.AuthResponse;
 import com.amool.hexagonal.application.port.in.CredentialsService;
 import com.amool.hexagonal.security.JwtService;
+import com.amool.hexagonal.security.JwtUserPrincipal;
+
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
+import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -20,6 +25,22 @@ public class LoginController {
     public LoginController(CredentialsService credentialsService, JwtService jwtService) {
         this.credentialsService = credentialsService;
         this.jwtService = jwtService;
+    }
+
+    
+
+    @GetMapping("/me")
+    public ResponseEntity<UserDto> me(@AuthenticationPrincipal JwtUserPrincipal principal) {
+        if (principal == null) {
+            return ResponseEntity.status(401).build();
+        }
+        UserDto dto = new UserDto();
+        dto.setId(principal.getUserId());
+        dto.setEmail(principal.getEmail());
+        dto.setName(principal.getName());
+        dto.setSurname(principal.getSurname());
+        dto.setUsername(principal.getUsername());
+        return ResponseEntity.ok(dto);
     }
 
     @PostMapping("/login")
