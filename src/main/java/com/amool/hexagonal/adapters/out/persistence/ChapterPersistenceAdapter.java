@@ -66,4 +66,10 @@ public class ChapterPersistenceAdapter implements LoadChapterPort, SaveChapterPo
 
         return domain;
     }
+
+    @Override
+    public Optional<Chapter> loadChapterForEdit(Long chapterId) {
+        return Optional.ofNullable(entityManager.find(ChapterEntity.class, chapterId))
+                .map(ChapterMapper::toDomain);
+    }
 }
