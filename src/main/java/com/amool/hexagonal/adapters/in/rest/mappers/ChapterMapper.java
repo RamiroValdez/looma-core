@@ -2,7 +2,9 @@ package com.amool.hexagonal.adapters.in.rest.mappers;
 
 import com.amool.hexagonal.adapters.in.rest.dtos.ChapterWithContentDto;
 import com.amool.hexagonal.adapters.in.rest.dtos.ChapterDto;
+import com.amool.hexagonal.adapters.in.rest.dtos.ChapterResponseDto;
 import com.amool.hexagonal.application.port.in.ChapterService;
+import com.amool.hexagonal.domain.model.Chapter;
 
 import java.util.List;
 
@@ -36,6 +38,37 @@ public class ChapterMapper {
         dto.setPublicationStatus(chapter.getPublicationStatus());
         dto.setScheduledPublicationDate(chapter.getScheduledPublicationDate());
         dto.setPublishedAt(chapter.getPublishedAt());
+        return dto;
+    }
+
+    public static ChapterResponseDto toDto(
+            Chapter chapter,
+            String content,
+            String workName,
+            List<String> availableLanguages,
+            Integer chapterNumber,
+            String languageCode
+            ) {
+
+        if (chapter == null) {
+            return null;
+        }
+
+        ChapterResponseDto dto = new ChapterResponseDto();
+        dto.setId(chapter.getId());
+        dto.setTitle(chapter.getTitle());
+        dto.setContent(content); 
+        dto.setPrice(chapter.getPrice());
+        dto.setWorkName(workName);
+        dto.setLastUpdate(chapter.getLastModified());
+        dto.setLikes(chapter.getLikes());
+        dto.setAllowAiTranslation(chapter.getAllowAiTranslation());
+        dto.setLanguageCode(languageCode);
+        dto.setPublicationStatus(chapter.getPublicationStatus());
+        dto.setScheduledPublicationDate(chapter.getScheduledPublicationDate());
+        dto.setPublishedAt(chapter.getPublishedAt());
+        dto.setAvailableLanguages(availableLanguages);
+        dto.setChapterNumber(chapterNumber);
         return dto;
     }
 

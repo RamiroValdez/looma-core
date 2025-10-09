@@ -23,6 +23,10 @@ public class ChapterMapper {
             chapter.setWorkId(entity.getWorkEntity().getId());
         }
 
+        if (entity.getLanguageEntity() != null) {
+            chapter.setLanguageId(entity.getLanguageEntity().getId());
+        }
+
         chapter.setAllowAiTranslation(entity.getAllowAiTranslation());
         chapter.setPublicationStatus(entity.getPublicationStatus());
         chapter.setScheduledPublicationDate(entity.getScheduledPublicationDate());

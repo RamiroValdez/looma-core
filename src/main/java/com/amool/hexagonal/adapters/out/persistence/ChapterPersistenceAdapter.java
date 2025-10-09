@@ -69,6 +69,12 @@ public class ChapterPersistenceAdapter implements LoadChapterPort, SaveChapterPo
     }
 
     @Override
+    public Optional<Chapter> loadChapterForEdit(Long chapterId) {
+        return Optional.ofNullable(entityManager.find(ChapterEntity.class, chapterId))
+                .map(ChapterMapper::toDomain);
+    }
+
+    @Override
     @Transactional
     public void deleteChapter(Long workId, Long chapterId) {
         ChapterEntity chapter = entityManager.find(ChapterEntity.class, chapterId);

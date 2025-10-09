@@ -11,4 +11,5 @@ public interface LoadChapterPort {
      * @return Optional con el capítulo si se encuentra, vacío en caso contrario
      */
     Optional<Chapter> loadChapter(Long workId, Long chapterId);
+    Optional<Chapter> loadChapterForEdit(Long chapterId);
 }
