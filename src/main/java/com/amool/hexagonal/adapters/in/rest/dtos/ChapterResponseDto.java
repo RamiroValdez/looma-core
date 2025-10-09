@@ -17,6 +17,7 @@ public class ChapterResponseDto {
     LocalDateTime scheduledPublicationDate;
     LocalDateTime publishedAt;
     List<String> availableLanguages;
+    Integer chapter_number;
 
     public Long getId() { return id; }
     public void setId(Long id) { this.id = id; }
@@ -50,11 +51,13 @@ public class ChapterResponseDto {
 
     public LocalDateTime getScheduledPublicationDate() { return scheduledPublicationDate; }
     public void setScheduledPublicationDate(LocalDateTime scheduledPublicationDate) { this.scheduledPublicationDate = scheduledPublicationDate; }
-
     public LocalDateTime getPublishedAt() { return publishedAt; }
     public void setPublishedAt(LocalDateTime publishedAt) { this.publishedAt = publishedAt; }
 
     public List<String> getAvailableLanguages() { return availableLanguages; }
     public void setAvailableLanguages(List<String> availableLanguages) { this.availableLanguages = availableLanguages; }
-    
+
+    public Integer getChapterNumber() { return chapter_number; }
+    public void setChapterNumber(Integer chapter_number) { this.chapter_number = chapter_number; }
+
 }

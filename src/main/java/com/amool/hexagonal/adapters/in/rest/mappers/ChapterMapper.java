@@ -46,7 +46,8 @@ public class ChapterMapper {
             Chapter chapter,
             String content,
             String workName,
-            List<String> availableLanguages
+            List<String> availableLanguages,
+            Integer chapterNumber
             ) {
 
         if (chapter == null) {
@@ -67,6 +68,7 @@ public class ChapterMapper {
         dto.setScheduledPublicationDate(chapter.getScheduledPublicationDate());
         dto.setPublishedAt(chapter.getPublishedAt());
         dto.setAvailableLanguages(availableLanguages);
+        dto.setChapterNumber(chapterNumber);
         return dto;
     }
 

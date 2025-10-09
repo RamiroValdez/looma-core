@@ -17,6 +17,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 import java.util.Optional;
+import com.amool.hexagonal.domain.model.Work;
 
 @Service
 @Transactional
@@ -113,13 +114,36 @@ public class ChapterServiceImpl implements ChapterService {
                                     .orElse("")
                             );
 
-                    String workName = obtainWorkByIdPort.obtainWorkById(chapter.getWorkId())
-                            .map(work -> work.getTitle())
+                    Optional<Work> workOptional = obtainWorkByIdPort.obtainWorkById(chapter.getWorkId());
+
+                    String workName = workOptional
+                            .map(Work::getTitle)
                             .orElse("Obra desconocida");
+
+                    Integer chapterNumber = workOptional
+                            .map(work -> calculateChapterNumber(work, chapter))
+                            .orElse(null);
 
                     List<String> availableLanguages = loadChapterContentPort.getAvailableLanguages(workIdStr, chapterIdStr);
 
-                    return ChapterMapper.toDto(chapter, content, workName, availableLanguages);
+                    return ChapterMapper.toDto(chapter, content, workName, availableLanguages, chapterNumber);
                 });
+    }
+
+    private Integer calculateChapterNumber(Work work, Chapter chapter) {
+        if (work == null || chapter == null) {
+            return null;
+        }
+        List<Chapter> chapters = work.getChapters();
+        if (chapters == null || chapter.getId() == null) {
+            return null;
+        }
+        for (int i = 0; i < chapters.size(); i++) {
+            Chapter workChapter = chapters.get(i);
+            if (workChapter != null && chapter.getId().equals(workChapter.getId())) {
+                return i + 1;
+            }
+        }
+        return null;
     }
 }

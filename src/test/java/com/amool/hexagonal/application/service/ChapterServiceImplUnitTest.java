@@ -177,6 +177,7 @@ class ChapterServiceImplUnitTest {
 
         Work work = new Work();
         work.setTitle("Obra prueba");
+        work.setChapters(List.of(chapter));
         when(obtainWorkByIdPort.obtainWorkById(workId)).thenReturn(Optional.of(work));
 
         Optional<ChapterResponseDto> result = chapterService.getChapterForEdit(chapterId);
@@ -189,6 +190,7 @@ class ChapterServiceImplUnitTest {
         assertEquals(languageId, dto.getLanguageId());
         assertEquals(List.of("es", "en"), dto.getAvailableLanguages());
         assertEquals("Obra prueba", dto.getWorkName());
+        assertEquals(1, dto.getChapterNumber());
     }
 
     @Test
