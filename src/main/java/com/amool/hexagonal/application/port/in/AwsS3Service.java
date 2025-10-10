@@ -18,4 +18,6 @@ public interface AwsS3Service {
 
     List<S3Object> obtainObjectsInPath(String path);
 
+    void deleteObject(String key);
+
 }

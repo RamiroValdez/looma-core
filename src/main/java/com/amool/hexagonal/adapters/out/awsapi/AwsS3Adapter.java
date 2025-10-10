@@ -11,6 +11,7 @@ import software.amazon.awssdk.services.s3.model.PutObjectRequest;
 import software.amazon.awssdk.services.s3.model.S3Object;
 import software.amazon.awssdk.services.s3.presigner.S3Presigner;
 import software.amazon.awssdk.services.s3.presigner.model.GetObjectPresignRequest;
+import software.amazon.awssdk.services.s3.model.DeleteObjectRequest;
 
 import java.io.IOException;
 import java.time.Duration;
@@ -94,6 +95,16 @@ public class AwsS3Adapter implements AwsS3Port {
         return s3Client.listObjectsV2(builder ->
                 builder.bucket(bucketName).prefix(path)
         ).contents();
+    }
+
+    @Override
+    public void deleteObject(String key) {
+        if (key == null || key.isBlank()) return;
+        DeleteObjectRequest request = DeleteObjectRequest.builder()
+                .bucket(bucketName)
+                .key(key)
+                .build();
+        s3Client.deleteObject(request);
     }
 
 }

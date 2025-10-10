@@ -151,4 +151,49 @@ public class WorkServiceImpl implements WorkService {
         work.setCover(coverUrl);
         work.setBanner(bannerUrl);
     }
+
+    @Override
+    @Transactional(rollbackFor = Exception.class)
+    public void updateCover(Long workId, MultipartFile coverFile, Long authenticatedUserId) throws IOException {
+        if (authenticatedUserId == null) {
+            throw new SecurityException("Usuario no autenticado");
+        }
+
+        Work work = this.obtainWorkByIdPort
+                .obtainWorkById(workId)
+                .orElseThrow(() -> new NoSuchElementException("Obra no encontrada"));
+
+        if (work.getCreator() == null || !Objects.equals(work.getCreator().getId(), authenticatedUserId)) {
+            throw new SecurityException("No autorizado para modificar esta obra");
+        }
+
+        this.imagesService.deleteImage(work.getCover());
+
+        String newCoverPath = this.imagesService.uploadCoverImage(coverFile, work.getId().toString());
+        work.setCover(newCoverPath);
+        this.workPort.updateWork(work);
+    }
+
+    @Override
+    @Transactional(rollbackFor = Exception.class)
+    public void updateBanner(Long workId, MultipartFile bannerFile, Long authenticatedUserId) throws IOException {
+        if (authenticatedUserId == null) {
+            throw new SecurityException("Usuario no autenticado");
+        }
+
+        Work work = this.obtainWorkByIdPort
+                .obtainWorkById(workId)
+                .orElseThrow(() -> new NoSuchElementException("Obra no encontrada"));
+
+        if (work.getCreator() == null || !Objects.equals(work.getCreator().getId(), authenticatedUserId)) {
+            throw new SecurityException("No autorizado para modificar esta obra");
+        }
+
+        // Delete previous banner from S3 before uploading the new one
+        this.imagesService.deleteImage(work.getBanner());
+
+        String newBannerPath = this.imagesService.uploadBannerImage(bannerFile, work.getId().toString());
+        work.setBanner(newBannerPath);
+        this.workPort.updateWork(work);
+    }
 }
