@@ -2,21 +2,15 @@ package com.amool.hexagonal.application.service;
 
 import com.amool.hexagonal.adapters.in.rest.dtos.ChapterResponseDto;
 import com.amool.hexagonal.adapters.in.rest.mappers.ChapterMapper;
+import com.amool.hexagonal.adapters.in.rest.mappers.LanguageMapper;
 import com.amool.hexagonal.application.port.in.ChapterService;
-import com.amool.hexagonal.application.port.out.LoadChapterContentPort;
-import com.amool.hexagonal.application.port.out.LoadChapterPort;
-import com.amool.hexagonal.application.port.out.SaveChapterPort;
-import com.amool.hexagonal.application.port.out.SaveChapterContentPort;
-import com.amool.hexagonal.application.port.out.DeleteChapterPort;
-import com.amool.hexagonal.application.port.out.DeleteChapterContentPort;
-import com.amool.hexagonal.application.port.out.ObtainWorkByIdPort;
+import com.amool.hexagonal.application.port.out.*;
 import com.amool.hexagonal.domain.model.Chapter;
-import com.amool.hexagonal.adapters.out.persistence.entity.LanguageEntity;
+import com.amool.hexagonal.domain.model.Language;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.PersistenceContext;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-
 import java.util.List;
 import java.util.Optional;
 import com.amool.hexagonal.domain.model.Work;
@@ -32,6 +26,7 @@ public class ChapterServiceImpl implements ChapterService {
     private final DeleteChapterPort deleteChapterPort;
     private final DeleteChapterContentPort deleteChapterContentPort;
     private final ObtainWorkByIdPort obtainWorkByIdPort;
+    private final LoadLanguagePort loadLanguagePort;
 
     @PersistenceContext
     private EntityManager entityManager;
@@ -42,7 +37,9 @@ public class ChapterServiceImpl implements ChapterService {
                               SaveChapterContentPort saveChapterContentPort,
                               DeleteChapterPort deleteChapterPort,
                               DeleteChapterContentPort deleteChapterContentPort,
-                              ObtainWorkByIdPort obtainWorkByIdPort) {
+                              ObtainWorkByIdPort obtainWorkByIdPort,
+                                LoadLanguagePort loadLanguagePort
+                              ) {
         this.loadChapterPort = loadChapterPort;
         this.loadChapterContentPort = loadChapterContentPort;
         this.saveChapterPort = saveChapterPort;
@@ -50,6 +47,7 @@ public class ChapterServiceImpl implements ChapterService {
         this.deleteChapterPort = deleteChapterPort;
         this.deleteChapterContentPort = deleteChapterContentPort;
         this.obtainWorkByIdPort = obtainWorkByIdPort;
+        this.loadLanguagePort = loadLanguagePort;
     }
 
     @Override
@@ -69,7 +67,11 @@ public class ChapterServiceImpl implements ChapterService {
         Chapter savedChapter = saveChapterPort.saveChapter(chapter);
 
         if ("TEXT".equals(contentType)) {
-            String languageCode = getLanguageCodeFromLanguageId(languageId);
+
+            String languageCode = this.loadLanguagePort.loadLanguageById(languageId)
+                    .map(Language::getCode)
+                    .orElse("es");
+
             String emptyContent = ""; 
             saveChapterContentPort.saveContent(
                 workId.toString(),
@@ -88,58 +90,29 @@ public class ChapterServiceImpl implements ChapterService {
         deleteChapterPort.deleteChapter(workId, chapterId);
     }
 
-    private String getLanguageCodeFromLanguageId(Long languageId) {
-        if (languageId == null) {
-            return "es";
-        }
-
-        LanguageEntity languageEntity = entityManager.find(LanguageEntity.class, languageId);
-        if (languageEntity == null) {
-            return "es"; 
-        }
-
-        String languageName = languageEntity.getName().toLowerCase().trim();
-
-        return switch (languageName) {
-            case "español", "spanish" -> "es";
-            case "english", "inglés" -> "en";
-            case "french", "francés" -> "fr";
-            case "german", "alemán" -> "de";
-            case "italian", "italiano" -> "it";
-            case "portuguese", "portugués" -> "pt";
-            default -> "es"; 
-        };
-    }
-
     @Override
     public Optional<ChapterResponseDto> getChapterForEdit(Long chapterId, String language) {
         return loadChapterPort.loadChapterForEdit(chapterId)
                 .map(chapter -> {
+
                     String workIdStr = chapter.getWorkId().toString();
                     String chapterIdStr = chapterId.toString();
 
-                    List<String> availableLanguages = loadChapterContentPort.getAvailableLanguages(workIdStr, chapterIdStr);
+                    List<String> availableCodeLanguages = loadChapterContentPort.getAvailableLanguages(workIdStr, chapterIdStr);
 
-                    String defaultLanguageCode = getLanguageCodeFromLanguageId(chapter.getLanguageId());
-
-                    String computedLanguage = (language != null && !language.isBlank())
-                            ? language.trim().toLowerCase()
-                            : defaultLanguageCode;
-
-                    if (computedLanguage.isBlank()) {
-                        computedLanguage = defaultLanguageCode;
-                    }
-
-                    final String selectedLanguage = computedLanguage;
+                    List<Language> availableLanguages = loadLanguagePort.getLanguagesByCodes(availableCodeLanguages);
 
                     String content = loadChapterContentPort
-                            .loadContent(workIdStr, chapterIdStr, selectedLanguage)
-                            .map(chapterContent -> chapterContent.getContent(selectedLanguage))
+                            .loadContent(workIdStr, chapterIdStr, language)
+                            .map(chapterContent -> chapterContent.getContent(language))
                             .orElseGet(() -> loadChapterContentPort.loadContent(workIdStr, chapterIdStr)
-                                    .map(chapterContent -> chapterContent.getContent(selectedLanguage))
+                                    .map(chapterContent -> chapterContent.getContent(language))
                                     .orElse(""));
 
                     Optional<Work> workOptional = obtainWorkByIdPort.obtainWorkById(chapter.getWorkId());
+
+                    Language defaultLanguageCode = workOptional.map(Work::getOriginalLanguage)
+                            .orElse(availableLanguages.getFirst());
 
                     String workName = workOptional
                             .map(Work::getTitle)
@@ -149,7 +122,14 @@ public class ChapterServiceImpl implements ChapterService {
                             .map(work -> calculateChapterNumber(work, chapter))
                             .orElse(null);
 
-                    return ChapterMapper.toDto(chapter, content, workName, availableLanguages, chapterNumber, defaultLanguageCode);
+                    return ChapterMapper.toDto(
+                            chapter,
+                            content,
+                            workName,
+                            LanguageMapper.toDtoList(availableLanguages),
+                            chapterNumber,
+                            LanguageMapper.toDto(defaultLanguageCode)
+                    );
                 });
     }
 

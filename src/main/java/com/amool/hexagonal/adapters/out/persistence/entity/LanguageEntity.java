@@ -13,6 +13,9 @@ public class LanguageEntity {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
+    @Column(name = "code")
+    private String code;
+
     @Column(name = "name", nullable = false)
     private String name;
 
@@ -27,4 +30,7 @@ public class LanguageEntity {
 
     public Set<UserEntity> getUsers() { return users; }
     public void setUsers(Set<UserEntity> users) { this.users = users; }
+
+    public String getCode() { return code; }
+    public void setCode(String code) { this.code = code; }
 }

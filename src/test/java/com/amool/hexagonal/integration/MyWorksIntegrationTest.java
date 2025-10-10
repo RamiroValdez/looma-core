@@ -3,6 +3,7 @@ package com.amool.hexagonal.integration;
 import com.amool.hexagonal.adapters.in.rest.controllers.MyWorksController;
 import com.amool.hexagonal.adapters.in.rest.dtos.WorkResponseDto;
 import com.amool.hexagonal.adapters.out.persistence.WorksPersistenceAdapter;
+import com.amool.hexagonal.application.port.out.*;
 import com.amool.hexagonal.security.JwtUserPrincipal;
 import com.amool.hexagonal.adapters.out.persistence.entity.WorkEntity;
 import com.amool.hexagonal.adapters.out.persistence.entity.UserEntity;
@@ -15,6 +16,9 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.boot.test.context.TestConfiguration;
+import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.Primary;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.boot.autoconfigure.mongo.MongoAutoConfiguration;
 import org.springframework.boot.autoconfigure.data.mongo.MongoDataAutoConfiguration;
@@ -27,10 +31,6 @@ import org.springframework.http.HttpStatus;
 import org.springframework.security.test.context.support.WithMockUser;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.context.SecurityContextHolder;
-import com.amool.hexagonal.application.port.out.LoadChapterContentPort;
-import com.amool.hexagonal.application.port.out.LoadChapterPort;
-import com.amool.hexagonal.application.port.out.SaveChapterContentPort;
-import com.amool.hexagonal.application.port.out.SaveChapterPort;
 import com.amool.hexagonal.adapters.out.mongodb.repository.MongoChapterContentRepository;
 import org.springframework.data.mongodb.core.MongoTemplate;
 import com.mongodb.client.MongoClient;
@@ -39,6 +39,7 @@ import java.time.LocalDate;
 import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.*;
+import static org.mockito.Mockito.mock;
 
 @SpringBootTest
 @EnableAutoConfiguration(exclude = {MongoAutoConfiguration.class, MongoDataAutoConfiguration.class, MongoRepositoriesAutoConfiguration.class})
@@ -48,6 +49,58 @@ import static org.junit.jupiter.api.Assertions.*;
 })
 @Transactional
 class MyWorksIntegrationTest {
+
+    @TestConfiguration
+    static class TestConfig {
+
+        @Bean
+        @Primary
+        public LoadChapterContentPort loadChapterContentPort() {
+            return mock(LoadChapterContentPort.class);
+        }
+
+        @Bean
+        @Primary
+        public LoadChapterPort loadChapterPort() {
+            return mock(LoadChapterPort.class);
+        }
+
+        @Bean
+        @Primary
+        public SaveChapterContentPort saveChapterContentPort() {
+            return mock(SaveChapterContentPort.class);
+        }
+
+        @Bean
+        @Primary
+        public SaveChapterPort saveChapterPort() {
+            return mock(SaveChapterPort.class);
+        }
+
+        @Bean
+        @Primary
+        public DeleteChapterPort deleteChapterPort() {
+            return mock(DeleteChapterPort.class);
+        }
+
+        @Bean
+        @Primary
+        public MongoChapterContentRepository mongoChapterContentRepository() {
+            return mock(MongoChapterContentRepository.class);
+        }
+
+        @Bean
+        @Primary
+        public MongoTemplate mongoTemplate() {
+            return mock(MongoTemplate.class);
+        }
+
+        @Bean
+        @Primary
+        public MongoClient mongoClient() {
+            return mock(MongoClient.class);
+        }
+    }
 
     @Autowired
     private MyWorksController myWorksController;
@@ -61,26 +114,6 @@ class MyWorksIntegrationTest {
     @Autowired
     private EntityManager entityManager;
 
-    @MockitoBean
-    private LoadChapterContentPort loadChapterContentPort;
-
-    @MockitoBean
-    private LoadChapterPort loadChapterPort;
-
-    @MockitoBean
-    private SaveChapterContentPort saveChapterContentPort;
-
-    @MockitoBean
-    private SaveChapterPort saveChapterPort;
-
-    @MockitoBean
-    private MongoChapterContentRepository mongoChapterContentRepository;
-
-    @MockitoBean
-    private MongoTemplate mongoTemplate;
-
-    @MockitoBean
-    private MongoClient mongoClient;
     private UserEntity testUser;
     private FormatEntity testFormat;
     private LanguageEntity testLanguage;
@@ -89,7 +122,6 @@ class MyWorksIntegrationTest {
 
     @BeforeEach
     void setUp() {
-        
         testUser = new UserEntity();
         testUser.setName("Test");
         testUser.setSurname("User");
@@ -98,17 +130,14 @@ class MyWorksIntegrationTest {
         testUser.setPassword("password123");
         entityManager.persist(testUser);
 
-        
         testFormat = new FormatEntity();
         testFormat.setName("Test Format");
         entityManager.persist(testFormat);
 
-        
         testLanguage = new LanguageEntity();
         testLanguage.setName("Español");
         entityManager.persist(testLanguage);
 
-        
         testWork1 = new WorkEntity();
         testWork1.setTitle("Test Work 1");
         testWork1.setDescription("Description 1");

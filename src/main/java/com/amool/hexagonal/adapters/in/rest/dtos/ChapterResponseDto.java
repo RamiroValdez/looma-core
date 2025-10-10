@@ -12,12 +12,12 @@ public class ChapterResponseDto {
     LocalDateTime last_update;
     Long likes;
     Boolean allowAiTranslation;
-    String language_code;
+    LanguageDto languageDefaultCode;
     String publicationStatus;
     LocalDateTime scheduledPublicationDate;
     LocalDateTime publishedAt;
-    List<String> availableLanguages;
-    Integer chapter_number;
+    List<LanguageDto> availableLanguages;
+    Integer chapterNumber;
 
     public Long getId() { return id; }
     public void setId(Long id) { this.id = id; }
@@ -43,8 +43,8 @@ public class ChapterResponseDto {
     public Boolean getAllowAiTranslation() { return allowAiTranslation; }
     public void setAllowAiTranslation(Boolean allowAiTranslation) { this.allowAiTranslation = allowAiTranslation; }
 
-    public String getLanguageCode() { return language_code; }
-    public void setLanguageCode(String language_code) { this.language_code = language_code; }
+    public LanguageDto getLanguageDefaultCode() { return languageDefaultCode; }
+    public void setLanguageDefaultCode(LanguageDto language_code) { this.languageDefaultCode = language_code; }
 
     public String getPublicationStatus() { return publicationStatus; }
     public void setPublicationStatus(String publicationStatus) { this.publicationStatus = publicationStatus; }
@@ -54,10 +54,10 @@ public class ChapterResponseDto {
     public LocalDateTime getPublishedAt() { return publishedAt; }
     public void setPublishedAt(LocalDateTime publishedAt) { this.publishedAt = publishedAt; }
 
-    public List<String> getAvailableLanguages() { return availableLanguages; }
-    public void setAvailableLanguages(List<String> availableLanguages) { this.availableLanguages = availableLanguages; }
+    public List<LanguageDto> getAvailableLanguages() { return availableLanguages; }
+    public void setAvailableLanguages(List<LanguageDto> availableLanguages) { this.availableLanguages = availableLanguages; }
 
-    public Integer getChapterNumber() { return chapter_number; }
-    public void setChapterNumber(Integer chapter_number) { this.chapter_number = chapter_number; }
+    public Integer getChapterNumber() { return chapterNumber; }
+    public void setChapterNumber(Integer chapter_number) { this.chapterNumber = chapter_number; }
 
 }
