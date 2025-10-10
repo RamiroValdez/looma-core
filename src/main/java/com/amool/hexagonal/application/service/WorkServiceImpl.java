@@ -167,8 +167,7 @@ public class WorkServiceImpl implements WorkService {
             throw new SecurityException("No autorizado para modificar esta obra");
         }
 
-        work.setCover("none");
-        this.workPort.updateWork(work);
+        this.imagesService.deleteImage(work.getCover());
 
         String newCoverPath = this.imagesService.uploadCoverImage(coverFile, work.getId().toString());
         work.setCover(newCoverPath);
@@ -190,8 +189,8 @@ public class WorkServiceImpl implements WorkService {
             throw new SecurityException("No autorizado para modificar esta obra");
         }
 
-        work.setBanner("none");
-        this.workPort.updateWork(work);
+        // Delete previous banner from S3 before uploading the new one
+        this.imagesService.deleteImage(work.getBanner());
 
         String newBannerPath = this.imagesService.uploadBannerImage(bannerFile, work.getId().toString());
         work.setBanner(newBannerPath);

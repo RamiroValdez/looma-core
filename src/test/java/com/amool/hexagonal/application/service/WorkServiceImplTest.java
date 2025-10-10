@@ -20,6 +20,7 @@ import org.springframework.web.multipart.MultipartFile;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
+import org.mockito.InOrder;
 
 import java.io.IOException;
 import java.util.Arrays;
@@ -189,14 +190,17 @@ public class WorkServiceImplTest {
         User creator = new User();
         creator.setId(10L);
         work.setCreator(creator);
+        work.setCover("works/1/cover/old.jpg");
         when(obtainWorkByIdPort.obtainWorkById(1L)).thenReturn(Optional.of(work));
         when(imagesService.uploadCoverImage(any(), eq("1"))).thenReturn("works/1/cover/cover.jpg");
 
         MultipartFile file = new MockMultipartFile("cover", "c.jpg", "image/jpeg", new byte[]{1});
         workServiceImpl.updateCover(1L, file, 10L);
 
-        verify(workPort, times(2)).updateWork(any(Work.class));
-        verify(imagesService).uploadCoverImage(file, "1");
+        InOrder inOrder = inOrder(imagesService, workPort);
+        inOrder.verify(imagesService).deleteImage("works/1/cover/old.jpg");
+        inOrder.verify(imagesService).uploadCoverImage(file, "1");
+        inOrder.verify(workPort).updateWork(any(Work.class));
     }
 
     @Test
@@ -206,14 +210,15 @@ public class WorkServiceImplTest {
         User creator = new User();
         creator.setId(10L);
         work.setCreator(creator);
+        work.setCover("works/1/cover/old.jpg");
         when(obtainWorkByIdPort.obtainWorkById(1L)).thenReturn(Optional.of(work));
         when(imagesService.uploadCoverImage(any(), anyString())).thenThrow(new IOException("fail"));
 
         MultipartFile file = new MockMultipartFile("cover", "c.jpg", "image/jpeg", new byte[]{1});
 
         assertThrows(IOException.class, () -> workServiceImpl.updateCover(1L, file, 10L));
-        // first update to clear field, second update should not happen due to exception
-        verify(workPort, times(1)).updateWork(any(Work.class));
+        verify(workPort, never()).updateWork(any(Work.class));
+        verify(imagesService).deleteImage("works/1/cover/old.jpg");
     }
 
     // --- updateBanner tests ---
@@ -263,14 +268,17 @@ public class WorkServiceImplTest {
         User creator = new User();
         creator.setId(10L);
         work.setCreator(creator);
+        work.setBanner("works/1/banner/old.jpg");
         when(obtainWorkByIdPort.obtainWorkById(1L)).thenReturn(Optional.of(work));
         when(imagesService.uploadBannerImage(any(), eq("1"))).thenReturn("works/1/banner/banner.jpg");
 
         MultipartFile file = new MockMultipartFile("banner", "b.jpg", "image/jpeg", new byte[]{1});
         workServiceImpl.updateBanner(1L, file, 10L);
 
-        verify(workPort, times(2)).updateWork(any(Work.class));
-        verify(imagesService).uploadBannerImage(file, "1");
+        InOrder inOrder = inOrder(imagesService, workPort);
+        inOrder.verify(imagesService).deleteImage("works/1/banner/old.jpg");
+        inOrder.verify(imagesService).uploadBannerImage(file, "1");
+        inOrder.verify(workPort).updateWork(any(Work.class));
     }
 
     @Test
@@ -280,13 +288,14 @@ public class WorkServiceImplTest {
         User creator = new User();
         creator.setId(10L);
         work.setCreator(creator);
+        work.setBanner("works/1/banner/old.jpg");
         when(obtainWorkByIdPort.obtainWorkById(1L)).thenReturn(Optional.of(work));
         when(imagesService.uploadBannerImage(any(), anyString())).thenThrow(new IOException("fail"));
 
         MultipartFile file = new MockMultipartFile("banner", "b.jpg", "image/jpeg", new byte[]{1});
 
         assertThrows(IOException.class, () -> workServiceImpl.updateBanner(1L, file, 10L));
-        // first update to clear field, second update should not happen due to exception
-        verify(workPort, times(1)).updateWork(any(Work.class));
+        verify(workPort, never()).updateWork(any(Work.class));
+        verify(imagesService).deleteImage("works/1/banner/old.jpg");
     }
 }

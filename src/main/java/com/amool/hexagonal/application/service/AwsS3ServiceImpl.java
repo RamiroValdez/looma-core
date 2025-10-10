@@ -44,4 +44,9 @@ public class AwsS3ServiceImpl implements AwsS3Service {
         return this.awsS3Port.obtainObjectsInPath(path);
     }
 
+    @Override
+    public void deleteObject(String key) {
+        this.awsS3Port.deleteObject(key);
+    }
+
 }

@@ -107,4 +107,11 @@ public class ImagesServiceImpl implements ImagesService {
     public String getComicImageUrl(String comicFilePath) {
         return this.awsS3Service.obtainPresignedUrl(comicFilePath);
     }
+
+    @Override
+    public void deleteImage(String filePath) {
+        if (filePath == null) return;
+        if ("none".equalsIgnoreCase(filePath)) return;
+        this.awsS3Service.deleteObject(filePath);
+    }
 }

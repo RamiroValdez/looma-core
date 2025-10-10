@@ -22,4 +22,6 @@ public interface ImagesService {
 
     String getComicImageUrl(String comicFilePath);
 
+    void deleteImage(String filePath);
+
 }
