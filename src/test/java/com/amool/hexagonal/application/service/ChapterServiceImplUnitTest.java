@@ -1,14 +1,9 @@
 package com.amool.hexagonal.application.service;
 
+import com.amool.hexagonal.adapters.in.rest.dtos.LanguageDto;
 import com.amool.hexagonal.adapters.out.persistence.entity.LanguageEntity;
 import com.amool.hexagonal.adapters.in.rest.dtos.ChapterResponseDto;
-import com.amool.hexagonal.application.port.out.LoadChapterContentPort;
-import com.amool.hexagonal.application.port.out.LoadChapterPort;
-import com.amool.hexagonal.application.port.out.ObtainWorkByIdPort;
-import com.amool.hexagonal.application.port.out.SaveChapterContentPort;
-import com.amool.hexagonal.application.port.out.SaveChapterPort;
-import com.amool.hexagonal.application.port.out.DeleteChapterPort;
-import com.amool.hexagonal.application.port.out.DeleteChapterContentPort;
+import com.amool.hexagonal.application.port.out.*;
 import com.amool.hexagonal.domain.model.Chapter;
 import com.amool.hexagonal.domain.model.ChapterContent;
 import com.amool.hexagonal.domain.model.Work;
@@ -20,6 +15,7 @@ import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 import org.mockito.junit.jupiter.MockitoExtension;
 
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -45,6 +41,9 @@ class ChapterServiceImplUnitTest {
 
     @Mock
     private ObtainWorkByIdPort obtainWorkByIdPort;
+
+    @Mock
+    private LoadLanguagePort loadLanguagePort;
 
     @Mock
     private DeleteChapterPort deleteChapterPort;
@@ -74,7 +73,8 @@ class ChapterServiceImplUnitTest {
             saveChapterContentPort,
             deleteChapterPort,
             deleteChapterContentPort,
-            obtainWorkByIdPort
+            obtainWorkByIdPort,
+            loadLanguagePort
         );
 
         var entityManagerField = ChapterServiceImpl.class.getDeclaredField("entityManager");
@@ -169,38 +169,47 @@ class ChapterServiceImplUnitTest {
 
         when(loadChapterPort.loadChapterForEdit(chapterId)).thenReturn(Optional.of(chapter));
 
-        when(entityManager.find(LanguageEntity.class, languageId)).thenReturn(mockLanguageEntity);
-        when(mockLanguageEntity.getName()).thenReturn("Spanish");
-
-        ChapterContent chapterContent = new ChapterContent(
-            workId.toString(),
-            chapterId.toString(),
-            Map.of("es", "Contenido ES"),
-            "es"
-        );
-
-        when(loadChapterContentPort.loadContent(workId.toString(), chapterId.toString(), "es"))
-            .thenReturn(Optional.of(chapterContent));
         when(loadChapterContentPort.getAvailableLanguages(workId.toString(), chapterId.toString()))
-            .thenReturn(List.of("es", "en"));
+                .thenReturn(List.of("es", "en"));
+
+        com.amool.hexagonal.domain.model.Language langEs = new com.amool.hexagonal.domain.model.Language();
+        langEs.setId(1L);
+        langEs.setCode("es");
+        langEs.setName("Español");
+        com.amool.hexagonal.domain.model.Language langEn = new com.amool.hexagonal.domain.model.Language();
+        langEn.setId(2L);
+        langEn.setCode("en");
+        langEn.setName("Inglés");
+        when(loadLanguagePort.getLanguagesByCodes(List.of("es", "en")))
+                .thenReturn(List.of(langEs, langEn));
+
+        when(loadChapterContentPort.loadContent(eq(workId.toString()), eq(chapterId.toString()), any()))
+                .thenReturn(Optional.of(new ChapterContent(
+                        workId.toString(),
+                        chapterId.toString(),
+                        Map.of("es", "Contenido ES"),
+                        "es"
+                )));
 
         Work work = new Work();
         work.setTitle("Obra prueba");
         work.setChapters(List.of(chapter));
+        work.setOriginalLanguage(langEs);
         when(obtainWorkByIdPort.obtainWorkById(workId)).thenReturn(Optional.of(work));
 
-        Optional<ChapterResponseDto> result = chapterService.getChapterForEdit(chapterId, null);
+        Optional<ChapterResponseDto> result = chapterService.getChapterForEdit(chapterId, "es");
 
         assertTrue(result.isPresent());
         ChapterResponseDto dto = result.get();
         assertEquals(chapterId, dto.getId());
         assertEquals("Capítulo de prueba", dto.getTitle());
         assertEquals("Contenido ES", dto.getContent());
-        assertEquals("es", dto.getLanguageCode());
-        assertEquals(List.of("es", "en"), dto.getAvailableLanguages());
+        assertEquals("es", dto.getLanguageDefaultCode().getCode());
+        assertEquals(List.of("es", "en"), dto.getAvailableLanguages().stream().map(LanguageDto::getCode).toList());
         assertEquals("Obra prueba", dto.getWorkName());
         assertEquals(1, dto.getChapterNumber());
     }
+
 
     @Test
     void getChapterForEdit_ShouldReturnEmptyWhenChapterNotFound() {

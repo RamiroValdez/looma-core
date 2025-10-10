@@ -12,6 +12,7 @@ public class LanguageMapper {
         Language language = new Language();
         language.setId(entity.getId());
         language.setName(entity.getName());
+        language.setCode(entity.getCode());
         return language;
     }
 
@@ -22,6 +23,7 @@ public class LanguageMapper {
         LanguageEntity entity = new LanguageEntity();
         entity.setId(language.getId());
         entity.setName(language.getName());
+        entity.setCode(language.getCode());
         return entity;
     }
     

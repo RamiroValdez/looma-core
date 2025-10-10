@@ -37,4 +37,22 @@ public class LanguagePersistenceAdapter implements LoadLanguagePort {
         LanguageEntity languageEntity = entityManager.find(LanguageEntity.class, languageId);
         return Optional.ofNullable(LanguageMapper.toDomain(languageEntity));
     }
+
+    @Override
+    public List<Language> getLanguagesByCodes(List<String> codes) {
+        if (codes == null || codes.isEmpty()) {
+            return List.of();
+        }
+
+        List<LanguageEntity> languages = entityManager.createQuery(
+                                        "SELECT l FROM LanguageEntity l WHERE l.code IN :codes", LanguageEntity.class)
+                                        .setParameter("codes", codes)
+                                        .getResultList();
+
+
+        return languages.stream()
+                .map(LanguageMapper::toDomain)
+                .collect(Collectors.toList());
+    }
+
 }
