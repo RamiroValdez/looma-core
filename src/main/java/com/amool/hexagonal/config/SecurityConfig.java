@@ -30,6 +30,7 @@ public class SecurityConfig {
                         .requestMatchers("/api/category/obtain-all").permitAll()
                         .requestMatchers("/api/format/obtain-all").permitAll()
                         .requestMatchers("/api/my-works/**").authenticated()
+                        .requestMatchers("/api/works/**").authenticated()
                         .anyRequest().authenticated()
                 )
                 .addFilterBefore(new JwtAuthenticationFilter(jwtService), UsernamePasswordAuthenticationFilter.class);
@@ -44,7 +45,7 @@ public class SecurityConfig {
                 "http://localhost:5173",
                 "https://looma-front.com"
         ));
-        configuration.setAllowedMethods(List.of("GET", "POST", "PUT", "DELETE", "OPTIONS"));
+        configuration.setAllowedMethods(List.of("GET", "POST", "PUT", "DELETE", "OPTIONS", "PATCH"));
         configuration.setAllowedHeaders(List.of("*"));
         configuration.setAllowCredentials(true);
 

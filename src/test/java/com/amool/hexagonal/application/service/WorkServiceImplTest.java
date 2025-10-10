@@ -9,15 +9,19 @@ import com.amool.hexagonal.application.port.out.WorkPort;
 import com.amool.hexagonal.application.port.in.ImagesService;
 import com.amool.hexagonal.application.port.in.TagService;
 import com.amool.hexagonal.domain.model.Work;
+import com.amool.hexagonal.domain.model.User;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
+import org.springframework.mock.web.MockMultipartFile;
+import org.springframework.web.multipart.MultipartFile;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
 
+import java.io.IOException;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
@@ -136,5 +140,153 @@ public class WorkServiceImplTest {
         assertEquals(1, result.size());
         assertEquals("Work 1", result.get(0).getTitle());
         verify(obtainWorkByIdPort, times(1)).getWorksByUserId(userId);
+    }
+
+    // --- updateCover tests ---
+
+    @Test
+    void updateCover_shouldThrowSecurityException_whenUserNotAuthenticated() {
+        MultipartFile file = new MockMultipartFile("cover", "c.jpg", "image/jpeg", new byte[]{1});
+        SecurityException ex = assertThrows(SecurityException.class, () ->
+                workServiceImpl.updateCover(1L, file, null)
+        );
+        assertEquals("Usuario no autenticado", ex.getMessage());
+        verifyNoInteractions(obtainWorkByIdPort);
+    }
+
+    @Test
+    void updateCover_shouldThrowNoSuchElement_whenWorkNotFound() {
+        when(obtainWorkByIdPort.obtainWorkById(1L)).thenReturn(Optional.empty());
+        MultipartFile file = new MockMultipartFile("cover", "c.jpg", "image/jpeg", new byte[]{1});
+        assertThrows(java.util.NoSuchElementException.class, () ->
+                workServiceImpl.updateCover(1L, file, 10L)
+        );
+        verify(obtainWorkByIdPort).obtainWorkById(1L);
+        verifyNoMoreInteractions(workPort);
+    }
+
+    @Test
+    void updateCover_shouldThrowSecurityException_whenUserIsNotCreator() {
+        Work work = new Work();
+        work.setId(1L);
+        User creator = new User();
+        creator.setId(99L);
+        work.setCreator(creator);
+        when(obtainWorkByIdPort.obtainWorkById(1L)).thenReturn(Optional.of(work));
+
+        MultipartFile file = new MockMultipartFile("cover", "c.jpg", "image/jpeg", new byte[]{1});
+        assertThrows(SecurityException.class, () ->
+                workServiceImpl.updateCover(1L, file, 10L)
+        );
+        verify(obtainWorkByIdPort).obtainWorkById(1L);
+        verifyNoMoreInteractions(workPort);
+    }
+
+    @Test
+    void updateCover_shouldUpdateAndPersist_whenOk() throws Exception {
+        Work work = new Work();
+        work.setId(1L);
+        User creator = new User();
+        creator.setId(10L);
+        work.setCreator(creator);
+        when(obtainWorkByIdPort.obtainWorkById(1L)).thenReturn(Optional.of(work));
+        when(imagesService.uploadCoverImage(any(), eq("1"))).thenReturn("works/1/cover/cover.jpg");
+
+        MultipartFile file = new MockMultipartFile("cover", "c.jpg", "image/jpeg", new byte[]{1});
+        workServiceImpl.updateCover(1L, file, 10L);
+
+        verify(workPort, times(2)).updateWork(any(Work.class));
+        verify(imagesService).uploadCoverImage(file, "1");
+    }
+
+    @Test
+    void updateCover_shouldPropagateIOException_andNotPersistFinalPath_whenUploadFails() throws Exception {
+        Work work = new Work();
+        work.setId(1L);
+        User creator = new User();
+        creator.setId(10L);
+        work.setCreator(creator);
+        when(obtainWorkByIdPort.obtainWorkById(1L)).thenReturn(Optional.of(work));
+        when(imagesService.uploadCoverImage(any(), anyString())).thenThrow(new IOException("fail"));
+
+        MultipartFile file = new MockMultipartFile("cover", "c.jpg", "image/jpeg", new byte[]{1});
+
+        assertThrows(IOException.class, () -> workServiceImpl.updateCover(1L, file, 10L));
+        // first update to clear field, second update should not happen due to exception
+        verify(workPort, times(1)).updateWork(any(Work.class));
+    }
+
+    // --- updateBanner tests ---
+
+    @Test
+    void updateBanner_shouldThrowSecurityException_whenUserNotAuthenticated() {
+        MultipartFile file = new MockMultipartFile("banner", "b.jpg", "image/jpeg", new byte[]{1});
+        SecurityException ex = assertThrows(SecurityException.class, () ->
+                workServiceImpl.updateBanner(1L, file, null)
+        );
+        assertEquals("Usuario no autenticado", ex.getMessage());
+        verifyNoInteractions(obtainWorkByIdPort);
+    }
+
+    @Test
+    void updateBanner_shouldThrowNoSuchElement_whenWorkNotFound() {
+        when(obtainWorkByIdPort.obtainWorkById(1L)).thenReturn(Optional.empty());
+        MultipartFile file = new MockMultipartFile("banner", "b.jpg", "image/jpeg", new byte[]{1});
+        assertThrows(java.util.NoSuchElementException.class, () ->
+                workServiceImpl.updateBanner(1L, file, 10L)
+        );
+        verify(obtainWorkByIdPort).obtainWorkById(1L);
+        verifyNoMoreInteractions(workPort);
+    }
+
+    @Test
+    void updateBanner_shouldThrowSecurityException_whenUserIsNotCreator() {
+        Work work = new Work();
+        work.setId(1L);
+        User creator = new User();
+        creator.setId(99L);
+        work.setCreator(creator);
+        when(obtainWorkByIdPort.obtainWorkById(1L)).thenReturn(Optional.of(work));
+
+        MultipartFile file = new MockMultipartFile("banner", "b.jpg", "image/jpeg", new byte[]{1});
+        assertThrows(SecurityException.class, () ->
+                workServiceImpl.updateBanner(1L, file, 10L)
+        );
+        verify(obtainWorkByIdPort).obtainWorkById(1L);
+        verifyNoMoreInteractions(workPort);
+    }
+
+    @Test
+    void updateBanner_shouldUpdateAndPersist_whenOk() throws Exception {
+        Work work = new Work();
+        work.setId(1L);
+        User creator = new User();
+        creator.setId(10L);
+        work.setCreator(creator);
+        when(obtainWorkByIdPort.obtainWorkById(1L)).thenReturn(Optional.of(work));
+        when(imagesService.uploadBannerImage(any(), eq("1"))).thenReturn("works/1/banner/banner.jpg");
+
+        MultipartFile file = new MockMultipartFile("banner", "b.jpg", "image/jpeg", new byte[]{1});
+        workServiceImpl.updateBanner(1L, file, 10L);
+
+        verify(workPort, times(2)).updateWork(any(Work.class));
+        verify(imagesService).uploadBannerImage(file, "1");
+    }
+
+    @Test
+    void updateBanner_shouldPropagateIOException_andNotPersistFinalPath_whenUploadFails() throws Exception {
+        Work work = new Work();
+        work.setId(1L);
+        User creator = new User();
+        creator.setId(10L);
+        work.setCreator(creator);
+        when(obtainWorkByIdPort.obtainWorkById(1L)).thenReturn(Optional.of(work));
+        when(imagesService.uploadBannerImage(any(), anyString())).thenThrow(new IOException("fail"));
+
+        MultipartFile file = new MockMultipartFile("banner", "b.jpg", "image/jpeg", new byte[]{1});
+
+        assertThrows(IOException.class, () -> workServiceImpl.updateBanner(1L, file, 10L));
+        // first update to clear field, second update should not happen due to exception
+        verify(workPort, times(1)).updateWork(any(Work.class));
     }
 }

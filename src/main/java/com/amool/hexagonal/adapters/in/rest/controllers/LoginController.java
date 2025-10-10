@@ -55,14 +55,7 @@ public class LoginController {
                     claims.put("username", user.getUsername());
                     String token = jwtService.generateToken(claims);
                     return ResponseEntity.ok(
-                            new AuthResponse(
-                                    token,
-                                    user.getId(),
-                                    user.getEmail(),
-                                    user.getName(),
-                                    user.getSurname(),
-                                    user.getUsername()
-                            )
+                            new AuthResponse(token)
                     );
                 })
                 .orElseGet(() -> ResponseEntity.status(401).build());

@@ -34,4 +34,8 @@ public interface WorkService {
                     MultipartFile coverFile,
                     MultipartFile bannerFile,
                     Long userId) throws IOException;
+
+    void updateCover(Long workId, MultipartFile coverFile, Long authenticatedUserId) throws IOException;
+
+    void updateBanner(Long workId, MultipartFile bannerFile, Long authenticatedUserId) throws IOException;
 }

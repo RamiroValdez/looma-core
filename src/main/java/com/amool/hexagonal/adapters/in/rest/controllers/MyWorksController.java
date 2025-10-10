@@ -6,18 +6,21 @@ import com.amool.hexagonal.application.port.in.WorkService;
 import com.amool.hexagonal.domain.model.Work;
 import com.amool.hexagonal.security.JwtUserPrincipal;
 
-
 import java.util.List;
 import java.util.stream.Collectors;
+import java.io.IOException;
 
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PatchMapping;
+import org.springframework.web.bind.annotation.RequestPart;
 import org.springframework.web.bind.annotation.RequestMapping;
-import com.amool.hexagonal.domain.exception.UnauthorizedAccessException;
-import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.multipart.MultipartFile;
+import org.springframework.http.ResponseEntity;
+import com.amool.hexagonal.domain.exception.UnauthorizedAccessException;
 
 @RestController
 @RequestMapping("/api/my-works")
@@ -42,6 +45,42 @@ public class MyWorksController {
             return ResponseEntity.ok(response);
         } catch (Exception e) {
             throw new UnauthorizedAccessException("No se pudo obtener las obras del usuario autenticado: " + e.getMessage(), e);
+        }
+    }
+
+    @PatchMapping(value = "/{workId}/cover", consumes = "multipart/form-data")
+    public ResponseEntity<Void> updateCover(
+            @PathVariable("workId") Long workId,
+            @RequestPart("cover") MultipartFile coverFile,
+            @AuthenticationPrincipal JwtUserPrincipal principal
+    ) {
+        try {
+            this.workService.updateCover(workId, coverFile, principal.getUserId());
+            return ResponseEntity.noContent().build();
+        } catch (IllegalArgumentException e) {
+            return ResponseEntity.notFound().build();
+        } catch (SecurityException e) {
+            return ResponseEntity.status(403).build();
+        } catch (IOException e) {
+            return ResponseEntity.badRequest().build();
+        }
+    }
+
+    @PatchMapping(value = "/{workId}/banner", consumes = "multipart/form-data")
+    public ResponseEntity<Void> updateBanner(
+            @PathVariable("workId") Long workId,
+            @RequestPart("banner") MultipartFile bannerFile,
+            @AuthenticationPrincipal JwtUserPrincipal principal
+    ) {
+        try {
+            this.workService.updateBanner(workId, bannerFile, principal.getUserId());
+            return ResponseEntity.noContent().build();
+        } catch (IllegalArgumentException e) {
+            return ResponseEntity.notFound().build();
+        } catch (SecurityException e) {
+            return ResponseEntity.status(403).build();
+        } catch (IOException e) {
+            return ResponseEntity.badRequest().build();
         }
     }
 
