@@ -1,0 +1,9 @@
+Create a detailed book cover illustration.
+
+Artistic style: {artisticStyle}.
+Color palette: {colorPalette}.
+Composition: {composition}.
+
+Description of the scene: {description}.
+
+The image should look like a professional book cover, with strong visual focus, balanced typography space, and cinematic lighting. No text or title, only the visual illustration.
