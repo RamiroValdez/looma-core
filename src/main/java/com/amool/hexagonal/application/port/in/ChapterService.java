@@ -14,5 +14,11 @@ public interface ChapterService {
 
     void deleteChapter(Long workId, Long chapterId);
 
+    void publishChapter(Long workId, Long chapterId, Long authenticatedUserId);
+
+    void schedulePublication(Long workId, Long chapterId, java.time.Instant when, Long authenticatedUserId);
+
+    void cancelScheduledPublication(Long workId, Long chapterId, Long authenticatedUserId);
+
     record ChapterWithContent(Chapter chapter, String content) {}
 }
