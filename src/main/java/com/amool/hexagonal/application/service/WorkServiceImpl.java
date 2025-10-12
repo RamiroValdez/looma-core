@@ -9,7 +9,11 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 
-import java.io.IOException;
+import java.io.*;
+import java.net.URI;
+import java.net.http.HttpClient;
+import java.net.http.HttpRequest;
+import java.net.http.HttpResponse;
 import java.time.LocalDate;
 import java.util.*;
 
@@ -84,7 +88,7 @@ public class WorkServiceImpl implements WorkService {
     }
 
     @Override
-    public Long createWork(String title, String description, List<Long> categoryIds, Long formatId, Long originalLanguageId, Set<String> tagIds, MultipartFile coverFile, MultipartFile bannerFile, Long userId) throws IOException {
+    public Long createWork(String title, String description, List<Long> categoryIds, Long formatId, Long originalLanguageId, Set<String> tagIds, String coverIaUrl, MultipartFile coverFile, MultipartFile bannerFile, Long userId) throws IOException, InterruptedException {
 
         Work work = this.initializeWork(title, description);
 
@@ -100,7 +104,7 @@ public class WorkServiceImpl implements WorkService {
 
         createdWork.setTags(tagService.getMatchTags(tagIds));
 
-        this.updateWorkImages(createdWork, coverFile, bannerFile);
+        this.updateWorkImages(createdWork, coverFile, bannerFile, coverIaUrl);
 
         this.workPort.updateWork(createdWork);
 
@@ -145,16 +149,50 @@ public class WorkServiceImpl implements WorkService {
         return categories;
     }
 
-    private void updateWorkImages(Work work, MultipartFile coverFile, MultipartFile bannerFile) throws IOException {
-        String coverUrl = imagesService.uploadCoverImage(coverFile, work.getId().toString());
+    private void updateWorkImages(Work work, MultipartFile coverFile, MultipartFile bannerFile, String coverIaUrl) throws IOException, InterruptedException {
+        String coverUrl;
+        if(coverFile == null){
+            coverUrl = downloadAndUploadCoverImage(coverIaUrl, work.getId().toString());
+        } else {
+            coverUrl = imagesService.uploadCoverImage(coverFile, work.getId().toString());
+        }
+
         String bannerUrl = imagesService.uploadBannerImage(bannerFile, work.getId().toString());
         work.setCover(coverUrl);
         work.setBanner(bannerUrl);
     }
 
+    private String downloadAndUploadCoverImage(String url, String workId) throws IOException, InterruptedException {
+        HttpClient client = HttpClient.newHttpClient();
+
+        HttpRequest request = HttpRequest.newBuilder()
+                .uri(URI.create(url))
+                .GET()
+                .build();
+
+        HttpResponse<byte[]> response = client.send(request, HttpResponse.BodyHandlers.ofByteArray());
+
+        if (response.statusCode() != 200) {
+            throw new IOException("Error al descargar la imagen. HTTP status: " + response.statusCode());
+        }
+
+        byte[] imageBytes = response.body();
+        String contentType = response.headers().firstValue("Content-Type").orElse("image/png");
+
+        MultipartFile multipartFile = new InMemoryMultipartFile(
+                "cover",
+                "cover.png",
+                contentType,
+                imageBytes
+        );
+
+        return imagesService.uploadCoverImage(multipartFile, workId);
+    }
+
+
     @Override
     @Transactional(rollbackFor = Exception.class)
-    public void updateCover(Long workId, MultipartFile coverFile, Long authenticatedUserId) throws IOException {
+    public void updateCover(Long workId, MultipartFile coverFile, Long authenticatedUserId, String coverIaUrl) throws IOException, InterruptedException {
         if (authenticatedUserId == null) {
             throw new SecurityException("Usuario no autenticado");
         }
@@ -169,7 +207,14 @@ public class WorkServiceImpl implements WorkService {
 
         this.imagesService.deleteImage(work.getCover());
 
-        String newCoverPath = this.imagesService.uploadCoverImage(coverFile, work.getId().toString());
+        String newCoverPath;
+
+        if(coverFile == null){
+            newCoverPath = downloadAndUploadCoverImage(coverIaUrl, work.getId().toString());
+        } else {
+            newCoverPath = imagesService.uploadCoverImage(coverFile, work.getId().toString());
+        }
+
         work.setCover(newCoverPath);
         this.workPort.updateWork(work);
     }
@@ -189,7 +234,6 @@ public class WorkServiceImpl implements WorkService {
             throw new SecurityException("No autorizado para modificar esta obra");
         }
 
-        // Delete previous banner from S3 before uploading the new one
         this.imagesService.deleteImage(work.getBanner());
 
         String newBannerPath = this.imagesService.uploadBannerImage(bannerFile, work.getId().toString());
