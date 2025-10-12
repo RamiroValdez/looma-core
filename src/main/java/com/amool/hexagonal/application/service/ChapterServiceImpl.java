@@ -1,6 +1,7 @@
 package com.amool.hexagonal.application.service;
 
 import com.amool.hexagonal.adapters.in.rest.dtos.ChapterResponseDto;
+import com.amool.hexagonal.adapters.in.rest.dtos.UpdateChapterRequest;
 import com.amool.hexagonal.adapters.in.rest.mappers.ChapterMapper;
 import com.amool.hexagonal.adapters.in.rest.mappers.LanguageMapper;
 import com.amool.hexagonal.application.port.in.ChapterService;
@@ -22,6 +23,7 @@ public class ChapterServiceImpl implements ChapterService {
     private final LoadChapterPort loadChapterPort;
     private final LoadChapterContentPort loadChapterContentPort;
     private final SaveChapterPort saveChapterPort;
+    private final UpdateChapterPort updateChapterPort;
     private final SaveChapterContentPort saveChapterContentPort;
     private final DeleteChapterPort deleteChapterPort;
     private final DeleteChapterContentPort deleteChapterContentPort;
@@ -34,6 +36,7 @@ public class ChapterServiceImpl implements ChapterService {
     public ChapterServiceImpl(LoadChapterPort loadChapterPort,
                               LoadChapterContentPort loadChapterContentPort,
                               SaveChapterPort saveChapterPort,
+                              UpdateChapterPort updateChapterPort,
                               SaveChapterContentPort saveChapterContentPort,
                               DeleteChapterPort deleteChapterPort,
                               DeleteChapterContentPort deleteChapterContentPort,
@@ -43,6 +46,7 @@ public class ChapterServiceImpl implements ChapterService {
         this.loadChapterPort = loadChapterPort;
         this.loadChapterContentPort = loadChapterContentPort;
         this.saveChapterPort = saveChapterPort;
+        this.updateChapterPort = updateChapterPort;
         this.saveChapterContentPort = saveChapterContentPort;
         this.deleteChapterPort = deleteChapterPort;
         this.deleteChapterContentPort = deleteChapterContentPort;
@@ -148,5 +152,50 @@ public class ChapterServiceImpl implements ChapterService {
             }
         }
         return null;
+    }
+
+    @Override
+    public boolean updateChapter(Long chapterId, UpdateChapterRequest updateRequest) {
+        return loadChapterPort.loadChapterForEdit(chapterId)
+                .map(existingChapter -> {
+                    applyUpdates(existingChapter, updateRequest);
+                    Optional<Chapter> updatedChapter = updateChapterPort.updateChapter(existingChapter);
+                    updatedChapter.ifPresent(chapter -> updateVersionsIfNeeded(chapter, updateRequest));
+                    return updatedChapter.isPresent();
+                })
+                .orElse(false);
+    }
+
+    private void applyUpdates(Chapter chapter, UpdateChapterRequest updateRequest) {
+        if (updateRequest.getTitle() != null) {
+            chapter.setTitle(updateRequest.getTitle());
+        }
+        if (updateRequest.getStatus() != null) {
+            chapter.setPublicationStatus(updateRequest.getStatus());
+        }
+        if (updateRequest.getPrice() != null) {
+            chapter.setPrice(updateRequest.getPrice());
+        }
+        if (updateRequest.getLast_update() != null) {
+            chapter.setLastModified(updateRequest.getLast_update());
+        }
+        if (updateRequest.getAllow_ai_translation() != null) {
+            chapter.setAllowAiTranslation(updateRequest.getAllow_ai_translation());
+        }
+    }
+
+    private void updateVersionsIfNeeded(Chapter savedChapter, UpdateChapterRequest updateRequest) {
+        if (updateRequest.getVersions() == null || updateRequest.getVersions().isEmpty()) {
+            return;
+        }
+        String workId = savedChapter.getWorkId() != null ? savedChapter.getWorkId().toString() : null;
+        String chapterId = savedChapter.getId() != null ? savedChapter.getId().toString() : null;
+        if (workId == null || chapterId == null) {
+            return;
+        }
+
+        updateRequest.getVersions().forEach((languageCode, content) ->
+                saveChapterContentPort.saveContent(workId, chapterId, languageCode, content != null ? content : "")
+        );
     }
 }

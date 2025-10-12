@@ -1,6 +1,7 @@
 package com.amool.hexagonal.application.port.in;
 
 import com.amool.hexagonal.adapters.in.rest.dtos.ChapterResponseDto;
+import com.amool.hexagonal.adapters.in.rest.dtos.UpdateChapterRequest;
 import com.amool.hexagonal.domain.model.Chapter;
 
 import java.util.Optional;
@@ -15,4 +16,7 @@ public interface ChapterService {
     void deleteChapter(Long workId, Long chapterId);
 
     record ChapterWithContent(Chapter chapter, String content) {}
+
+    boolean updateChapter(Long chapterId, UpdateChapterRequest updateRequest);
+
 }

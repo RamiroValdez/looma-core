@@ -4,6 +4,7 @@ import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 import com.amool.hexagonal.adapters.in.rest.dtos.ChapterResponseDto;
+import com.amool.hexagonal.adapters.in.rest.dtos.UpdateChapterRequest;
 import com.amool.hexagonal.application.port.in.ChapterService;
 
 import org.springframework.http.ResponseEntity;
@@ -28,4 +29,13 @@ public class EditChapterController {
                 .orElseGet(() -> ResponseEntity.notFound().build());
     }
     
+    @PutMapping("/update/{chapterId}")
+    @PreAuthorize("isAuthenticated()")
+    public ResponseEntity<String> updateChapter (
+        @PathVariable Long chapterId,
+        @RequestBody UpdateChapterRequest updateRequest) {
+        
+        boolean updated = chapterService.updateChapter(chapterId, updateRequest);
+        return updated ? ResponseEntity.ok("Capítulo actualizado") : ResponseEntity.notFound().build();
+    }
 }

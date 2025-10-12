@@ -7,6 +7,7 @@ import com.amool.hexagonal.adapters.out.persistence.mappers.ChapterMapper;
 import com.amool.hexagonal.application.port.out.LoadChapterPort;
 import com.amool.hexagonal.application.port.out.SaveChapterPort;
 import com.amool.hexagonal.application.port.out.DeleteChapterPort;
+import com.amool.hexagonal.application.port.out.UpdateChapterPort;
 import com.amool.hexagonal.domain.model.Chapter;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.PersistenceContext;
@@ -19,7 +20,7 @@ import java.util.Optional;
 
 @Component
 @RequiredArgsConstructor
-public class ChapterPersistenceAdapter implements LoadChapterPort, SaveChapterPort, DeleteChapterPort {
+public class ChapterPersistenceAdapter implements LoadChapterPort, SaveChapterPort, UpdateChapterPort, DeleteChapterPort {
 
     @PersistenceContext
     private EntityManager entityManager;
@@ -66,6 +67,42 @@ public class ChapterPersistenceAdapter implements LoadChapterPort, SaveChapterPo
         Chapter domain = ChapterMapper.toDomain(entity);
 
         return domain;
+    }
+
+    @Override
+    @Transactional
+    public Optional<Chapter> updateChapter(Chapter chapter) {
+        if (chapter == null || chapter.getId() == null) {
+            return Optional.empty();
+        }
+
+        ChapterEntity entity = entityManager.find(ChapterEntity.class, chapter.getId());
+        if (entity == null) {
+            return Optional.empty();
+        }
+
+        entity.setTitle(chapter.getTitle());
+        entity.setPrice(chapter.getPrice());
+        entity.setLikes(chapter.getLikes());
+        entity.setLastModified(chapter.getLastModified() != null ? chapter.getLastModified() : LocalDateTime.now());
+        entity.setAllowAiTranslation(chapter.getAllowAiTranslation());
+        entity.setPublicationStatus(chapter.getPublicationStatus());
+        entity.setScheduledPublicationDate(chapter.getScheduledPublicationDate());
+        entity.setPublishedAt(chapter.getPublishedAt());
+
+        if (chapter.getWorkId() != null) {
+            WorkEntity workEntity = entityManager.find(WorkEntity.class, chapter.getWorkId());
+            entity.setWorkEntity(workEntity);
+        }
+
+        if (chapter.getLanguageId() != null) {
+            LanguageEntity languageEntity = entityManager.find(LanguageEntity.class, chapter.getLanguageId());
+            entity.setLanguageEntity(languageEntity);
+        }
+
+        entityManager.flush();
+
+        return Optional.ofNullable(ChapterMapper.toDomain(entity));
     }
 
     @Override
