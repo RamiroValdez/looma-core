@@ -52,6 +52,7 @@ public class Work {
     public LocalDate getPublicationDate() { return publicationDate; }
     public void setPublicationDate(LocalDate publicationDate) { this.publicationDate = publicationDate; }
     
+    
     public User getCreator() { return creator; }
     public void setCreator(User creator) { this.creator = creator; }
     

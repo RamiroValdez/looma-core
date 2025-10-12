@@ -11,7 +11,10 @@ import jakarta.persistence.EntityManager;
 import jakarta.persistence.PersistenceContext;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import java.time.LocalDateTime;
+import java.time.Instant;
 import java.util.List;
+import java.util.NoSuchElementException;
 import java.util.Optional;
 import com.amool.hexagonal.domain.model.Work;
 
@@ -27,6 +30,7 @@ public class ChapterServiceImpl implements ChapterService {
     private final DeleteChapterContentPort deleteChapterContentPort;
     private final ObtainWorkByIdPort obtainWorkByIdPort;
     private final LoadLanguagePort loadLanguagePort;
+    private final UpdateChapterStatusPort updateChapterStatusPort;
 
     @PersistenceContext
     private EntityManager entityManager;
@@ -38,7 +42,8 @@ public class ChapterServiceImpl implements ChapterService {
                               DeleteChapterPort deleteChapterPort,
                               DeleteChapterContentPort deleteChapterContentPort,
                               ObtainWorkByIdPort obtainWorkByIdPort,
-                                LoadLanguagePort loadLanguagePort
+                              LoadLanguagePort loadLanguagePort,
+                              UpdateChapterStatusPort updateChapterStatusPort
                               ) {
         this.loadChapterPort = loadChapterPort;
         this.loadChapterContentPort = loadChapterContentPort;
@@ -48,6 +53,7 @@ public class ChapterServiceImpl implements ChapterService {
         this.deleteChapterContentPort = deleteChapterContentPort;
         this.obtainWorkByIdPort = obtainWorkByIdPort;
         this.loadLanguagePort = loadLanguagePort;
+        this.updateChapterStatusPort = updateChapterStatusPort;
     }
 
     @Override
@@ -86,8 +92,37 @@ public class ChapterServiceImpl implements ChapterService {
 
     @Override
     public void deleteChapter(Long workId, Long chapterId) {
+        Chapter chapter = loadChapterPort.loadChapter(workId, chapterId)
+                .orElseThrow(() -> new NoSuchElementException("Capítulo no encontrado"));
+
+        if (!"DRAFT".equals(chapter.getPublicationStatus())) {
+            throw new IllegalStateException("Solo se puede eliminar un capítulo en estado DRAFT");
+        }
+
         deleteChapterContentPort.deleteContent(workId.toString(), chapterId.toString());
         deleteChapterPort.deleteChapter(workId, chapterId);
+    }
+
+    @Override
+    public void publishChapter(Long workId, Long chapterId, Long authenticatedUserId) {
+        if (authenticatedUserId == null) {
+            throw new SecurityException("Usuario no autenticado");
+        }
+
+        Work work = obtainWorkByIdPort.obtainWorkById(workId)
+                .orElseThrow(() -> new NoSuchElementException("Obra no encontrada"));
+        if (work.getCreator() == null || !authenticatedUserId.equals(work.getCreator().getId())) {
+            throw new SecurityException("No autorizado para modificar esta obra");
+        }
+
+        Chapter chapter = loadChapterPort.loadChapter(workId, chapterId)
+                .orElseThrow(() -> new NoSuchElementException("Capítulo no encontrado"));
+
+        if (!"DRAFT".equals(chapter.getPublicationStatus())) {
+            throw new IllegalStateException("Solo se puede publicar un capítulo en estado DRAFT");
+        }
+
+        updateChapterStatusPort.updatePublicationStatus(workId, chapterId, "PUBLISHED", LocalDateTime.now());
     }
 
     @Override
@@ -148,5 +183,52 @@ public class ChapterServiceImpl implements ChapterService {
             }
         }
         return null;
+    }
+
+    @Override
+    public void schedulePublication(Long workId, Long chapterId, Instant when, Long authenticatedUserId) {
+        if (authenticatedUserId == null) {
+            throw new SecurityException("Usuario no autenticado");
+        }
+        if (when == null || !when.isAfter(Instant.now())) {
+            throw new IllegalArgumentException("Fecha/Hora inválida para programar publicación");
+        }
+
+        Work work = obtainWorkByIdPort.obtainWorkById(workId)
+                .orElseThrow(() -> new NoSuchElementException("Obra no encontrada"));
+        
+        if (work.getCreator() == null || !authenticatedUserId.equals(work.getCreator().getId())) {
+            throw new SecurityException("No autorizado para modificar esta obra");
+        }
+
+        Chapter chapter = loadChapterPort.loadChapter(workId, chapterId)
+                .orElseThrow(() -> new NoSuchElementException("Capítulo no encontrado"));
+
+        if (!"DRAFT".equals(chapter.getPublicationStatus())) {
+            throw new IllegalStateException("Solo se puede programar publicación si el capítulo está en estado DRAFT");
+        }
+
+        updateChapterStatusPort.schedulePublication(workId, chapterId, when);
+    }
+
+    @Override
+    public void cancelScheduledPublication(Long workId, Long chapterId, Long authenticatedUserId) {
+        if (authenticatedUserId == null) {
+            throw new SecurityException("Usuario no autenticado");
+        }
+        Work work = obtainWorkByIdPort.obtainWorkById(workId)
+                .orElseThrow(() -> new NoSuchElementException("Obra no encontrada"));
+        
+        if (work.getCreator() == null || !authenticatedUserId.equals(work.getCreator().getId())) {
+            throw new SecurityException("No autorizado para modificar esta obra");
+        }
+        Chapter chapter = loadChapterPort.loadChapter(workId, chapterId)
+                .orElseThrow(() -> new NoSuchElementException("Capítulo no encontrado"));
+
+        if (!"SCHEDULED".equals(chapter.getPublicationStatus())) {
+            throw new IllegalStateException("Solo se puede cancelar la programación si el capítulo está en estado SCHEDULED");
+        }
+
+        updateChapterStatusPort.clearSchedule(workId, chapterId);
     }
 }

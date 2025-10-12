@@ -2,8 +2,10 @@ package com.amool.hexagonal;
 
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
+import org.springframework.scheduling.annotation.EnableScheduling;
 
 @SpringBootApplication
+@EnableScheduling
 public class LoomaCoreApplication {
     public static void main(String[] args) {
         SpringApplication.run(LoomaCoreApplication.class, args);

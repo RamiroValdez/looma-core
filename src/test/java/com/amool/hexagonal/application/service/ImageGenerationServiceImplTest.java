@@ -17,14 +17,13 @@ class ImageGenerationServiceImplTest {
         OpenAIImagePort port = mock(OpenAIImagePort.class);
         ImageGenerationServiceImpl service = new ImageGenerationServiceImpl(port);
 
-        String prompt = "anime cover";
         String expectedUrl = "https://img.example/cover.png";
-        when(port.generateImageUrl(eq(prompt))).thenReturn(expectedUrl);
+        when(port.generateImageUrl(anyString())).thenReturn(expectedUrl);
 
-        String result = service.generateImageUrl(prompt);
+        String result = service.generateImageUrl("style", "palette", "composition", "anime cover");
 
         assertEquals(expectedUrl, result);
-        verify(port, times(1)).generateImageUrl(eq(prompt));
+        verify(port, times(1)).generateImageUrl(anyString());
     }
 
     @Test
@@ -33,12 +32,11 @@ class ImageGenerationServiceImplTest {
         OpenAIImagePort port = mock(OpenAIImagePort.class);
         ImageGenerationServiceImpl service = new ImageGenerationServiceImpl(port);
 
-        String prompt = "anime cover";
-        when(port.generateImageUrl(eq(prompt))).thenReturn(null);
+        when(port.generateImageUrl(anyString())).thenReturn(null);
 
-        String result = service.generateImageUrl(prompt);
+        String result = service.generateImageUrl("style", "palette", "composition", "anime cover");
 
         assertNull(result);
-        verify(port, times(1)).generateImageUrl(eq(prompt));
+        verify(port, times(1)).generateImageUrl(anyString());
     }
 }
