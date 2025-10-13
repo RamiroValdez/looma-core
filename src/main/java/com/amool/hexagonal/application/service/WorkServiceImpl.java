@@ -196,4 +196,36 @@ public class WorkServiceImpl implements WorkService {
         work.setBanner(newBannerPath);
         this.workPort.updateWork(work);
     }
+
+    @Override
+    @Transactional(rollbackFor = Exception.class)
+    public void deleteWork(Long workId, Long authenticatedUserId) {
+        if (authenticatedUserId == null) {
+            throw new SecurityException("Usuario no autenticado");
+        }
+
+        Work work = this.obtainWorkByIdPort
+                .obtainWorkById(workId)
+                .orElseThrow(() -> new NoSuchElementException("Obra no encontrada"));
+
+        if (work.getCreator() == null || !Objects.equals(work.getCreator().getId(), authenticatedUserId)) {
+            throw new SecurityException("No autorizado para eliminar esta obra");
+        }
+
+        try {
+            if (work.getCover() != null && !work.getCover().equals("none")) {
+                this.imagesService.deleteImage(work.getCover());
+            }
+            if (work.getBanner() != null && !work.getBanner().equals("none")) {
+                this.imagesService.deleteImage(work.getBanner());
+            }
+        } catch (Exception e) {
+            System.err.println("Error al eliminar las imágenes de la obra: " + e.getMessage());
+        }
+
+        boolean deleted = this.workPort.deleteWork(workId);
+        if (!deleted) {
+            throw new RuntimeException("No se pudo eliminar la obra");
+        }
+    }
 }

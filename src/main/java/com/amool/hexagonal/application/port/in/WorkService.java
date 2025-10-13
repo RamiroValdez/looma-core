@@ -4,9 +4,10 @@ import com.amool.hexagonal.domain.model.Work;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
-import java.util.Optional;
 import java.util.List;
+import java.util.NoSuchElementException;
 import java.util.Set;
+import java.util.Optional;
 
 public interface WorkService {
 
@@ -38,4 +39,7 @@ public interface WorkService {
     void updateCover(Long workId, MultipartFile coverFile, Long authenticatedUserId) throws IOException;
 
     void updateBanner(Long workId, MultipartFile bannerFile, Long authenticatedUserId) throws IOException;
+    
+    void deleteWork(Long workId, Long authenticatedUserId) 
+        throws SecurityException, NoSuchElementException, RuntimeException;
 }

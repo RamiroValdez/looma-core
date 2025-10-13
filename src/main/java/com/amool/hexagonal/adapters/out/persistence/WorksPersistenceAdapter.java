@@ -84,4 +84,26 @@ public class WorksPersistenceAdapter implements ObtainWorkByIdPort, WorkPort {
             return false;
         }
     }
+
+    @Override
+    public Boolean deleteWork(Long workId) {
+        try {
+            WorkEntity workEntity = entityManager.find(WorkEntity.class, workId);
+            if (workEntity == null) {
+                return false;
+            }
+            
+            workEntity.getChapters().clear();
+            workEntity.getCategories().clear();
+            entityManager.flush();
+            
+            entityManager.remove(workEntity);
+            entityManager.flush();
+            
+            return true;
+        } catch (Exception e) {
+            e.printStackTrace();
+            return false;
+        }
+    }
 }

@@ -25,6 +25,7 @@ import org.mockito.InOrder;
 import java.io.IOException;
 import java.util.Arrays;
 import java.util.List;
+import java.util.NoSuchElementException;
 import java.util.Optional;
 
 public class WorkServiceImplTest {
@@ -143,8 +144,6 @@ public class WorkServiceImplTest {
         verify(obtainWorkByIdPort, times(1)).getWorksByUserId(userId);
     }
 
-    // --- updateCover tests ---
-
     @Test
     void updateCover_shouldThrowSecurityException_whenUserNotAuthenticated() {
         MultipartFile file = new MockMultipartFile("cover", "c.jpg", "image/jpeg", new byte[]{1});
@@ -221,8 +220,6 @@ public class WorkServiceImplTest {
         verify(imagesService).deleteImage("works/1/cover/old.jpg");
     }
 
-    // --- updateBanner tests ---
-
     @Test
     void updateBanner_shouldThrowSecurityException_whenUserNotAuthenticated() {
         MultipartFile file = new MockMultipartFile("banner", "b.jpg", "image/jpeg", new byte[]{1});
@@ -297,5 +294,102 @@ public class WorkServiceImplTest {
         assertThrows(IOException.class, () -> workServiceImpl.updateBanner(1L, file, 10L));
         verify(workPort, never()).updateWork(any(Work.class));
         verify(imagesService).deleteImage("works/1/banner/old.jpg");
+    }
+
+    @Test
+    void deleteWork_shouldThrowSecurityException_whenUserNotAuthenticated() {
+        assertThrows(SecurityException.class, () -> 
+            workServiceImpl.deleteWork(1L, null)
+        );
+        verifyNoInteractions(obtainWorkByIdPort, workPort, imagesService);
+    }
+
+    @Test
+    void deleteWork_shouldThrowNoSuchElement_whenWorkNotFound() {
+        when(obtainWorkByIdPort.obtainWorkById(1L)).thenReturn(Optional.empty());
+        
+        assertThrows(NoSuchElementException.class, () -> 
+            workServiceImpl.deleteWork(1L, 10L)
+        );
+        
+        verify(obtainWorkByIdPort).obtainWorkById(1L);
+        verifyNoInteractions(workPort, imagesService);
+    }
+
+    @Test
+    void deleteWork_shouldThrowSecurityException_whenUserIsNotCreator() {
+        Work work = new Work();
+        work.setId(1L);
+        User creator = new User();
+        creator.setId(99L);
+        work.setCreator(creator);
+        when(obtainWorkByIdPort.obtainWorkById(1L)).thenReturn(Optional.of(work));
+
+        assertThrows(SecurityException.class, () ->
+            workServiceImpl.deleteWork(1L, 10L)
+        );
+        
+        verify(obtainWorkByIdPort).obtainWorkById(1L);
+        verifyNoInteractions(workPort, imagesService);
+    }
+
+    @Test
+    void deleteWork_shouldDeleteWorkAndImages_whenOk() {
+        Work work = new Work();
+        work.setId(1L);
+        work.setCover("works/1/cover/cover.jpg");
+        work.setBanner("works/1/banner/banner.jpg");
+        User creator = new User();
+        creator.setId(10L);
+        work.setCreator(creator);
+        
+        when(obtainWorkByIdPort.obtainWorkById(1L)).thenReturn(Optional.of(work));
+        when(workPort.deleteWork(1L)).thenReturn(true);
+
+        workServiceImpl.deleteWork(1L, 10L);
+
+        InOrder inOrder = inOrder(imagesService, workPort);
+        inOrder.verify(imagesService).deleteImage("works/1/cover/cover.jpg");
+        inOrder.verify(imagesService).deleteImage("works/1/banner/banner.jpg");
+        inOrder.verify(workPort).deleteWork(1L);
+    }
+
+    @Test
+    void deleteWork_shouldContinueDeletion_whenImageDeletionFails() {
+        Work work = new Work();
+        work.setId(1L);
+        work.setCover("works/1/cover/cover.jpg");
+        work.setBanner("works/1/banner/banner.jpg");
+        User creator = new User();
+        creator.setId(10L);
+        work.setCreator(creator);
+        
+        when(obtainWorkByIdPort.obtainWorkById(1L)).thenReturn(Optional.of(work));
+        doThrow(new RuntimeException("Error al eliminar imagen")).when(imagesService).deleteImage("works/1/cover/cover.jpg");
+        when(workPort.deleteWork(1L)).thenReturn(true);
+
+        workServiceImpl.deleteWork(1L, 10L);
+
+        verify(imagesService).deleteImage("works/1/cover/cover.jpg");
+        verify(imagesService).deleteImage("works/1/banner/banner.jpg");
+        verify(workPort).deleteWork(1L);
+    }
+
+    @Test
+    void deleteWork_shouldThrowRuntimeException_whenDeletionFails() {
+        Work work = new Work();
+        work.setId(1L);
+        User creator = new User();
+        creator.setId(10L);
+        work.setCreator(creator);
+        
+        when(obtainWorkByIdPort.obtainWorkById(1L)).thenReturn(Optional.of(work));
+        when(workPort.deleteWork(1L)).thenReturn(false);
+
+        assertThrows(RuntimeException.class, () ->
+            workServiceImpl.deleteWork(1L, 10L)
+        );
+        
+        verify(workPort).deleteWork(1L);
     }
 }
