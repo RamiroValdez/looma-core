@@ -14,9 +14,11 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import java.util.List;
 import java.util.Optional;
+import java.util.NoSuchElementException;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import com.amool.hexagonal.security.JwtUserPrincipal;
+import com.amool.hexagonal.adapters.in.rest.dtos.SchedulePublicationRequestDto;
 
 @RestController
 @RequestMapping("/api")
@@ -93,9 +95,86 @@ public class ChapterController {
         if (!isOwner) {
             return ResponseEntity.status(403).build();
         }
+        try {
+            chapterService.deleteChapter(workIdLong, Long.valueOf(chapterId));
+            return ResponseEntity.noContent().build();
+        } catch (NoSuchElementException e) {
+            return ResponseEntity.notFound().build();
+        } catch (IllegalStateException e) {
+            return ResponseEntity.status(409).build();
+        }
+    }
 
-        chapterService.deleteChapter(workIdLong, Long.valueOf(chapterId));
-        return ResponseEntity.noContent().build();
+    @PostMapping("/work/{workId}/chapter/{chapterId}/publish")
+    public ResponseEntity<Void> publishChapter(
+            @PathVariable String workId,
+            @PathVariable String chapterId) {
+
+        Authentication auth = SecurityContextHolder.getContext().getAuthentication();
+        if (auth == null || !(auth.getPrincipal() instanceof JwtUserPrincipal principal)) {
+            return ResponseEntity.status(401).build();
+        }
+
+        try {
+            chapterService.publishChapter(Long.valueOf(workId), Long.valueOf(chapterId), principal.getUserId());
+            return ResponseEntity.noContent().build();
+        } catch (NoSuchElementException e) {
+            return ResponseEntity.notFound().build();
+        } catch (SecurityException e) {
+            return ResponseEntity.status(403).build();
+        } catch (IllegalStateException e) {
+            return ResponseEntity.status(409).build();
+        }
+    }
+
+    @PostMapping("/work/{workId}/chapter/{chapterId}/schedule")
+    public ResponseEntity<Void> scheduleChapter(
+            @PathVariable String workId,
+            @PathVariable String chapterId,
+            @RequestBody SchedulePublicationRequestDto request) {
+
+        Authentication auth = SecurityContextHolder.getContext().getAuthentication();
+        if (auth == null || !(auth.getPrincipal() instanceof JwtUserPrincipal principal)) {
+            return ResponseEntity.status(401).build();
+        }
+
+        try {
+            java.time.Instant when = java.time.OffsetDateTime.parse(request.when()).toInstant();
+            chapterService.schedulePublication(Long.valueOf(workId), Long.valueOf(chapterId), when, principal.getUserId());
+            return ResponseEntity.noContent().build();
+        } catch (java.time.format.DateTimeParseException e) {
+            return ResponseEntity.badRequest().build();
+        } catch (NoSuchElementException e) {
+            return ResponseEntity.notFound().build();
+        } catch (SecurityException e) {
+            return ResponseEntity.status(403).build();
+        } catch (IllegalArgumentException e) {
+            return ResponseEntity.badRequest().build();
+        } catch (IllegalStateException e) {
+            return ResponseEntity.status(409).build();
+        }
+    }
+
+    @DeleteMapping("/work/{workId}/chapter/{chapterId}/schedule")
+    public ResponseEntity<Void> cancelSchedule(
+            @PathVariable String workId,
+            @PathVariable String chapterId) {
+
+        Authentication auth = SecurityContextHolder.getContext().getAuthentication();
+        if (auth == null || !(auth.getPrincipal() instanceof JwtUserPrincipal principal)) {
+            return ResponseEntity.status(401).build();
+        }
+
+        try {
+            chapterService.cancelScheduledPublication(Long.valueOf(workId), Long.valueOf(chapterId), principal.getUserId());
+            return ResponseEntity.noContent().build();
+        } catch (NoSuchElementException e) {
+            return ResponseEntity.notFound().build();
+        } catch (SecurityException e) {
+            return ResponseEntity.status(403).build();
+        } catch (IllegalStateException e) {
+            return ResponseEntity.status(409).build();
+        }
     }
 
     

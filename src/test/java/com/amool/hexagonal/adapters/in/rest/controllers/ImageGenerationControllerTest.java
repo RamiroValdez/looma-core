@@ -31,17 +31,15 @@ class ImageGenerationControllerTest {
     @DisplayName("POST /api/images/generate returns image URL")
     void generate_ReturnsImageUrl() throws Exception {
         String expectedUrl = "https://example.com/image.png";
+        given(imageGenerationService.generateImageUrl(anyString(), anyString(), anyString(), anyString()))
+                .willReturn(expectedUrl);
 
-        given(imageGenerationService.generateImageUrl(anyString(),anyString(),anyString(),anyString())).willReturn(expectedUrl);
-
-        String body = """
-        {
-          "artisticStyleId": "1",
-          "colorPaletteId": "2", 
-          "compositionId": "3",
-          "description": "example prompt"
-        }
-        """;
+        String body = "{\n" +
+                "  \"artisticStyleId\": \"style-1\",\n" +
+                "  \"colorPaletteId\": \"palette-1\",\n" +
+                "  \"compositionId\": \"composition-1\",\n" +
+                "  \"description\": \"example prompt\"\n" +
+                "}";
 
         mockMvc.perform(post("/api/images/generate")
                         .contentType(MediaType.APPLICATION_JSON)

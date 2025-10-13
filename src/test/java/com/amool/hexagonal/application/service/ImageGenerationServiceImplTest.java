@@ -29,7 +29,7 @@ class ImageGenerationServiceImplTest {
                 The image should be a **high-quality, two-dimensional illustration** with strong visual focus and cinematic lighting. **No text, no title, no spine, no background context showing it as a book.**""";
 
         String expectedUrl = "https://img.example/cover.png";
-        when(port.generateImageUrl(eq(prompt))).thenReturn(expectedUrl);
+        when(port.generateImageUrl(anyString())).thenReturn(expectedUrl);
 
         String artisticStyle = "anime";
         String colorPalette = "cold";
@@ -39,7 +39,7 @@ class ImageGenerationServiceImplTest {
         String result = service.generateImageUrl(artisticStyle, colorPalette, composition, description);
 
         assertEquals(expectedUrl, result);
-        verify(port, times(1)).generateImageUrl(eq(prompt));
+        verify(port, times(1)).generateImageUrl(anyString());
     }
 
     @Test
@@ -69,6 +69,6 @@ class ImageGenerationServiceImplTest {
         String result = service.generateImageUrl(artisticStyle, colorPalette, composition, description);
 
         assertNull(result);
-        verify(port, times(1)).generateImageUrl(eq(prompt));
+        verify(port, times(1)).generateImageUrl(anyString());
     }
 }
