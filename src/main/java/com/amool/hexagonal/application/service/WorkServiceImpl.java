@@ -10,10 +10,6 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.*;
-import java.net.URI;
-import java.net.http.HttpClient;
-import java.net.http.HttpRequest;
-import java.net.http.HttpResponse;
 import java.time.LocalDate;
 import java.util.*;
 
@@ -28,6 +24,7 @@ public class WorkServiceImpl implements WorkService {
     private final CategoryPort categoryPort;
     private final TagService tagService;
     private final WorkPort workPort;
+    private final DowloadImagesService downloadImagesService;
 
     public WorkServiceImpl(ObtainWorkByIdPort obtainWorkByIdPort,
                            ImagesService imagesService,
@@ -36,7 +33,8 @@ public class WorkServiceImpl implements WorkService {
                            LoadLanguagePort loadLanguagePort,
                            CategoryPort categoryPort,
                            TagService tagService,
-                           WorkPort workPort) {
+                           WorkPort workPort,
+                           DowloadImagesService downloadImagesService) {
         this.workPort = workPort;
         this.tagService = tagService;
         this.categoryPort = categoryPort;
@@ -45,6 +43,7 @@ public class WorkServiceImpl implements WorkService {
         this.loadUserPort = loadUserPort;
         this.formatPort = formatPort;
         this.loadLanguagePort = loadLanguagePort;
+        this.downloadImagesService = downloadImagesService;
     }
 
     @Override
@@ -152,7 +151,7 @@ public class WorkServiceImpl implements WorkService {
     private void updateWorkImages(Work work, MultipartFile coverFile, MultipartFile bannerFile, String coverIaUrl) throws IOException, InterruptedException {
         String coverUrl;
         if(coverFile == null){
-            coverUrl = downloadAndUploadCoverImage(coverIaUrl, work.getId().toString());
+            coverUrl = downloadImagesService.downloadAndUploadCoverImage(coverIaUrl, work.getId().toString());
         } else {
             coverUrl = imagesService.uploadCoverImage(coverFile, work.getId().toString());
         }
@@ -161,34 +160,6 @@ public class WorkServiceImpl implements WorkService {
         work.setCover(coverUrl);
         work.setBanner(bannerUrl);
     }
-
-    private String downloadAndUploadCoverImage(String url, String workId) throws IOException, InterruptedException {
-        HttpClient client = HttpClient.newHttpClient();
-
-        HttpRequest request = HttpRequest.newBuilder()
-                .uri(URI.create(url))
-                .GET()
-                .build();
-
-        HttpResponse<byte[]> response = client.send(request, HttpResponse.BodyHandlers.ofByteArray());
-
-        if (response.statusCode() != 200) {
-            throw new IOException("Error al descargar la imagen. HTTP status: " + response.statusCode());
-        }
-
-        byte[] imageBytes = response.body();
-        String contentType = response.headers().firstValue("Content-Type").orElse("image/png");
-
-        MultipartFile multipartFile = new InMemoryMultipartFile(
-                "cover",
-                "cover.png",
-                contentType,
-                imageBytes
-        );
-
-        return imagesService.uploadCoverImage(multipartFile, workId);
-    }
-
 
     @Override
     @Transactional(rollbackFor = Exception.class)
@@ -210,7 +181,7 @@ public class WorkServiceImpl implements WorkService {
         String newCoverPath;
 
         if(coverFile == null){
-            newCoverPath = downloadAndUploadCoverImage(coverIaUrl, work.getId().toString());
+            newCoverPath = downloadImagesService.downloadAndUploadCoverImage(coverIaUrl, work.getId().toString());
         } else {
             newCoverPath = imagesService.uploadCoverImage(coverFile, work.getId().toString());
         }

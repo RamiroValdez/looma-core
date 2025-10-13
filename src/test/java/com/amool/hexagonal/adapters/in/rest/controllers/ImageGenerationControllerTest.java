@@ -1,13 +1,14 @@
 package com.amool.hexagonal.adapters.in.rest.controllers;
 
+import com.amool.hexagonal.adapters.in.rest.dtos.ImageUrlResponseDto;
 import com.amool.hexagonal.application.port.in.ImageGenerationService;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
-import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.http.MediaType;
+import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.MockMvc;
 
 import static org.mockito.ArgumentMatchers.anyString;
@@ -23,16 +24,24 @@ class ImageGenerationControllerTest {
     @Autowired
     private MockMvc mockMvc;
 
-    @MockBean
+    @MockitoBean
     private ImageGenerationService imageGenerationService;
 
     @Test
     @DisplayName("POST /api/images/generate returns image URL")
     void generate_ReturnsImageUrl() throws Exception {
         String expectedUrl = "https://example.com/image.png";
-        given(imageGenerationService.generateImageUrl(anyString())).willReturn(expectedUrl);
 
-        String body = "{\n  \"prompt\": \"example prompt\"\n}";
+        given(imageGenerationService.generateImageUrl(anyString(),anyString(),anyString(),anyString())).willReturn(expectedUrl);
+
+        String body = """
+        {
+          "artisticStyleId": "1",
+          "colorPaletteId": "2", 
+          "compositionId": "3",
+          "description": "example prompt"
+        }
+        """;
 
         mockMvc.perform(post("/api/images/generate")
                         .contentType(MediaType.APPLICATION_JSON)
