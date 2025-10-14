@@ -1,0 +1,42 @@
+package com.amool.hexagonal.application.port.in;
+
+import com.amool.hexagonal.domain.model.Work;
+import org.springframework.web.multipart.MultipartFile;
+
+import java.io.IOException;
+import java.util.Optional;
+import java.util.List;
+import java.util.Set;
+
+public interface WorkService {
+
+    Optional<Work> obtainWorkById(Long workId);
+
+    List<Work> getWorksByUserId(Long userId);
+    
+    List<Work> getAuthenticatedUserWorks(Long authenticatedUserId);
+
+    default Optional<Work> getById(Long workId) {
+        return obtainWorkById(workId);
+    }
+
+    @Deprecated
+    default List<Work> getByCreatorId(Long userId) {
+        return getWorksByUserId(userId);
+    }
+
+    Long createWork(String title,
+                    String description,
+                    List<Long> categoryIds,
+                    Long formatId,
+                    Long originalLanguageId,
+                    Set<String> tagIds,
+                    String coverImageUrl,
+                    MultipartFile coverFile,
+                    MultipartFile bannerFile,
+                    Long userId) throws IOException, InterruptedException;
+
+    void updateCover(Long workId, MultipartFile coverFile, Long authenticatedUserId, String coverIaUrl) throws IOException, InterruptedException ;
+
+    void updateBanner(Long workId, MultipartFile bannerFile, Long authenticatedUserId) throws IOException;
+}

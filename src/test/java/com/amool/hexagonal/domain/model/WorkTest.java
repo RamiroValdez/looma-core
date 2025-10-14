@@ -7,14 +7,10 @@ import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.*;
 
-/**
- * Test unitario para el modelo de dominio Work
- */
 public class WorkTest {
 
     @Test
     public void testWorkCreation() {
-        // Arrange & Act
         Work work = new Work();
         work.setId(1L);
         work.setTitle("Test Work");
@@ -23,7 +19,6 @@ public class WorkTest {
         work.setLikes(100);
         work.setState("PUBLISHED");
 
-        // Assert
         assertEquals(1L, work.getId());
         assertEquals("Test Work", work.getTitle());
         assertEquals("Test Description", work.getDescription());
@@ -34,7 +29,6 @@ public class WorkTest {
 
     @Test
     public void testWorkWithRelations() {
-        // Arrange
         Work work = new Work();
         User creator = new User();
         creator.setId(1L);
@@ -50,12 +44,9 @@ public class WorkTest {
         chapter.setTitle("Chapter 1");
         chapters.add(chapter);
 
-        // Act
         work.setCreator(creator);
         work.setFormat(format);
         work.setChapters(chapters);
-
-        // Assert
         assertNotNull(work.getCreator());
         assertEquals("John", work.getCreator().getName());
         assertNotNull(work.getFormat());

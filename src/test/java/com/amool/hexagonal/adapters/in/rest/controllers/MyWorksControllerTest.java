@@ -1,183 +1,199 @@
 package com.amool.hexagonal.adapters.in.rest.controllers;
 
-import com.amool.hexagonal.adapters.in.rest.dtos.WorkResponseDto;
-import com.amool.hexagonal.application.port.in.ObtainWorkByIdUseCase;
-import com.amool.hexagonal.domain.model.User;
-import com.amool.hexagonal.domain.model.Work;
-import org.junit.jupiter.api.BeforeEach;
+import com.amool.hexagonal.application.port.in.WorkService;
+import com.amool.hexagonal.security.JwtUserPrincipal;
+import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.extension.ExtendWith;
-import org.mockito.InjectMocks;
-import org.mockito.Mock;
-import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
+import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
+import org.springframework.boot.test.context.TestConfiguration;
+import org.springframework.http.MediaType;
+import org.springframework.mock.web.MockMultipartFile;
+import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.test.context.bean.override.mockito.MockitoBean;
+import org.springframework.test.web.servlet.MockMvc;
+import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
+import org.springframework.web.method.support.HandlerMethodArgumentResolver;
+import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
 
-import java.time.LocalDate;
-import java.util.Arrays;
-import java.util.Collections;
+import java.io.IOException;
 import java.util.List;
 
-import static org.junit.jupiter.api.Assertions.*;
+import static org.mockito.ArgumentMatchers.*;
 import static org.mockito.Mockito.*;
+import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.authentication;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
+@WebMvcTest(controllers = MyWorksController.class)
+@AutoConfigureMockMvc(addFilters = false)
+public class MyWorksControllerTest {
 
-@ExtendWith(MockitoExtension.class)
-class MyWorksControllerTest {
+    @TestConfiguration
+    static class SecurityTestConfig implements WebMvcConfigurer {
+        @Override
+        public void addArgumentResolvers(List<HandlerMethodArgumentResolver> resolvers) {
+            resolvers.add(new HandlerMethodArgumentResolver() {
+                @Override
+                public boolean supportsParameter(org.springframework.core.MethodParameter parameter) {
+                    return parameter.hasParameterAnnotation(org.springframework.security.core.annotation.AuthenticationPrincipal.class)
+                            && JwtUserPrincipal.class.isAssignableFrom(parameter.getParameterType());
+                }
 
-    @Mock
-    private ObtainWorkByIdUseCase obtainWorkByIdUseCase;
-
-    @InjectMocks
-    private MyWorksController myWorksController;
-
-    private Work testWork1;
-    private Work testWork2;
-    private User testUser;
-
-    @BeforeEach
-    void setUp() {
-
-        testUser = new User();
-        testUser.setId(1L);
-        testUser.setUsername("testuser");
-        testUser.setEmail("test@example.com");
-
-     
-        testWork1 = new Work();
-        testWork1.setId(1L);
-        testWork1.setTitle("Test Work 1");
-        testWork1.setDescription("Description 1");
-        testWork1.setState("PUBLISHED");
-        testWork1.setPrice(10.99);
-        testWork1.setLikes(5);
-        testWork1.setPublicationDate(LocalDate.of(2025, 1, 1));
-        testWork1.setCreator(testUser);
-
-
-        testWork2 = new Work();
-        testWork2.setId(2L);
-        testWork2.setTitle("Test Work 2");
-        testWork2.setDescription("Description 2");
-        testWork2.setState("DRAFT");
-        testWork2.setPrice(15.99);
-        testWork2.setLikes(10);
-        testWork2.setPublicationDate(LocalDate.of(2025, 2, 1));
-        testWork2.setCreator(testUser);
-    }
-
-    @Test
-    void getWorksByUserId_WithValidUserId_ReturnsWorkResponseDtoList() {
-
-        Long userId = 1L;
-        List<Work> works = Arrays.asList(testWork1, testWork2);
-        when(obtainWorkByIdUseCase.getWorksByUserId(userId)).thenReturn(works);
-
-        List<WorkResponseDto> result = myWorksController.getWorksByUserId(userId);
-
-        assertNotNull(result);
-        assertEquals(2, result.size());
-
-        WorkResponseDto dto1 = result.get(0);
-        assertEquals(testWork1.getId(), dto1.getId());
-        assertEquals(testWork1.getTitle(), dto1.getTitle());
-        assertEquals(testWork1.getDescription(), dto1.getDescription());
-        assertEquals(testWork1.getState(), dto1.getState());
-        assertEquals(testWork1.getPrice(), dto1.getPrice());
-        assertEquals(testWork1.getLikes(), dto1.getLikes());
-
-        WorkResponseDto dto2 = result.get(1);
-        assertEquals(testWork2.getId(), dto2.getId());
-        assertEquals(testWork2.getTitle(), dto2.getTitle());
-        assertEquals(testWork2.getDescription(), dto2.getDescription());
-        assertEquals(testWork2.getState(), dto2.getState());
-        assertEquals(testWork2.getPrice(), dto2.getPrice());
-        assertEquals(testWork2.getLikes(), dto2.getLikes());
-
-        verify(obtainWorkByIdUseCase, times(1)).getWorksByUserId(userId);
-    }
-
-    @Test
-    void getWorksByUserId_WithNoWorks_ReturnsEmptyList() {
-
-        Long userId = 1L;
-        when(obtainWorkByIdUseCase.getWorksByUserId(userId)).thenReturn(Collections.emptyList());
-
-        
-        List<WorkResponseDto> result = myWorksController.getWorksByUserId(userId);
-
-       
-        assertNotNull(result);
-        assertTrue(result.isEmpty());
-        verify(obtainWorkByIdUseCase, times(1)).getWorksByUserId(userId);
-    }
-
-    @Test
-    void getWorksByUserId_WithSingleWork_ReturnsSingleWorkResponseDto() {
-     
-        Long userId = 1L;
-        List<Work> works = Collections.singletonList(testWork1);
-        when(obtainWorkByIdUseCase.getWorksByUserId(userId)).thenReturn(works);
-
-        
-        List<WorkResponseDto> result = myWorksController.getWorksByUserId(userId);
-
-        assertNotNull(result);
-        assertEquals(1, result.size());
-        assertEquals(testWork1.getId(), result.get(0).getId());
-        assertEquals(testWork1.getTitle(), result.get(0).getTitle());
-        verify(obtainWorkByIdUseCase, times(1)).getWorksByUserId(userId);
-    }
-
-    @Test
-    void getWorksByUserId_VerifyMappingIsAppliedToAllWorks() {
-      
-        Long userId = 1L;
-        List<Work> works = Arrays.asList(testWork1, testWork2);
-        when(obtainWorkByIdUseCase.getWorksByUserId(userId)).thenReturn(works);
-
-      
-        List<WorkResponseDto> result = myWorksController.getWorksByUserId(userId);
-
-    
-        assertEquals(works.size(), result.size());
-        for (int i = 0; i < works.size(); i++) {
-            Work work = works.get(i);
-            WorkResponseDto dto = result.get(i);
-            assertEquals(work.getId(), dto.getId());
-            assertEquals(work.getTitle(), dto.getTitle());
+                @Override
+                public Object resolveArgument(org.springframework.core.MethodParameter parameter,
+                                              org.springframework.web.method.support.ModelAndViewContainer mavContainer,
+                                              org.springframework.web.context.request.NativeWebRequest webRequest,
+                                              org.springframework.web.bind.support.WebDataBinderFactory binderFactory) {
+                    Authentication auth = SecurityContextHolder.getContext().getAuthentication();
+                    if (auth != null && auth.getPrincipal() instanceof JwtUserPrincipal principal) {
+                        return principal;
+                    }
+                    return new JwtUserPrincipal(999L, "test@example.com", "Test", "User", "testuser");
+                }
+            });
         }
-        verify(obtainWorkByIdUseCase, times(1)).getWorksByUserId(userId);
+    }
+
+    @Autowired
+    private MockMvc mockMvc;
+
+    @MockitoBean
+    private WorkService workService;
+
+    private UsernamePasswordAuthenticationToken authWith(Long userId) {
+        JwtUserPrincipal principal = new JwtUserPrincipal(userId, "mail@test.com", "Name", "Surname", "user");
+        return new UsernamePasswordAuthenticationToken(principal, null, List.of());
     }
 
     @Test
-    void getWorksByUserId_WithDifferentUserIds_CallsUseCaseWithCorrectParameter() {
-       
-        Long userId1 = 1L;
-        Long userId2 = 2L;
-        when(obtainWorkByIdUseCase.getWorksByUserId(anyLong())).thenReturn(Collections.emptyList());
+    @DisplayName("PATCH /api/my-works/{id}/cover -> 204 when success")
+    void updateCover_shouldReturn204_whenSuccess() throws Exception {
+        doNothing().when(workService).updateCover(anyLong(), any(), anyLong(), anyString());
 
-        myWorksController.getWorksByUserId(userId1);
-        myWorksController.getWorksByUserId(userId2);
+        MockMultipartFile cover = new MockMultipartFile("cover", "c.jpg", "image/jpeg", new byte[]{1});
 
-        verify(obtainWorkByIdUseCase, times(1)).getWorksByUserId(userId1);
-        verify(obtainWorkByIdUseCase, times(1)).getWorksByUserId(userId2);
-        verify(obtainWorkByIdUseCase, times(2)).getWorksByUserId(anyLong());
+        mockMvc.perform(
+                MockMvcRequestBuilders.multipart("/api/my-works/{id}/cover", 1L)
+                        .file(cover)
+                        .with(request -> { request.setMethod("PATCH"); return request; })
+                        .contentType(MediaType.MULTIPART_FORM_DATA)
+                        .with(authentication(authWith(10L)))
+        ).andExpect(status().isNoContent());
     }
 
     @Test
-    void getWorksByUserId_WithNullWorkInList_HandlesGracefully() {
+    @DisplayName("PATCH /api/my-works/{id}/cover -> 404 when not found")
+    void updateCover_shouldReturn404_whenNotFound() throws Exception {
+        doThrow(new IllegalArgumentException("not found")).when(workService).updateCover(anyLong(), any(), anyLong(),isNull());
 
-        Long userId = 1L;
-        List<Work> works = Arrays.asList(testWork1, null, testWork2);
-        when(obtainWorkByIdUseCase.getWorksByUserId(userId)).thenReturn(works);
+        MockMultipartFile cover = new MockMultipartFile("cover", "c.jpg", "image/jpeg", new byte[]{1});
 
-       
-        List<WorkResponseDto> result = myWorksController.getWorksByUserId(userId);
+        mockMvc.perform(
+                MockMvcRequestBuilders.multipart("/api/my-works/{id}/cover", 1L)
+                        .file(cover)
+                        .with(request -> { request.setMethod("PATCH"); return request; })
+                        .contentType(MediaType.MULTIPART_FORM_DATA)
+                        .with(authentication(authWith(10L)))
+        ).andExpect(status().isNotFound());
+    }
 
-        assertNotNull(result);
-        assertEquals(3, result.size());
-        assertNotNull(result.get(0));
-        assertNull(result.get(1)); 
-        assertNotNull(result.get(2));
-        verify(obtainWorkByIdUseCase, times(1)).getWorksByUserId(userId);
+    @Test
+    @DisplayName("PATCH /api/my-works/{id}/cover -> 403 when forbidden")
+    void updateCover_shouldReturn403_whenForbidden() throws Exception {
+        doThrow(new SecurityException("forbidden")).when(workService).updateCover(anyLong(), any(), anyLong(), any());
+
+        MockMultipartFile cover = new MockMultipartFile("cover", "c.jpg", "image/jpeg", new byte[]{1});
+
+        mockMvc.perform(
+                MockMvcRequestBuilders.multipart("/api/my-works/{id}/cover", 1L)
+                        .file(cover)
+                        .with(request -> { request.setMethod("PATCH"); return request; })
+                        .contentType(MediaType.MULTIPART_FORM_DATA)
+                        .with(authentication(authWith(10L)))
+        ).andExpect(status().isForbidden());
+    }
+
+    @Test
+    @DisplayName("PATCH /api/my-works/{id}/cover -> 400 when IO error")
+    void updateCover_shouldReturn400_whenIOException() throws Exception {
+
+        doThrow(new IOException("io")).when(workService).updateCover(any(), any(), any(), any());
+
+        MockMultipartFile cover = new MockMultipartFile("cover", "c.jpg", "image/jpeg", new byte[]{1});
+
+        mockMvc.perform(
+                MockMvcRequestBuilders.multipart("/api/my-works/{id}/cover", 1L)
+                        .file(cover)
+                        .with(request -> { request.setMethod("PATCH"); return request; })
+                        .contentType(MediaType.MULTIPART_FORM_DATA)
+                        .with(authentication(authWith(10L)))
+        ).andExpect(status().isBadRequest());
+    }
+
+    @Test
+    @DisplayName("PATCH /api/my-works/{id}/banner -> 204 when success")
+    void updateBanner_shouldReturn204_whenSuccess() throws Exception {
+        doNothing().when(workService).updateBanner(anyLong(), any(), anyLong());
+
+        MockMultipartFile banner = new MockMultipartFile("banner", "b.jpg", "image/jpeg", new byte[]{1});
+
+        mockMvc.perform(
+                MockMvcRequestBuilders.multipart("/api/my-works/{id}/banner", 1L)
+                        .file(banner)
+                        .with(request -> { request.setMethod("PATCH"); return request; })
+                        .contentType(MediaType.MULTIPART_FORM_DATA)
+                        .with(authentication(authWith(10L)))
+        ).andExpect(status().isNoContent());
+    }
+
+    @Test
+    @DisplayName("PATCH /api/my-works/{id}/banner -> 404 when not found")
+    void updateBanner_shouldReturn404_whenNotFound() throws Exception {
+        doThrow(new IllegalArgumentException("not found")).when(workService).updateBanner(anyLong(), any(), anyLong());
+
+        MockMultipartFile banner = new MockMultipartFile("banner", "b.jpg", "image/jpeg", new byte[]{1});
+
+        mockMvc.perform(
+                MockMvcRequestBuilders.multipart("/api/my-works/{id}/banner", 1L)
+                        .file(banner)
+                        .with(request -> { request.setMethod("PATCH"); return request; })
+                        .contentType(MediaType.MULTIPART_FORM_DATA)
+                        .with(authentication(authWith(10L)))
+        ).andExpect(status().isNotFound());
+    }
+
+    @Test
+    @DisplayName("PATCH /api/my-works/{id}/banner -> 403 when forbidden")
+    void updateBanner_shouldReturn403_whenForbidden() throws Exception {
+        doThrow(new SecurityException("forbidden")).when(workService).updateBanner(anyLong(), any(), anyLong());
+
+        MockMultipartFile banner = new MockMultipartFile("banner", "b.jpg", "image/jpeg", new byte[]{1});
+
+        mockMvc.perform(
+                MockMvcRequestBuilders.multipart("/api/my-works/{id}/banner", 1L)
+                        .file(banner)
+                        .with(request -> { request.setMethod("PATCH"); return request; })
+                        .contentType(MediaType.MULTIPART_FORM_DATA)
+                        .with(authentication(authWith(10L)))
+        ).andExpect(status().isForbidden());
+    }
+
+    @Test
+    @DisplayName("PATCH /api/my-works/{id}/banner -> 400 when IO error")
+    void updateBanner_shouldReturn400_whenIOException() throws Exception {
+        doThrow(new IOException("io")).when(workService).updateBanner(anyLong(), any(), anyLong());
+
+        MockMultipartFile banner = new MockMultipartFile("banner", "b.jpg", "image/jpeg", new byte[]{1});
+
+        mockMvc.perform(
+                MockMvcRequestBuilders.multipart("/api/my-works/{id}/banner", 1L)
+                        .file(banner)
+                        .with(request -> { request.setMethod("PATCH"); return request; })
+                        .contentType(MediaType.MULTIPART_FORM_DATA)
+                        .with(authentication(authWith(10L)))
+        ).andExpect(status().isBadRequest());
     }
 }

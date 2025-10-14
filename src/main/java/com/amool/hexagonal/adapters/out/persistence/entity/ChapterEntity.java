@@ -13,13 +13,13 @@ public class ChapterEntity {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @Column(name = "title", nullable = false)
-    private String title;
+    @Column(name = "title")
+    private String title = "";
 
-    @Column(name = "price", nullable = false)
-    private Double price;
+    @Column(name = "price")  
+    private Double price = 0.0;
 
-    @Column(name = "last_update", nullable = false)
+    @Column(name = "last_update") 
     private LocalDateTime lastModified;
 
     @ManyToOne
@@ -27,19 +27,30 @@ public class ChapterEntity {
     private WorkEntity workEntity;
 
     @Column(name = "likes", nullable = false)
-    private Long likes;
+    private Long likes = 0L;  
+
+    @Column(name = "allow_ai_translation", nullable = false)
+    private Boolean allowAiTranslation = true; 
 
     @ManyToOne
-    @JoinColumn(name = "language_id", nullable = false)
+    @JoinColumn(name = "language_id") 
     private LanguageEntity languageEntity;
 
-    // Relations
+    @Column(name = "publication_status")  
+    private String publicationStatus = "DRAFT"; 
 
-    // Usuario adquiere capítulos
+    @Column(name = "scheduled_publication_date")
+    private LocalDateTime scheduledPublicationDate;
+
+    @Column(name = "published_at")
+    private LocalDateTime publishedAt;
+
+    @OneToMany(mappedBy = "chapterEntity", cascade = CascadeType.ALL)
+    private Set<VersionEntity> versions = new HashSet<>();
+
     @ManyToMany(mappedBy = "acquiredChapterEntities")
     private Set<UserEntity> usersWhoAcquired = new HashSet<>();
 
-    // Getters y Setters
     public Long getId() { return id; }
     public void setId(Long id) { this.id = id; }
 
@@ -58,9 +69,24 @@ public class ChapterEntity {
     public Long getLikes() { return likes; }
     public void setLikes(Long likes) { this.likes = likes; }
 
+    public Boolean getAllowAiTranslation() { return allowAiTranslation; }
+    public void setAllowAiTranslation(Boolean allowAiTranslation) { this.allowAiTranslation = allowAiTranslation; }
+
     public LanguageEntity getLanguageEntity() { return languageEntity; }
     public void setLanguageEntity(LanguageEntity languageEntity) { this.languageEntity = languageEntity; }
 
+    public String getPublicationStatus() { return publicationStatus; }
+    public void setPublicationStatus(String publicationStatus) { this.publicationStatus = publicationStatus; }
+
+    public LocalDateTime getScheduledPublicationDate() { return scheduledPublicationDate; }
+    public void setScheduledPublicationDate(LocalDateTime scheduledPublicationDate) { this.scheduledPublicationDate = scheduledPublicationDate; }
+
+    public LocalDateTime getPublishedAt() { return publishedAt; }
+    public void setPublishedAt(LocalDateTime publishedAt) { this.publishedAt = publishedAt; }
+
     public Set<UserEntity> getUsersWhoAcquired() { return usersWhoAcquired; }
     public void setUsersWhoAcquired(Set<UserEntity> usersWhoAcquired) { this.usersWhoAcquired = usersWhoAcquired; }
+
+    public Set<VersionEntity> getVersions() { return versions; }
+    public void setVersions(Set<VersionEntity> versions) { this.versions = versions; }
 }

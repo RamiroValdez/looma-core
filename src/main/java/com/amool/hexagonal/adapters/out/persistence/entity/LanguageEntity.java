@@ -13,15 +13,15 @@ public class LanguageEntity {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
+    @Column(name = "code")
+    private String code;
+
     @Column(name = "name", nullable = false)
     private String name;
 
-    // Relations
-    // Usuario prefiere idiomas
     @ManyToMany(mappedBy = "preferredLanguageEntities")
     private Set<UserEntity> users = new HashSet<>();
 
-    // Getters y Setters
     public Long getId() { return id; }
     public void setId(Long id) { this.id = id; }
 
@@ -30,4 +30,7 @@ public class LanguageEntity {
 
     public Set<UserEntity> getUsers() { return users; }
     public void setUsers(Set<UserEntity> users) { this.users = users; }
+
+    public String getCode() { return code; }
+    public void setCode(String code) { this.code = code; }
 }

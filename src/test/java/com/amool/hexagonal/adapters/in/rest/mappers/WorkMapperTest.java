@@ -10,15 +10,11 @@ import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.*;
 
-/**
- * Test unitario para WorkMapper de REST
- * Verifica el mapeo correcto de Domain → DTO
- */
+
 public class WorkMapperTest {
 
     @Test
     public void testToDto_ShouldMapAllFields() {
-        // Arrange
         User creator = new User();
         creator.setId(1L);
         creator.setName("John");
@@ -60,10 +56,8 @@ public class WorkMapperTest {
         categories.add(category);
         work.setCategories(categories);
 
-        // Act
         WorkResponseDto dto = WorkMapper.toDto(work);
 
-        // Assert
         assertNotNull(dto);
         assertEquals(1L, dto.getId());
         assertEquals("Test Work", dto.getTitle());
@@ -72,7 +66,6 @@ public class WorkMapperTest {
         assertEquals(29.99, dto.getPrice());
         assertEquals(500, dto.getLikes());
         
-        // Verificar relaciones
         assertNotNull(dto.getCreator());
         assertEquals("John", dto.getCreator().getName());
         assertNotNull(dto.getFormat());
@@ -85,10 +78,7 @@ public class WorkMapperTest {
 
     @Test
     public void testToDto_ShouldReturnNull_WhenWorkIsNull() {
-        // Act
         WorkResponseDto dto = WorkMapper.toDto(null);
-
-        // Assert
         assertNull(dto);
     }
 }

@@ -10,15 +10,10 @@ import java.util.HashSet;
 
 import static org.junit.jupiter.api.Assertions.*;
 
-/**
- * Test unitario para WorkMapper de persistencia
- * Verifica el mapeo correcto de Entity → Domain
- */
 public class WorkMapperTest {
 
     @Test
     public void testToDomain_ShouldMapAllFields() {
-        // Arrange
         UserEntity creator = new UserEntity();
         creator.setId(1L);
         creator.setName("John");
@@ -30,6 +25,10 @@ public class WorkMapperTest {
         FormatEntity format = new FormatEntity();
         format.setId(1L);
         format.setName("Novel");
+
+        LanguageEntity originalLanguage = new LanguageEntity();
+        originalLanguage.setId(1L);
+        originalLanguage.setName("Español");
 
         WorkEntity entity = new WorkEntity();
         entity.setId(1L);
@@ -43,13 +42,13 @@ public class WorkMapperTest {
         entity.setPublicationDate(LocalDate.of(2024, 1, 15));
         entity.setCreator(creator);
         entity.setFormatEntity(format);
+        entity.setOriginalLanguageEntity(originalLanguage);
         entity.setChapters(new ArrayList<>());
         entity.setCategories(new HashSet<>());
+        entity.setTags(new HashSet<>());
 
-        // Act
         Work work = WorkMapper.toDomain(entity);
 
-        // Assert
         assertNotNull(work);
         assertEquals(1L, work.getId());
         assertEquals("Test Work", work.getTitle());
@@ -61,21 +60,20 @@ public class WorkMapperTest {
         assertEquals(500, work.getLikes());
         assertEquals(LocalDate.of(2024, 1, 15), work.getPublicationDate());
         
-        // Verificar relaciones
         assertNotNull(work.getCreator());
         assertEquals("John", work.getCreator().getName());
         assertNotNull(work.getFormat());
         assertEquals("Novel", work.getFormat().getName());
+        assertNotNull(work.getOriginalLanguage());
+        assertEquals("Español", work.getOriginalLanguage().getName());
         assertNotNull(work.getChapters());
         assertNotNull(work.getCategories());
+        assertNotNull(work.getTags());
     }
 
     @Test
     public void testToDomain_ShouldReturnNull_WhenEntityIsNull() {
-        // Act
         Work work = WorkMapper.toDomain(null);
-
-        // Assert
         assertNull(work);
     }
 }

@@ -2,33 +2,90 @@ package com.amool.hexagonal.adapters.in.rest.controllers;
 
 import com.amool.hexagonal.adapters.in.rest.dtos.WorkResponseDto;
 import com.amool.hexagonal.adapters.in.rest.mappers.WorkMapper;
-import com.amool.hexagonal.application.port.in.ObtainWorkByIdUseCase;
+import com.amool.hexagonal.application.port.in.WorkService;
 import com.amool.hexagonal.domain.model.Work;
+import com.amool.hexagonal.security.JwtUserPrincipal;
 
 import java.util.List;
 import java.util.stream.Collectors;
+import java.io.IOException;
 
+import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PatchMapping;
+import org.springframework.web.bind.annotation.RequestPart;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.multipart.MultipartFile;
+import org.springframework.http.ResponseEntity;
+import com.amool.hexagonal.domain.exception.UnauthorizedAccessException;
 
 @RestController
 @RequestMapping("/api/my-works")
 public class MyWorksController {
 
-    private ObtainWorkByIdUseCase obtainWorkByIdUseCase;
+    private WorkService workService;
 
-    public MyWorksController(ObtainWorkByIdUseCase obtainWorkByIdUseCase) {
-        this.obtainWorkByIdUseCase = obtainWorkByIdUseCase;
+    public MyWorksController(WorkService workService) {
+        this.workService = workService;
+    }
+    
+    @GetMapping("/{userId}")
+    @PreAuthorize("isAuthenticated() and #userId == principal.userId")
+    public ResponseEntity<List<WorkResponseDto>> getWorksByUserId(
+            @PathVariable Long userId, 
+            @AuthenticationPrincipal JwtUserPrincipal principal) {
+        try {
+            List<Work> works = workService.getAuthenticatedUserWorks(principal.getUserId());
+            List<WorkResponseDto> response = works.stream()
+                    .map(WorkMapper::toDto)
+                    .collect(Collectors.toList());
+            return ResponseEntity.ok(response);
+        } catch (Exception e) {
+            throw new UnauthorizedAccessException("No se pudo obtener las obras del usuario autenticado: " + e.getMessage(), e);
+        }
     }
 
-    @GetMapping("/{userId}")
-    public List<WorkResponseDto> getWorksByUserId(@PathVariable Long userId) {
-        List<Work> works = obtainWorkByIdUseCase.getWorksByUserId(userId);
-        return works.stream()
-                .map(WorkMapper::toDto)
-                .collect(Collectors.toList());
+    @PatchMapping(value = "/{workId}/cover", consumes = "multipart/form-data")
+    public ResponseEntity<Void> updateCover(
+            @PathVariable("workId") Long workId,
+            @RequestPart(value = "coverIaUrl", required = false) String optionalData,
+            @RequestPart(value = "cover", required = false) MultipartFile coverFile,
+            @AuthenticationPrincipal JwtUserPrincipal principal
+    ) {
+        try {
+            this.workService.updateCover(workId, coverFile, principal.getUserId(),optionalData);
+            return ResponseEntity.noContent().build();
+        } catch (IllegalArgumentException e) {
+            return ResponseEntity.notFound().build();
+        } catch (SecurityException e) {
+            return ResponseEntity.status(403).build();
+        } catch (IOException e) {
+            return ResponseEntity.badRequest().build();
+        }   catch (InterruptedException e) {
+            Thread.currentThread().interrupt();
+            return ResponseEntity.status(500).build();
+        }
+    }
+
+    @PatchMapping(value = "/{workId}/banner", consumes = "multipart/form-data")
+    public ResponseEntity<Void> updateBanner(
+            @PathVariable("workId") Long workId,
+            @RequestPart("banner") MultipartFile bannerFile,
+            @AuthenticationPrincipal JwtUserPrincipal principal
+    ) {
+        try {
+            this.workService.updateBanner(workId, bannerFile, principal.getUserId());
+            return ResponseEntity.noContent().build();
+        } catch (IllegalArgumentException e) {
+            return ResponseEntity.notFound().build();
+        } catch (SecurityException e) {
+            return ResponseEntity.status(403).build();
+        } catch (IOException e) {
+            return ResponseEntity.badRequest().build();
+        }
     }
 
 }

@@ -19,7 +19,7 @@ public class WorkEntity {
     @Column(name = "title", nullable = false)
     private String title;
 
-    @Column(name = "description", nullable = false)
+    @Column(name = "description", nullable = false, columnDefinition = "TEXT")
     private String description;
 
     @Column(name = "cover")
@@ -48,26 +48,32 @@ public class WorkEntity {
     @JoinColumn(name = "format_id", nullable = false)
     private FormatEntity formatEntity;
 
-    // Relations
+    @ManyToOne
+    @JoinColumn(name = "original_language_id", nullable = false)
+    private LanguageEntity originalLanguageEntity;
 
-    // Obra tiene capítulos
+
     @OneToMany(mappedBy = "workEntity", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<ChapterEntity> chapters = new ArrayList<>();
 
-    // Usuario guarda obras
     @ManyToMany(mappedBy = "savedWorks")
     private Set<UserEntity> usersWhoSaved = new HashSet<>();
 
-    // Obra tiene categorías
     @ManyToMany
     @JoinTable(name = "work_category", joinColumns = @JoinColumn(name = "work_id"), inverseJoinColumns = @JoinColumn(name = "category_id"))
     private Set<CategoryEntity> categories = new HashSet<>();
 
-    // Suscripción a obras
     @ManyToMany(mappedBy = "subscribedWorks")
     private Set<UserEntity> subscribers = new HashSet<>();
 
-    // Getters y Setters
+    @ManyToMany
+    @JoinTable(
+            name = "work_tag",
+            joinColumns = @JoinColumn(name = "work_id"),
+            inverseJoinColumns = @JoinColumn(name = "tag_id")
+    )
+    private Set<TagEntity> tags = new HashSet<>();
+
     public Long getId() { return id; }
     public void setId(Long id) { this.id = id; }
 
@@ -101,16 +107,21 @@ public class WorkEntity {
     public FormatEntity getFormatEntity() { return formatEntity; }
     public void setFormatEntity(FormatEntity formatEntity) { this.formatEntity = formatEntity; }
 
+    public LanguageEntity getOriginalLanguageEntity() { return originalLanguageEntity; }
+    public void setOriginalLanguageEntity(LanguageEntity originalLanguageEntity) { this.originalLanguageEntity = originalLanguageEntity; }
+
     public Set<UserEntity> getUsersWhoSaved() { return usersWhoSaved; }
     public void setUsersWhoSaved(Set<UserEntity> usersWhoSaved) { this.usersWhoSaved = usersWhoSaved; }
 
     public Set<CategoryEntity> getCategories() { return categories; }
     public void setCategories(Set<CategoryEntity> categories) { this.categories = categories; }
-
     public Set<UserEntity> getSubscribers() { return subscribers; }
     public void setSubscribers(Set<UserEntity> subscribers) { this.subscribers = subscribers; }
 
     public List<ChapterEntity> getChapters() { return chapters; }
     public void setChapters(List<ChapterEntity> chapters) { this.chapters = chapters; }
-  
+
+    public Set<TagEntity> getTags() { return tags; }
+    public void setTags(Set<TagEntity> tags) { this.tags = tags; }
 }
+

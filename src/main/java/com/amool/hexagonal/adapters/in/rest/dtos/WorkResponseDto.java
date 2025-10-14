@@ -15,8 +15,10 @@ public class WorkResponseDto {
     Integer likes;
     CreatorDto creator;
     FormatDto format;
+    LanguageDto originalLanguage;
     List<ChapterDto> chapters;
     List<CategoryDto> categories;
+    List<TagDto> tags;
 
     public Long getId() {
         return id;
@@ -51,13 +53,18 @@ public class WorkResponseDto {
     public FormatDto getFormat() {
         return format;
     }
+    public LanguageDto getOriginalLanguage() {
+        return originalLanguage;
+    }
     public List<ChapterDto> getChapters() {
         return chapters;
     }
     public List<CategoryDto> getCategories() {
         return categories;
     }
-    
+    public List<TagDto> getTags() {
+        return tags;
+    }
     public void setId(Long id) {
         this.id = id;
     }
@@ -91,10 +98,17 @@ public class WorkResponseDto {
     public void setFormat(FormatDto format) {
         this.format = format;
     }
+    public void setOriginalLanguage(LanguageDto originalLanguage) {
+        this.originalLanguage = originalLanguage;
+    }
     public void setChapters(List<ChapterDto> chapters) {
         this.chapters = chapters;
     }
     public void setCategories(List<CategoryDto> categories) {
         this.categories = categories;
+    }
+    
+    public void setTags(List<TagDto> tags) {
+        this.tags = tags;
     }
 }

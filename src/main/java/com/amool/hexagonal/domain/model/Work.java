@@ -2,7 +2,9 @@ package com.amool.hexagonal.domain.model;
 
 import java.time.LocalDate;
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 public class Work {
     private Long id;
@@ -16,10 +18,13 @@ public class Work {
     private LocalDate publicationDate;
     private User creator;
     private Format format;
+    private Language originalLanguage;
     private List<Chapter> chapters = new ArrayList<>();
     private List<Category> categories = new ArrayList<>();
-    
-    // Getters y Setters
+    private Set<Tag> tags = new HashSet<>();
+
+    public Work() {}
+
     public Long getId() { return id; }
     public void setId(Long id) { this.id = id; }
     
@@ -47,11 +52,15 @@ public class Work {
     public LocalDate getPublicationDate() { return publicationDate; }
     public void setPublicationDate(LocalDate publicationDate) { this.publicationDate = publicationDate; }
     
+    
     public User getCreator() { return creator; }
     public void setCreator(User creator) { this.creator = creator; }
     
     public Format getFormat() { return format; }
     public void setFormat(Format format) { this.format = format; }
+
+    public Language getOriginalLanguage() { return originalLanguage; }
+    public void setOriginalLanguage(Language originalLanguage) { this.originalLanguage = originalLanguage; }
     
     public List<Chapter> getChapters() { return chapters; }
     public void setChapters(List<Chapter> chapters) { this.chapters = chapters; }
@@ -59,4 +68,6 @@ public class Work {
     public List<Category> getCategories() { return categories; }
     public void setCategories(List<Category> categories) { this.categories = categories; }
     
+    public Set<Tag> getTags() { return tags; }
+    public void setTags(Set<Tag> tags) { this.tags = tags; }
 }

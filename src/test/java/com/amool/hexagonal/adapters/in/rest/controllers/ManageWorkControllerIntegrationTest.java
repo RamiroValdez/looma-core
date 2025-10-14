@@ -1,16 +1,22 @@
 package com.amool.hexagonal.adapters.in.rest.controllers;
 
-import com.amool.hexagonal.application.port.in.ObtainWorkByIdUseCase;
+import com.amool.hexagonal.application.port.in.WorkService;
+import com.amool.hexagonal.application.port.in.ChapterService;
+import com.amool.hexagonal.application.port.out.LoadWorkOwnershipPort;
 import com.amool.hexagonal.domain.model.*;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
+import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.test.web.servlet.MockMvc;
 
 import java.time.LocalDate;
 import java.util.ArrayList;
+import java.util.HashSet;
+import java.util.Optional;
 
 import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
@@ -24,13 +30,26 @@ public class ManageWorkControllerIntegrationTest {
     private MockMvc mockMvc;
 
     @MockitoBean
-    private ObtainWorkByIdUseCase obtainWorkByIdUseCase;
+    private WorkService workService;
+
+    @MockitoBean
+    private ChapterService chapterService;
+
+    @MockitoBean
+    private LoadWorkOwnershipPort loadWorkOwnershipPort;
+
+    private void setAuthenticatedUser(Long userId) {
+        var principal = new com.amool.hexagonal.security.JwtUserPrincipal(userId, "u@e.com", "Name", "Surname", "user");
+        var auth = new UsernamePasswordAuthenticationToken(principal, null, java.util.Collections.emptyList());
+        SecurityContextHolder.getContext().setAuthentication(auth);
+    }
 
     @Test
     public void testGetWorkById_ShouldReturnWork_WhenWorkExists() throws Exception {
-        // Arrange
         Long workId = 1L;
-        
+        setAuthenticatedUser(1L);
+        when(loadWorkOwnershipPort.isOwner(1L, 1L)).thenReturn(true);
+
         User creator = new User();
         creator.setId(1L);
         creator.setName("John");
@@ -40,6 +59,10 @@ public class ManageWorkControllerIntegrationTest {
         Format format = new Format();
         format.setId(1L);
         format.setName("Novel");
+
+        Language originalLanguage = new Language();
+        originalLanguage.setId(1L);
+        originalLanguage.setName("Español");
 
         Work work = new Work();
         work.setId(workId);
@@ -51,12 +74,13 @@ public class ManageWorkControllerIntegrationTest {
         work.setPublicationDate(LocalDate.of(2024, 1, 15));
         work.setCreator(creator);
         work.setFormat(format);
+        work.setOriginalLanguage(originalLanguage);
         work.setChapters(new ArrayList<>());
         work.setCategories(new ArrayList<>());
+        work.setTags(new HashSet<>());
 
-        when(obtainWorkByIdUseCase.execute(workId)).thenReturn(work);
+        when(workService.obtainWorkById(workId)).thenReturn(Optional.of(work));
 
-    
         mockMvc.perform(get("/api/manage-work/" + workId))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.id").value(workId))
@@ -66,18 +90,18 @@ public class ManageWorkControllerIntegrationTest {
                 .andExpect(jsonPath("$.price").value(29.99))
                 .andExpect(jsonPath("$.likes").value(500))
                 .andExpect(jsonPath("$.creator.name").value("John"))
-                .andExpect(jsonPath("$.format.name").value("Novel"));
+                .andExpect(jsonPath("$.format.name").value("Novel"))
+                .andExpect(jsonPath("$.originalLanguage.name").value("Español"));
     }
 
     @Test
-    public void testGetWorkById_ShouldReturnNull_WhenWorkDoesNotExist() throws Exception {
- 
+    public void testGetWorkById_ShouldReturn404_WhenWorkDoesNotExist() throws Exception {
         Long workId = 999L;
-        when(obtainWorkByIdUseCase.execute(workId)).thenReturn(null);
+        setAuthenticatedUser(999L);
+        when(loadWorkOwnershipPort.isOwner(999L, 999L)).thenReturn(true);
+        when(workService.obtainWorkById(workId)).thenReturn(Optional.empty());
 
-   
         mockMvc.perform(get("/api/manage-work/" + workId))
-                .andExpect(status().isOk())
-                .andExpect(jsonPath("$").doesNotExist());
+                .andExpect(status().isNotFound());
     }
 }

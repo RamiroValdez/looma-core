@@ -18,4 +18,18 @@ public class UserMapper {
         user.setPhoto(entity.getPhoto());
         return user;
     }
+
+    public static UserEntity toEntity(User user) {
+        if (user == null) {
+            return null;
+        }
+        UserEntity entity = new UserEntity();
+        entity.setId(user.getId());
+        entity.setName(user.getName());
+        entity.setSurname(user.getSurname());
+        entity.setUsername(user.getUsername());
+        entity.setEmail(user.getEmail());
+        entity.setPhoto(user.getPhoto());
+        return entity;
+    }
 }
