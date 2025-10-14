@@ -46,6 +46,7 @@ public class ChapterMapper {
             Chapter chapter,
             String content,
             String workName,
+            String workId,
             List<LanguageDto> availableLanguages,
             Integer chapterNumber,
             LanguageDto languageDefaultCode
@@ -61,6 +62,7 @@ public class ChapterMapper {
         dto.setContent(content); 
         dto.setPrice(chapter.getPrice());
         dto.setWorkName(workName);
+        dto.setWorkId(workId);
         dto.setLastUpdate(chapter.getLastModified());
         dto.setLikes(chapter.getLikes());
         dto.setAllowAiTranslation(chapter.getAllowAiTranslation());

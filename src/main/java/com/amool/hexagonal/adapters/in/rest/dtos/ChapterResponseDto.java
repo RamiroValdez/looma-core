@@ -9,6 +9,7 @@ public class ChapterResponseDto {
     String content;
     Double price;
     String work_name;
+    String work_id;
     LocalDateTime last_update;
     Long likes;
     Boolean allowAiTranslation;
@@ -33,6 +34,9 @@ public class ChapterResponseDto {
 
     public String getWorkName() { return work_name; }
     public void setWorkName(String work_name) { this.work_name = work_name; }
+
+    public String getWorkId() { return work_id; }
+    public void setWorkId(String work_id) { this.work_id = work_id; }
 
     public LocalDateTime getLastUpdate() { return last_update; }
     public void setLastUpdate(LocalDateTime last_update) { this.last_update = last_update; }

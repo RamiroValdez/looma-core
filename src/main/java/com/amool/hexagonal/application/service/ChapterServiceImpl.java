@@ -165,6 +165,7 @@ public class ChapterServiceImpl implements ChapterService {
                             chapter,
                             content,
                             workName,
+                            workIdStr,
                             LanguageMapper.toDtoList(availableLanguages),
                             chapterNumber,
                             LanguageMapper.toDto(defaultLanguageCode)
