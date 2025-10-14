@@ -8,6 +8,7 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
 import com.amool.hexagonal.adapters.in.rest.dtos.ChapterResponseDto;
+import com.amool.hexagonal.adapters.in.rest.dtos.UpdateChapterRequest;
 import com.amool.hexagonal.adapters.in.rest.dtos.FileTextResponseDto;
 import com.amool.hexagonal.application.port.in.ChapterService;
 import com.amool.hexagonal.application.port.in.FileToTextService;
@@ -38,6 +39,17 @@ public class EditChapterController {
                 .map(ResponseEntity::ok)
                 .orElseGet(() -> ResponseEntity.notFound().build());
     }
+    
+    @PutMapping("/update/{chapterId}")
+    @PreAuthorize("isAuthenticated()")
+    public ResponseEntity<String> updateChapter (
+        @PathVariable Long chapterId,
+        @RequestBody UpdateChapterRequest updateRequest) {
+        
+        boolean updated = chapterService.updateChapter(chapterId, updateRequest);
+        return updated ? ResponseEntity.ok("Capítulo actualizado") : ResponseEntity.notFound().build();
+    }
+
 
     @PostMapping(value = "/import-text", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     @PreAuthorize("isAuthenticated()")

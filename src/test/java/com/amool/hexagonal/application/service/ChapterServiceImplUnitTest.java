@@ -39,6 +39,9 @@ class ChapterServiceImplUnitTest {
     private SaveChapterPort saveChapterPort;
 
     @Mock
+    private UpdateChapterPort updateChapterPort;
+
+    @Mock
     private SaveChapterContentPort saveChapterContentPort;
 
     @Mock
@@ -75,6 +78,7 @@ class ChapterServiceImplUnitTest {
             loadChapterPort,
             loadChapterContentPort,
             saveChapterPort,
+            updateChapterPort,
             saveChapterContentPort,
             deleteChapterPort,
             deleteChapterContentPort,
