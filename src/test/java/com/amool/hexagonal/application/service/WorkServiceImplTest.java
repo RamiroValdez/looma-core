@@ -36,6 +36,9 @@ public class WorkServiceImplTest {
     private ImagesService imagesService;
 
     @Mock
+    private DowloadImagesService downloadImagesService;
+
+    @Mock
     private LoadUserPort loadUserPort;
 
     @Mock
@@ -149,7 +152,7 @@ public class WorkServiceImplTest {
     void updateCover_shouldThrowSecurityException_whenUserNotAuthenticated() {
         MultipartFile file = new MockMultipartFile("cover", "c.jpg", "image/jpeg", new byte[]{1});
         SecurityException ex = assertThrows(SecurityException.class, () ->
-                workServiceImpl.updateCover(1L, file, null)
+                workServiceImpl.updateCover(1L, file, null, null)
         );
         assertEquals("Usuario no autenticado", ex.getMessage());
         verifyNoInteractions(obtainWorkByIdPort);
@@ -160,7 +163,7 @@ public class WorkServiceImplTest {
         when(obtainWorkByIdPort.obtainWorkById(1L)).thenReturn(Optional.empty());
         MultipartFile file = new MockMultipartFile("cover", "c.jpg", "image/jpeg", new byte[]{1});
         assertThrows(java.util.NoSuchElementException.class, () ->
-                workServiceImpl.updateCover(1L, file, 10L)
+                workServiceImpl.updateCover(1L, file, 10L, null)
         );
         verify(obtainWorkByIdPort).obtainWorkById(1L);
         verifyNoMoreInteractions(workPort);
@@ -177,7 +180,7 @@ public class WorkServiceImplTest {
 
         MultipartFile file = new MockMultipartFile("cover", "c.jpg", "image/jpeg", new byte[]{1});
         assertThrows(SecurityException.class, () ->
-                workServiceImpl.updateCover(1L, file, 10L)
+                workServiceImpl.updateCover(1L, file, 10L, null)
         );
         verify(obtainWorkByIdPort).obtainWorkById(1L);
         verifyNoMoreInteractions(workPort);
@@ -195,7 +198,7 @@ public class WorkServiceImplTest {
         when(imagesService.uploadCoverImage(any(), eq("1"))).thenReturn("works/1/cover/cover.jpg");
 
         MultipartFile file = new MockMultipartFile("cover", "c.jpg", "image/jpeg", new byte[]{1});
-        workServiceImpl.updateCover(1L, file, 10L);
+        workServiceImpl.updateCover(1L, file, 10L, null);
 
         InOrder inOrder = inOrder(imagesService, workPort);
         inOrder.verify(imagesService).deleteImage("works/1/cover/old.jpg");
@@ -216,10 +219,32 @@ public class WorkServiceImplTest {
 
         MultipartFile file = new MockMultipartFile("cover", "c.jpg", "image/jpeg", new byte[]{1});
 
-        assertThrows(IOException.class, () -> workServiceImpl.updateCover(1L, file, 10L));
+        assertThrows(IOException.class, () -> workServiceImpl.updateCover(1L, file, 10L, null));
         verify(workPort, never()).updateWork(any(Work.class));
         verify(imagesService).deleteImage("works/1/cover/old.jpg");
     }
+
+    @Test
+    void updateCover_shouldDownloadFromIaAndPersist_whenNoFileButIaUrlProvided() throws Exception {
+        Work work = new Work();
+        work.setId(1L);
+        User creator = new User();
+        creator.setId(10L);
+        work.setCreator(creator);
+        work.setCover("works/1/cover/old.jpg");
+
+        when(obtainWorkByIdPort.obtainWorkById(1L)).thenReturn(Optional.of(work));
+        when(downloadImagesService.downloadAndUploadCoverImage(anyString(), anyString())).thenReturn("works/1/cover/cover.png");
+
+        String iaUrl = "http://archive.org/cover.png";
+        workServiceImpl.updateCover(1L, null, 10L, iaUrl);
+
+        InOrder inOrder = inOrder(imagesService, downloadImagesService, workPort);
+        inOrder.verify(imagesService).deleteImage("works/1/cover/old.jpg");
+        inOrder.verify(downloadImagesService).downloadAndUploadCoverImage(iaUrl, "1");
+        inOrder.verify(workPort).updateWork(any(Work.class));
+    }
+
 
     // --- updateBanner tests ---
 

@@ -9,7 +9,8 @@ public record CreateWorkDto(
         List<Long> categoryIds,
         Long formatId,
         Long originalLanguageId,
-        Set<String> tagIds
+        Set<String> tagIds,
+        String coverIaUrl
 ) {
 
 

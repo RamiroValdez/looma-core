@@ -31,11 +31,12 @@ public interface WorkService {
                     Long formatId,
                     Long originalLanguageId,
                     Set<String> tagIds,
+                    String coverImageUrl,
                     MultipartFile coverFile,
                     MultipartFile bannerFile,
-                    Long userId) throws IOException;
+                    Long userId) throws IOException, InterruptedException;
 
-    void updateCover(Long workId, MultipartFile coverFile, Long authenticatedUserId) throws IOException;
+    void updateCover(Long workId, MultipartFile coverFile, Long authenticatedUserId, String coverIaUrl) throws IOException, InterruptedException ;
 
     void updateBanner(Long workId, MultipartFile bannerFile, Long authenticatedUserId) throws IOException;
 }

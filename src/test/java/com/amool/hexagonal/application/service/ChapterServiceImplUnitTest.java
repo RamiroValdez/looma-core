@@ -19,6 +19,8 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.time.Instant;
+import java.util.NoSuchElementException;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.*;
@@ -55,6 +57,9 @@ class ChapterServiceImplUnitTest {
     private DeleteChapterContentPort deleteChapterContentPort;
 
     @Mock
+    private UpdateChapterStatusPort updateChapterStatusPort;
+
+    @Mock
     private EntityManager entityManager;
 
     private ChapterServiceImpl chapterService;
@@ -78,7 +83,8 @@ class ChapterServiceImplUnitTest {
             deleteChapterPort,
             deleteChapterContentPort,
             obtainWorkByIdPort,
-            loadLanguagePort
+            loadLanguagePort,
+            updateChapterStatusPort
         );
 
         var entityManagerField = ChapterServiceImpl.class.getDeclaredField("entityManager");
@@ -224,5 +230,196 @@ class ChapterServiceImplUnitTest {
 
         assertTrue(result.isEmpty());
         verify(loadChapterContentPort, never()).loadContent(anyString(), anyString(), anyString());
+    }
+
+    @Test
+    void schedulePublication_ShouldThrow_WhenUserNotAuthenticated() {
+        assertThrows(SecurityException.class, () ->
+                chapterService.schedulePublication(1L, 2L, Instant.now().plusSeconds(3600), null)
+        );
+        verifyNoInteractions(obtainWorkByIdPort, loadChapterPort, updateChapterStatusPort);
+    }
+
+    @Test
+    void schedulePublication_ShouldThrow_WhenWhenInPast() {
+        assertThrows(IllegalArgumentException.class, () ->
+                chapterService.schedulePublication(1L, 2L, Instant.now().minusSeconds(10), 10L)
+        );
+        verifyNoInteractions(obtainWorkByIdPort, loadChapterPort, updateChapterStatusPort);
+    }
+
+    @Test
+    void schedulePublication_ShouldThrow_WhenWorkNotFound() {
+        when(obtainWorkByIdPort.obtainWorkById(1L)).thenReturn(Optional.empty());
+        assertThrows(NoSuchElementException.class, () ->
+                chapterService.schedulePublication(1L, 2L, Instant.now().plusSeconds(3600), 10L)
+        );
+    }
+
+    @Test
+    void schedulePublication_ShouldThrow_WhenNotOwner() {
+        var work = new Work();
+        var creator = new com.amool.hexagonal.domain.model.User();
+        creator.setId(999L);
+        work.setCreator(creator);
+        when(obtainWorkByIdPort.obtainWorkById(1L)).thenReturn(Optional.of(work));
+
+        assertThrows(SecurityException.class, () ->
+                chapterService.schedulePublication(1L, 2L, Instant.now().plusSeconds(3600), 10L)
+        );
+    }
+
+    @Test
+    void schedulePublication_ShouldThrow_WhenChapterNotFound() {
+        var work = new Work();
+        var creator = new com.amool.hexagonal.domain.model.User();
+        creator.setId(10L);
+        work.setCreator(creator);
+        when(obtainWorkByIdPort.obtainWorkById(1L)).thenReturn(Optional.of(work));
+        when(loadChapterPort.loadChapter(1L, 2L)).thenReturn(Optional.empty());
+
+        assertThrows(NoSuchElementException.class, () ->
+                chapterService.schedulePublication(1L, 2L, Instant.now().plusSeconds(3600), 10L)
+        );
+        verify(updateChapterStatusPort, never()).schedulePublication(anyLong(), anyLong(), any());
+    }
+
+    @Test
+    void schedulePublication_ShouldCallPort_WhenOk() {
+        var work = new Work();
+        var creator = new com.amool.hexagonal.domain.model.User();
+        creator.setId(10L);
+        work.setCreator(creator);
+        when(obtainWorkByIdPort.obtainWorkById(1L)).thenReturn(Optional.of(work));
+        Chapter chapter = new Chapter();
+        chapter.setPublicationStatus("DRAFT");
+        when(loadChapterPort.loadChapter(1L, 2L)).thenReturn(Optional.of(chapter));
+
+        Instant when = Instant.now().plusSeconds(3600);
+        chapterService.schedulePublication(1L, 2L, when, 10L);
+
+        verify(updateChapterStatusPort).schedulePublication(1L, 2L, when);
+    }
+
+    @Test
+    void cancelScheduledPublication_ShouldThrow_WhenUserNotAuthenticated() {
+        assertThrows(SecurityException.class, () ->
+                chapterService.cancelScheduledPublication(1L, 2L, null)
+        );
+        verifyNoInteractions(obtainWorkByIdPort, loadChapterPort, updateChapterStatusPort);
+    }
+
+    @Test
+    void cancelScheduledPublication_ShouldThrow_WhenNotOwnerOrWorkMissing() {
+        when(obtainWorkByIdPort.obtainWorkById(1L)).thenReturn(Optional.empty());
+        assertThrows(NoSuchElementException.class, () ->
+                chapterService.cancelScheduledPublication(1L, 2L, 10L)
+        );
+
+        var work = new Work();
+        var creator = new com.amool.hexagonal.domain.model.User();
+        creator.setId(999L);
+        work.setCreator(creator);
+        when(obtainWorkByIdPort.obtainWorkById(1L)).thenReturn(Optional.of(work));
+        assertThrows(SecurityException.class, () ->
+                chapterService.cancelScheduledPublication(1L, 2L, 10L)
+        );
+    }
+
+    @Test
+    void cancelScheduledPublication_ShouldThrow_WhenChapterNotFound() {
+        var work = new Work();
+        var creator = new com.amool.hexagonal.domain.model.User();
+        creator.setId(10L);
+        work.setCreator(creator);
+        when(obtainWorkByIdPort.obtainWorkById(1L)).thenReturn(Optional.of(work));
+        when(loadChapterPort.loadChapter(1L, 2L)).thenReturn(Optional.empty());
+
+        assertThrows(NoSuchElementException.class, () ->
+                chapterService.cancelScheduledPublication(1L, 2L, 10L)
+        );
+        verify(updateChapterStatusPort, never()).clearSchedule(anyLong(), anyLong());
+    }
+
+    @Test
+    void cancelScheduledPublication_ShouldCallPort_WhenOk() {
+        var work = new Work();
+        var creator = new com.amool.hexagonal.domain.model.User();
+        creator.setId(10L);
+        work.setCreator(creator);
+        when(obtainWorkByIdPort.obtainWorkById(1L)).thenReturn(Optional.of(work));
+        Chapter chapter = new Chapter();
+        chapter.setPublicationStatus("SCHEDULED");
+        when(loadChapterPort.loadChapter(1L, 2L)).thenReturn(Optional.of(chapter));
+
+        chapterService.cancelScheduledPublication(1L, 2L, 10L);
+        verify(updateChapterStatusPort).clearSchedule(1L, 2L);
+    }
+
+    @Test
+    void deleteChapter_ShouldThrowIllegalState_WhenNotDraft() {
+        Long workId = 1L;
+        Long chapterId = 2L;
+
+        Chapter chapter = new Chapter();
+        chapter.setPublicationStatus("PUBLISHED");
+        when(loadChapterPort.loadChapter(workId, chapterId)).thenReturn(Optional.of(chapter));
+
+        assertThrows(IllegalStateException.class, () ->
+                chapterService.deleteChapter(workId, chapterId)
+        );
+        verify(deleteChapterPort, never()).deleteChapter(anyLong(), anyLong());
+        verify(deleteChapterContentPort, never()).deleteContent(anyString(), anyString());
+    }
+
+    @Test
+    void deleteChapter_ShouldDelete_WhenDraft() {
+        Long workId = 1L;
+        Long chapterId = 2L;
+
+        Chapter chapter = new Chapter();
+        chapter.setPublicationStatus("DRAFT");
+        when(loadChapterPort.loadChapter(workId, chapterId)).thenReturn(Optional.of(chapter));
+
+        chapterService.deleteChapter(workId, chapterId);
+
+        verify(deleteChapterContentPort).deleteContent(workId.toString(), chapterId.toString());
+        verify(deleteChapterPort).deleteChapter(workId, chapterId);
+    }
+
+    @Test
+    void schedulePublication_ShouldThrowIllegalState_WhenNotDraft() {
+        var work = new Work();
+        var creator = new com.amool.hexagonal.domain.model.User();
+        creator.setId(10L);
+        work.setCreator(creator);
+        when(obtainWorkByIdPort.obtainWorkById(1L)).thenReturn(Optional.of(work));
+
+        Chapter chapter = new Chapter();
+        chapter.setPublicationStatus("PUBLISHED");
+        when(loadChapterPort.loadChapter(1L, 2L)).thenReturn(Optional.of(chapter));
+
+        assertThrows(IllegalStateException.class, () ->
+                chapterService.schedulePublication(1L, 2L, Instant.now().plusSeconds(3600), 10L)
+        );
+        verify(updateChapterStatusPort, never()).schedulePublication(anyLong(), anyLong(), any());
+    }
+
+    @Test
+    void cancelScheduledPublication_ShouldThrowIllegalState_WhenNotScheduled() {
+        var work = new Work();
+        var creator = new com.amool.hexagonal.domain.model.User();
+        creator.setId(10L);
+        work.setCreator(creator);
+        when(obtainWorkByIdPort.obtainWorkById(1L)).thenReturn(Optional.of(work));
+
+        Chapter chapter = new Chapter();
+        chapter.setPublicationStatus("DRAFT");
+        when(loadChapterPort.loadChapter(1L, 2L)).thenReturn(Optional.of(chapter));
+
+        assertThrows(IllegalStateException.class, () ->
+                chapterService.cancelScheduledPublication(1L, 2L, 10L)
+        );
+        verify(updateChapterStatusPort, never()).clearSchedule(anyLong(), anyLong());
     }
 }

@@ -32,7 +32,7 @@ public class CreateWorkController {
     @PostMapping(value = "/save", consumes = "multipart/form-data")
     public ResponseEntity<Long> saveWork(
             @RequestPart("work") CreateWorkDto createWorkDto,
-            @RequestPart("cover") MultipartFile coverFile,
+            @RequestPart(value = "cover", required = false) MultipartFile coverFile,
             @RequestPart("banner") MultipartFile bannerFile,
             @AuthenticationPrincipal JwtUserPrincipal principal
             ) {
@@ -44,6 +44,7 @@ public class CreateWorkController {
                             createWorkDto.formatId(),
                             createWorkDto.originalLanguageId(),
                             createWorkDto.tagIds(),
+                            createWorkDto.coverIaUrl(),
                             coverFile,
                             bannerFile,
                             principal.getUserId());
