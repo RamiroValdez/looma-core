@@ -26,9 +26,15 @@ public class TranslationSystemServiceImpl implements TranslationSystemService {
     @Override
     public String CreateLanguageVersion(String sourceLanguage, String targetLanguage , String originalText) {
 
-        String translationText = this.sendTextToTranslate(originalText, targetLanguage);
+        String cleanedText = this.cleanText(originalText);
+
+        String translationText = this.sendTextToTranslate(cleanedText, targetLanguage);
 
         return this.createPromptToCompareAndCreateVersion(originalText,translationText,sourceLanguage,targetLanguage);
+    }
+
+    private String cleanText(String text){
+        return text.replaceAll("<br\\s*/?>", " ").replaceAll(" +", " ").trim();
     }
 
     private String sendTextToTranslate(String originalText, String targetLanguage){

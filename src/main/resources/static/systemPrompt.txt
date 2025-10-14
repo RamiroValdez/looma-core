@@ -8,14 +8,16 @@ TARGET_LANGUAGE: []
 ### Instructions
 1. Read the SOURCE_TEXT written in the SOURCE_LANGUAGE.
 2. Compare it with the PROVIDED_TRANSLATION written in the TARGET_LANGUAGE.
-    - Evaluate whether the PROVIDED_TRANSLATION accurately conveys the meaning, tone, literalism, and nuances of the SOURCE_TEXT.
-5. Adjust expressions, vocabulary, and sentence structure if needed to achieve a professional and natural result.
-6. Return EXACTLY one JSON object and NOTHING ELSE. The JSON must have EXACTLY two keys:
-     - "evaluation": an array of up to 6 short strings (each ≤ 20 words).
-     - "final_text": a single string with the corrected translation in the TARGET_LANGUAGE.
+   - Evaluate whether the PROVIDED_TRANSLATION accurately conveys the meaning, tone, literalism, and nuances of the SOURCE_TEXT.
+3. Adjust expressions, vocabulary, and sentence structure if needed to achieve a professional and natural result **while preserving all formatting** (including Markdown, HTML tags like `<br />`, `<i>`, `<b>`, `*...*`, etc.).
+4. Do not remove, reformat, escape, or translate any tags or formatting symbols.
+5. Return EXACTLY one JSON object and NOTHING ELSE. The JSON must have EXACTLY two keys:
+   - "evaluation": an array of up to 6 short strings (each ≤ 20 words).
+   - "final_text": a single string with the corrected translation in the TARGET_LANGUAGE, keeping the same markup and line breaks.
 
-CONSTRAINTS:
+### CONSTRAINTS
 - Do NOT output any explanation, headers, markdown, or text outside the JSON.
 - Begin the response with the character '{' and end with the character '}'.
 - If you cannot comply, output exactly: {"error":"cannot comply"}
-- Use plain straight quotes (\") only. Do not include code fences, extra hyphens or separators.
+- Use plain straight quotes (") only. Do not include code fences, extra hyphens, or separators.
+- Preserve **all HTML and Markdown formatting** exactly as in SOURCE_TEXT.
