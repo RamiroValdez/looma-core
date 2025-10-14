@@ -51,11 +51,12 @@ public class MyWorksController {
     @PatchMapping(value = "/{workId}/cover", consumes = "multipart/form-data")
     public ResponseEntity<Void> updateCover(
             @PathVariable("workId") Long workId,
-            @RequestPart("cover") MultipartFile coverFile,
+            @RequestPart(value = "coverIaUrl", required = false) String optionalData,
+            @RequestPart(value = "cover", required = false) MultipartFile coverFile,
             @AuthenticationPrincipal JwtUserPrincipal principal
     ) {
         try {
-            this.workService.updateCover(workId, coverFile, principal.getUserId());
+            this.workService.updateCover(workId, coverFile, principal.getUserId(),optionalData);
             return ResponseEntity.noContent().build();
         } catch (IllegalArgumentException e) {
             return ResponseEntity.notFound().build();
@@ -63,6 +64,9 @@ public class MyWorksController {
             return ResponseEntity.status(403).build();
         } catch (IOException e) {
             return ResponseEntity.badRequest().build();
+        }   catch (InterruptedException e) {
+            Thread.currentThread().interrupt();
+            return ResponseEntity.status(500).build();
         }
     }
 

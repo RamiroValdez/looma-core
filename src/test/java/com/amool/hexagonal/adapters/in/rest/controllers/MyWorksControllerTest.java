@@ -7,13 +7,13 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
-import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.boot.test.context.TestConfiguration;
 import org.springframework.http.MediaType;
 import org.springframework.mock.web.MockMultipartFile;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
 import org.springframework.web.method.support.HandlerMethodArgumentResolver;
@@ -22,10 +22,8 @@ import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
 import java.io.IOException;
 import java.util.List;
 
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.anyLong;
-import static org.mockito.Mockito.doNothing;
-import static org.mockito.Mockito.doThrow;
+import static org.mockito.ArgumentMatchers.*;
+import static org.mockito.Mockito.*;
 import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.authentication;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
@@ -62,7 +60,7 @@ public class MyWorksControllerTest {
     @Autowired
     private MockMvc mockMvc;
 
-    @MockBean
+    @MockitoBean
     private WorkService workService;
 
     private UsernamePasswordAuthenticationToken authWith(Long userId) {
@@ -73,7 +71,7 @@ public class MyWorksControllerTest {
     @Test
     @DisplayName("PATCH /api/my-works/{id}/cover -> 204 when success")
     void updateCover_shouldReturn204_whenSuccess() throws Exception {
-        doNothing().when(workService).updateCover(anyLong(), any(), anyLong());
+        doNothing().when(workService).updateCover(anyLong(), any(), anyLong(), anyString());
 
         MockMultipartFile cover = new MockMultipartFile("cover", "c.jpg", "image/jpeg", new byte[]{1});
 
@@ -89,7 +87,7 @@ public class MyWorksControllerTest {
     @Test
     @DisplayName("PATCH /api/my-works/{id}/cover -> 404 when not found")
     void updateCover_shouldReturn404_whenNotFound() throws Exception {
-        doThrow(new IllegalArgumentException("not found")).when(workService).updateCover(anyLong(), any(), anyLong());
+        doThrow(new IllegalArgumentException("not found")).when(workService).updateCover(anyLong(), any(), anyLong(),isNull());
 
         MockMultipartFile cover = new MockMultipartFile("cover", "c.jpg", "image/jpeg", new byte[]{1});
 
@@ -105,7 +103,7 @@ public class MyWorksControllerTest {
     @Test
     @DisplayName("PATCH /api/my-works/{id}/cover -> 403 when forbidden")
     void updateCover_shouldReturn403_whenForbidden() throws Exception {
-        doThrow(new SecurityException("forbidden")).when(workService).updateCover(anyLong(), any(), anyLong());
+        doThrow(new SecurityException("forbidden")).when(workService).updateCover(anyLong(), any(), anyLong(), any());
 
         MockMultipartFile cover = new MockMultipartFile("cover", "c.jpg", "image/jpeg", new byte[]{1});
 
@@ -121,7 +119,8 @@ public class MyWorksControllerTest {
     @Test
     @DisplayName("PATCH /api/my-works/{id}/cover -> 400 when IO error")
     void updateCover_shouldReturn400_whenIOException() throws Exception {
-        doThrow(new IOException("io")).when(workService).updateCover(anyLong(), any(), anyLong());
+
+        doThrow(new IOException("io")).when(workService).updateCover(any(), any(), any(), any());
 
         MockMultipartFile cover = new MockMultipartFile("cover", "c.jpg", "image/jpeg", new byte[]{1});
 
