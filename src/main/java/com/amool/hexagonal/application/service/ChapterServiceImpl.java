@@ -232,6 +232,7 @@ public class ChapterServiceImpl implements ChapterService {
         updateRequest.getVersions().forEach((languageCode, content) ->
                 saveChapterContentPort.saveContent(workId, chapterId, languageCode, content != null ? content : "")
         );
+    }
     public void schedulePublication(Long workId, Long chapterId, Instant when, Long authenticatedUserId) {
         if (authenticatedUserId == null) {
             throw new SecurityException("Usuario no autenticado");
