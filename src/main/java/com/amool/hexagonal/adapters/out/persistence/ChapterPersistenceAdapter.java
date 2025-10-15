@@ -156,7 +156,7 @@ public class ChapterPersistenceAdapter implements LoadChapterPort, SaveChapterPo
     @Override
     @Transactional
     public void schedulePublication(Long workId, Long chapterId, java.time.Instant when) {
-        LocalDateTime whenLdt = LocalDateTime.ofInstant(when, java.time.ZoneOffset.UTC);
+        LocalDateTime whenLdt = LocalDateTime.ofInstant(when, java.time.ZoneId.of("America/Argentina/Buenos_Aires"));
         int updated = entityManager.createQuery(
                 "UPDATE ChapterEntity c SET c.publicationStatus = :status, c.scheduledPublicationDate = :when, c.publishedAt = NULL, c.lastModified = :now " +
                         "WHERE c.id = :chapterId AND c.workEntity.id = :workId")
@@ -192,7 +192,7 @@ public class ChapterPersistenceAdapter implements LoadChapterPort, SaveChapterPo
     @Override
     @Transactional(readOnly = true)
     public java.util.List<FindChaptersDueForPublicationPort.DueChapter> findDue(java.time.Instant now, int limit) {
-        LocalDateTime nowLdt = LocalDateTime.ofInstant(now, java.time.ZoneOffset.UTC);
+        LocalDateTime nowLdt = LocalDateTime.ofInstant(now, java.time.ZoneId.of("America/Argentina/Buenos_Aires"));
         var query = entityManager.createQuery(
                 "SELECT c.workEntity.id, c.id FROM ChapterEntity c " +
                         "WHERE c.publicationStatus = :status AND c.scheduledPublicationDate <= :now AND c.publishedAt IS NULL",

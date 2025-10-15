@@ -39,10 +39,10 @@ public class ChapterEntity {
     @Column(name = "publication_status")  
     private String publicationStatus = "DRAFT"; 
 
-    @Column(name = "scheduled_publication_date")
+    @Column(name = "scheduled_publication_date", columnDefinition = "timestamp without time zone")
     private LocalDateTime scheduledPublicationDate;
 
-    @Column(name = "published_at")
+    @Column(name = "published_at", columnDefinition = "timestamp without time zone")
     private LocalDateTime publishedAt;
 
     @OneToMany(mappedBy = "chapterEntity", cascade = CascadeType.ALL)
