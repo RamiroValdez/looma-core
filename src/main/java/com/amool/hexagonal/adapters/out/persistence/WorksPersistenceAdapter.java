@@ -31,7 +31,6 @@ public class WorksPersistenceAdapter implements ObtainWorkByIdPort, WorkPort {
                       "LEFT JOIN FETCH w.creator " +
                       "LEFT JOIN FETCH w.formatEntity " +
                       "LEFT JOIN FETCH w.chapters " +
-                      "LEFT JOIN FETCH w.categories " +
                       "WHERE w.id = :workId";
         List<WorkEntity> results = entityManager.createQuery(jpql, WorkEntity.class)
                 .setParameter("workId", workId)
