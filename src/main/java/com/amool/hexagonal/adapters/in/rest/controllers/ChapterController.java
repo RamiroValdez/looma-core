@@ -19,6 +19,8 @@ import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import com.amool.hexagonal.security.JwtUserPrincipal;
 import com.amool.hexagonal.adapters.in.rest.dtos.SchedulePublicationRequestDto;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 @RestController
 @RequestMapping("/api")
@@ -29,6 +31,8 @@ public class ChapterController {
     private final LoadChapterContentPort loadChapterContentPort;
     private final SaveChapterContentPort saveChapterContentPort;
     private final LoadWorkOwnershipPort loadWorkOwnershipPort;
+    private static final java.time.ZoneId AR = java.time.ZoneId.of("America/Argentina/Buenos_Aires");
+    private static final Logger log = LoggerFactory.getLogger(ChapterController.class);
 
     @GetMapping("/work/{workId}/chapter/{chapterId}")
     public ResponseEntity<ChapterWithContentDto> getChapter(
@@ -139,7 +143,18 @@ public class ChapterController {
         }
 
         try {
-            java.time.Instant when = java.time.OffsetDateTime.parse(request.when()).toInstant();
+            log.debug("Schedule request.when raw: {}", request.when());
+            java.time.Instant when;
+            try {
+                when = java.time.OffsetDateTime.parse(request.when()).toInstant();
+                log.debug("Parsed as OffsetDateTime -> Instant(UTC): {}", when);
+            } catch (java.time.format.DateTimeParseException ex) {
+                java.time.LocalDateTime local = java.time.LocalDateTime.parse(request.when());
+                when = local.atZone(AR).toInstant();
+                log.debug("Parsed as LocalDateTime AR -> Instant(UTC): {} (local: {})", when, local);
+            }
+            java.time.LocalDateTime persistedLocal = java.time.LocalDateTime.ofInstant(when, AR);
+            log.debug("Will persist local AR time: {} (computed from Instant)", persistedLocal);
             chapterService.schedulePublication(Long.valueOf(workId), Long.valueOf(chapterId), when, principal.getUserId());
             return ResponseEntity.noContent().build();
         } catch (java.time.format.DateTimeParseException e) {

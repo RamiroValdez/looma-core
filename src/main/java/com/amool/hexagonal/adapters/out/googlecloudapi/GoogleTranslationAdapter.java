@@ -50,10 +50,10 @@ public class GoogleTranslationAdapter implements GoogleTranslatePort {
     }
 
     private String cleanRawTranslation(String raw) {
-        String clean = URLDecoder.decode(raw, StandardCharsets.UTF_8);
+        if (raw == null) return "";
+        String clean = raw;
 
         clean = clean.replaceAll("\\s+", " ").trim();
-
         clean = clean.replaceAll("[\\u200B-\\u200D\\uFEFF]", "");
 
         return clean;
