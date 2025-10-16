@@ -9,5 +9,6 @@ public interface WorkPort {
      Long createWork(Work work);
 
      Boolean updateWork(Work work);
-
+     
+     Boolean deleteWork(Long workId);
 }
