@@ -32,15 +32,12 @@ public class TranslationSystemServiceImpl implements TranslationSystemService {
 
             String translationText = this.sendTextToTranslate(cleanedText, targetLanguage);
             
-            // Log para verificar la traducción (si tiene éxito)
             logger.info("Translation received from Google: {}", translationText);
 
             return this.createPromptToCompareAndCreateVersion(originalText,translationText,sourceLanguage,targetLanguage);
 
         } catch (RuntimeException e) {
-            // Capturamos el error relanzado y lo registramos
             logger.error("CreateLanguageVersion failed.", e);
-            // Devolvemos un mensaje de error claro al cliente
             return "ERROR: " + e.getMessage();
         }
     }
@@ -63,17 +60,14 @@ public class TranslationSystemServiceImpl implements TranslationSystemService {
 
         String model = "gpt-4o-mini";
         
-        // --- CÓDIGO DE REINTENTO (RETRY) PARA SOLUCIONAR EL ERROR DE UNA SOLA VEZ ---
         final int MAX_RETRIES = 3;
         
         for (int attempt = 0; attempt < MAX_RETRIES; attempt++) {
             try {
                 String openAiResponse = this.sendToOpenAI(userPrompt, systemPrompt, model, 0.1);
-                return this.obtainFinalTextFromResponse(openAiResponse); // Si funciona, salimos.
+                return this.obtainFinalTextFromResponse(openAiResponse);
             } catch (RuntimeException e) {
                 
-                // 1. Verificamos si es un error de parsing (el error de "e")
-                // 2. Si no es el último intento, reintentamos.
                 if (attempt < MAX_RETRIES - 1 && e.getMessage().contains("Error parsing OpenAI response")) {
                     logger.warn("OpenAI call failed on attempt {}. Retrying in 1 second...", attempt + 1);
                     try {
@@ -82,24 +76,19 @@ public class TranslationSystemServiceImpl implements TranslationSystemService {
                         Thread.currentThread().interrupt();
                     }
                 } else {
-                    // Si falló el último intento o no es el error de parsing, lanzamos.
                     throw e; 
                 }
             }
         }
-        // Si el bucle termina sin éxito.
         throw new RuntimeException("Failed to get valid response from OpenAI after " + MAX_RETRIES + " attempts.");
-        // --- FIN DEL CÓDIGO DE REINTENTO ---
     }
 
     private String setLanguagesToSystemPrompt(String sourceLanguage, String targetLanguage) {
-        // CORRECCIÓN: Declaramos 'prompt' fuera del try/catch
         String prompt = ""; 
 
         try {
             ClassPathResource filePrompt = new ClassPathResource("/static/systemPrompt.txt");
             
-            // Asignamos el valor dentro del try
             prompt = new String(filePrompt.getInputStream().readAllBytes(), StandardCharsets.UTF_8);
 
             prompt = prompt.replace("SOURCE_LANGUAGE: []", "SOURCE_LANGUAGE: " + sourceLanguage);
@@ -117,7 +106,6 @@ public class TranslationSystemServiceImpl implements TranslationSystemService {
             JsonNode jsonNode = objectMapper.readTree(openAiResponse);
             return jsonNode.get("final_text").asText();
         }catch (IOException e){
-            // Cambiamos el tipo de excepción de retorno para que el retry la atrape.
             throw new RuntimeException("Error parsing OpenAI response: " + e.getMessage()); 
         }
     }
