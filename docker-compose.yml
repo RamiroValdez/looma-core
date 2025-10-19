@@ -8,7 +8,7 @@ services:
       POSTGRES_PASSWORD: ${DB_PASSWORD}
       POSTGRES_DB: ${DB_NAME}
     ports:
-      - "5432:5432"
+      - "${POSTGRES_DB_PORT_EXTERNAL}:5432"
     volumes:
       - postgres_data:/var/lib/postgresql/data
 
@@ -17,7 +17,7 @@ services:
     container_name: looma-mongo
     env_file: .env
     ports:
-      - "${MONGO_DB_PORT}:27017"
+      - "${MONGO_DB_PORT_EXTERNAL}:27017"
     volumes:
       - mongo_data:/data/db
 

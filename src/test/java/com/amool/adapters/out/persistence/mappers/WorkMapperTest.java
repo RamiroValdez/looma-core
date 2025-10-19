@@ -1,0 +1,83 @@
+package com.amool.adapters.out.persistence.mappers;
+
+import com.amool.adapters.out.persistence.entity.FormatEntity;
+import com.amool.adapters.out.persistence.entity.LanguageEntity;
+import com.amool.adapters.out.persistence.entity.UserEntity;
+import com.amool.adapters.out.persistence.entity.WorkEntity;
+import com.amool.adapters.out.persistence.entity.*;
+import com.amool.domain.model.Work;
+import org.junit.jupiter.api.Test;
+
+import java.time.LocalDate;
+import java.util.ArrayList;
+import java.util.HashSet;
+
+import static org.junit.jupiter.api.Assertions.*;
+
+public class WorkMapperTest {
+
+    @Test
+    public void testToDomain_ShouldMapAllFields() {
+        UserEntity creator = new UserEntity();
+        creator.setId(1L);
+        creator.setName("John");
+        creator.setSurname("Doe");
+        creator.setUsername("johndoe");
+        creator.setEmail("john@example.com");
+        creator.setPhoto("photo.jpg");
+
+        FormatEntity format = new FormatEntity();
+        format.setId(1L);
+        format.setName("Novel");
+
+        LanguageEntity originalLanguage = new LanguageEntity();
+        originalLanguage.setId(1L);
+        originalLanguage.setName("Español");
+
+        WorkEntity entity = new WorkEntity();
+        entity.setId(1L);
+        entity.setTitle("Test Work");
+        entity.setDescription("Test Description");
+        entity.setCover("cover.jpg");
+        entity.setBanner("banner.jpg");
+        entity.setState("PUBLISHED");
+        entity.setPrice(29.99);
+        entity.setLikes(500);
+        entity.setPublicationDate(LocalDate.of(2024, 1, 15));
+        entity.setCreator(creator);
+        entity.setFormatEntity(format);
+        entity.setOriginalLanguageEntity(originalLanguage);
+        entity.setChapters(new ArrayList<>());
+        entity.setCategories(new HashSet<>());
+        entity.setTags(new HashSet<>());
+
+        Work work = WorkMapper.toDomain(entity);
+
+        assertNotNull(work);
+        assertEquals(1L, work.getId());
+        assertEquals("Test Work", work.getTitle());
+        assertEquals("Test Description", work.getDescription());
+        assertEquals("cover.jpg", work.getCover());
+        assertEquals("banner.jpg", work.getBanner());
+        assertEquals("PUBLISHED", work.getState());
+        assertEquals(29.99, work.getPrice());
+        assertEquals(500, work.getLikes());
+        assertEquals(LocalDate.of(2024, 1, 15), work.getPublicationDate());
+        
+        assertNotNull(work.getCreator());
+        assertEquals("John", work.getCreator().getName());
+        assertNotNull(work.getFormat());
+        assertEquals("Novel", work.getFormat().getName());
+        assertNotNull(work.getOriginalLanguage());
+        assertEquals("Español", work.getOriginalLanguage().getName());
+        assertNotNull(work.getChapters());
+        assertNotNull(work.getCategories());
+        assertNotNull(work.getTags());
+    }
+
+    @Test
+    public void testToDomain_ShouldReturnNull_WhenEntityIsNull() {
+        Work work = WorkMapper.toDomain(null);
+        assertNull(work);
+    }
+}
