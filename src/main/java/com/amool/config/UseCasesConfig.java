@@ -260,6 +260,6 @@ public class UseCasesConfig {
 
     @Bean
     public SearchAndFiltrateUseCase searchAndFiltrateUseCase() {
-        return new SearchAndFiltrateUseCase(workPort);
+        return new SearchAndFiltrateUseCase(workPort, awsS3Port);
     }
 }
