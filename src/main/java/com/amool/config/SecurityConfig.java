@@ -29,7 +29,6 @@ public class SecurityConfig {
                         .requestMatchers("/api/languages/obtain-all").permitAll()
                         .requestMatchers("/api/category/obtain-all").permitAll()
                         .requestMatchers("/api/format/obtain-all").permitAll()
-                        .requestMatchers("/api/explore").permitAll()
                         .requestMatchers("/api/my-works/**").authenticated()
                         .requestMatchers("/api/works/**").authenticated()
                         .anyRequest().authenticated()
