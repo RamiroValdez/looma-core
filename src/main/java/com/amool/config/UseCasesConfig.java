@@ -257,4 +257,9 @@ public class UseCasesConfig {
                 imagesService,
                 workPort);
     }
+
+    @Bean
+    public SearchAndFiltrateUseCase searchAndFiltrateUseCase() {
+        return new SearchAndFiltrateUseCase(workPort);
+    }
 }
