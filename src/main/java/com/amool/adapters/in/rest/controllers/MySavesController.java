@@ -1,10 +1,11 @@
 package com.amool.adapters.in.rest.controllers;
 
+import com.amool.adapters.in.rest.dtos.SaveWorkResponseDto;
 import com.amool.application.usecases.SaveWorkUseCase;
 import com.amool.domain.model.Work;
+import com.amool.security.JwtUserPrincipal;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
-import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -21,40 +22,38 @@ public class MySavesController {
 
     @PostMapping("/{workId}/toggle")
     public ResponseEntity<?> toggleSaveWork(
-            @AuthenticationPrincipal UserDetails userDetails,
+            @AuthenticationPrincipal JwtUserPrincipal userDetails,
             @PathVariable Long workId) {
         
-        Long userId = Long.parseLong(userDetails.getUsername());
+        Long userId = userDetails.getUserId();
         saveWorkUseCase.toggleSaveWork(userId, workId);
         
         boolean isSaved = saveWorkUseCase.isWorkSavedByUser(userId, workId);
         return ResponseEntity.ok().body(
-            new SaveWorkResponse(workId, isSaved)
+            new SaveWorkResponseDto(workId, isSaved)
         );
     }
 
     @GetMapping("/{workId}/status")
     public ResponseEntity<?> getSaveStatus(
-            @AuthenticationPrincipal UserDetails userDetails,
+            @AuthenticationPrincipal JwtUserPrincipal userDetails,
             @PathVariable Long workId) {
         
-        Long userId = Long.parseLong(userDetails.getUsername());
+        Long userId = userDetails.getUserId();
         boolean isSaved = saveWorkUseCase.isWorkSavedByUser(userId, workId);
         
         return ResponseEntity.ok().body(
-            new SaveWorkResponse(workId, isSaved)
+            new SaveWorkResponseDto(workId, isSaved)
         );
     }
     
     @GetMapping
     public ResponseEntity<List<Work>> getSavedWorks(
-            @AuthenticationPrincipal UserDetails userDetails) {
+            @AuthenticationPrincipal JwtUserPrincipal userDetails) {
         
-        Long userId = Long.parseLong(userDetails.getUsername());
+        Long userId = userDetails.getUserId();
         List<Work> savedWorks = saveWorkUseCase.getSavedWorksByUser(userId);
         
         return ResponseEntity.ok(savedWorks);
     }
-
-    private record SaveWorkResponse(Long workId, boolean isSaved) {}
 }

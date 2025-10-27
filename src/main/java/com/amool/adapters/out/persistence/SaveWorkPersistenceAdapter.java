@@ -67,7 +67,7 @@ public class SaveWorkPersistenceAdapter implements SaveWorkPort {
 
     @Override
     public boolean isWorkSavedByUser(Long userId, Long workId) {
-        String jpql = "SELECT COUNT(uw) > 0 FROM UserEntity u JOIN u.savedWorks w WHERE u.id = :userId AND w.id = :workId";
+        String jpql = "SELECT COUNT(w) > 0 FROM UserEntity u JOIN u.savedWorks w WHERE u.id = :userId AND w.id = :workId";
         return entityManager.createQuery(jpql, Boolean.class)
                 .setParameter("userId", userId)
                 .setParameter("workId", workId)
