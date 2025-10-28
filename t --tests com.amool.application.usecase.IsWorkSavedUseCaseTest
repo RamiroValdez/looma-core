@@ -1,0 +1,12 @@
+  develop[m
+  feature/ImplementacionDeValidacionesYExcepcionesParaQueUnAutorNoPuedaTraerObrasAjenas[m
+  feature/crear_logica_para_traer_datos_a_mis_obras[m
+  feature/eliminarObra-back[m
+  feature/funcion-traer-todos-los-idiomas-back[m
+* [32mfeature/guardarObraBack[m
+  feature/implementarAutentificacionAlTraerLasObrasDeUnUsuario[m
+  feature/mapeo_de_base_de_datos_sql[m
+  feature/permitirLikearUnCapituloBack[m
+  feature/traerObrasALaVistaHome[m
+  fix/architecture[m
+  master[m
