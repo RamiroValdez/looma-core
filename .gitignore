@@ -41,3 +41,9 @@ out/
 
 # Environment files
 .env
+.application.properties
+.application-test.properties
+.application-dev.properties
+.application-prod.properties
+
+
