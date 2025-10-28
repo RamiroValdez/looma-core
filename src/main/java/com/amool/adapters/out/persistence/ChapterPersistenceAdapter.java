@@ -158,10 +158,11 @@ public class ChapterPersistenceAdapter implements LoadChapterPort, SaveChapterPo
     public void schedulePublication(Long workId, Long chapterId, java.time.Instant when) {
         LocalDateTime whenLdt = LocalDateTime.ofInstant(when, java.time.ZoneId.of("America/Argentina/Buenos_Aires"));
         int updated = entityManager.createQuery(
-                "UPDATE ChapterEntity c SET c.publicationStatus = :status, c.scheduledPublicationDate = :when, c.publishedAt = NULL, c.lastModified = :now " +
+                "UPDATE ChapterEntity c SET c.publicationStatus = :status, c.scheduledPublicationDate = :when, c.publishedAt = :publishedAt, c.lastModified = :now " +
                         "WHERE c.id = :chapterId AND c.workEntity.id = :workId")
                 .setParameter("status", "SCHEDULED")
                 .setParameter("when", whenLdt)
+                .setParameter("publishedAt", (LocalDateTime) null)
                 .setParameter("now", LocalDateTime.now())
                 .setParameter("chapterId", chapterId)
                 .setParameter("workId", workId)
@@ -176,9 +177,10 @@ public class ChapterPersistenceAdapter implements LoadChapterPort, SaveChapterPo
     @Transactional
     public void clearSchedule(Long workId, Long chapterId) {
         int updated = entityManager.createQuery(
-                "UPDATE ChapterEntity c SET c.publicationStatus = :status, c.scheduledPublicationDate = NULL, c.lastModified = :now " +
+                "UPDATE ChapterEntity c SET c.publicationStatus = :status, c.scheduledPublicationDate = :whenNull, c.lastModified = :now " +
                         "WHERE c.id = :chapterId AND c.workEntity.id = :workId")
                 .setParameter("status", "DRAFT")
+                .setParameter("whenNull", (LocalDateTime) null)
                 .setParameter("now", LocalDateTime.now())
                 .setParameter("chapterId", chapterId)
                 .setParameter("workId", workId)
