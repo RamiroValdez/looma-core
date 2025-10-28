@@ -48,6 +48,22 @@ jobs:
       - name: Grant execute permission for Gradle wrapper
         run: chmod +x gradlew
 
+      - name: Wait for PostgreSQL
+        shell: bash
+        run: |
+          for i in {1..60}; do
+            (echo > /dev/tcp/localhost/5432) >/dev/null 2>&1 && echo "Postgres is up" && break
+            echo "Waiting for Postgres...($i)"; sleep 1
+          done
+
+      - name: Wait for MongoDB
+        shell: bash
+        run: |
+          for i in {1..60}; do
+            (echo > /dev/tcp/localhost/27017) >/dev/null 2>&1 && echo "Mongo is up" && break
+            echo "Waiting for Mongo...($i)"; sleep 1
+          done
+
       - name: Run tests
         env:
           SPRING_PROFILES_ACTIVE: test
