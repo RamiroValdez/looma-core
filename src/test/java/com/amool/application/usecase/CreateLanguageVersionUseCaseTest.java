@@ -3,13 +3,11 @@ package com.amool.application.usecase;
 import com.amool.application.port.out.GoogleTranslatePort;
 import com.amool.application.port.out.OpenAIPort;
 import com.amool.application.usecases.CreateLanguageVersionUseCase;
-import io.jsonwebtoken.io.IOException;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertThrows;
 
 public class CreateLanguageVersionUseCaseTest {
 
