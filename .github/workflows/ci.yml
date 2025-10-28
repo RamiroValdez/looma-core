@@ -56,6 +56,17 @@ jobs:
             echo "Waiting for Postgres...($i)"; sleep 1
           done
 
+      - name: Install psql client
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y postgresql-client
+
+      - name: Reset Postgres schema (public)
+        env:
+          PGPASSWORD: postgres
+        run: |
+          psql -h localhost -U postgres -d testdb -c "DROP SCHEMA IF EXISTS public CASCADE; CREATE SCHEMA public;"
+
       - name: Wait for MongoDB
         shell: bash
         run: |
