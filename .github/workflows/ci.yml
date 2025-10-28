@@ -79,6 +79,23 @@ jobs:
         run: |
           ./gradlew --no-daemon clean test
 
+      - name: Rerun failing tests with verbose logs
+        if: failure()
+        env:
+          SPRING_PROFILES_ACTIVE: test
+          SPRING_DATA_MONGODB_URI: mongodb://localhost:27017/testdb
+          SPRING_TEST_DATABASE_REPLACE: NONE
+          SPRING_DATASOURCE_URL: jdbc:postgresql://localhost:5432/testdb
+          SPRING_DATASOURCE_USERNAME: postgres
+          SPRING_DATASOURCE_PASSWORD: postgres
+          SPRING_JPA_HIBERNATE_DDL_AUTO: create-drop
+          SPRING_JPA_DATABASE_PLATFORM: org.hibernate.dialect.PostgreSQLDialect
+          SPRING_AI_OPENAI_ENABLED: false
+          OPENAI_API_KEY: dummy
+        run: |
+          ./gradlew --no-daemon -i -S test --tests com.amool.adapters.out.persistence.ChapterPersistenceAdapterIntegrationTest
+          ./gradlew --no-daemon -i -S test --tests com.amool.adapters.out.persistence.WorksPersistenceAdapterIntegrationTest
+
       - name: Build (assemble)
         run: ./gradlew --no-daemon assemble
 
