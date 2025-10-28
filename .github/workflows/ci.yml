@@ -1,0 +1,127 @@
+name: CI
+
+on:
+  push:
+    branches: [ main, develop, feature/** ]
+  pull_request:
+    branches: [ main, develop ]
+
+jobs:
+  build-and-test:
+    runs-on: ubuntu-latest
+
+    services:
+      postgres:
+        image: postgres:15
+        env:
+          POSTGRES_DB: testdb
+          POSTGRES_USER: postgres
+          POSTGRES_PASSWORD: postgres
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd "pg_isready -U postgres -d testdb"
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+      mongo:
+        image: mongo:6.0
+        ports:
+          - 27017:27017
+        options: >-
+          --health-cmd "mongosh --eval 'db.runCommand({ ping: 1 })'"
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Java
+        uses: actions/setup-java@v4
+        with:
+          distribution: 'temurin'
+          java-version: '21'
+          cache: 'gradle'
+
+      - name: Grant execute permission for Gradle wrapper
+        run: chmod +x gradlew
+
+      - name: Wait for PostgreSQL
+        shell: bash
+        run: |
+          for i in {1..60}; do
+            (echo > /dev/tcp/localhost/5432) >/dev/null 2>&1 && echo "Postgres is up" && break
+            echo "Waiting for Postgres...($i)"; sleep 1
+          done
+
+      - name: Install psql client
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y postgresql-client
+
+      - name: Reset Postgres schema (public)
+        env:
+          PGPASSWORD: postgres
+        run: |
+          psql -h localhost -U postgres -d testdb -c "DROP SCHEMA IF EXISTS public CASCADE; CREATE SCHEMA public;"
+
+      - name: Wait for MongoDB
+        shell: bash
+        run: |
+          for i in {1..60}; do
+            (echo > /dev/tcp/localhost/27017) >/dev/null 2>&1 && echo "Mongo is up" && break
+            echo "Waiting for Mongo...($i)"; sleep 1
+          done
+
+      - name: Run tests
+        env:
+          SPRING_PROFILES_ACTIVE: test
+          SPRING_DATA_MONGODB_URI: mongodb://localhost:27017/testdb
+          SPRING_TEST_DATABASE_REPLACE: NONE
+          SPRING_DATASOURCE_URL: jdbc:postgresql://localhost:5432/testdb
+          SPRING_DATASOURCE_USERNAME: postgres
+          SPRING_DATASOURCE_PASSWORD: postgres
+          SPRING_JPA_HIBERNATE_DDL_AUTO: create-drop
+          SPRING_JPA_DATABASE_PLATFORM: org.hibernate.dialect.PostgreSQLDialect
+          SPRING_AI_OPENAI_ENABLED: false
+          OPENAI_API_KEY: dummy
+        run: |
+          ./gradlew --no-daemon clean test
+
+      - name: Rerun failing tests with verbose logs
+        if: failure()
+        env:
+          SPRING_PROFILES_ACTIVE: test
+          SPRING_DATA_MONGODB_URI: mongodb://localhost:27017/testdb
+          SPRING_TEST_DATABASE_REPLACE: NONE
+          SPRING_DATASOURCE_URL: jdbc:postgresql://localhost:5432/testdb
+          SPRING_DATASOURCE_USERNAME: postgres
+          SPRING_DATASOURCE_PASSWORD: postgres
+          SPRING_JPA_HIBERNATE_DDL_AUTO: create-drop
+          SPRING_JPA_DATABASE_PLATFORM: org.hibernate.dialect.PostgreSQLDialect
+          SPRING_AI_OPENAI_ENABLED: false
+          OPENAI_API_KEY: dummy
+        run: |
+          ./gradlew --no-daemon -i -S test --tests com.amool.adapters.out.persistence.ChapterPersistenceAdapterIntegrationTest
+          ./gradlew --no-daemon -i -S test --tests com.amool.adapters.out.persistence.WorksPersistenceAdapterIntegrationTest
+
+      - name: Build (assemble)
+        run: ./gradlew --no-daemon assemble
+
+      - name: Upload test reports (always)
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: test-reports
+          path: |
+            build/reports/tests/test
+            build/test-results/test
+
+      - name: Upload jar artifact
+        if: success()
+        uses: actions/upload-artifact@v4
+        with:
+          name: app-jars
+          path: build/libs/*.jar

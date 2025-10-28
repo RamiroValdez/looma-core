@@ -90,8 +90,6 @@ public class WorksPersistenceAdapter implements ObtainWorkByIdPort, WorkPort {
                 return false;
             }
 
-            // Update only scalar fields and simple associations. Do NOT touch chapters to avoid
-            // cascading changes that could nullify chapter.workEntity (work_id).
             if (work.getTitle() != null) existingEntity.setTitle(work.getTitle());
             if (work.getDescription() != null) existingEntity.setDescription(work.getDescription());
             if (work.getCover() != null) existingEntity.setCover(work.getCover());
@@ -137,7 +135,6 @@ public class WorksPersistenceAdapter implements ObtainWorkByIdPort, WorkPort {
         typedQuery.setMaxResults(pageable.getPageSize());
         List<WorkEntity> entities = typedQuery.getResultList();
 
-        // Query de conteo: usar predicates construidos con un nuevo root
         CriteriaQuery<Long> countQuery = cb.createQuery(Long.class);
         Root<WorkEntity> countRoot = countQuery.from(WorkEntity.class);
         List<Predicate> countPredicates = buildPredicates(filter, cb, countRoot);
