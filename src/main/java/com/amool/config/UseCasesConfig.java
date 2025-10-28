@@ -257,4 +257,9 @@ public class UseCasesConfig {
                 imagesService,
                 workPort);
     }
+
+    @Bean
+    public GetAllWorksUseCase getAllWorksUseCase() {
+        return new GetAllWorksUseCase(workPort);
+    }
 }

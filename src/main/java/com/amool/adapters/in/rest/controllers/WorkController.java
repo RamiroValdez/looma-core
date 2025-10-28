@@ -2,7 +2,7 @@ package com.amool.adapters.in.rest.controllers;
 
 import com.amool.adapters.in.rest.dtos.WorkResponseDto;
 import com.amool.adapters.in.rest.mappers.WorkMapper;
-import com.amool.application.port.out.WorkPort;
+import com.amool.application.usecases.GetAllWorksUseCase;
 import com.amool.domain.model.Work;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -16,17 +16,17 @@ import java.util.stream.Collectors;
 @RequestMapping("/api/works")
 public class WorkController {
 
-    private final WorkPort workPort;
+    private final GetAllWorksUseCase getAllWorksUseCase;
     private final WorkMapper workMapper;
 
-    public WorkController(WorkPort workPort, WorkMapper workMapper) {
-        this.workPort = workPort;
+    public WorkController(GetAllWorksUseCase getAllWorksUseCase, WorkMapper workMapper) {
+        this.getAllWorksUseCase = getAllWorksUseCase;
         this.workMapper = workMapper;
     }
 
     @GetMapping
     public ResponseEntity<List<WorkResponseDto>> getAllWorks() {
-        List<Work> works = workPort.getAllWorks();
+        List<Work> works = getAllWorksUseCase.execute();
         List<WorkResponseDto> response = works.stream()
                 .map(WorkMapper::toDto)
                 .collect(Collectors.toList());
