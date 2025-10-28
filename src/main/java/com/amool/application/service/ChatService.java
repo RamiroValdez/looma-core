@@ -1,16 +1,12 @@
 package com.amool.application.service;
 
-import com.amool.application.usecases.ProcessChatMessageUseCase;
 import com.amool.domain.model.ChatMessage;
 import org.springframework.ai.chat.client.ChatClient;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Service;
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.stream.Collectors;
 
-@Service
-public class ChatService implements ProcessChatMessageUseCase {
+public class ChatService {
     private final Map<String, List<ChatMessage>> conversations = new ConcurrentHashMap<>();
     private final Map<String, String> chapterContexts = new ConcurrentHashMap<>();
     private static final int MAX_MESSAGES = 20;
@@ -19,12 +15,10 @@ public class ChatService implements ProcessChatMessageUseCase {
     
     private final ChatClient chatClient;
     
-    @Autowired
     public ChatService(ChatClient.Builder chatClientBuilder) {
         this.chatClient = chatClientBuilder.build();
     }
 
-    @Override
     public ChatMessage processMessage(Long userId, Long chapterId, String message, String chapterContent) {
         String convKey = getConversationKey(userId, chapterId);
         
@@ -51,7 +45,6 @@ public class ChatService implements ProcessChatMessageUseCase {
         return assistantMessage;
     }
 
-    @Override
     public List<ChatMessage> getConversation(Long userId, Long chapterId) {
         return conversations.getOrDefault(
             getConversationKey(userId, chapterId), 
