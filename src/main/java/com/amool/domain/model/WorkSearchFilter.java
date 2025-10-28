@@ -7,8 +7,8 @@ public class WorkSearchFilter {
     private Set<Long> formatIds;
     private String state;
     private Integer minLikes;
-    private String text; // búsqueda libre
-    private String sortBy; // "title", "likes", "publicationDate"
+    private String text;
+    private String sortBy;
     private Boolean asc = true;
 
     public Set<Long> getCategoryIds() {

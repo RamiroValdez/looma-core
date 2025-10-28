@@ -108,11 +108,9 @@ class ChapterPersistenceAdapterIntegrationTest {
 
     @Test
     void clearSchedule_shouldUnsetScheduleAndDraftStatus() {
-        // Primero programamos
         Instant when = Instant.now().plusSeconds(3600);
         chapterPersistenceAdapter.schedulePublication(work.getId(), chapter.getId(), when);
 
-        // Luego cancelamos
         chapterPersistenceAdapter.clearSchedule(work.getId(), chapter.getId());
 
         ChapterEntity reloaded = entityManager.find(ChapterEntity.class, chapter.getId());
@@ -123,7 +121,6 @@ class ChapterPersistenceAdapterIntegrationTest {
 
     @Test
     void findDue_shouldReturnScheduledChaptersWithElapsedTime() {
-        // Programamos uno en el pasado para que esté vencido
         Instant past = Instant.now().minusSeconds(60);
         chapterPersistenceAdapter.schedulePublication(work.getId(), chapter.getId(), past);
 
