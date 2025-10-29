@@ -17,11 +17,9 @@ import java.util.stream.Collectors;
 public class WorkController {
 
     private final GetAllWorksUseCase getAllWorksUseCase;
-    private final WorkMapper workMapper;
 
-    public WorkController(GetAllWorksUseCase getAllWorksUseCase, WorkMapper workMapper) {
+    public WorkController(GetAllWorksUseCase getAllWorksUseCase) {
         this.getAllWorksUseCase = getAllWorksUseCase;
-        this.workMapper = workMapper;
     }
 
     @GetMapping
