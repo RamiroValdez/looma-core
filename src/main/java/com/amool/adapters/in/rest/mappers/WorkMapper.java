@@ -47,6 +47,8 @@ public class WorkMapper {
         WorkSearchFilter domain = new WorkSearchFilter();
         domain.setCategoryIds(dto.categoryIds());
         domain.setFormatIds(dto.formatIds());
+        domain.setRangeEpisodes(dto.rangeEpisodes());
+        domain.setLastUpdated(dto.lastUpdated());
         domain.setState(dto.state());
         domain.setMinLikes(dto.minLikes());
         domain.setText(dto.text());
@@ -65,6 +67,8 @@ public class WorkMapper {
         return new WorkSearchFilterDto(
                 domain.getCategoryIds(),
                 domain.getFormatIds(),
+                domain.getRangeEpisodes(),
+                domain.getLastUpdated(),
                 domain.getState(),
                 domain.getMinLikes(),
                 domain.getText(),
@@ -72,4 +76,5 @@ public class WorkMapper {
                 domain.getAsc()
         );
     }
+
 }
