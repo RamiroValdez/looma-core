@@ -2,6 +2,7 @@ package com.amool.adapters.out.persistence.entity;
 
 import java.util.HashSet;
 import java.util.Set;
+import java.math.BigDecimal;
 
 import jakarta.persistence.*;
 
@@ -30,6 +31,9 @@ public class UserEntity {
 
     @Column(name = "photo")
     private String photo;
+
+    @Column(name = "money", nullable = false)
+    private BigDecimal money = BigDecimal.ZERO;
 
 
     @ManyToMany
@@ -79,6 +83,9 @@ public class UserEntity {
 
     public String getPhoto() { return photo; }
     public void setPhoto(String photo) { this.photo = photo; }
+
+    public BigDecimal getMoney() { return money; }
+    public void setMoney(BigDecimal money) { this.money = money; }
 
     public Set<WorkEntity> getSavedWorks() { return savedWorks; }
     public void setSavedWorks(Set<WorkEntity> savedWorks) { this.savedWorks = savedWorks; }

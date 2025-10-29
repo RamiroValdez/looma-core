@@ -20,6 +20,10 @@ public class WorkResponseDto {
     List<CategoryDto> categories;
     List<TagDto> tags;
 
+    Boolean subscribedToAuthor;
+    Boolean subscribedToWork;
+    List<Long> unlockedChapters;
+
     public Long getId() {
         return id;
     }
@@ -65,6 +69,9 @@ public class WorkResponseDto {
     public List<TagDto> getTags() {
         return tags;
     }
+    public Boolean getSubscribedToAuthor() { return subscribedToAuthor; }
+    public Boolean getSubscribedToWork() { return subscribedToWork; }
+    public List<Long> getUnlockedChapters() { return unlockedChapters; }
     public void setId(Long id) {
         this.id = id;
     }
@@ -111,4 +118,7 @@ public class WorkResponseDto {
     public void setTags(List<TagDto> tags) {
         this.tags = tags;
     }
+    public void setSubscribedToAuthor(Boolean subscribedToAuthor) { this.subscribedToAuthor = subscribedToAuthor; }
+    public void setSubscribedToWork(Boolean subscribedToWork) { this.subscribedToWork = subscribedToWork; }
+    public void setUnlockedChapters(List<Long> unlockedChapters) { this.unlockedChapters = unlockedChapters; }
 }

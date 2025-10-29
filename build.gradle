@@ -44,10 +44,12 @@ dependencies {
     developmentOnly 'org.springframework.boot:spring-boot-devtools'
     runtimeOnly 'com.h2database:h2'
     runtimeOnly 'org.postgresql:postgresql'
+    testRuntimeOnly 'org.postgresql:postgresql'
     testImplementation 'com.h2database:h2'
     testImplementation 'org.springframework.boot:spring-boot-starter-test'
     testImplementation 'org.springframework.security:spring-security-test'
     testRuntimeOnly 'org.junit.platform:junit-platform-launcher'
+    testImplementation 'de.flapdoodle.embed:de.flapdoodle.embed.mongo:4.12.2'
 
     compileOnly 'org.projectlombok:lombok'
     annotationProcessor 'org.projectlombok:lombok'
@@ -62,4 +64,12 @@ dependencyManagement {
 tasks.named('test') {
     useJUnitPlatform()
     jvmArgs "-javaagent:${classpath.find { it.name.contains('mockito-core') }}"
+    testLogging {
+        events "failed", "skipped"
+        exceptionFormat "full"
+        showCauses true
+        showExceptions true
+        showStackTraces true
+        showStandardStreams true
+    }
 }
