@@ -34,6 +34,7 @@ public class UseCasesConfig {
     private final GoogleTranslatePort googleTranslatePort;
     private final LoadUserPort loadUserPort;
     private final WorkPort workPort;
+    private final SaveWorkPort saveWorkPort;
 
     private final ImagesService imagesService;
 
@@ -59,7 +60,8 @@ public class UseCasesConfig {
             GoogleTranslatePort googleTranslatePort,
             LoadUserPort loadUserPort,
             ImagesService imagesService,
-            WorkPort workPort
+            WorkPort workPort,
+            SaveWorkPort saveWorkPort
             ) {
         this.awsS3Port = awsS3Port;
         this.authPort = authPort;
@@ -83,6 +85,7 @@ public class UseCasesConfig {
         this.loadUserPort = loadUserPort;
         this.imagesService = imagesService;
         this.workPort = workPort;
+        this.saveWorkPort = saveWorkPort;
     }
 
     @Bean
@@ -261,6 +264,21 @@ public class UseCasesConfig {
     @Bean
     public SearchAndFiltrateUseCase searchAndFiltrateUseCase() {
         return new SearchAndFiltrateUseCase(workPort, awsS3Port);
+    }
+
+    @Bean
+    public IsWorkSavedUseCase isWorkSavedUseCase() {
+        return new IsWorkSavedUseCase(saveWorkPort);
+    }
+    
+    @Bean
+    public GetSavedWorksUseCase getSavedWorksUseCase() {
+        return new GetSavedWorksUseCase(saveWorkPort);
+    }
+    
+    @Bean
+    public ToggleSaveWorkUseCase toggleSaveWorkUseCase() {
+        return new ToggleSaveWorkUseCase(saveWorkPort);
     }
 
     @Bean
