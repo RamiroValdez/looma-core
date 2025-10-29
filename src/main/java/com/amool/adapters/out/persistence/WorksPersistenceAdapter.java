@@ -222,8 +222,15 @@ public class WorksPersistenceAdapter implements ObtainWorkByIdPort, WorkPort {
                 if (!"cualquiera".equals(range)) {
                     Subquery<Long> chapterCountSubquery = cb.createQuery().subquery(Long.class);
                     Root<WorkEntity> subRoot = chapterCountSubquery.from(WorkEntity.class);
-                    chapterCountSubquery.select(cb.count(subRoot.join("chapters")))
-                            .where(cb.equal(subRoot.get("id"), root.get("id")));
+                    Join<?, ?> chapterJoin = subRoot.join("chapters", JoinType.LEFT);
+
+                    chapterCountSubquery.select(cb.count(chapterJoin))
+                            .where(
+                                    cb.and(
+                                            cb.equal(subRoot.get("id"), root.get("id")),
+                                            cb.equal(chapterJoin.get("publicationStatus"), "PUBLISHED")
+                                    )
+                            );
 
                     switch (range) {
                         case "1-5":
@@ -250,38 +257,32 @@ public class WorksPersistenceAdapter implements ObtainWorkByIdPort, WorkPort {
         // Filtro de períodos de actualización (última publicación de capítulo)
         if (filter.getLastUpdated() != null && !filter.getLastUpdated().isEmpty()) {
             List<Predicate> updatePredicates = new ArrayList<>();
-            java.time.LocalDateTime now = java.time.LocalDateTime.now();
+            java.time.LocalDate today = java.time.LocalDate.now();
 
             for (String period : filter.getLastUpdated()) {
-                java.time.LocalDateTime threshold;
+                java.time.LocalDate threshold;
 
                 switch (period) {
                     case "today":
-                        threshold = now.toLocalDate().atStartOfDay();
+                        threshold = today;
                         break;
                     case "last_week":
-                        threshold = now.minusWeeks(1);
+                        threshold = today.minusWeeks(1);
                         break;
                     case "last_month":
-                        threshold = now.minusMonths(1);
+                        threshold = today.minusMonths(1);
                         break;
                     case "last_3_months":
-                        threshold = now.minusMonths(3);
+                        threshold = today.minusMonths(3);
                         break;
                     case "last_year":
-                        threshold = now.minusYears(1);
+                        threshold = today.minusYears(1);
                         break;
                     default:
                         continue;
                 }
 
-                Subquery<java.time.LocalDateTime> latestChapterSubquery = cb.createQuery().subquery(java.time.LocalDateTime.class);
-                Root<WorkEntity> subRoot = latestChapterSubquery.from(WorkEntity.class);
-                Join<?, ?> chapterJoin = subRoot.join("chapters", JoinType.LEFT);
-                latestChapterSubquery.select(cb.greatest(chapterJoin.get("publishedAt")))
-                        .where(cb.equal(subRoot.get("id"), root.get("id")));
-
-                updatePredicates.add(cb.greaterThanOrEqualTo(latestChapterSubquery, threshold));
+                updatePredicates.add(cb.greaterThanOrEqualTo(root.get("publicationDate"), threshold));
             }
 
             if (!updatePredicates.isEmpty()) {
@@ -291,6 +292,7 @@ public class WorksPersistenceAdapter implements ObtainWorkByIdPort, WorkPort {
 
         return predicates;
     }
+
 
 
 
