@@ -1,5 +1,8 @@
 package com.amool.adapters.out.persistence;
 
+import com.amool.adapters.out.persistence.entity.CategoryEntity;
+import com.amool.adapters.out.persistence.entity.FormatEntity;
+import com.amool.adapters.out.persistence.entity.TagEntity;
 import com.amool.adapters.out.persistence.entity.WorkEntity;
 import com.amool.adapters.out.persistence.mappers.WorkMapper;
 import com.amool.adapters.out.persistence.mappers.CategoryMapper;
@@ -10,10 +13,19 @@ import com.amool.adapters.out.persistence.mappers.UserMapper;
 import com.amool.application.port.out.ObtainWorkByIdPort;
 import com.amool.application.port.out.WorkPort;
 import com.amool.domain.model.Work;
+import com.amool.domain.model.WorkSearchFilter;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.PersistenceContext;
+import jakarta.persistence.TypedQuery;
+import jakarta.persistence.criteria.*;
 import jakarta.transaction.Transactional;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Component;
+
+import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
@@ -94,8 +106,6 @@ public class WorksPersistenceAdapter implements ObtainWorkByIdPort, WorkPort {
                 return false;
             }
 
-            // Update only scalar fields and simple associations. Do NOT touch chapters to avoid
-            // cascading changes that could nullify chapter.workEntity (work_id).
             if (work.getTitle() != null) existingEntity.setTitle(work.getTitle());
             if (work.getDescription() != null) existingEntity.setDescription(work.getDescription());
             if (work.getCover() != null) existingEntity.setCover(work.getCover());
@@ -119,4 +129,93 @@ public class WorksPersistenceAdapter implements ObtainWorkByIdPort, WorkPort {
             return false;
         }
     }
+
+    @Override
+    public Page<Work> findByFilters(WorkSearchFilter filter, Pageable pageable) {
+        CriteriaBuilder cb = entityManager.getCriteriaBuilder();
+
+        CriteriaQuery<WorkEntity> query = cb.createQuery(WorkEntity.class);
+        Root<WorkEntity> root = query.from(WorkEntity.class);
+        List<Predicate> predicates = buildPredicates(filter, cb, root);
+
+        query.select(root).distinct(true)
+                .where(cb.and(predicates.toArray(new Predicate[0])));
+
+        if (pageable.getSort().isUnsorted() && filter.getSortBy() != null && !filter.getSortBy().isBlank()) {
+            Path<?> orderPath = root.get(filter.getSortBy());
+            query.orderBy(filter.getAsc() ? cb.asc(orderPath) : cb.desc(orderPath));
+        }
+
+        TypedQuery<WorkEntity> typedQuery = entityManager.createQuery(query);
+        typedQuery.setFirstResult((int) pageable.getOffset());
+        typedQuery.setMaxResults(pageable.getPageSize());
+        List<WorkEntity> entities = typedQuery.getResultList();
+
+        CriteriaQuery<Long> countQuery = cb.createQuery(Long.class);
+        Root<WorkEntity> countRoot = countQuery.from(WorkEntity.class);
+        List<Predicate> countPredicates = buildPredicates(filter, cb, countRoot);
+
+        countQuery.select(cb.countDistinct(countRoot))
+                .where(cb.and(countPredicates.toArray(new Predicate[0])));
+
+        Long total = entityManager.createQuery(countQuery).getSingleResult();
+
+        List<Work> works = entities.stream()
+                .map(WorkMapper::toDomain)
+                .collect(Collectors.toList());
+
+        return new PageImpl<>(works, pageable, total);
+    }
+
+    private List<Predicate> buildPredicates(WorkSearchFilter filter, CriteriaBuilder cb, Root<WorkEntity> root) {
+        List<Predicate> predicates = new ArrayList<>();
+
+        if (filter.getText() != null && !filter.getText().isBlank()) {
+            String text = filter.getText().toLowerCase().trim();
+            String phrasePattern = "%" + text + "%";
+
+            String slugPattern = "%" + text.replace(" ", "-") + "%";
+            List<String> wordPatterns = Arrays.stream(text.split("\\s+"))
+                    .filter(word -> word.length() > 2)
+                    .map(word -> "%" + word + "%")
+                    .toList();
+
+            Join<WorkEntity, TagEntity> tagJoin = root.join("tags", JoinType.LEFT);
+
+            Predicate titleMatch = cb.like(cb.lower(root.get("title")), phrasePattern);
+            Predicate descriptionMatch = cb.like(cb.lower(root.get("description")), phrasePattern);
+
+            List<Predicate> tagPredicates = new ArrayList<>();
+            tagPredicates.add(cb.like(cb.lower(tagJoin.get("name")), phrasePattern));
+            tagPredicates.add(cb.like(cb.lower(tagJoin.get("name")), slugPattern));
+            for (String pattern : wordPatterns) {
+                tagPredicates.add(cb.like(cb.lower(tagJoin.get("name")), pattern));
+            }
+
+            Predicate tagCombined = cb.or(tagPredicates.toArray(new Predicate[0]));
+            predicates.add(cb.or(titleMatch, descriptionMatch, tagCombined));
+        }
+
+        if (filter.getCategoryIds() != null && !filter.getCategoryIds().isEmpty()) {
+            Join<WorkEntity, CategoryEntity> categoryJoin = root.join("categories", JoinType.INNER);
+            predicates.add(categoryJoin.get("id").in(filter.getCategoryIds()));
+        }
+
+        if (filter.getFormatIds() != null && !filter.getFormatIds().isEmpty()) {
+            Join<WorkEntity, FormatEntity> formatJoin = root.join("formatEntity", JoinType.INNER);
+            predicates.add(formatJoin.get("id").in(filter.getFormatIds()));
+        }
+
+        if (filter.getState() != null && !filter.getState().isBlank()) {
+            predicates.add(cb.equal(root.get("state"), filter.getState()));
+        }
+
+        if (filter.getMinLikes() != null) {
+            predicates.add(cb.greaterThanOrEqualTo(root.get("likes"), filter.getMinLikes()));
+        }
+
+        return predicates;
+    }
+
+
 }

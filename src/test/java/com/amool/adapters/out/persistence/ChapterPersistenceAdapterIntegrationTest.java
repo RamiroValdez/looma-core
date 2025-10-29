@@ -11,6 +11,9 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
 import org.springframework.context.annotation.Import;
+import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabase;
+import org.springframework.test.context.TestPropertySource;
+import org.springframework.boot.autoconfigure.domain.EntityScan;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
@@ -19,6 +22,12 @@ import java.time.Instant;
 import static org.junit.jupiter.api.Assertions.*;
 
 @DataJpaTest
+@AutoConfigureTestDatabase(replace = AutoConfigureTestDatabase.Replace.NONE)
+@TestPropertySource(properties = {
+        "spring.jpa.hibernate.ddl-auto=create-drop",
+        "spring.jpa.properties.hibernate.default_schema=public"
+})
+@EntityScan(basePackages = "com.amool.adapters.out.persistence.entity")
 @Import(ChapterPersistenceAdapter.class)
 class ChapterPersistenceAdapterIntegrationTest {
 
@@ -108,11 +117,9 @@ class ChapterPersistenceAdapterIntegrationTest {
 
     @Test
     void clearSchedule_shouldUnsetScheduleAndDraftStatus() {
-        // Primero programamos
         Instant when = Instant.now().plusSeconds(3600);
         chapterPersistenceAdapter.schedulePublication(work.getId(), chapter.getId(), when);
 
-        // Luego cancelamos
         chapterPersistenceAdapter.clearSchedule(work.getId(), chapter.getId());
 
         ChapterEntity reloaded = entityManager.find(ChapterEntity.class, chapter.getId());
@@ -123,7 +130,6 @@ class ChapterPersistenceAdapterIntegrationTest {
 
     @Test
     void findDue_shouldReturnScheduledChaptersWithElapsedTime() {
-        // Programamos uno en el pasado para que esté vencido
         Instant past = Instant.now().minusSeconds(60);
         chapterPersistenceAdapter.schedulePublication(work.getId(), chapter.getId(), past);
 

@@ -1,7 +1,10 @@
 package com.amool.adapters.in.rest.mappers;
 
 import com.amool.adapters.in.rest.dtos.WorkResponseDto;
+import com.amool.adapters.in.rest.dtos.WorkSearchFilterDto;
 import com.amool.domain.model.Work;
+import com.amool.domain.model.WorkSearchFilter;
+
 import java.util.stream.Collectors;
 
 public class WorkMapper {
@@ -37,4 +40,36 @@ public class WorkMapper {
         return dto;
     }
 
+    public static WorkSearchFilter toDomain(WorkSearchFilterDto dto) {
+        if (dto == null) {
+            return null;
+        }
+        WorkSearchFilter domain = new WorkSearchFilter();
+        domain.setCategoryIds(dto.categoryIds());
+        domain.setFormatIds(dto.formatIds());
+        domain.setState(dto.state());
+        domain.setMinLikes(dto.minLikes());
+        domain.setText(dto.text());
+        domain.setSortBy(dto.sortBy());
+
+        if (dto.asc() != null) {
+            domain.setAsc(dto.asc());
+        }
+        return domain;
+    }
+
+    public static WorkSearchFilterDto toDto(WorkSearchFilter domain) {
+        if (domain == null) {
+            return null;
+        }
+        return new WorkSearchFilterDto(
+                domain.getCategoryIds(),
+                domain.getFormatIds(),
+                domain.getState(),
+                domain.getMinLikes(),
+                domain.getText(),
+                domain.getSortBy(),
+                domain.getAsc()
+        );
+    }
 }

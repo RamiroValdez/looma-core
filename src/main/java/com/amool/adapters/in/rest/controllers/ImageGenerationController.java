@@ -65,7 +65,7 @@ public class ImageGenerationController {
 
         List<ArtisticStyleDto> artisticStyles = List.of(
                 new ArtisticStyleDto(1L, "Fotorrealista", "Ideal para thrillers modernos o no ficción."),
-                new ArtisticStyleDto(2L,"Pintura al Óleo Digital", "Da un look rico y texturizado."),
+                new ArtisticStyleDto(2L,"Óleo", "Da un look rico y texturizado."),
                 new ArtisticStyleDto(3L, "Minimalista", "Para diseños limpios y abstractos."),
                 new ArtisticStyleDto(4L, "Dibujo a Línea", "Sencillo y efectivo, como un diagrama."),
                 new ArtisticStyleDto(5L, "Arte Conceptual", "Para fantasía épica o ciencia ficción."),

@@ -1,9 +1,15 @@
-Create a detailed **flat illustration** for a book cover. **Avoid showing the image as a physical book, a 3D object, or a photo of a book.**
+Create a detailed **flat 2D illustration** in the style of **book cover artwork**,
+but **do not** show any physical book, mockup, or printed object.
+
+The image should look like **an illustration that could be placed on the front of a book**,
+not a photo or a product presentation.
 
 Artistic style: {artisticStyle}.
 Color palette: {colorPalette}.
 Composition: {composition}.
 
-Description of the scene: {description}.
+Scene description: {description}.
 
-The image should be a **high-quality, two-dimensional illustration** with strong visual focus and cinematic lighting. **No text, no title, no spine, no background context showing it as a book.**
+Focus on a **high-quality, cinematic, two-dimensional illustration** with clear visual storytelling.
+Exclude all text, titles, spines, logos, backgrounds, or hands holding a book.
+Avoid 3D perspective, branding, or photographic renderings.

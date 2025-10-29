@@ -259,6 +259,11 @@ public class UseCasesConfig {
     }
 
     @Bean
+    public SearchAndFiltrateUseCase searchAndFiltrateUseCase() {
+        return new SearchAndFiltrateUseCase(workPort, awsS3Port);
+    }
+
+    @Bean
     public GetAllWorksUseCase getAllWorksUseCase() {
         return new GetAllWorksUseCase(workPort);
     }
