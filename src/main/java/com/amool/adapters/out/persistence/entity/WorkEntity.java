@@ -19,8 +19,7 @@ public class WorkEntity {
     @Column(name = "title", nullable = false, length = 2048)
     private String title;
 
-    @Lob
-    @Column(name = "description", nullable = false)
+    @Column(name = "description", nullable = false, columnDefinition = "TEXT")
     private String description;
 
     @Column(name = "cover", length = 2048)
