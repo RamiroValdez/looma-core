@@ -279,5 +279,9 @@ public class UseCasesConfig {
     @Bean
     public ToggleSaveWorkUseCase toggleSaveWorkUseCase() {
         return new ToggleSaveWorkUseCase(saveWorkPort);
+    
+    @Bean
+    public GetAllWorksUseCase getAllWorksUseCase() {
+        return new GetAllWorksUseCase(workPort);
     }
 }

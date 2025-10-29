@@ -55,6 +55,22 @@ public class WorksPersistenceAdapter implements ObtainWorkByIdPort, WorkPort {
     }
 
     @Override
+    public List<Work> getAllWorks() {
+        String jpql = "SELECT DISTINCT w FROM WorkEntity w " +
+                "LEFT JOIN FETCH w.creator " +
+                "LEFT JOIN FETCH w.formatEntity " +
+                "LEFT JOIN FETCH w.chapters " +
+                "LEFT JOIN FETCH w.categories " +
+                "LEFT JOIN FETCH w.tags";
+        
+        return entityManager.createQuery(jpql, WorkEntity.class)
+                .getResultList()
+                .stream()
+                .map(WorkMapper::toDomain)
+                .collect(Collectors.toList());
+    }
+
+    @Override
     public List<Work> getWorksByUserId(Long userId) {
         String jpql = "SELECT DISTINCT w FROM WorkEntity w " +
                       "LEFT JOIN FETCH w.creator c " +
