@@ -279,4 +279,14 @@ public class UseCasesConfig {
     public UnlikeWorkUseCase unlikeWorkUseCase() {
         return new UnlikeWorkUseCase(likePort);
     }
+
+    @Bean
+    public LikeChapterUseCase likeChapterUseCase() {
+        return new LikeChapterUseCase(likePort);
+    }
+
+    @Bean
+    public UnlikeChapterUseCase unlikeChapterUseCase() {
+        return new UnlikeChapterUseCase(likePort);
+    }
 }

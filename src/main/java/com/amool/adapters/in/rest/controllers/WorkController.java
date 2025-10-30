@@ -44,7 +44,7 @@ public class WorkController {
             @AuthenticationPrincipal JwtUserPrincipal userPrincipal) {
         
         Long userId = userPrincipal.getUserId();
-        int likeCount = likeWorkUseCase.execute(workId, userId);
+        Long likeCount = likeWorkUseCase.execute(workId, userId);
     
         LikeResponseDto response = new LikeResponseDto(workId, likeCount);
         return ResponseEntity.ok(response);
@@ -56,7 +56,7 @@ public class WorkController {
             @AuthenticationPrincipal JwtUserPrincipal userPrincipal) {
         
         Long userId = userPrincipal.getUserId();
-        int likeCount = unlikeWorkUseCase.execute(workId, userId);
+        Long likeCount = unlikeWorkUseCase.execute(workId, userId);
     
         LikeResponseDto response = new LikeResponseDto(workId, likeCount);
         return ResponseEntity.ok(response);

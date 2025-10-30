@@ -10,7 +10,7 @@ public class UnlikeWorkUseCase {
         this.likePort = likePort;
     }
     
-    public int execute(Long workId, Long userId) {
+    public Long execute(Long workId, Long userId) {
         return likePort.unlikeWork(workId, userId);
     }
 }

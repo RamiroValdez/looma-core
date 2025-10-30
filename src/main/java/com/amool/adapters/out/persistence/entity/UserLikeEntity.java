@@ -28,6 +28,9 @@ public class UserLikeEntity {
         this.work = work;
     }
 
+    public void setId(Long id) { this.id = id; }
+    public void setUser(UserEntity user) { this.user = user; }
+    public void setWork(WorkEntity work) { this.work = work; }
     public Long getId() { return id; }
     public UserEntity getUser() { return user; }
     public WorkEntity getWork() { return work; }

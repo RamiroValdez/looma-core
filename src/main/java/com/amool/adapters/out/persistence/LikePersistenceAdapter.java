@@ -2,7 +2,9 @@ package com.amool.adapters.out.persistence;
 
 import com.amool.adapters.out.persistence.entity.UserEntity;
 import com.amool.adapters.out.persistence.entity.WorkEntity;
+import com.amool.adapters.out.persistence.entity.ChapterEntity;
 import com.amool.adapters.out.persistence.entity.UserLikeEntity;
+import com.amool.adapters.out.persistence.entity.ChapterLikeEntity;
 import com.amool.application.port.out.LikePort;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.EntityNotFoundException;
@@ -19,7 +21,7 @@ public class LikePersistenceAdapter implements LikePort {
 
     @Override
     @Transactional
-    public int likeWork(Long workId, Long userId) {
+    public Long likeWork(Long workId, Long userId) {
         WorkEntity work = entityManager.find(WorkEntity.class, workId);
         UserEntity user = entityManager.find(UserEntity.class, userId);
         
@@ -28,7 +30,7 @@ public class LikePersistenceAdapter implements LikePort {
         }
 
         if (hasUserLikedWork(workId, userId)) {
-            return work.getLikes();
+            return work.getLikes().longValue();
         }
 
         UserLikeEntity like = new UserLikeEntity(user, work);
@@ -37,12 +39,12 @@ public class LikePersistenceAdapter implements LikePort {
         work.setLikes(work.getLikes() + 1);
         entityManager.merge(work);
         
-        return work.getLikes();
+        return work.getLikes().longValue();
     }
 
     @Override
     @Transactional
-    public int unlikeWork(Long workId, Long userId) {
+    public Long unlikeWork(Long workId, Long userId) {
         WorkEntity work = entityManager.find(WorkEntity.class, workId);
         
         if (work == null) {
@@ -62,7 +64,7 @@ public class LikePersistenceAdapter implements LikePort {
             entityManager.merge(work);
         });
         
-        return work.getLikes();
+        return work.getLikes().longValue();
     }
 
     @Override
@@ -73,6 +75,67 @@ public class LikePersistenceAdapter implements LikePort {
             Long.class
         );
         query.setParameter("workId", workId);
+        query.setParameter("userId", userId);
+        
+        return query.getSingleResult() > 0;
+    }
+
+    @Override
+    @Transactional
+    public Long likeChapter(Long chapterId, Long userId) {
+        ChapterEntity chapter = entityManager.find(ChapterEntity.class, chapterId);
+        UserEntity user = entityManager.find(UserEntity.class, userId);
+        
+        if (chapter == null || user == null) {
+            throw new EntityNotFoundException("Chapter or User not found");
+        }
+
+        if (hasUserLikedChapter(chapterId, userId)) {
+            return chapter.getLikes();
+        }
+
+        ChapterLikeEntity like = new ChapterLikeEntity(user, chapter);
+        entityManager.persist(like);
+        
+        chapter.setLikes(chapter.getLikes() + 1);
+        entityManager.merge(chapter);
+        
+        return chapter.getLikes();
+    }
+
+    @Override
+    @Transactional
+    public Long unlikeChapter(Long chapterId, Long userId) {
+        ChapterEntity chapter = entityManager.find(ChapterEntity.class, chapterId);
+        
+        if (chapter == null) {
+            throw new EntityNotFoundException("Chapter not found with id: " + chapterId);
+        }
+
+        TypedQuery<ChapterLikeEntity> query = entityManager.createQuery(
+            "SELECT l FROM ChapterLike l WHERE l.chapter.id = :chapterId AND l.user.id = :userId", 
+            ChapterLikeEntity.class
+        );
+        query.setParameter("chapterId", chapterId);
+        query.setParameter("userId", userId);
+        
+        query.getResultStream().findFirst().ifPresent(like -> {
+            entityManager.remove(like);
+            chapter.setLikes(Math.max(0, chapter.getLikes() - 1));
+            entityManager.merge(chapter);
+        });
+        
+        return chapter.getLikes();
+    }
+
+    @Override
+    @Transactional(readOnly = true)
+    public boolean hasUserLikedChapter(Long chapterId, Long userId) {
+        TypedQuery<Long> query = entityManager.createQuery(
+            "SELECT COUNT(l) > 0 FROM ChapterLike l WHERE l.chapter.id = :chapterId AND l.user.id = :userId", 
+            Long.class
+        );
+        query.setParameter("chapterId", chapterId);
         query.setParameter("userId", userId);
         
         return query.getSingleResult() > 0;

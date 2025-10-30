@@ -22,14 +22,14 @@ class UnlikeWorkUseCaseTest {
 
     private static final Long WORK_ID = 1L;
     private static final Long USER_ID = 1L;
-    private static final int INITIAL_LIKES = 5;
+    private static final Long INITIAL_LIKES = 5L;
 
     @Test
     void execute_ShouldDecrementLikesAndReturnNewCount() {
-        int expectedLikes = 4;
+        Long expectedLikes = 4L;
         when(likePort.unlikeWork(WORK_ID, USER_ID)).thenReturn(expectedLikes);
 
-        int result = unlikeWorkUseCase.execute(WORK_ID, USER_ID);
+        Long result = unlikeWorkUseCase.execute(WORK_ID, USER_ID);
 
         assertEquals(expectedLikes, result);
         verify(likePort, times(1)).unlikeWork(WORK_ID, USER_ID);
@@ -37,22 +37,22 @@ class UnlikeWorkUseCaseTest {
 
     @Test
     void execute_ShouldNotGoBelowZero() {
-        when(likePort.unlikeWork(WORK_ID, USER_ID)).thenReturn(0);
+        when(likePort.unlikeWork(WORK_ID, USER_ID)).thenReturn(0L);
 
-        int result = unlikeWorkUseCase.execute(WORK_ID, USER_ID);
+        Long result = unlikeWorkUseCase.execute(WORK_ID, USER_ID);
 
-        assertEquals(0, result);
+        assertEquals(0L, result);
         verify(likePort, times(1)).unlikeWork(WORK_ID, USER_ID);
     }
     
     @Test
     void execute_ShouldUseProvidedUserId() {
         Long differentUserId = 999L;
-        int expectedLikes = 0;
+        Long expectedLikes = 0L;
         
         when(likePort.unlikeWork(WORK_ID, differentUserId)).thenReturn(expectedLikes);
 
-        int result = unlikeWorkUseCase.execute(WORK_ID, differentUserId);
+        Long result = unlikeWorkUseCase.execute(WORK_ID, differentUserId);
 
         verify(likePort, times(1)).unlikeWork(WORK_ID, differentUserId);
         assertEquals(expectedLikes, result);
