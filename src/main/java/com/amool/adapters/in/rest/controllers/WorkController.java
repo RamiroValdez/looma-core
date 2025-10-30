@@ -11,12 +11,17 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import com.amool.security.JwtUserPrincipal;
+import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
+
 import java.util.List;
 import java.util.stream.Collectors;
 
 @RestController
 @RequestMapping("/api/works")
 @RequiredArgsConstructor
+@PreAuthorize("isAuthenticated()")
 public class WorkController {
 
     private final GetAllWorksUseCase getAllWorksUseCase;
@@ -35,23 +40,25 @@ public class WorkController {
 
     @PostMapping("/{workId}/like")
     public ResponseEntity<LikeResponseDto> likeWork(
-            @PathVariable Long workId) {
+            @PathVariable Long workId,
+            @AuthenticationPrincipal JwtUserPrincipal userPrincipal) {
         
-        int likeCount = likeWorkUseCase.execute(workId);
-        
+        Long userId = userPrincipal.getUserId();
+        int likeCount = likeWorkUseCase.execute(workId, userId);
+    
         LikeResponseDto response = new LikeResponseDto(workId, likeCount);
-        
         return ResponseEntity.ok(response);
     }
 
     @DeleteMapping("/{workId}/like")
     public ResponseEntity<LikeResponseDto> unlikeWork(
-            @PathVariable Long workId) {
+            @PathVariable Long workId, 
+            @AuthenticationPrincipal JwtUserPrincipal userPrincipal) {
         
-        int likeCount = unlikeWorkUseCase.execute(workId);
-        
+        Long userId = userPrincipal.getUserId();
+        int likeCount = unlikeWorkUseCase.execute(workId, userId);
+    
         LikeResponseDto response = new LikeResponseDto(workId, likeCount);
-        
         return ResponseEntity.ok(response);
     }
 

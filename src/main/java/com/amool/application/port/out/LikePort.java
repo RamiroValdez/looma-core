@@ -1,7 +1,9 @@
 package com.amool.application.port.out;
 
 public interface LikePort {
-    int incrementLikes(Long workId);
+    int likeWork(Long workId, Long userId);
     
-    int decrementLikes(Long workId);
+    int unlikeWork(Long workId, Long userId);
+    
+    boolean hasUserLikedWork(Long workId, Long userId);
 }
