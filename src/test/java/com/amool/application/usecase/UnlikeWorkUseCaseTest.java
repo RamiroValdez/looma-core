@@ -7,8 +7,10 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import com.amool.adapters.in.rest.dtos.LikeResponseDto;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
@@ -21,40 +23,45 @@ class UnlikeWorkUseCaseTest {
     private UnlikeWorkUseCase unlikeWorkUseCase;
 
     private static final Long WORK_ID = 1L;
-    private static final Long USER_ID = 1L;
     private static final Long INITIAL_LIKES = 5L;
+    private static final Long USER_ID = 1L;
 
     @Test
-    void execute_ShouldDecrementLikesAndReturnNewCount() {
-        Long expectedLikes = 4L;
-        when(likePort.unlikeWork(WORK_ID, USER_ID)).thenReturn(expectedLikes);
+    void execute_ShouldDecrementLikesAndReturnResponse() {
+        when(likePort.unlikeWork(WORK_ID, USER_ID)).thenReturn(INITIAL_LIKES - 1);
+        when(likePort.hasUserLikedWork(WORK_ID, USER_ID)).thenReturn(false);
 
-        Long result = unlikeWorkUseCase.execute(WORK_ID, USER_ID);
+        LikeResponseDto response = unlikeWorkUseCase.execute(WORK_ID, USER_ID);
 
-        assertEquals(expectedLikes, result);
-        verify(likePort, times(1)).unlikeWork(WORK_ID, USER_ID);
+        assertEquals(WORK_ID, response.getWorkId());
+        assertEquals(INITIAL_LIKES - 1, response.getLikeCount());
+        assertFalse(response.isLikedByUser());
+        verify(likePort).unlikeWork(WORK_ID, USER_ID);
+        verify(likePort).hasUserLikedWork(WORK_ID, USER_ID);
     }
 
     @Test
     void execute_ShouldNotGoBelowZero() {
         when(likePort.unlikeWork(WORK_ID, USER_ID)).thenReturn(0L);
+        when(likePort.hasUserLikedWork(WORK_ID, USER_ID)).thenReturn(false);
 
-        Long result = unlikeWorkUseCase.execute(WORK_ID, USER_ID);
+        LikeResponseDto response = unlikeWorkUseCase.execute(WORK_ID, USER_ID);
 
-        assertEquals(0L, result);
-        verify(likePort, times(1)).unlikeWork(WORK_ID, USER_ID);
+        assertEquals(0L, response.getLikeCount());
+        assertFalse(response.isLikedByUser());
     }
-    
+
     @Test
     void execute_ShouldUseProvidedUserId() {
         Long differentUserId = 999L;
-        Long expectedLikes = 0L;
-        
-        when(likePort.unlikeWork(WORK_ID, differentUserId)).thenReturn(expectedLikes);
+        when(likePort.unlikeWork(WORK_ID, differentUserId)).thenReturn(INITIAL_LIKES - 1);
+        when(likePort.hasUserLikedWork(WORK_ID, differentUserId)).thenReturn(false);
 
-        Long result = unlikeWorkUseCase.execute(WORK_ID, differentUserId);
+        LikeResponseDto response = unlikeWorkUseCase.execute(WORK_ID, differentUserId);
 
-        verify(likePort, times(1)).unlikeWork(WORK_ID, differentUserId);
-        assertEquals(expectedLikes, result);
+        assertEquals(INITIAL_LIKES - 1, response.getLikeCount());
+        assertFalse(response.isLikedByUser());
+        verify(likePort).unlikeWork(WORK_ID, differentUserId);
+        verify(likePort).hasUserLikedWork(WORK_ID, differentUserId);
     }
 }

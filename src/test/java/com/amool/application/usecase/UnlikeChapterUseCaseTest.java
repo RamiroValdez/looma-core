@@ -7,8 +7,10 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import com.amool.adapters.in.rest.dtos.LikeResponseDto;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
@@ -25,35 +27,41 @@ class UnlikeChapterUseCaseTest {
     private static final Long USER_ID = 1L;
 
     @Test
-    void execute_ShouldDecrementLikesAndReturnNewCount() {
+    void execute_ShouldDecrementLikesAndReturnResponse() {
         when(likePort.unlikeChapter(CHAPTER_ID, USER_ID)).thenReturn(INITIAL_LIKES - 1);
+        when(likePort.hasUserLikedChapter(CHAPTER_ID, USER_ID)).thenReturn(false);
 
-        Long result = unlikeChapterUseCase.execute(CHAPTER_ID, USER_ID);
+        LikeResponseDto response = unlikeChapterUseCase.execute(CHAPTER_ID, USER_ID);
 
-        assertEquals(INITIAL_LIKES - 1, result);
-        verify(likePort, times(1)).unlikeChapter(CHAPTER_ID, USER_ID);
+        assertEquals(CHAPTER_ID, response.getWorkId());
+        assertEquals(INITIAL_LIKES - 1, response.getLikeCount());
+        assertFalse(response.isLikedByUser());
+        verify(likePort).unlikeChapter(CHAPTER_ID, USER_ID);
+        verify(likePort).hasUserLikedChapter(CHAPTER_ID, USER_ID);
     }
 
     @Test
     void execute_ShouldNotGoBelowZero() {
         when(likePort.unlikeChapter(CHAPTER_ID, USER_ID)).thenReturn(0L);
+        when(likePort.hasUserLikedChapter(CHAPTER_ID, USER_ID)).thenReturn(false);
 
-        Long result = unlikeChapterUseCase.execute(CHAPTER_ID, USER_ID);
-        
-        assertEquals(0L, result);
-        verify(likePort, times(1)).unlikeChapter(CHAPTER_ID, USER_ID);
+        LikeResponseDto response = unlikeChapterUseCase.execute(CHAPTER_ID, USER_ID);
+
+        assertEquals(0L, response.getLikeCount());
+        assertFalse(response.isLikedByUser());
     }
-    
+
     @Test
     void execute_ShouldUseProvidedUserId() {
         Long differentUserId = 999L;
-        Long expectedLikes = 4L;
-        
-        when(likePort.unlikeChapter(CHAPTER_ID, differentUserId)).thenReturn(expectedLikes);
+        when(likePort.unlikeChapter(CHAPTER_ID, differentUserId)).thenReturn(INITIAL_LIKES - 1);
+        when(likePort.hasUserLikedChapter(CHAPTER_ID, differentUserId)).thenReturn(false);
 
-        Long result = unlikeChapterUseCase.execute(CHAPTER_ID, differentUserId);
-        
-        assertEquals(expectedLikes, result);
-        verify(likePort, times(1)).unlikeChapter(CHAPTER_ID, differentUserId);
+        LikeResponseDto response = unlikeChapterUseCase.execute(CHAPTER_ID, differentUserId);
+
+        assertEquals(INITIAL_LIKES - 1, response.getLikeCount());
+        assertFalse(response.isLikedByUser());
+        verify(likePort).unlikeChapter(CHAPTER_ID, differentUserId);
+        verify(likePort).hasUserLikedChapter(CHAPTER_ID, differentUserId);
     }
 }

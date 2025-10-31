@@ -29,6 +29,7 @@ public class WorkController {
     private final UnlikeWorkUseCase unlikeWorkUseCase;
     private final WorkMapper workMapper;
 
+
     @GetMapping
     public ResponseEntity<List<WorkResponseDto>> getAllWorks() {
         List<Work> works = getAllWorksUseCase.execute();
@@ -38,27 +39,23 @@ public class WorkController {
         return ResponseEntity.ok(response);
     }
 
-    @PostMapping("/{workId}/like")
+    @PostMapping("/work/{workId}/like")
     public ResponseEntity<LikeResponseDto> likeWork(
             @PathVariable Long workId,
             @AuthenticationPrincipal JwtUserPrincipal userPrincipal) {
         
         Long userId = userPrincipal.getUserId();
-        Long likeCount = likeWorkUseCase.execute(workId, userId);
-    
-        LikeResponseDto response = new LikeResponseDto(workId, likeCount);
+        LikeResponseDto response = likeWorkUseCase.execute(workId, userId);
         return ResponseEntity.ok(response);
     }
 
-    @DeleteMapping("/{workId}/like")
+    @DeleteMapping("/work/{workId}/like")
     public ResponseEntity<LikeResponseDto> unlikeWork(
             @PathVariable Long workId, 
             @AuthenticationPrincipal JwtUserPrincipal userPrincipal) {
         
         Long userId = userPrincipal.getUserId();
-        Long likeCount = unlikeWorkUseCase.execute(workId, userId);
-    
-        LikeResponseDto response = new LikeResponseDto(workId, likeCount);
+        LikeResponseDto response = unlikeWorkUseCase.execute(workId, userId);
         return ResponseEntity.ok(response);
     }
 

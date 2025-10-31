@@ -10,4 +10,5 @@ import lombok.NoArgsConstructor;
 public class LikeResponseDto {
     private Long workId;
     private Long likeCount;
+    private boolean likedByUser;
 }

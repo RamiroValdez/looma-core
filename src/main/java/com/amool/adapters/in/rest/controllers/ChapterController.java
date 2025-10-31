@@ -209,9 +209,7 @@ public class ChapterController {
             @AuthenticationPrincipal JwtUserPrincipal userPrincipal) {
     
         Long userId = userPrincipal.getUserId();
-        Long likeCount = likeChapterUseCase.execute(chapterId, userId);
-
-        LikeResponseDto response = new LikeResponseDto(chapterId, likeCount);
+        LikeResponseDto response = likeChapterUseCase.execute(chapterId, userId);
         return ResponseEntity.ok(response);
     }
 
@@ -222,9 +220,7 @@ public class ChapterController {
             @AuthenticationPrincipal JwtUserPrincipal userPrincipal) {
     
         Long userId = userPrincipal.getUserId();
-        Long likeCount = unlikeChapterUseCase.execute(chapterId, userId);
-
-        LikeResponseDto response = new LikeResponseDto(chapterId, likeCount);
+        LikeResponseDto response = unlikeChapterUseCase.execute(chapterId, userId);
         return ResponseEntity.ok(response);
     }
 

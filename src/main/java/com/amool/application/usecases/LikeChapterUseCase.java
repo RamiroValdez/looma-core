@@ -1,5 +1,6 @@
 package com.amool.application.usecases;
 
+import com.amool.adapters.in.rest.dtos.LikeResponseDto;
 import com.amool.application.port.out.LikePort;
 
 public class LikeChapterUseCase {
@@ -9,7 +10,13 @@ public class LikeChapterUseCase {
         this.likePort = likePort;
     }
 
-    public Long execute(Long chapterId, Long userId) {
+    /*public Long execute(Long chapterId, Long userId) {
         return likePort.likeChapter(chapterId, userId);
+    }*/
+
+    public LikeResponseDto execute(Long chapterId, Long userId) {
+        Long likeCount = likePort.likeChapter(chapterId, userId);
+        boolean likedByUser = likePort.hasUserLikedChapter(chapterId, userId);
+        return new LikeResponseDto(chapterId, likeCount, likedByUser);
     }
 }
