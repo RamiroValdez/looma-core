@@ -2,10 +2,6 @@ package com.amool.config;
 
 import com.amool.application.port.out.*;
 import com.amool.application.service.ImagesService;
-import com.amool.application.usecases.GetUserByIdUseCase;
-import com.amool.application.usecases.CreateLanguageVersionUseCase;
-import com.amool.application.usecases.GetMatchTagsUseCase;
-import com.amool.application.usecases.SuggestTagsUseCase;
 import com.amool.application.usecases.*;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -37,6 +33,7 @@ public class UseCasesConfig {
     private final SaveWorkPort saveWorkPort;
     private final LikePort likePort;
     private final ImagesService imagesService;
+    private final VerifyUserLikedPort verifyUserLikedPort;
 
     public UseCasesConfig(
             AwsS3Port awsS3Port,
@@ -62,7 +59,8 @@ public class UseCasesConfig {
             ImagesService imagesService,
             WorkPort workPort,
             SaveWorkPort saveWorkPort,
-            LikePort likePort
+            LikePort likePort,
+            VerifyUserLikedPort verifyUserLikedPort
             ) {
         this.awsS3Port = awsS3Port;
         this.authPort = authPort;
@@ -88,6 +86,7 @@ public class UseCasesConfig {
         this.workPort = workPort;
         this.saveWorkPort = saveWorkPort;
         this.likePort = likePort;
+        this.verifyUserLikedPort = verifyUserLikedPort;
     }
 
     @Bean
@@ -216,10 +215,16 @@ public class UseCasesConfig {
     }
 
     @Bean
+    public CheckWorkLikesUseCase checkWorkLikesUseCase() {
+        return new CheckWorkLikesUseCase(verifyUserLikedPort);
+    }
+    
+    @Bean
     public ObtainWorkByIdUseCase obtainWorkByIdUseCase() {
         return new ObtainWorkByIdUseCase(
                 obtainWorkByIdPort,
-                awsS3Port);
+                awsS3Port,
+                checkWorkLikesUseCase());
     }
 
     @Bean
