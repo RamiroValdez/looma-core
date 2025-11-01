@@ -15,6 +15,8 @@ public class Work {
     private String state;
     private Double price;
     private Integer likes;
+    private Double averageRating;
+    private Integer ratingCount;
     private LocalDate publicationDate;
     private User creator;
     private Format format;
@@ -48,6 +50,12 @@ public class Work {
     
     public Integer getLikes() { return likes; }
     public void setLikes(Integer likes) { this.likes = likes; }
+    
+    public Double getAverageRating() { return averageRating; }
+    public void setAverageRating(Double averageRating) { this.averageRating = averageRating; }
+    
+    public Integer getRatingCount() { return ratingCount; }
+    public void setRatingCount(Integer ratingCount) { this.ratingCount = ratingCount; }
     
     public LocalDate getPublicationDate() { return publicationDate; }
     public void setPublicationDate(LocalDate publicationDate) { this.publicationDate = publicationDate; }

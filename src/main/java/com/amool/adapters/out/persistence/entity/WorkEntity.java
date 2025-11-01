@@ -41,6 +41,12 @@ public class WorkEntity {
     @Column(name = "publication_date")
     private LocalDate publicationDate;
 
+    @Column(name = "average_rating")
+    private Double averageRating = 0.0;
+
+    @Column(name = "rating_count")
+    private Integer ratingCount = 0;
+
     @ManyToOne
     @JoinColumn(name = "creator_id", nullable = false)
     private UserEntity creator;
@@ -101,6 +107,12 @@ public class WorkEntity {
 
     public LocalDate getPublicationDate() { return publicationDate; }
     public void setPublicationDate(LocalDate publicationDate) { this.publicationDate = publicationDate; }
+
+    public Double getAverageRating() { return averageRating; }
+    public void setAverageRating(Double averageRating) { this.averageRating = averageRating; }
+
+    public Integer getRatingCount() { return ratingCount; }
+    public void setRatingCount(Integer ratingCount) { this.ratingCount = ratingCount; }
 
     public UserEntity getCreator() { return creator; }
     public void setCreator(UserEntity creator) { this.creator = creator; }

@@ -34,7 +34,7 @@ public class UseCasesConfig {
     private final GoogleTranslatePort googleTranslatePort;
     private final LoadUserPort loadUserPort;
     private final WorkPort workPort;
-
+    private final RatingPort ratingPort;
     private final ImagesService imagesService;
 
     public UseCasesConfig(
@@ -59,7 +59,8 @@ public class UseCasesConfig {
             GoogleTranslatePort googleTranslatePort,
             LoadUserPort loadUserPort,
             ImagesService imagesService,
-            WorkPort workPort
+            WorkPort workPort,
+            RatingPort ratingPort
             ) {
         this.awsS3Port = awsS3Port;
         this.authPort = authPort;
@@ -83,6 +84,7 @@ public class UseCasesConfig {
         this.loadUserPort = loadUserPort;
         this.imagesService = imagesService;
         this.workPort = workPort;
+        this.ratingPort = ratingPort;
     }
 
     @Bean
@@ -266,5 +268,20 @@ public class UseCasesConfig {
     @Bean
     public GetAllWorksUseCase getAllWorksUseCase() {
         return new GetAllWorksUseCase(workPort);
+    }
+
+    @Bean
+    public RateWorkUseCase rateWorkUseCase() {
+        return new RateWorkUseCase(ratingPort);
+    }
+
+    @Bean
+    public GetUserRatingUseCase getUserRatingUseCase() {
+        return new GetUserRatingUseCase(ratingPort);
+    }
+
+    @Bean
+    public GetWorkRatingsUseCase getWorkRatingsUseCase() {
+        return new GetWorkRatingsUseCase(ratingPort);
     }
 }
