@@ -1,5 +1,6 @@
 package com.amool.hexagonal.adapters.out.persistence;
 
+import com.amool.adapters.out.persistence.UserBalancePersistenceAdapter;
 import com.amool.adapters.out.persistence.entity.UserEntity;
 import jakarta.persistence.EntityManager;
 import org.junit.jupiter.api.BeforeEach;
