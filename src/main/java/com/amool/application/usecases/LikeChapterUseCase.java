@@ -10,10 +10,6 @@ public class LikeChapterUseCase {
         this.likePort = likePort;
     }
 
-    /*public Long execute(Long chapterId, Long userId) {
-        return likePort.likeChapter(chapterId, userId);
-    }*/
-
     public LikeResponseDto execute(Long chapterId, Long userId) {
         Long likeCount = likePort.likeChapter(chapterId, userId);
         boolean likedByUser = likePort.hasUserLikedChapter(chapterId, userId);

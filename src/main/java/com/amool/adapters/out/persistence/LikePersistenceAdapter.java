@@ -52,7 +52,7 @@ public class LikePersistenceAdapter implements LikePort {
         }
 
         TypedQuery<UserLikeEntity> query = entityManager.createQuery(
-            "SELECT l FROM UserLike l WHERE l.work.id = :workId AND l.user.id = :userId", 
+            "SELECT l FROM UserLikeEntity l WHERE l.work.id = :workId AND l.user.id = :userId",
             UserLikeEntity.class
         );
         query.setParameter("workId", workId);
@@ -70,14 +70,14 @@ public class LikePersistenceAdapter implements LikePort {
     @Override
     @Transactional(readOnly = true)
     public boolean hasUserLikedWork(Long workId, Long userId) {
-        TypedQuery<Long> query = entityManager.createQuery(
-            "SELECT COUNT(l) > 0 FROM UserLike l WHERE l.work.id = :workId AND l.user.id = :userId", 
-            Long.class
+        TypedQuery<Boolean> query = entityManager.createQuery(
+            "SELECT COUNT(l) > 0 FROM UserLikeEntity l WHERE l.work.id = :workId AND l.user.id = :userId",
+            Boolean.class
         );
         query.setParameter("workId", workId);
         query.setParameter("userId", userId);
         
-        return query.getSingleResult() > 0;
+        return query.getSingleResult();
     }
 
     @Override
@@ -113,7 +113,7 @@ public class LikePersistenceAdapter implements LikePort {
         }
 
         TypedQuery<ChapterLikeEntity> query = entityManager.createQuery(
-            "SELECT l FROM ChapterLike l WHERE l.chapter.id = :chapterId AND l.user.id = :userId", 
+            "SELECT l FROM ChapterLikeEntity l WHERE l.chapter.id = :chapterId AND l.user.id = :userId",
             ChapterLikeEntity.class
         );
         query.setParameter("chapterId", chapterId);
@@ -131,13 +131,13 @@ public class LikePersistenceAdapter implements LikePort {
     @Override
     @Transactional(readOnly = true)
     public boolean hasUserLikedChapter(Long chapterId, Long userId) {
-        TypedQuery<Long> query = entityManager.createQuery(
-            "SELECT COUNT(l) > 0 FROM ChapterLike l WHERE l.chapter.id = :chapterId AND l.user.id = :userId", 
-            Long.class
+        TypedQuery<Boolean> query = entityManager.createQuery(
+            "SELECT COUNT(l) > 0 FROM ChapterLikeEntity l WHERE l.chapter.id = :chapterId AND l.user.id = :userId",
+            Boolean.class
         );
         query.setParameter("chapterId", chapterId);
         query.setParameter("userId", userId);
         
-        return query.getSingleResult() > 0;
+        return query.getSingleResult();
     }
 }

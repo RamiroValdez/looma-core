@@ -4,7 +4,7 @@ import jakarta.persistence.*;
 import java.util.Objects;
 
 @Entity
-@Table(name = "user_likes", uniqueConstraints = {
+@Table(name = "likes_work", uniqueConstraints = {
     @UniqueConstraint(columnNames = {"user_id", "work_id"})
 })
 public class UserLikeEntity {

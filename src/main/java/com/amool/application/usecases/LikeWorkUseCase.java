@@ -10,10 +10,6 @@ public class LikeWorkUseCase {
     public LikeWorkUseCase(LikePort likePort) {
         this.likePort = likePort;
     }
-    
-    /*public Long execute(Long workId, Long userId) {
-        return likePort.likeWork(workId, userId);
-    }*/
 
     public LikeResponseDto execute(Long workId, Long userId) {
         Long likeCount = likePort.likeWork(workId, userId);

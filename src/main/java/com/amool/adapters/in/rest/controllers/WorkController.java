@@ -20,18 +20,18 @@ import java.util.stream.Collectors;
 
 @RestController
 @RequestMapping("/api/works")
-@RequiredArgsConstructor
 @PreAuthorize("isAuthenticated()")
 public class WorkController {
 
     private final GetAllWorksUseCase getAllWorksUseCase;
     private final LikeWorkUseCase likeWorkUseCase;
     private final UnlikeWorkUseCase unlikeWorkUseCase;
-    private final WorkMapper workMapper;
 
-    public WorkController(GetAllWorksUseCase getAllWorksUseCase, WorkMapper workMapper) {
+    public WorkController(GetAllWorksUseCase getAllWorksUseCase,
+                          LikeWorkUseCase likeWorkUseCase, UnlikeWorkUseCase unlikeWorkUseCase) {
         this.getAllWorksUseCase = getAllWorksUseCase;
-        this.workMapper = workMapper;
+        this.likeWorkUseCase = likeWorkUseCase;
+        this.unlikeWorkUseCase = unlikeWorkUseCase;
     }
 
     @GetMapping
@@ -43,7 +43,7 @@ public class WorkController {
         return ResponseEntity.ok(response);
     }
 
-    @PostMapping("/work/{workId}/like")
+    @PostMapping("/{workId}/like")
     public ResponseEntity<LikeResponseDto> likeWork(
             @PathVariable Long workId,
             @AuthenticationPrincipal JwtUserPrincipal userPrincipal) {
@@ -53,7 +53,7 @@ public class WorkController {
         return ResponseEntity.ok(response);
     }
 
-    @DeleteMapping("/work/{workId}/like")
+    @DeleteMapping("/{workId}/like")
     public ResponseEntity<LikeResponseDto> unlikeWork(
             @PathVariable Long workId,
             @AuthenticationPrincipal JwtUserPrincipal userPrincipal) {
