@@ -140,4 +140,16 @@ public class LikePersistenceAdapter implements LikePort {
         
         return query.getSingleResult();
     }
+
+    @Override
+    @Transactional(readOnly = true)
+    public boolean isWorkLikedByUser(Long workId, Long userId) {
+        return hasUserLikedWork(workId, userId);
+    }
+
+    @Override
+    @Transactional(readOnly = true)
+    public boolean isChapterLikedByUser(Long chapterId, Long userId) {
+        return hasUserLikedChapter(chapterId, userId);
+    }
 }

@@ -12,4 +12,8 @@ public interface LikePort {
     Long unlikeChapter(Long chapterId, Long userId);
 
     boolean hasUserLikedChapter(Long chapterId, Long userId);
+
+    boolean isWorkLikedByUser(Long workId, Long userId);
+    
+    boolean isChapterLikedByUser(Long chapterId, Long userId);
 }

@@ -33,7 +33,6 @@ public class UseCasesConfig {
     private final SaveWorkPort saveWorkPort;
     private final LikePort likePort;
     private final ImagesService imagesService;
-    private final VerifyUserLikedPort verifyUserLikedPort;
 
     public UseCasesConfig(
             AwsS3Port awsS3Port,
@@ -59,8 +58,7 @@ public class UseCasesConfig {
             ImagesService imagesService,
             WorkPort workPort,
             SaveWorkPort saveWorkPort,
-            LikePort likePort,
-            VerifyUserLikedPort verifyUserLikedPort
+            LikePort likePort
             ) {
         this.awsS3Port = awsS3Port;
         this.authPort = authPort;
@@ -86,7 +84,6 @@ public class UseCasesConfig {
         this.workPort = workPort;
         this.saveWorkPort = saveWorkPort;
         this.likePort = likePort;
-        this.verifyUserLikedPort = verifyUserLikedPort;
     }
 
     @Bean
@@ -216,7 +213,7 @@ public class UseCasesConfig {
 
     @Bean
     public CheckWorkLikesUseCase checkWorkLikesUseCase() {
-        return new CheckWorkLikesUseCase(verifyUserLikedPort);
+        return new CheckWorkLikesUseCase(likePort);
     }
     
     @Bean
