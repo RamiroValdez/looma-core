@@ -1,6 +1,7 @@
 package com.amool.adapters.in.rest.controllers;
 
 import com.amool.adapters.in.rest.dtos.ChapterWithContentDto;
+import com.amool.adapters.in.rest.dtos.LikeResponseDto;
 import com.amool.adapters.in.rest.dtos.UpdateChapterContentRequest;
 import com.amool.adapters.in.rest.mappers.ChapterMapper;
 import com.amool.application.port.out.LoadChapterContentPort;
@@ -16,11 +17,14 @@ import java.util.List;
 import java.util.Optional;
 import java.util.NoSuchElementException;
 import org.springframework.security.core.Authentication;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.security.core.context.SecurityContextHolder;
 import com.amool.security.JwtUserPrincipal;
 import com.amool.adapters.in.rest.dtos.SchedulePublicationRequestDto;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import com.amool.application.usecases.LikeChapterUseCase;
+import com.amool.application.usecases.UnlikeChapterUseCase;
 
 @RestController
 @RequestMapping("/api")
@@ -35,6 +39,8 @@ public class ChapterController {
     private final LoadChapterContentPort loadChapterContentPort;
     private final SaveChapterContentPort saveChapterContentPort;
     private final LoadWorkOwnershipPort loadWorkOwnershipPort;
+    private final LikeChapterUseCase likeChapterUseCase;
+    private final UnlikeChapterUseCase unlikeChapterUseCase;
     private static final java.time.ZoneId AR = java.time.ZoneId.of("America/Argentina/Buenos_Aires");
     private static final Logger log = LoggerFactory.getLogger(ChapterController.class);
 
@@ -196,6 +202,26 @@ public class ChapterController {
         }
     }
 
+    @PostMapping("/work/{workId}/chapter/{chapterId}/like")
+    public ResponseEntity<LikeResponseDto> likeChapter(
+            @PathVariable Long workId,
+            @PathVariable Long chapterId,
+            @AuthenticationPrincipal JwtUserPrincipal userPrincipal) {
     
+        Long userId = userPrincipal.getUserId();
+        LikeResponseDto response = likeChapterUseCase.execute(chapterId, userId);
+        return ResponseEntity.ok(response);
+    }
+
+    @DeleteMapping("/work/{workId}/chapter/{chapterId}/like")
+    public ResponseEntity<LikeResponseDto> unlikeChapter(
+            @PathVariable Long workId,
+            @PathVariable Long chapterId,
+            @AuthenticationPrincipal JwtUserPrincipal userPrincipal) {
+    
+        Long userId = userPrincipal.getUserId();
+        LikeResponseDto response = unlikeChapterUseCase.execute(chapterId, userId);
+        return ResponseEntity.ok(response);
+    }
 
 }

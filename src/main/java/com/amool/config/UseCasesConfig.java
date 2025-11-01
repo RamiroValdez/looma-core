@@ -35,7 +35,7 @@ public class UseCasesConfig {
     private final LoadUserPort loadUserPort;
     private final WorkPort workPort;
     private final SaveWorkPort saveWorkPort;
-
+    private final LikePort likePort;
     private final ImagesService imagesService;
 
     public UseCasesConfig(
@@ -61,7 +61,8 @@ public class UseCasesConfig {
             LoadUserPort loadUserPort,
             ImagesService imagesService,
             WorkPort workPort,
-            SaveWorkPort saveWorkPort
+            SaveWorkPort saveWorkPort,
+            LikePort likePort
             ) {
         this.awsS3Port = awsS3Port;
         this.authPort = authPort;
@@ -86,6 +87,7 @@ public class UseCasesConfig {
         this.imagesService = imagesService;
         this.workPort = workPort;
         this.saveWorkPort = saveWorkPort;
+        this.likePort = likePort;
     }
 
     @Bean
@@ -270,12 +272,12 @@ public class UseCasesConfig {
     public IsWorkSavedUseCase isWorkSavedUseCase() {
         return new IsWorkSavedUseCase(saveWorkPort);
     }
-    
+
     @Bean
     public GetSavedWorksUseCase getSavedWorksUseCase() {
         return new GetSavedWorksUseCase(saveWorkPort);
     }
-    
+
     @Bean
     public ToggleSaveWorkUseCase toggleSaveWorkUseCase() {
         return new ToggleSaveWorkUseCase(saveWorkPort);
@@ -284,5 +286,25 @@ public class UseCasesConfig {
     @Bean
     public GetAllWorksUseCase getAllWorksUseCase() {
         return new GetAllWorksUseCase(workPort);
+    }
+
+    @Bean
+    public LikeWorkUseCase likeWorkUseCase() {
+        return new LikeWorkUseCase(likePort);
+    }
+
+    @Bean
+    public UnlikeWorkUseCase unlikeWorkUseCase() {
+        return new UnlikeWorkUseCase(likePort);
+    }
+
+    @Bean
+    public LikeChapterUseCase likeChapterUseCase() {
+        return new LikeChapterUseCase(likePort);
+    }
+
+    @Bean
+    public UnlikeChapterUseCase unlikeChapterUseCase() {
+        return new UnlikeChapterUseCase(likePort);
     }
 }
