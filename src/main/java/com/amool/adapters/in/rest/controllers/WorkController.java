@@ -29,6 +29,10 @@ public class WorkController {
     private final UnlikeWorkUseCase unlikeWorkUseCase;
     private final WorkMapper workMapper;
 
+    public WorkController(GetAllWorksUseCase getAllWorksUseCase, WorkMapper workMapper) {
+        this.getAllWorksUseCase = getAllWorksUseCase;
+        this.workMapper = workMapper;
+    }
 
     @GetMapping
     public ResponseEntity<List<WorkResponseDto>> getAllWorks() {
@@ -43,7 +47,7 @@ public class WorkController {
     public ResponseEntity<LikeResponseDto> likeWork(
             @PathVariable Long workId,
             @AuthenticationPrincipal JwtUserPrincipal userPrincipal) {
-        
+
         Long userId = userPrincipal.getUserId();
         LikeResponseDto response = likeWorkUseCase.execute(workId, userId);
         return ResponseEntity.ok(response);
@@ -51,9 +55,9 @@ public class WorkController {
 
     @DeleteMapping("/work/{workId}/like")
     public ResponseEntity<LikeResponseDto> unlikeWork(
-            @PathVariable Long workId, 
+            @PathVariable Long workId,
             @AuthenticationPrincipal JwtUserPrincipal userPrincipal) {
-        
+
         Long userId = userPrincipal.getUserId();
         LikeResponseDto response = unlikeWorkUseCase.execute(workId, userId);
         return ResponseEntity.ok(response);

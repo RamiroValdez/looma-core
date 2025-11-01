@@ -1,5 +1,8 @@
 package com.amool.domain.model;
 
+import java.util.HashSet;
+import java.util.Set;
+
 public class User {
     private Long id;
     private String name;
@@ -7,6 +10,7 @@ public class User {
     private String username;
     private String email;
     private String photo;
+    private Set<Work> savedWorks = new HashSet<>();
 
     public Long getId() { return id; }
     public void setId(Long id) { this.id = id; }
@@ -25,4 +29,9 @@ public class User {
 
     public String getPhoto() { return photo; }
     public void setPhoto(String photo) { this.photo = photo; }
+    
+    public Set<Work> getSavedWorks() { return savedWorks; }
+    public void setSavedWorks(Set<Work> savedWorks) { this.savedWorks = savedWorks; }
+    public void addSavedWork(Work work) { this.savedWorks.add(work); }
+    public void removeSavedWork(Work work) { this.savedWorks.remove(work); }
 }
