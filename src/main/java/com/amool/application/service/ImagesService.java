@@ -1,6 +1,7 @@
 package com.amool.application.service;
 
 import com.amool.application.port.out.AwsS3Port;
+import com.amool.application.port.out.HttpDownloadPort;
 import com.amool.domain.model.InMemoryMultipartFile;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -17,40 +18,29 @@ import static com.google.common.io.Files.getFileExtension;
 public class ImagesService {
 
     private final AwsS3Port awsS3Port;
+    private final HttpDownloadPort httpDownloadPort;
     private final String WORK_COVER_PATH = "works/{workId}/cover/";
     private final String WORK_BANNER_PATH = "works/{workId}/banner/";
 
-    public ImagesService(AwsS3Port awsS3Port) {
+    public ImagesService(AwsS3Port awsS3Port, HttpDownloadPort httpDownloadPort) {
+        this.httpDownloadPort = httpDownloadPort;
         this.awsS3Port = awsS3Port;
     }
 
 
     public String downloadAndUploadCoverImage(String url, String workId) throws IOException, InterruptedException {
-        HttpClient client = HttpClient.newHttpClient();
-
-        HttpRequest request = HttpRequest.newBuilder()
-                .uri(URI.create(url))
-                .GET()
-                .build();
-
-        HttpResponse<byte[]> response = client.send(request, HttpResponse.BodyHandlers.ofByteArray());
-
-        if (response.statusCode() != 200) {
-            throw new IOException("Error al descargar la imagen. HTTP status: " + response.statusCode());
-        }
-
-        byte[] imageBytes = response.body();
-        String contentType = response.headers().firstValue("Content-Type").orElse("image/png");
+        byte[] imageBytes = httpDownloadPort.downloadImage(url);
 
         MultipartFile multipartFile = new InMemoryMultipartFile(
                 "cover",
                 "cover.png",
-                contentType,
+                "image/png",
                 imageBytes
         );
 
         return uploadCoverImage(multipartFile, workId);
     }
+
 
     public String uploadBannerImage(MultipartFile file, String workId) throws IOException {
 

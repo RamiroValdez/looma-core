@@ -9,6 +9,7 @@ import com.amool.application.usecases.SuggestTagsUseCase;
 import com.amool.application.usecases.*;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.web.client.RestTemplate;
 
 @Configuration
 public class UseCasesConfig {
@@ -37,6 +38,13 @@ public class UseCasesConfig {
     private final SaveWorkPort saveWorkPort;
     private final LikePort likePort;
     private final ImagesService imagesService;
+    private final LoadWorkOwnershipPort loadWorkOwnershipPort;
+    private final SubscriptionQueryPort subscriptionQueryPort;
+    private final PaymentAuditPort paymentAuditPort;
+    private final UserBalancePort userBalancePort;
+    private final PaymentRecordPort paymentRecordPort;
+    private final SubscriptionPersistencePort subscriptionPersistencePort;
+    private final RestTemplate restTemplate;
 
     public UseCasesConfig(
             AwsS3Port awsS3Port,
@@ -62,7 +70,14 @@ public class UseCasesConfig {
             ImagesService imagesService,
             WorkPort workPort,
             SaveWorkPort saveWorkPort,
-            LikePort likePort
+            LikePort likePort,
+            LoadWorkOwnershipPort loadWorkOwnershipPort,
+            SubscriptionQueryPort subscriptionQueryPort,
+            PaymentAuditPort paymentAuditPort,
+            UserBalancePort userBalancePort,
+            PaymentRecordPort paymentRecordPort,
+            SubscriptionPersistencePort subscriptionPersistencePort,
+            RestTemplate restTemplate
             ) {
         this.awsS3Port = awsS3Port;
         this.authPort = authPort;
@@ -88,6 +103,13 @@ public class UseCasesConfig {
         this.workPort = workPort;
         this.saveWorkPort = saveWorkPort;
         this.likePort = likePort;
+        this.loadWorkOwnershipPort = loadWorkOwnershipPort;
+        this.subscriptionQueryPort = subscriptionQueryPort;
+        this.paymentAuditPort = paymentAuditPort;
+        this.userBalancePort = userBalancePort;
+        this.paymentRecordPort = paymentRecordPort;
+        this.subscriptionPersistencePort = subscriptionPersistencePort;
+        this.restTemplate = restTemplate;
     }
 
     @Bean
@@ -129,7 +151,8 @@ public class UseCasesConfig {
         return new DeleteChapterUseCase(
                 loadChapterPort,
                 deleteChapterContentPort,
-                deleteChapterPort
+                deleteChapterPort,
+                loadWorkOwnershipPort
         );
     }
 
@@ -306,5 +329,49 @@ public class UseCasesConfig {
     @Bean
     public UnlikeChapterUseCase unlikeChapterUseCase() {
         return new UnlikeChapterUseCase(likePort);
+    }
+
+    @Bean
+    public UpdateChapterContentUseCase updateChapterContentUseCase() {
+        return new UpdateChapterContentUseCase(
+                saveChapterContentPort,
+                loadWorkOwnershipPort);
+    }
+
+    @Bean
+    public ValidateChapterAccessUseCase validateChapterAccessUseCase() {
+        return new ValidateChapterAccessUseCase(
+                loadChapterPort,
+                obtainWorkByIdPort,
+                subscriptionQueryPort
+        );
+    }
+
+    @Bean
+    public GetWorkPermissionsUseCase getWorkPermissionsUseCase() {
+        return new GetWorkPermissionsUseCase(subscriptionQueryPort);
+    }
+
+    @Bean
+    public ExtractPaymentIdFromWebhookUseCase extractPaymentIdFromWebhookUseCase() {
+        return new ExtractPaymentIdFromWebhookUseCase();
+    }
+
+    @Bean
+    public SubscribeUserUseCase subscribeUserUseCase() {
+        return new SubscribeUserUseCase(subscriptionPersistencePort);
+    }
+
+    @Bean
+    public ProcessMercadoPagoWebhookUseCase processMercadoPagoWebhookUseCase() {
+        return new ProcessMercadoPagoWebhookUseCase(
+                restTemplate,
+                paymentAuditPort,
+                userBalancePort,
+                paymentRecordPort,
+                obtainWorkByIdPort,
+                loadChapterPort,
+                subscribeUserUseCase()
+        );
     }
 }

@@ -9,6 +9,7 @@ import com.amool.application.port.out.SaveChapterContentPort;
 import com.amool.application.port.out.LoadWorkOwnershipPort;
 import com.amool.application.usecases.*;
 import com.amool.domain.model.ChapterContent;
+import com.amool.domain.model.ChapterWithContentResult;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
@@ -36,9 +37,7 @@ public class ChapterController {
     private final PublishChapterUseCase publishChapterUseCase;
     private final SchedulePublicationUseCase schedulePublicationUseCase;
     private final CancelScheduledPublicationUseCase cancelScheduledPublicationUseCase;
-    private final LoadChapterContentPort loadChapterContentPort;
-    private final SaveChapterContentPort saveChapterContentPort;
-    private final LoadWorkOwnershipPort loadWorkOwnershipPort;
+    private final UpdateChapterContentUseCase updateChapterContentUseCase;
     private final LikeChapterUseCase likeChapterUseCase;
     private final UnlikeChapterUseCase unlikeChapterUseCase;
     private static final java.time.ZoneId AR = java.time.ZoneId.of("America/Argentina/Buenos_Aires");
@@ -49,75 +48,79 @@ public class ChapterController {
             @PathVariable String workId,
             @PathVariable String chapterId,
             @RequestParam(required = false, defaultValue = "es") String language) {
-        
-        return getChapterWithContentUseCase.execute(Long.valueOf(workId), Long.valueOf(chapterId), language)
-                .map(chapterWithContent -> {
-                    Optional<ChapterContent> chapterContent = loadChapterContentPort.loadContent(workId, chapterId, language);
-                    
-                    List<String> availableLanguages = loadChapterContentPort.getAvailableLanguages(workId, chapterId);
-                    
-                    String content = chapterContent
-                            .map(ChapterContent::getContentByLanguage)
-                            .map(contentMap -> contentMap.getOrDefault(language, 
-                                contentMap.values().stream().findFirst().orElse("")))
-                            .orElse("");
-                    return ChapterMapper.toDto(chapterWithContent, content, availableLanguages);
-                })
-                .map(ResponseEntity::ok)
-                .orElse(ResponseEntity.<ChapterWithContentDto>notFound().build());
+
+        return executeGetChapter(workId, chapterId, language)
+                .map(this::mapToResponse)
+                .orElse(buildNotFoundResponse());
     }
+
+    private Optional<ChapterWithContentResult> executeGetChapter(
+            String workId, String chapterId, String language) {
+        return getChapterWithContentUseCase.execute(Long.valueOf(workId), Long.valueOf(chapterId), language);
+    }
+
+    private ResponseEntity<ChapterWithContentDto> mapToResponse(
+            ChapterWithContentResult result) {
+        ChapterWithContentDto dto = ChapterMapper.toDto(
+                result.getChapterWithContent(),
+                result.getContent(),
+                result.getAvailableLanguages()
+        );
+        return ResponseEntity.ok(dto);
+    }
+
+    private ResponseEntity<ChapterWithContentDto> buildNotFoundResponse() {
+        return ResponseEntity.notFound().build();
+    }
+
     @PostMapping("/work/{workId}/chapter/{chapterId}/content")
     public ResponseEntity<ChapterContent> updateChapterContent(
             @PathVariable String workId,
             @PathVariable String chapterId,
-            @Valid @RequestBody UpdateChapterContentRequest request) {
+            @Valid @RequestBody UpdateChapterContentRequest request,
+            @AuthenticationPrincipal JwtUserPrincipal userPrincipal) {
 
         if (!workId.equals(request.workId()) || !chapterId.equals(request.chapterId())) {
             return ResponseEntity.badRequest().build();
         }
 
-        Authentication auth = SecurityContextHolder.getContext().getAuthentication();
-        if (auth == null || !(auth.getPrincipal() instanceof JwtUserPrincipal principal)) {
-            return ResponseEntity.status(401).build();
-        }
-        Long workIdLong = Long.valueOf(workId);
-        boolean isOwner = loadWorkOwnershipPort.isOwner(workIdLong, principal.getUserId());
-        if (!isOwner) {
+        try {
+            ChapterContent updated = updateChapterContentUseCase.execute(
+                    request.workId(),
+                    request.chapterId(),
+                    request.language(),
+                    request.content(),
+                    userPrincipal.getUserId()
+            );
+            return ResponseEntity.ok(updated);
+        } catch (SecurityException e) {
             return ResponseEntity.status(403).build();
         }
-        ChapterContent updated = saveChapterContentPort.saveContent(
-            request.workId(),
-            request.chapterId(),
-            request.language(),
-            request.content()
-        );
-        return ResponseEntity.ok(updated);
     }
+
 
     @DeleteMapping("/work/{workId}/chapter/{chapterId}/delete")
     public ResponseEntity<Void> deleteChapter(
             @PathVariable String workId,
-            @PathVariable String chapterId) {
+            @PathVariable String chapterId,
+            @AuthenticationPrincipal JwtUserPrincipal userPrincipal) {
 
-        Authentication auth = SecurityContextHolder.getContext().getAuthentication();
-        if (auth == null || !(auth.getPrincipal() instanceof JwtUserPrincipal principal)) {
-            return ResponseEntity.status(401).build();
-        }
-
-        Long workIdLong = Long.valueOf(workId);
-        boolean isOwner = loadWorkOwnershipPort.isOwner(workIdLong, principal.getUserId());
-        if (!isOwner) {
-            return ResponseEntity.status(403).build();
-        }
         try {
-            deleteChapterUseCase.execute(workIdLong, Long.valueOf(chapterId));
+            deleteChapterUseCase.execute(
+                    Long.valueOf(workId),
+                    Long.valueOf(chapterId),
+                    userPrincipal.getUserId()
+            );
             return ResponseEntity.noContent().build();
         } catch (NoSuchElementException e) {
             return ResponseEntity.notFound().build();
+        } catch (SecurityException e) {
+            return ResponseEntity.status(403).build();
         } catch (IllegalStateException e) {
             return ResponseEntity.status(409).build();
         }
     }
+
 
     @PostMapping("/work/{workId}/chapter/{chapterId}/publish")
     public ResponseEntity<Void> publishChapter(

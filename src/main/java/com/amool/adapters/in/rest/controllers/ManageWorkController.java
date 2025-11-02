@@ -6,9 +6,11 @@ import com.amool.adapters.in.rest.dtos.WorkResponseDto;
 import com.amool.adapters.in.rest.dtos.ChapterDto;
 import com.amool.adapters.in.rest.mappers.WorkMapper;
 import com.amool.application.usecases.CreateEmptyChapterUseCase;
+import com.amool.application.usecases.GetWorkPermissionsUseCase;
 import com.amool.application.usecases.ObtainWorkByIdUseCase;
 import com.amool.domain.model.Chapter;
-import com.amool.hexagonal.application.port.out.SubscriptionQueryPort;
+import com.amool.application.port.out.SubscriptionQueryPort;
+import com.amool.domain.model.WorkPermissions;
 import com.amool.security.JwtUserPrincipal;
 
 import org.springframework.http.ResponseEntity;
@@ -26,49 +28,38 @@ public class ManageWorkController {
 
     private final ObtainWorkByIdUseCase obtainWorkByIdUseCase;
     private final CreateEmptyChapterUseCase createEmptyChapterUseCase;
-    private final SubscriptionQueryPort subscriptionQueryPort;
+    private final GetWorkPermissionsUseCase getWorkPermissionsUseCase;
 
     public ManageWorkController(ObtainWorkByIdUseCase obtainWorkByIdUseCase,
                                 CreateEmptyChapterUseCase createEmptyChapterUseCase,
-                                SubscriptionQueryPort subscriptionQueryPort) {
+                                GetWorkPermissionsUseCase getWorkPermissionsUseCase) {
         this.obtainWorkByIdUseCase = obtainWorkByIdUseCase;
         this.createEmptyChapterUseCase = createEmptyChapterUseCase;
-        this.subscriptionQueryPort = subscriptionQueryPort;
+        this.getWorkPermissionsUseCase = getWorkPermissionsUseCase;
     }
 
     @GetMapping("/{workId}")
     @PreAuthorize("isAuthenticated()")
     public ResponseEntity<WorkResponseDto> getWorkById(@PathVariable Long workId) {
         return obtainWorkByIdUseCase.execute(workId)
-                .map(WorkMapper::toDto)
-                .map(dto -> {
+                .map(work -> {
+                    WorkResponseDto dto = WorkMapper.toDto(work);
+
                     Authentication auth = SecurityContextHolder.getContext().getAuthentication();
                     if (auth != null && auth.getPrincipal() instanceof JwtUserPrincipal principal) {
                         Long userId = principal.getUserId();
-                        Long authorId = dto.getCreator() != null ? dto.getCreator().getId() : null;
-                        if (authorId != null && authorId.equals(userId)) {
-                            dto.setSubscribedToAuthor(true);
-                            dto.setSubscribedToWork(true);
-                            List<Long> allChapterIds = new ArrayList<>();
-                            if (dto.getChapters() != null) {
-                                for (ChapterDto ch : dto.getChapters()) {
-                                    if (ch != null && ch.getId() != null) allChapterIds.add(ch.getId());
-                                }
-                            }
-                            dto.setUnlockedChapters(allChapterIds);
-                        } else {
-                            boolean subAuthor = authorId != null && subscriptionQueryPort.isSubscribedToAuthor(userId, authorId);
-                            boolean subWork = subscriptionQueryPort.isSubscribedToWork(userId, workId);
-                            var unlocked = subscriptionQueryPort.unlockedChapters(userId, workId);
-                            dto.setSubscribedToAuthor(subAuthor);
-                            dto.setSubscribedToWork(subWork);
-                            dto.setUnlockedChapters(unlocked);
-                        }
+                        WorkPermissions permissions = getWorkPermissionsUseCase.execute(work, userId);
+
+                        dto.setSubscribedToAuthor(permissions.isSubscribedToAuthor());
+                        dto.setSubscribedToWork(permissions.isSubscribedToWork());
+                        dto.setUnlockedChapters(permissions.getUnlockedChapters());
                     }
+
                     return ResponseEntity.ok(dto);
                 })
                 .orElseGet(() -> ResponseEntity.notFound().build());
     }
+
 
     @PostMapping("/create-chapter")
     @PreAuthorize("isAuthenticated()")

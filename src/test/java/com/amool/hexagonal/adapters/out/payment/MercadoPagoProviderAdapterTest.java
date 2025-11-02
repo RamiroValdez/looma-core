@@ -1,13 +1,14 @@
 package com.amool.hexagonal.adapters.out.payment;
 
+import com.amool.adapters.out.payment.MercadoPagoProviderAdapter;
 import com.amool.application.port.out.LoadChapterPort;
 import com.amool.application.port.out.ObtainWorkByIdPort;
 import com.amool.domain.model.Chapter;
 import com.amool.domain.model.User;
 import com.amool.domain.model.Work;
-import com.amool.hexagonal.application.port.out.UserQueryPort;
-import com.amool.hexagonal.domain.model.PaymentInitResult;
-import com.amool.hexagonal.domain.model.SubscriptionType;
+import com.amool.application.port.out.UserQueryPort;
+import com.amool.domain.model.PaymentInitResult;
+import com.amool.domain.model.SubscriptionType;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;

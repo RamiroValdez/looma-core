@@ -5,7 +5,6 @@ import com.amool.application.port.out.LoadChapterPort;
 import com.amool.application.usecases.GetChapterWithContentUseCase;
 import com.amool.domain.model.Chapter;
 import com.amool.domain.model.ChapterContent;
-import com.amool.domain.model.ChapterWithContent;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
@@ -59,13 +58,18 @@ public class GetChapterWithContentUseCaseTest {
             LANGUAGE
         )).thenReturn(Optional.of(content));
 
-        Optional<ChapterWithContent> result = useCase.execute(WORK_ID, CHAPTER_ID, LANGUAGE);
+        when(loadChapterContentPort.getAvailableLanguages(
+            WORK_ID.toString(),
+            CHAPTER_ID.toString()
+        )).thenReturn(java.util.List.of(LANGUAGE));
+
+        Optional<com.amool.domain.model.ChapterWithContentResult> result = useCase.execute(WORK_ID, CHAPTER_ID, LANGUAGE);
 
         assertTrue(result.isPresent());
-        ChapterWithContent chapterWithContent = result.get();
-        assertEquals(CHAPTER_ID, chapterWithContent.chapter().getId());
-        assertEquals(CHAPTER_TITLE, chapterWithContent.chapter().getTitle());
-        assertEquals(CHAPTER_CONTENT, chapterWithContent.content());
+        com.amool.domain.model.ChapterWithContentResult chapterWithContent = result.get();
+        assertEquals(CHAPTER_ID, chapterWithContent.getChapterWithContent().chapter().getId());
+        assertEquals(CHAPTER_TITLE, chapterWithContent.getChapterWithContent().chapter().getTitle());
+        assertEquals(CHAPTER_CONTENT, chapterWithContent.getContent());
     }
 
     @Test
@@ -73,13 +77,13 @@ public class GetChapterWithContentUseCaseTest {
         when(loadChapterPort.loadChapter(WORK_ID, CHAPTER_ID))
             .thenReturn(Optional.empty());
 
-        Optional<ChapterWithContent> result = useCase.execute(WORK_ID, CHAPTER_ID, LANGUAGE);
+        Optional<com.amool.domain.model.ChapterWithContentResult> result = useCase.execute(WORK_ID, CHAPTER_ID, LANGUAGE);
 
         assertTrue(result.isEmpty());
     }
 
     @Test
-    public void when_ContentDoesNotExist_ThenReturnEmpty() {
+    public void when_ContentDoesNotExist_ThenReturnChapterWithEmptyContent() {
         Chapter chapter = new Chapter();
         chapter.setId(CHAPTER_ID);
         chapter.setTitle(CHAPTER_TITLE);
@@ -94,9 +98,18 @@ public class GetChapterWithContentUseCaseTest {
             anyString()
         )).thenReturn(Optional.empty());
 
-        Optional<ChapterWithContent> result = useCase.execute(WORK_ID, CHAPTER_ID, LANGUAGE);
+        when(loadChapterContentPort.getAvailableLanguages(
+            anyString(),
+            anyString()
+        )).thenReturn(java.util.List.of());
 
-        assertTrue(result.isEmpty());
+        Optional<com.amool.domain.model.ChapterWithContentResult> result = useCase.execute(WORK_ID, CHAPTER_ID, LANGUAGE);
+
+        assertTrue(result.isPresent());
+        com.amool.domain.model.ChapterWithContentResult chapterWithContent = result.get();
+        assertEquals(CHAPTER_ID, chapterWithContent.getChapterWithContent().chapter().getId());
+        assertEquals(CHAPTER_TITLE, chapterWithContent.getChapterWithContent().chapter().getTitle());
+        assertEquals("", chapterWithContent.getContent());
     }
 
 }
