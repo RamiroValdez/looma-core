@@ -37,6 +37,7 @@ public class UseCasesConfig {
     private final WorkPort workPort;
     private final SaveWorkPort saveWorkPort;
     private final LikePort likePort;
+    private final RatingPort ratingPort;
     private final ImagesService imagesService;
     private final LoadWorkOwnershipPort loadWorkOwnershipPort;
     private final SubscriptionQueryPort subscriptionQueryPort;
@@ -77,7 +78,8 @@ public class UseCasesConfig {
             UserBalancePort userBalancePort,
             PaymentRecordPort paymentRecordPort,
             SubscriptionPersistencePort subscriptionPersistencePort,
-            RestTemplate restTemplate
+            RestTemplate restTemplate,
+            RatingPort ratingPort
             ) {
         this.awsS3Port = awsS3Port;
         this.authPort = authPort;
@@ -101,6 +103,7 @@ public class UseCasesConfig {
         this.loadUserPort = loadUserPort;
         this.imagesService = imagesService;
         this.workPort = workPort;
+        this.ratingPort = ratingPort;
         this.saveWorkPort = saveWorkPort;
         this.likePort = likePort;
         this.loadWorkOwnershipPort = loadWorkOwnershipPort;
@@ -309,6 +312,21 @@ public class UseCasesConfig {
     @Bean
     public GetAllWorksUseCase getAllWorksUseCase() {
         return new GetAllWorksUseCase(workPort);
+    }
+
+    @Bean
+    public RateWorkUseCase rateWorkUseCase() {
+        return new RateWorkUseCase(ratingPort);
+    }
+
+    @Bean
+    public GetUserRatingUseCase getUserRatingUseCase() {
+        return new GetUserRatingUseCase(ratingPort);
+    }
+
+    @Bean
+    public GetWorkRatingsUseCase getWorkRatingsUseCase() {
+        return new GetWorkRatingsUseCase(ratingPort);
     }
 
     @Bean
