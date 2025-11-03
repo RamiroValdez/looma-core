@@ -332,23 +332,13 @@ public class UseCasesConfig {
     }
 
     @Bean
-    public LikeWorkUseCase likeWorkUseCase() {
-        return new LikeWorkUseCase(likePort);
+    public ToggleWorkLikeUseCase toggleWorkLikeUseCase() {
+        return new ToggleWorkLikeUseCase(likePort);
     }
 
     @Bean
-    public UnlikeWorkUseCase unlikeWorkUseCase() {
-        return new UnlikeWorkUseCase(likePort);
-    }
-
-    @Bean
-    public LikeChapterUseCase likeChapterUseCase() {
-        return new LikeChapterUseCase(likePort);
-    }
-
-    @Bean
-    public UnlikeChapterUseCase unlikeChapterUseCase() {
-        return new UnlikeChapterUseCase(likePort);
+    public ToggleChapterLikeUseCase toggleChapterLikeUseCase() {
+        return new ToggleChapterLikeUseCase(likePort);
     }
 
     @Bean
