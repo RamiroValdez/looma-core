@@ -85,7 +85,7 @@ public class MercadoPagoProviderAdapterTest {
     @Test
     void startCheckout_workValidatesOwnerAndTitle() {
         Work w = new Work();
-        w.setId(10L); w.setTitle("Mi Obra"); w.setPrice(2000.0);
+        w.setId(10L); w.setTitle("Mi Obra"); w.setPrice(BigDecimal.valueOf(2000.0));
         User creator = new User();
         creator.setId(99L);
         w.setCreator(creator);
@@ -103,7 +103,7 @@ public class MercadoPagoProviderAdapterTest {
     @Test
     void startCheckout_chapterResolvesWorkAndTitle() {
         Chapter c = new Chapter();
-        c.setId(7L); c.setTitle("Cap 1"); c.setPrice(300.0); c.setWorkId(10L);
+        c.setId(7L); c.setTitle("Cap 1"); c.setPrice(BigDecimal.valueOf(300.0)); c.setWorkId(10L);
         Mockito.when(loadChapterPort.loadChapterForEdit(7L)).thenReturn(java.util.Optional.of(c));
         Work w = new Work(); w.setId(10L); w.setTitle("Mi Obra"); User cr = new User(); cr.setId(55L); w.setCreator(cr);
         Mockito.when(obtainWorkByIdPort.obtainWorkById(10L)).thenReturn(java.util.Optional.of(w));

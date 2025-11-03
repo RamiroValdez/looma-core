@@ -1,5 +1,6 @@
 package com.amool.adapters.in.rest.dtos;
 
+import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.util.Map;
 
@@ -8,7 +9,7 @@ public class UpdateChapterRequest {
     private String title;
     private String status;
     private LocalDateTime last_update;
-    private Double price;
+    private BigDecimal price;
     private Boolean allow_ai_translation;
     private Map<String, String> versions;
 
@@ -36,11 +37,11 @@ public class UpdateChapterRequest {
         this.last_update = last_update;
     }
 
-    public Double getPrice() {
+    public BigDecimal getPrice() {
         return price;
     }
 
-    public void setPrice(Double price) {
+    public void setPrice(BigDecimal price) {
         this.price = price;
     }
 

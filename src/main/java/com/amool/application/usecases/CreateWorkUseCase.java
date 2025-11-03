@@ -6,6 +6,7 @@ import com.amool.domain.model.*;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
+import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.HashSet;
@@ -46,7 +47,7 @@ public class CreateWorkUseCase {
                         List<Long> categoryIds,
                         Long formatId,
                         Long originalLanguageId,
-                        Double price,
+                        BigDecimal price,
                         Set<String> tagIds,
                         String coverIaUrl,
                         MultipartFile coverFile,
@@ -73,7 +74,7 @@ public class CreateWorkUseCase {
         return workId;
     }
 
-    private Work initializeWork(String title, String description, Double price) {
+    private Work initializeWork(String title, String description, BigDecimal price) {
         Work work = new Work();
         work.setTitle(title);
         work.setDescription(description);

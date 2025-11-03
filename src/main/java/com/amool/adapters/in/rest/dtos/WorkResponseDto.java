@@ -1,5 +1,6 @@
 package com.amool.adapters.in.rest.dtos;
 
+import java.math.BigDecimal;
 import java.util.Date;
 import java.util.List;
 
@@ -11,7 +12,7 @@ public class WorkResponseDto {
     String banner;
     String state;
     Date publicationDate;
-    Double price;
+    BigDecimal price;
     Integer likes;
     CreatorDto creator;
     FormatDto format;
@@ -45,7 +46,7 @@ public class WorkResponseDto {
     public Date getPublicationDate() {
         return publicationDate;
     }
-    public Double getPrice() {
+    public BigDecimal getPrice() {
         return price;
     }
     public Integer getLikes() {
@@ -93,7 +94,7 @@ public class WorkResponseDto {
     public void setPublicationDate(Date publicationDate) {
         this.publicationDate = publicationDate;
     }
-    public void setPrice(Double price) {
+    public void setPrice(BigDecimal price) {
         this.price = price;
     }
     public void setLikes(Integer likes) {

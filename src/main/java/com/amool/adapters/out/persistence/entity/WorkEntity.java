@@ -1,6 +1,7 @@
 
 package com.amool.adapters.out.persistence.entity;
 
+import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.HashSet;
@@ -32,7 +33,7 @@ public class WorkEntity {
     private String state;
 
     @Column(name = "price", nullable = false, precision = 10, scale = 2)
-    private Double price;
+    private BigDecimal price;
 
     @Column(name = "likes", nullable = false)
     private Integer likes;
@@ -92,8 +93,8 @@ public class WorkEntity {
     public String getState() { return state; }
     public void setState(String state) { this.state = state; }
 
-    public Double getPrice() { return price; }
-    public void setPrice(Double price) { this.price = price; }
+    public BigDecimal getPrice() { return price; }
+    public void setPrice(BigDecimal price) { this.price = price; }
 
     public Integer getLikes() { return likes; }
     public void setLikes(Integer likes) { this.likes = likes; }

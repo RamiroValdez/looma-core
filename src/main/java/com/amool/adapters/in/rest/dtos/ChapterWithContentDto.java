@@ -2,12 +2,13 @@ package com.amool.adapters.in.rest.dtos;
 
 import com.amool.domain.model.ChapterWithContent;
 
+import java.math.BigDecimal;
 import java.util.List;
 
 public record ChapterWithContentDto(
     Long id,
     String title,
-    Double price,
+    BigDecimal price,
     String content,
     List<String> availableLanguages
 ) {

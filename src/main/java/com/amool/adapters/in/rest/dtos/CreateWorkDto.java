@@ -1,5 +1,6 @@
 package com.amool.adapters.in.rest.dtos;
 
+import java.math.BigDecimal;
 import java.util.List;
 import java.util.Set;
 
@@ -9,7 +10,7 @@ public record CreateWorkDto(
         List<Long> categoryIds,
         Long formatId,
         Long originalLanguageId,
-        Double price,
+        BigDecimal price,
         Set<String> tagIds,
         String coverIaUrl
 ) {

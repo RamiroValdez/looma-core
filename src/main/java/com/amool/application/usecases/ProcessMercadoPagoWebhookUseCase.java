@@ -210,13 +210,13 @@ public class ProcessMercadoPagoWebhookUseCase {
                 Work w = obtainWorkByIdPort.obtainWorkById(ref.targetId)
                         .orElseThrow(() -> new IllegalArgumentException("work not found"));
                 if (w.getPrice() == null) return BigDecimal.ZERO;
-                return BigDecimal.valueOf(w.getPrice());
+                return w.getPrice();
             }
             case CHAPTER -> {
                 Chapter c = loadChapterPort.loadChapterForEdit(ref.targetId)
                         .orElseThrow(() -> new IllegalArgumentException("chapter not found"));
                 if (c.getPrice() == null) return BigDecimal.ZERO;
-                return BigDecimal.valueOf(c.getPrice());
+                return c.getPrice();
             }
             case AUTHOR -> {
                 if (authorPrice == null) return BigDecimal.ZERO;

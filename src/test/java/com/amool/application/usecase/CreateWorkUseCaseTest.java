@@ -8,6 +8,7 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
 
+import java.math.BigDecimal;
 import java.util.List;
 import java.util.Optional;
 import java.util.Set;
@@ -77,7 +78,7 @@ public class CreateWorkUseCaseTest {
             List.of(1L),
             1L,
             1L,
-            19.99,
+                BigDecimal.valueOf(19.99),
             Set.of("tag1"),
             "cover-url",
             null,
@@ -101,7 +102,7 @@ public class CreateWorkUseCaseTest {
                 List.of(1L),
                 1L,
                 1L,
-                0.0,
+                    BigDecimal.valueOf(0.0),
                 Set.of("tag1"),
                 "cover-url",
                 null,

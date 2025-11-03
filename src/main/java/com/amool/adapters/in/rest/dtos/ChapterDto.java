@@ -1,11 +1,12 @@
 package com.amool.adapters.in.rest.dtos;
 
+import java.math.BigDecimal;
 import java.time.LocalDateTime;
 
 public class ChapterDto {
     private Long id;
     private String title;
-    private Double price;
+    private BigDecimal price;
     private Long likes;
     private LocalDateTime lastModified;
     private Boolean allowAiTranslation;
@@ -19,8 +20,8 @@ public class ChapterDto {
     public String getTitle() { return title; }
     public void setTitle(String title) { this.title = title; }
 
-    public Double getPrice() { return price; }
-    public void setPrice(Double price) { this.price = price; }
+    public BigDecimal getPrice() { return price; }
+    public void setPrice(BigDecimal price) { this.price = price; }
 
     public Long getLikes() { return likes; }
     public void setLikes(Long likes) { this.likes = likes; }
