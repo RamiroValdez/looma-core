@@ -24,6 +24,7 @@ public class Work {
     private List<Chapter> chapters = new ArrayList<>();
     private List<Category> categories = new ArrayList<>();
     private Set<Tag> tags = new HashSet<>();
+    private transient Boolean likedByUser;
 
     public Work() {}
 
@@ -78,4 +79,7 @@ public class Work {
     
     public Set<Tag> getTags() { return tags; }
     public void setTags(Set<Tag> tags) { this.tags = tags; }
+    
+    public Boolean getLikedByUser() { return likedByUser; }
+    public void setLikedByUser(Boolean likedByUser) { this.likedByUser = likedByUser; }
 }

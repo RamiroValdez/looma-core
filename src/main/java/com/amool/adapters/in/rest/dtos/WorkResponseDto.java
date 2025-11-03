@@ -22,6 +22,7 @@ public class WorkResponseDto {
 
     Boolean subscribedToAuthor;
     Boolean subscribedToWork;
+    Boolean likedByUser;
     List<Long> unlockedChapters;
 
     public Long getId() {
@@ -72,6 +73,10 @@ public class WorkResponseDto {
     public Boolean getSubscribedToAuthor() { return subscribedToAuthor; }
     public Boolean getSubscribedToWork() { return subscribedToWork; }
     public List<Long> getUnlockedChapters() { return unlockedChapters; }
+    public Boolean getLikedByUser() {
+        return likedByUser;
+    }
+
     public void setId(Long id) {
         this.id = id;
     }
@@ -121,4 +126,5 @@ public class WorkResponseDto {
     public void setSubscribedToAuthor(Boolean subscribedToAuthor) { this.subscribedToAuthor = subscribedToAuthor; }
     public void setSubscribedToWork(Boolean subscribedToWork) { this.subscribedToWork = subscribedToWork; }
     public void setUnlockedChapters(List<Long> unlockedChapters) { this.unlockedChapters = unlockedChapters; }
+    public void setLikedByUser(Boolean likedByUser) { this.likedByUser = likedByUser; }
 }

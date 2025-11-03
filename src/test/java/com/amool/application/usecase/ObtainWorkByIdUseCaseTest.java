@@ -3,30 +3,68 @@ package com.amool.application.usecase;
 import com.amool.application.port.out.AwsS3Port;
 import com.amool.application.port.out.ObtainWorkByIdPort;
 import com.amool.application.usecases.ObtainWorkByIdUseCase;
+import com.amool.application.usecases.CheckWorkLikesUseCase;
 import com.amool.domain.model.Category;
 import com.amool.domain.model.Work;
+import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.mockito.Mockito;
+import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.Mock;
+import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.security.authentication.TestingAuthenticationToken;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContext;
+import org.springframework.security.core.context.SecurityContextHolder;
 
 import java.util.Arrays;
 import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.*;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.*;
 
+@ExtendWith(MockitoExtension.class)
 public class ObtainWorkByIdUseCaseTest {
 
+    private static final Long TEST_USER_ID = 123L;
+
+    @Mock
     private ObtainWorkByIdPort obtainWorkByIdPort;
+    
+    @Mock
     private AwsS3Port awsS3Port;
-    private ObtainWorkByIdUseCase useCase;
+    
+    @Mock
+    private CheckWorkLikesUseCase checkWorkLikesUseCase;
+    
+    private ObtainWorkByIdUseCase obtainWorkByIdUseCase;
 
     @BeforeEach
-    public void setUp() {
-        obtainWorkByIdPort = Mockito.mock(ObtainWorkByIdPort.class);
-        awsS3Port = Mockito.mock(AwsS3Port.class);
-        useCase = new ObtainWorkByIdUseCase(obtainWorkByIdPort, awsS3Port);
+    void setUp() {
+        SecurityContextHolder.setContext(new SecurityContext() {
+            @Override
+            public Authentication getAuthentication() {
+                return new TestingAuthenticationToken(TEST_USER_ID.toString(), null);
+            }
+            
+            @Override
+            public void setAuthentication(Authentication authentication) {
+            }
+        });
+        
+        obtainWorkByIdUseCase = new ObtainWorkByIdUseCase(
+                obtainWorkByIdPort, 
+                awsS3Port,
+                checkWorkLikesUseCase);
     }
-
+    
+    @AfterEach
+    void tearDown() {
+        SecurityContextHolder.clearContext();
+    }
+    
     @Test
     public void when_WorkExists_ThenReturnWorkWithUpdatedUrlsAndSortedCategories() {
         Long workId = 1L;
@@ -44,42 +82,49 @@ public class ObtainWorkByIdUseCaseTest {
         String expectedBannerUrl = "https://example.com/banner.jpg";
         String expectedCoverUrl = "https://example.com/cover.jpg";
 
-        Mockito.when(obtainWorkByIdPort.obtainWorkById(workId))
+        when(obtainWorkByIdPort.obtainWorkById(workId))
                 .thenReturn(Optional.of(work));
         
-        Mockito.when(awsS3Port.obtainPublicUrl("banner.jpg"))
+        when(awsS3Port.obtainPublicUrl("banner.jpg"))
                 .thenReturn(expectedBannerUrl);
                 
-        Mockito.when(awsS3Port.obtainPublicUrl("cover.jpg"))
+        when(awsS3Port.obtainPublicUrl("cover.jpg"))
                 .thenReturn(expectedCoverUrl);
+                
+        doNothing().when(checkWorkLikesUseCase)
+                  .execute(any(Work.class), eq(TEST_USER_ID));
 
-        Optional<Work> result = useCase.execute(workId);
+        Optional<Work> result = obtainWorkByIdUseCase.execute(workId);
 
-        assertTrue(result.isPresent());
-        assertEquals(workId, result.get().getId());
-        assertEquals(expectedBannerUrl, result.get().getBanner());
-        assertEquals(expectedCoverUrl, result.get().getCover());
+        assertTrue(result.isPresent(), "El resultado debería contener un trabajo");
+        assertEquals(workId, result.get().getId(), "El ID del trabajo no coincide");
+        assertEquals(expectedBannerUrl, result.get().getBanner(), "La URL del banner no coincide");
+        assertEquals(expectedCoverUrl, result.get().getCover(), "La URL de la portada no coincide");
         
-        assertEquals("A Category", result.get().getCategories().get(0).getName());
-        assertEquals("Z Category", result.get().getCategories().get(1).getName());
+        assertEquals("A Category", result.get().getCategories().get(0).getName(), 
+            "La primera categoría debería estar ordenada alfabéticamente");
+        assertEquals("Z Category", result.get().getCategories().get(1).getName(),
+            "La segunda categoría debería estar ordenada alfabéticamente");
         
-        Mockito.verify(obtainWorkByIdPort).obtainWorkById(workId);
-        Mockito.verify(awsS3Port).obtainPublicUrl("banner.jpg");
-        Mockito.verify(awsS3Port).obtainPublicUrl("cover.jpg");
+        verify(obtainWorkByIdPort).obtainWorkById(workId);
+        verify(awsS3Port).obtainPublicUrl("banner.jpg");
+        verify(awsS3Port).obtainPublicUrl("cover.jpg");
+        verify(checkWorkLikesUseCase).execute(any(Work.class), eq(TEST_USER_ID));
     }
 
     @Test
     public void when_WorkDoesNotExist_ThenReturnEmptyOptional() {
         Long workId = 999L;
 
-        Mockito.when(obtainWorkByIdPort.obtainWorkById(workId))
+        when(obtainWorkByIdPort.obtainWorkById(workId))
                 .thenReturn(Optional.empty());
 
-        Optional<Work> result = useCase.execute(workId);
+        Optional<Work> result = obtainWorkByIdUseCase.execute(workId);
 
-        assertFalse(result.isPresent());
-        Mockito.verify(obtainWorkByIdPort).obtainWorkById(workId);
-        Mockito.verifyNoInteractions(awsS3Port);
+        assertFalse(result.isPresent(), "El resultado debería estar vacío cuando el trabajo no existe");
+        verify(obtainWorkByIdPort).obtainWorkById(workId);
+        verifyNoInteractions(awsS3Port);
+        verifyNoInteractions(checkWorkLikesUseCase);
     }
 
 }

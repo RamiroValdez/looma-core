@@ -2,10 +2,6 @@ package com.amool.config;
 
 import com.amool.application.port.out.*;
 import com.amool.application.service.ImagesService;
-import com.amool.application.usecases.GetUserByIdUseCase;
-import com.amool.application.usecases.CreateLanguageVersionUseCase;
-import com.amool.application.usecases.GetMatchTagsUseCase;
-import com.amool.application.usecases.SuggestTagsUseCase;
 import com.amool.application.usecases.*;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -242,10 +238,16 @@ public class UseCasesConfig {
     }
 
     @Bean
+    public CheckWorkLikesUseCase checkWorkLikesUseCase() {
+        return new CheckWorkLikesUseCase(likePort);
+    }
+    
+    @Bean
     public ObtainWorkByIdUseCase obtainWorkByIdUseCase() {
         return new ObtainWorkByIdUseCase(
                 obtainWorkByIdPort,
-                awsS3Port);
+                awsS3Port,
+                checkWorkLikesUseCase());
     }
 
     @Bean

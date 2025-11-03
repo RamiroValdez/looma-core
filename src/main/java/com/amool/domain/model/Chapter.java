@@ -14,6 +14,7 @@ public class Chapter {
     private String publicationStatus;
     private LocalDateTime scheduledPublicationDate;
     private LocalDateTime publishedAt;
+    private transient Boolean likedByUser;
     
     public Long getId() { return id; }
     public void setId(Long id) { this.id = id; }
@@ -47,4 +48,7 @@ public class Chapter {
     
     public LocalDateTime getPublishedAt() { return publishedAt; }
     public void setPublishedAt(LocalDateTime publishedAt) { this.publishedAt = publishedAt; }
+    
+    public Boolean getLikedByUser() { return likedByUser; }
+    public void setLikedByUser(Boolean likedByUser) { this.likedByUser = likedByUser; }
 }
