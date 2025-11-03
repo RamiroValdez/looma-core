@@ -46,19 +46,19 @@ public class CreateWorkUseCase {
                         List<Long> categoryIds,
                         Long formatId,
                         Long originalLanguageId,
+                        Double price,
                         Set<String> tagIds,
                         String coverIaUrl,
                         MultipartFile coverFile,
                         MultipartFile bannerFile,
                         Long userId) throws IOException, InterruptedException {
 
-        Work work = this.initializeWork(title, description);
+        Work work = this.initializeWork(title, description, price);
 
         work.setCreator(this.loadUser(userId));
         work.setFormat(this.loadFormat(formatId));
         work.setOriginalLanguage(this.loadLanguage(originalLanguageId));
         work.setCategories(this.loadCategories(categoryIds));
-
         Long workId = this.workPort.createWork(work);
         Work createdWork = this.obtainWorkByIdPort
                 .obtainWorkById(workId)
@@ -73,14 +73,14 @@ public class CreateWorkUseCase {
         return workId;
     }
 
-    private Work initializeWork(String title, String description) {
+    private Work initializeWork(String title, String description, Double price) {
         Work work = new Work();
         work.setTitle(title);
         work.setDescription(description);
         work.setCover("none");
         work.setBanner("none");
         work.setState("InProgress");
-        work.setPrice(0.0);
+        work.setPrice(price);
         work.setLikes(0);
         work.setPublicationDate(LocalDate.now());
         return work;

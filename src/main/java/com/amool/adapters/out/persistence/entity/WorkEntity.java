@@ -31,7 +31,7 @@ public class WorkEntity {
     @Column(name = "state", nullable = false)
     private String state;
 
-    @Column(name = "price", nullable = false)
+    @Column(name = "price", nullable = false, precision = 10, scale = 2)
     private Double price;
 
     @Column(name = "likes", nullable = false)
