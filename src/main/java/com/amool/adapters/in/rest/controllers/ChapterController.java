@@ -24,8 +24,7 @@ import com.amool.security.JwtUserPrincipal;
 import com.amool.adapters.in.rest.dtos.SchedulePublicationRequestDto;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import com.amool.application.usecases.LikeChapterUseCase;
-import com.amool.application.usecases.UnlikeChapterUseCase;
+
 
 @RestController
 @RequestMapping("/api")
@@ -38,8 +37,7 @@ public class ChapterController {
     private final SchedulePublicationUseCase schedulePublicationUseCase;
     private final CancelScheduledPublicationUseCase cancelScheduledPublicationUseCase;
     private final UpdateChapterContentUseCase updateChapterContentUseCase;
-    private final LikeChapterUseCase likeChapterUseCase;
-    private final UnlikeChapterUseCase unlikeChapterUseCase;
+    private final ToggleChapterLikeUseCase toggleChapterLikeUseCase;
     private static final java.time.ZoneId AR = java.time.ZoneId.of("America/Argentina/Buenos_Aires");
     private static final Logger log = LoggerFactory.getLogger(ChapterController.class);
 
@@ -206,24 +204,13 @@ public class ChapterController {
     }
 
     @PostMapping("/work/{workId}/chapter/{chapterId}/like")
-    public ResponseEntity<LikeResponseDto> likeChapter(
+    public ResponseEntity<LikeResponseDto> toggleChapterLike(
             @PathVariable Long workId,
             @PathVariable Long chapterId,
             @AuthenticationPrincipal JwtUserPrincipal userPrincipal) {
     
         Long userId = userPrincipal.getUserId();
-        LikeResponseDto response = likeChapterUseCase.execute(chapterId, userId);
-        return ResponseEntity.ok(response);
-    }
-
-    @DeleteMapping("/work/{workId}/chapter/{chapterId}/like")
-    public ResponseEntity<LikeResponseDto> unlikeChapter(
-            @PathVariable Long workId,
-            @PathVariable Long chapterId,
-            @AuthenticationPrincipal JwtUserPrincipal userPrincipal) {
-    
-        Long userId = userPrincipal.getUserId();
-        LikeResponseDto response = unlikeChapterUseCase.execute(chapterId, userId);
+        LikeResponseDto response = toggleChapterLikeUseCase.execute(chapterId, userId);
         return ResponseEntity.ok(response);
     }
 
