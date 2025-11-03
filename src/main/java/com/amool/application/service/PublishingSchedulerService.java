@@ -7,7 +7,6 @@ import org.springframework.stereotype.Service;
 import java.time.Instant;
 import java.time.LocalDateTime;
 
-@Service
 public class PublishingSchedulerService {
 
     private final FindChaptersDueForPublicationPort findChaptersDueForPublicationPort;

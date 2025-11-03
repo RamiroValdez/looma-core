@@ -103,7 +103,7 @@ public class WorksPersistenceAdapter implements ObtainWorkByIdPort, WorkPort {
             WorkEntity existingEntity = entityManager.find(WorkEntity.class, work.getId());
 
             if (existingEntity == null) {
-                return false;
+                return Boolean.FALSE;
             }
 
             if (work.getTitle() != null) existingEntity.setTitle(work.getTitle());
@@ -124,9 +124,9 @@ public class WorksPersistenceAdapter implements ObtainWorkByIdPort, WorkPort {
 
             entityManager.merge(existingEntity);
             entityManager.flush();
-            return true;
+            return Boolean.TRUE;
         } catch (Exception e) {
-            return false;
+            return Boolean.FALSE;
         }
     }
 
@@ -214,8 +214,86 @@ public class WorksPersistenceAdapter implements ObtainWorkByIdPort, WorkPort {
             predicates.add(cb.greaterThanOrEqualTo(root.get("likes"), filter.getMinLikes()));
         }
 
+        // Filtro de rangos de episodios
+        if (filter.getRangeEpisodes() != null && !filter.getRangeEpisodes().isEmpty()) {
+            List<Predicate> episodePredicates = new ArrayList<>();
+
+            for (String range : filter.getRangeEpisodes()) {
+                if (!"cualquiera".equals(range)) {
+                    Subquery<Long> chapterCountSubquery = cb.createQuery().subquery(Long.class);
+                    Root<WorkEntity> subRoot = chapterCountSubquery.from(WorkEntity.class);
+                    Join<?, ?> chapterJoin = subRoot.join("chapters", JoinType.LEFT);
+
+                    chapterCountSubquery.select(cb.count(chapterJoin))
+                            .where(
+                                    cb.and(
+                                            cb.equal(subRoot.get("id"), root.get("id")),
+                                            cb.equal(chapterJoin.get("publicationStatus"), "PUBLISHED")
+                                    )
+                            );
+
+                    switch (range) {
+                        case "1-5":
+                            episodePredicates.add(cb.between(chapterCountSubquery, 1L, 5L));
+                            break;
+                        case "6-10":
+                            episodePredicates.add(cb.between(chapterCountSubquery, 6L, 10L));
+                            break;
+                        case "11-20":
+                            episodePredicates.add(cb.between(chapterCountSubquery, 11L, 20L));
+                            break;
+                        case "21+":
+                            episodePredicates.add(cb.greaterThanOrEqualTo(chapterCountSubquery, 21L));
+                            break;
+                    }
+                }
+            }
+
+            if (!episodePredicates.isEmpty()) {
+                predicates.add(cb.or(episodePredicates.toArray(new Predicate[0])));
+            }
+        }
+
+        // Filtro de períodos de actualización (última publicación de capítulo)
+        if (filter.getLastUpdated() != null && !filter.getLastUpdated().isEmpty()) {
+            List<Predicate> updatePredicates = new ArrayList<>();
+            java.time.LocalDate today = java.time.LocalDate.now();
+
+            for (String period : filter.getLastUpdated()) {
+                java.time.LocalDate threshold;
+
+                switch (period) {
+                    case "today":
+                        threshold = today;
+                        break;
+                    case "last_week":
+                        threshold = today.minusWeeks(1);
+                        break;
+                    case "last_month":
+                        threshold = today.minusMonths(1);
+                        break;
+                    case "last_3_months":
+                        threshold = today.minusMonths(3);
+                        break;
+                    case "last_year":
+                        threshold = today.minusYears(1);
+                        break;
+                    default:
+                        continue;
+                }
+
+                updatePredicates.add(cb.greaterThanOrEqualTo(root.get("publicationDate"), threshold));
+            }
+
+            if (!updatePredicates.isEmpty()) {
+                predicates.add(cb.or(updatePredicates.toArray(new Predicate[0])));
+            }
+        }
+
         return predicates;
     }
+
+
 
 
 }
