@@ -1,5 +1,6 @@
 package com.amool.adapters.in.rest.dtos;
 
+import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.util.List;
 
@@ -7,7 +8,7 @@ public class ChapterResponseDto {
     Long id;
     String title;
     String content;
-    Double price;
+    BigDecimal price;
     String work_name;
     String work_id;
     LocalDateTime last_update;
@@ -29,8 +30,8 @@ public class ChapterResponseDto {
     public String getContent() { return content; }
     public void setContent(String content) { this.content = content; }
 
-    public Double getPrice() { return price; }
-    public void setPrice(Double price) { this.price = price; }
+    public BigDecimal getPrice() { return price; }
+    public void setPrice(BigDecimal price) { this.price = price; }
 
     public String getWorkName() { return work_name; }
     public void setWorkName(String work_name) { this.work_name = work_name; }

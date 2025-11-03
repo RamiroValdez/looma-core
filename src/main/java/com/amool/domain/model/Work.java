@@ -1,5 +1,6 @@
 package com.amool.domain.model;
 
+import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.HashSet;
@@ -13,7 +14,7 @@ public class Work {
     private String cover;
     private String banner;
     private String state;
-    private Double price;
+    private BigDecimal price;
     private Integer likes;
     private Double averageRating;
     private Integer ratingCount;
@@ -46,8 +47,8 @@ public class Work {
     public String getState() { return state; }
     public void setState(String state) { this.state = state; }
     
-    public Double getPrice() { return price; }
-    public void setPrice(Double price) { this.price = price; }
+    public BigDecimal getPrice() { return price; }
+    public void setPrice(BigDecimal price) { this.price = price; }
     
     public Integer getLikes() { return likes; }
     public void setLikes(Integer likes) { this.likes = likes; }

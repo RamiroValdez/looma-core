@@ -97,10 +97,10 @@ public class MercadoPagoProviderAdapter implements PaymentProviderPort {
                 if (work.getCreator() != null && work.getCreator().getId() != null && work.getCreator().getId().equals(userId)) {
                     throw new IllegalArgumentException("Cannot subscribe to own work");
                 }
-                if (work.getPrice() == null || work.getPrice() <= 0) {
+                if (work.getPrice() == null ||  work.getPrice().compareTo(BigDecimal.ZERO) <= 0) {
                     throw new IllegalArgumentException("Invalid work price");
                 }
-                amount = BigDecimal.valueOf(work.getPrice());
+                amount = work.getPrice();
                 title = "Suscripción a " + (work.getTitle() == null ? ("work-" + work.getId()) : work.getTitle());
             }
             case CHAPTER -> {
@@ -114,10 +114,10 @@ public class MercadoPagoProviderAdapter implements PaymentProviderPort {
                 if (work.getCreator() != null && work.getCreator().getId() != null && work.getCreator().getId().equals(userId)) {
                     throw new IllegalArgumentException("Cannot subscribe to own chapter");
                 }
-                if (chapter.getPrice() == null || chapter.getPrice() <= 0) {
+                if (chapter.getPrice() == null || chapter.getPrice().compareTo(BigDecimal.ZERO) <= 0) {
                     throw new IllegalArgumentException("Invalid chapter price");
                 }
-                amount = BigDecimal.valueOf(chapter.getPrice());
+                amount = chapter.getPrice();
                 String wTitle = work.getTitle() == null ? ("work-" + work.getId()) : work.getTitle();
                 String cTitle = chapter.getTitle() == null ? ("cap-" + chapter.getId()) : chapter.getTitle();
                 title = "Suscripción a " + wTitle + " - " + cTitle;

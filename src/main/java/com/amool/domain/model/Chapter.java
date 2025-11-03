@@ -1,11 +1,12 @@
 package com.amool.domain.model;
 
+import java.math.BigDecimal;
 import java.time.LocalDateTime;
 
 public class Chapter {
     private Long id;
     private String title;
-    private Double price;
+    private BigDecimal price;
     private Long likes;
     private LocalDateTime lastModified;
     private Long workId;
@@ -22,8 +23,8 @@ public class Chapter {
     public String getTitle() { return title; }
     public void setTitle(String title) { this.title = title; }
 
-    public Double getPrice() { return price; }
-    public void setPrice(Double price) { this.price = price; }
+    public BigDecimal getPrice() { return price; }
+    public void setPrice(BigDecimal price) { this.price = price; }
     
     public Long getLikes() { return likes; }
     public void setLikes(Long likes) { this.likes = likes; }

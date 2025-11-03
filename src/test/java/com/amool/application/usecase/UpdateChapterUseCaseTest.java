@@ -10,6 +10,7 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
 
+import java.math.BigDecimal;
 import java.util.Map;
 import java.util.Optional;
 
@@ -45,7 +46,7 @@ public class UpdateChapterUseCaseTest {
         existingChapter.setId(chapterId);
         existingChapter.setWorkId(100L);
         existingChapter.setTitle("Original Title");
-        existingChapter.setPrice(0.0);
+        existingChapter.setPrice(BigDecimal.valueOf(0.0));
         existingChapter.setPublicationStatus("DRAFT");
         existingChapter.setAllowAiTranslation(false);
 
@@ -82,15 +83,15 @@ public class UpdateChapterUseCaseTest {
 
     @Test
     public void when_UpdatePrice_ThenUpdateSuccessfully() {
-        updateRequest.setPrice(2.99);
+        updateRequest.setPrice(BigDecimal.valueOf(2.99));
         when(loadChapterPort.loadChapterForEdit(chapterId)).thenReturn(Optional.of(existingChapter));
         when(updateChapterPort.updateChapter(any(Chapter.class))).thenReturn(Optional.of(existingChapter));
 
         boolean result = useCase.execute(chapterId, updateRequest);
 
         assertTrue(result);
-        verify(updateChapterPort).updateChapter(argThat(chapter -> 
-            2.99 == chapter.getPrice()
+        verify(updateChapterPort).updateChapter(argThat(chapter ->
+                BigDecimal.valueOf(2.99).equals(chapter.getPrice())
         ));
     }
 
