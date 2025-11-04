@@ -81,7 +81,7 @@ public class CreateWorkUseCase {
         work.setCover("none");
         work.setBanner("none");
         work.setState("InProgress");
-        work.setPrice(price);
+        work.setPrice(price == null ? BigDecimal.ZERO : price);
         work.setLikes(0);
         work.setPublicationDate(LocalDate.now());
         return work;

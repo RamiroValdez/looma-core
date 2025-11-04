@@ -39,6 +39,7 @@ public class ChapterMapper {
         dto.setPublicationStatus(chapter.getPublicationStatus());
         dto.setScheduledPublicationDate(chapter.getScheduledPublicationDate());
         dto.setPublishedAt(chapter.getPublishedAt());
+        dto.setLikedByUser(chapter.getLikedByUser());
         return dto;
     }
 

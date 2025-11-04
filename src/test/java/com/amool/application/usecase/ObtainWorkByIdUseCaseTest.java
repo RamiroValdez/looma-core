@@ -1,9 +1,9 @@
 package com.amool.application.usecase;
 
 import com.amool.application.port.out.AwsS3Port;
+import com.amool.application.port.out.LikePort;
 import com.amool.application.port.out.ObtainWorkByIdPort;
 import com.amool.application.usecases.ObtainWorkByIdUseCase;
-import com.amool.application.usecases.CheckWorkLikesUseCase;
 import com.amool.domain.model.Category;
 import com.amool.domain.model.Work;
 import org.junit.jupiter.api.AfterEach;
@@ -21,8 +21,6 @@ import java.util.Arrays;
 import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.*;
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
@@ -35,9 +33,9 @@ public class ObtainWorkByIdUseCaseTest {
     
     @Mock
     private AwsS3Port awsS3Port;
-    
+
     @Mock
-    private CheckWorkLikesUseCase checkWorkLikesUseCase;
+    LikePort likePort;
     
     private ObtainWorkByIdUseCase obtainWorkByIdUseCase;
 
@@ -57,7 +55,7 @@ public class ObtainWorkByIdUseCaseTest {
         obtainWorkByIdUseCase = new ObtainWorkByIdUseCase(
                 obtainWorkByIdPort, 
                 awsS3Port,
-                checkWorkLikesUseCase);
+                likePort);
     }
     
     @AfterEach
@@ -68,6 +66,7 @@ public class ObtainWorkByIdUseCaseTest {
     @Test
     public void when_WorkExists_ThenReturnWorkWithUpdatedUrlsAndSortedCategories() {
         Long workId = 1L;
+        Long userId = 1L;
         Work work = new Work();
         work.setId(workId);
         work.setBanner("banner.jpg");
@@ -90,11 +89,8 @@ public class ObtainWorkByIdUseCaseTest {
                 
         when(awsS3Port.obtainPublicUrl("cover.jpg"))
                 .thenReturn(expectedCoverUrl);
-                
-        doNothing().when(checkWorkLikesUseCase)
-                  .execute(any(Work.class), eq(TEST_USER_ID));
 
-        Optional<Work> result = obtainWorkByIdUseCase.execute(workId);
+        Optional<Work> result = obtainWorkByIdUseCase.execute(workId, 1L);
 
         assertTrue(result.isPresent(), "El resultado debería contener un trabajo");
         assertEquals(workId, result.get().getId(), "El ID del trabajo no coincide");
@@ -109,22 +105,21 @@ public class ObtainWorkByIdUseCaseTest {
         verify(obtainWorkByIdPort).obtainWorkById(workId);
         verify(awsS3Port).obtainPublicUrl("banner.jpg");
         verify(awsS3Port).obtainPublicUrl("cover.jpg");
-        verify(checkWorkLikesUseCase).execute(any(Work.class), eq(TEST_USER_ID));
     }
 
     @Test
     public void when_WorkDoesNotExist_ThenReturnEmptyOptional() {
         Long workId = 999L;
+        Long userId = 1L;
 
         when(obtainWorkByIdPort.obtainWorkById(workId))
                 .thenReturn(Optional.empty());
 
-        Optional<Work> result = obtainWorkByIdUseCase.execute(workId);
+        Optional<Work> result = obtainWorkByIdUseCase.execute(workId,1L);
 
         assertFalse(result.isPresent(), "El resultado debería estar vacío cuando el trabajo no existe");
         verify(obtainWorkByIdPort).obtainWorkById(workId);
         verifyNoInteractions(awsS3Port);
-        verifyNoInteractions(checkWorkLikesUseCase);
     }
 
 }

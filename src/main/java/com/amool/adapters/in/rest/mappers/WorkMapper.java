@@ -37,6 +37,7 @@ public class WorkMapper {
         if (work.getPublicationDate() != null) {
             dto.setPublicationDate(java.sql.Date.valueOf(work.getPublicationDate()));
         }
+        dto.setLikedByUser(work.getLikedByUser());
         return dto;
     }
 

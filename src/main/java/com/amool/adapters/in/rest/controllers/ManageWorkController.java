@@ -3,24 +3,19 @@ package com.amool.adapters.in.rest.controllers;
 import com.amool.adapters.in.rest.dtos.CreateEmptyChapterRequest;
 import com.amool.adapters.in.rest.dtos.CreateEmptyChapterResponse;
 import com.amool.adapters.in.rest.dtos.WorkResponseDto;
-import com.amool.adapters.in.rest.dtos.ChapterDto;
 import com.amool.adapters.in.rest.mappers.WorkMapper;
 import com.amool.application.usecases.CreateEmptyChapterUseCase;
 import com.amool.application.usecases.GetWorkPermissionsUseCase;
 import com.amool.application.usecases.ObtainWorkByIdUseCase;
 import com.amool.domain.model.Chapter;
-import com.amool.application.port.out.SubscriptionQueryPort;
 import com.amool.domain.model.WorkPermissions;
 import com.amool.security.JwtUserPrincipal;
-
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.Authentication;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.*;
-
-import java.util.ArrayList;
-import java.util.List;
 
 @RestController
 @RequestMapping("/api/manage-work")
@@ -40,8 +35,8 @@ public class ManageWorkController {
 
     @GetMapping("/{workId}")
     @PreAuthorize("isAuthenticated()")
-    public ResponseEntity<WorkResponseDto> getWorkById(@PathVariable Long workId) {
-        return obtainWorkByIdUseCase.execute(workId)
+    public ResponseEntity<WorkResponseDto> getWorkById(@PathVariable Long workId, @AuthenticationPrincipal JwtUserPrincipal user) {
+        return obtainWorkByIdUseCase.execute(workId, user.getUserId())
                 .map(work -> {
                     WorkResponseDto dto = WorkMapper.toDto(work);
 
