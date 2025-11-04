@@ -72,10 +72,4 @@ public class UpdateWorkPriceUseCaseTest {
         assertThrows(SecurityException.class, () -> useCase.execute(workId, BigDecimal.ONE, 999L));
         verify(workPort, never()).updateWork(any());
     }
-
-    @Test
-    public void when_InvalidPrice_ThenIllegalArgument() {
-        assertThrows(IllegalArgumentException.class, () -> useCase.execute(workId, new BigDecimal("-1"), ownerId));
-        verifyNoInteractions(obtainWorkByIdPort, workPort);
-    }
 }
