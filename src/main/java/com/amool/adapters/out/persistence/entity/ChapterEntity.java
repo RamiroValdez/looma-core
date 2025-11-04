@@ -1,4 +1,5 @@
 package com.amool.adapters.out.persistence.entity;
+import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.util.HashSet;
 import java.util.Set;
@@ -16,8 +17,8 @@ public class ChapterEntity {
     @Column(name = "title")
     private String title = "";
 
-    @Column(name = "price")  
-    private Double price = 0.0;
+    @Column(name = "price", precision = 10, scale = 2)
+    private BigDecimal price = BigDecimal.valueOf(0.0);
 
     @Column(name = "last_update") 
     private LocalDateTime lastModified;
@@ -57,8 +58,8 @@ public class ChapterEntity {
     public String getTitle() { return title; }
     public void setTitle(String title) { this.title = title; }
 
-    public Double getPrice() { return price; }
-    public void setPrice(Double price) { this.price = price; }
+    public BigDecimal getPrice() { return price; }
+    public void setPrice(BigDecimal price) { this.price = price; }
 
     public LocalDateTime getLastModified() { return lastModified; }
     public void setLastModified(LocalDateTime lastModified) { this.lastModified = lastModified; }

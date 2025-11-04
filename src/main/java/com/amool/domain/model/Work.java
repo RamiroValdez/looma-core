@@ -1,5 +1,6 @@
 package com.amool.domain.model;
 
+import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.HashSet;
@@ -13,8 +14,10 @@ public class Work {
     private String cover;
     private String banner;
     private String state;
-    private Double price;
+    private BigDecimal price;
     private Integer likes;
+    private Double averageRating;
+    private Integer ratingCount;
     private LocalDate publicationDate;
     private User creator;
     private Format format;
@@ -22,6 +25,7 @@ public class Work {
     private List<Chapter> chapters = new ArrayList<>();
     private List<Category> categories = new ArrayList<>();
     private Set<Tag> tags = new HashSet<>();
+    private transient Boolean likedByUser;
 
     public Work() {}
 
@@ -43,11 +47,17 @@ public class Work {
     public String getState() { return state; }
     public void setState(String state) { this.state = state; }
     
-    public Double getPrice() { return price; }
-    public void setPrice(Double price) { this.price = price; }
+    public BigDecimal getPrice() { return price; }
+    public void setPrice(BigDecimal price) { this.price = price; }
     
     public Integer getLikes() { return likes; }
     public void setLikes(Integer likes) { this.likes = likes; }
+    
+    public Double getAverageRating() { return averageRating; }
+    public void setAverageRating(Double averageRating) { this.averageRating = averageRating; }
+    
+    public Integer getRatingCount() { return ratingCount; }
+    public void setRatingCount(Integer ratingCount) { this.ratingCount = ratingCount; }
     
     public LocalDate getPublicationDate() { return publicationDate; }
     public void setPublicationDate(LocalDate publicationDate) { this.publicationDate = publicationDate; }
@@ -70,4 +80,7 @@ public class Work {
     
     public Set<Tag> getTags() { return tags; }
     public void setTags(Set<Tag> tags) { this.tags = tags; }
+    
+    public Boolean getLikedByUser() { return likedByUser; }
+    public void setLikedByUser(Boolean likedByUser) { this.likedByUser = likedByUser; }
 }

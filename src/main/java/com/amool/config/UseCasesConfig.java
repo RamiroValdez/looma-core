@@ -2,13 +2,10 @@ package com.amool.config;
 
 import com.amool.application.port.out.*;
 import com.amool.application.service.ImagesService;
-import com.amool.application.usecases.GetUserByIdUseCase;
-import com.amool.application.usecases.CreateLanguageVersionUseCase;
-import com.amool.application.usecases.GetMatchTagsUseCase;
-import com.amool.application.usecases.SuggestTagsUseCase;
 import com.amool.application.usecases.*;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.web.client.RestTemplate;
 
 @Configuration
 public class UseCasesConfig {
@@ -35,9 +32,17 @@ public class UseCasesConfig {
     private final LoadUserPort loadUserPort;
     private final WorkPort workPort;
     private final SaveWorkPort saveWorkPort;
+    private final LikePort likePort;
+    private final RatingPort ratingPort;
     private final ReadingProgressPort readingProgressPort;
-
     private final ImagesService imagesService;
+    private final LoadWorkOwnershipPort loadWorkOwnershipPort;
+    private final SubscriptionQueryPort subscriptionQueryPort;
+    private final PaymentAuditPort paymentAuditPort;
+    private final UserBalancePort userBalancePort;
+    private final PaymentRecordPort paymentRecordPort;
+    private final SubscriptionPersistencePort subscriptionPersistencePort;
+    private final RestTemplate restTemplate;
 
     public UseCasesConfig(
             AwsS3Port awsS3Port,
@@ -63,6 +68,15 @@ public class UseCasesConfig {
             ImagesService imagesService,
             WorkPort workPort,
             SaveWorkPort saveWorkPort,
+            LikePort likePort,
+            LoadWorkOwnershipPort loadWorkOwnershipPort,
+            SubscriptionQueryPort subscriptionQueryPort,
+            PaymentAuditPort paymentAuditPort,
+            UserBalancePort userBalancePort,
+            PaymentRecordPort paymentRecordPort,
+            SubscriptionPersistencePort subscriptionPersistencePort,
+            RestTemplate restTemplate,
+            RatingPort ratingPort,
             ReadingProgressPort readingProgressPort
             ) {
         this.awsS3Port = awsS3Port;
@@ -87,7 +101,16 @@ public class UseCasesConfig {
         this.loadUserPort = loadUserPort;
         this.imagesService = imagesService;
         this.workPort = workPort;
+        this.ratingPort = ratingPort;
         this.saveWorkPort = saveWorkPort;
+        this.likePort = likePort;
+        this.loadWorkOwnershipPort = loadWorkOwnershipPort;
+        this.subscriptionQueryPort = subscriptionQueryPort;
+        this.paymentAuditPort = paymentAuditPort;
+        this.userBalancePort = userBalancePort;
+        this.paymentRecordPort = paymentRecordPort;
+        this.subscriptionPersistencePort = subscriptionPersistencePort;
+        this.restTemplate = restTemplate;
         this.readingProgressPort = readingProgressPort;
     }
 
@@ -130,7 +153,8 @@ public class UseCasesConfig {
         return new DeleteChapterUseCase(
                 loadChapterPort,
                 deleteChapterContentPort,
-                deleteChapterPort
+                deleteChapterPort,
+                loadWorkOwnershipPort
         );
     }
 
@@ -220,7 +244,8 @@ public class UseCasesConfig {
     public ObtainWorkByIdUseCase obtainWorkByIdUseCase() {
         return new ObtainWorkByIdUseCase(
                 obtainWorkByIdPort,
-                awsS3Port);
+                awsS3Port,
+                likePort);
     }
 
     @Bean
@@ -273,12 +298,12 @@ public class UseCasesConfig {
     public IsWorkSavedUseCase isWorkSavedUseCase() {
         return new IsWorkSavedUseCase(saveWorkPort);
     }
-    
+
     @Bean
     public GetSavedWorksUseCase getSavedWorksUseCase() {
         return new GetSavedWorksUseCase(saveWorkPort);
     }
-    
+
     @Bean
     public ToggleSaveWorkUseCase toggleSaveWorkUseCase() {
         return new ToggleSaveWorkUseCase(saveWorkPort);
@@ -287,6 +312,75 @@ public class UseCasesConfig {
     @Bean
     public GetAllWorksUseCase getAllWorksUseCase() {
         return new GetAllWorksUseCase(workPort);
+    }
+
+    @Bean
+    public RateWorkUseCase rateWorkUseCase() {
+        return new RateWorkUseCase(ratingPort);
+    }
+
+    @Bean
+    public GetUserRatingUseCase getUserRatingUseCase() {
+        return new GetUserRatingUseCase(ratingPort);
+    }
+
+    @Bean
+    public GetWorkRatingsUseCase getWorkRatingsUseCase() {
+        return new GetWorkRatingsUseCase(ratingPort);
+    }
+
+    @Bean
+    public ToggleWorkLikeUseCase toggleWorkLikeUseCase() {
+        return new ToggleWorkLikeUseCase(likePort);
+    }
+
+    @Bean
+    public ToggleChapterLikeUseCase toggleChapterLikeUseCase() {
+        return new ToggleChapterLikeUseCase(likePort);
+    }
+
+    @Bean
+    public UpdateChapterContentUseCase updateChapterContentUseCase() {
+        return new UpdateChapterContentUseCase(
+                saveChapterContentPort,
+                loadWorkOwnershipPort);
+    }
+
+    @Bean
+    public ValidateChapterAccessUseCase validateChapterAccessUseCase() {
+        return new ValidateChapterAccessUseCase(
+                loadChapterPort,
+                obtainWorkByIdPort,
+                subscriptionQueryPort
+        );
+    }
+
+    @Bean
+    public GetWorkPermissionsUseCase getWorkPermissionsUseCase() {
+        return new GetWorkPermissionsUseCase(subscriptionQueryPort);
+    }
+
+    @Bean
+    public ExtractPaymentIdFromWebhookUseCase extractPaymentIdFromWebhookUseCase() {
+        return new ExtractPaymentIdFromWebhookUseCase();
+    }
+
+    @Bean
+    public SubscribeUserUseCase subscribeUserUseCase() {
+        return new SubscribeUserUseCase(subscriptionPersistencePort);
+    }
+
+    @Bean
+    public ProcessMercadoPagoWebhookUseCase processMercadoPagoWebhookUseCase() {
+        return new ProcessMercadoPagoWebhookUseCase(
+                restTemplate,
+                paymentAuditPort,
+                userBalancePort,
+                paymentRecordPort,
+                obtainWorkByIdPort,
+                loadChapterPort,
+                subscribeUserUseCase()
+        );
     }
 
     @Bean

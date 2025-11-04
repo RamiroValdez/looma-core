@@ -1,5 +1,6 @@
 package com.amool.adapters.in.rest.dtos;
 
+import java.math.BigDecimal;
 import java.util.Date;
 import java.util.List;
 
@@ -11,7 +12,7 @@ public class WorkResponseDto {
     String banner;
     String state;
     Date publicationDate;
-    Double price;
+    BigDecimal price;
     Integer likes;
     CreatorDto creator;
     FormatDto format;
@@ -22,6 +23,7 @@ public class WorkResponseDto {
 
     Boolean subscribedToAuthor;
     Boolean subscribedToWork;
+    Boolean likedByUser;
     List<Long> unlockedChapters;
 
     public Long getId() {
@@ -45,7 +47,7 @@ public class WorkResponseDto {
     public Date getPublicationDate() {
         return publicationDate;
     }
-    public Double getPrice() {
+    public BigDecimal getPrice() {
         return price;
     }
     public Integer getLikes() {
@@ -72,6 +74,10 @@ public class WorkResponseDto {
     public Boolean getSubscribedToAuthor() { return subscribedToAuthor; }
     public Boolean getSubscribedToWork() { return subscribedToWork; }
     public List<Long> getUnlockedChapters() { return unlockedChapters; }
+    public Boolean getLikedByUser() {
+        return likedByUser;
+    }
+
     public void setId(Long id) {
         this.id = id;
     }
@@ -93,7 +99,7 @@ public class WorkResponseDto {
     public void setPublicationDate(Date publicationDate) {
         this.publicationDate = publicationDate;
     }
-    public void setPrice(Double price) {
+    public void setPrice(BigDecimal price) {
         this.price = price;
     }
     public void setLikes(Integer likes) {
@@ -121,4 +127,5 @@ public class WorkResponseDto {
     public void setSubscribedToAuthor(Boolean subscribedToAuthor) { this.subscribedToAuthor = subscribedToAuthor; }
     public void setSubscribedToWork(Boolean subscribedToWork) { this.subscribedToWork = subscribedToWork; }
     public void setUnlockedChapters(List<Long> unlockedChapters) { this.unlockedChapters = unlockedChapters; }
+    public void setLikedByUser(Boolean likedByUser) { this.likedByUser = likedByUser; }
 }

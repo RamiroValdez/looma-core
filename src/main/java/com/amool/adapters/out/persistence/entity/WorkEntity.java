@@ -1,6 +1,7 @@
 
 package com.amool.adapters.out.persistence.entity;
 
+import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.HashSet;
@@ -31,14 +32,20 @@ public class WorkEntity {
     @Column(name = "state", nullable = false)
     private String state;
 
-    @Column(name = "price", nullable = false)
-    private Double price;
+    @Column(name = "price", nullable = false, precision = 10, scale = 2)
+    private BigDecimal price;
 
     @Column(name = "likes", nullable = false)
     private Integer likes;
 
     @Column(name = "publication_date")
     private LocalDate publicationDate;
+
+    @Column(name = "average_rating")
+    private Double averageRating = 0.0;
+
+    @Column(name = "rating_count")
+    private Integer ratingCount = 0;
 
     @ManyToOne
     @JoinColumn(name = "creator_id", nullable = false)
@@ -92,14 +99,20 @@ public class WorkEntity {
     public String getState() { return state; }
     public void setState(String state) { this.state = state; }
 
-    public Double getPrice() { return price; }
-    public void setPrice(Double price) { this.price = price; }
+    public BigDecimal getPrice() { return price; }
+    public void setPrice(BigDecimal price) { this.price = price; }
 
     public Integer getLikes() { return likes; }
     public void setLikes(Integer likes) { this.likes = likes; }
 
     public LocalDate getPublicationDate() { return publicationDate; }
     public void setPublicationDate(LocalDate publicationDate) { this.publicationDate = publicationDate; }
+
+    public Double getAverageRating() { return averageRating; }
+    public void setAverageRating(Double averageRating) { this.averageRating = averageRating; }
+
+    public Integer getRatingCount() { return ratingCount; }
+    public void setRatingCount(Integer ratingCount) { this.ratingCount = ratingCount; }
 
     public UserEntity getCreator() { return creator; }
     public void setCreator(UserEntity creator) { this.creator = creator; }

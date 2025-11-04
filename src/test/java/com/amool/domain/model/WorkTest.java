@@ -2,6 +2,7 @@ package com.amool.domain.model;
 
 import org.junit.jupiter.api.Test;
 
+import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -15,14 +16,14 @@ public class WorkTest {
         work.setId(1L);
         work.setTitle("Test Work");
         work.setDescription("Test Description");
-        work.setPrice(19.99);
+        work.setPrice(BigDecimal.valueOf(19.99));
         work.setLikes(100);
         work.setState("PUBLISHED");
 
         assertEquals(1L, work.getId());
         assertEquals("Test Work", work.getTitle());
         assertEquals("Test Description", work.getDescription());
-        assertEquals(19.99, work.getPrice());
+        assertEquals(BigDecimal.valueOf(19.99), work.getPrice());
         assertEquals(100, work.getLikes());
         assertEquals("PUBLISHED", work.getState());
     }

@@ -1,13 +1,14 @@
 package com.amool.hexagonal.adapters.out.payment;
 
+import com.amool.adapters.out.payment.MercadoPagoProviderAdapter;
 import com.amool.application.port.out.LoadChapterPort;
 import com.amool.application.port.out.ObtainWorkByIdPort;
 import com.amool.domain.model.Chapter;
 import com.amool.domain.model.User;
 import com.amool.domain.model.Work;
-import com.amool.hexagonal.application.port.out.UserQueryPort;
-import com.amool.hexagonal.domain.model.PaymentInitResult;
-import com.amool.hexagonal.domain.model.SubscriptionType;
+import com.amool.application.port.out.UserQueryPort;
+import com.amool.domain.model.PaymentInitResult;
+import com.amool.domain.model.SubscriptionType;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
@@ -84,7 +85,7 @@ public class MercadoPagoProviderAdapterTest {
     @Test
     void startCheckout_workValidatesOwnerAndTitle() {
         Work w = new Work();
-        w.setId(10L); w.setTitle("Mi Obra"); w.setPrice(2000.0);
+        w.setId(10L); w.setTitle("Mi Obra"); w.setPrice(BigDecimal.valueOf(2000.0));
         User creator = new User();
         creator.setId(99L);
         w.setCreator(creator);
@@ -102,7 +103,7 @@ public class MercadoPagoProviderAdapterTest {
     @Test
     void startCheckout_chapterResolvesWorkAndTitle() {
         Chapter c = new Chapter();
-        c.setId(7L); c.setTitle("Cap 1"); c.setPrice(300.0); c.setWorkId(10L);
+        c.setId(7L); c.setTitle("Cap 1"); c.setPrice(BigDecimal.valueOf(300.0)); c.setWorkId(10L);
         Mockito.when(loadChapterPort.loadChapterForEdit(7L)).thenReturn(java.util.Optional.of(c));
         Work w = new Work(); w.setId(10L); w.setTitle("Mi Obra"); User cr = new User(); cr.setId(55L); w.setCreator(cr);
         Mockito.when(obtainWorkByIdPort.obtainWorkById(10L)).thenReturn(java.util.Optional.of(w));

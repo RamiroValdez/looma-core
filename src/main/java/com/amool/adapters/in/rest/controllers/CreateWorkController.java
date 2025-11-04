@@ -43,13 +43,14 @@ public class CreateWorkController {
                             createWorkDto.categoryIds(),
                             createWorkDto.formatId(),
                             createWorkDto.originalLanguageId(),
+                            createWorkDto.price(),
                             createWorkDto.tagIds(),
                             createWorkDto.coverIaUrl(),
                             coverFile,
                             bannerFile,
                             principal.getUserId());
 
-                    return  ResponseEntity.ok(result);
+                    return ResponseEntity.ok(result);
 
                 } catch (Exception e) {
                     return ResponseEntity.badRequest().build();

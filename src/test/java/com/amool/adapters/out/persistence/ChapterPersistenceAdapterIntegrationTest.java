@@ -15,6 +15,7 @@ import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabas
 import org.springframework.test.context.TestPropertySource;
 import org.springframework.boot.autoconfigure.domain.EntityScan;
 
+import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.Instant;
@@ -65,7 +66,7 @@ class ChapterPersistenceAdapterIntegrationTest {
         work.setTitle("Work");
         work.setDescription("Desc");
         work.setState("DRAFT");
-        work.setPrice(0.0);
+        work.setPrice(BigDecimal.valueOf(0.0));
         work.setLikes(0);
         work.setPublicationDate(LocalDate.now());
         work.setCreator(user);
@@ -77,7 +78,7 @@ class ChapterPersistenceAdapterIntegrationTest {
         chapter.setWorkEntity(work);
         chapter.setLanguageEntity(language);
         chapter.setTitle("Cap 1");
-        chapter.setPrice(0.0);
+        chapter.setPrice(BigDecimal.valueOf(0.0));
         entityManager.persist(chapter);
 
         entityManager.flush();

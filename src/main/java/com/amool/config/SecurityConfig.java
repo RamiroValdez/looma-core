@@ -32,7 +32,7 @@ public class SecurityConfig {
                         .requestMatchers("/api/format/obtain-all").permitAll()
                         .requestMatchers("/api/explore").permitAll()
                         .requestMatchers("/api/my-works/**").authenticated()
-                        .requestMatchers("/api/works/**").authenticated()
+                        .requestMatchers("/api/works/**").permitAll()
                         .anyRequest().authenticated()
                 )
                 .addFilterBefore(new JwtAuthenticationFilter(jwtService), UsernamePasswordAuthenticationFilter.class);

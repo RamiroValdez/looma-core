@@ -8,6 +8,7 @@ import com.amool.adapters.out.persistence.entity.*;
 import com.amool.domain.model.Work;
 import org.junit.jupiter.api.Test;
 
+import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.HashSet;
@@ -41,7 +42,7 @@ public class WorkMapperTest {
         entity.setCover("cover.jpg");
         entity.setBanner("banner.jpg");
         entity.setState("PUBLISHED");
-        entity.setPrice(29.99);
+        entity.setPrice(BigDecimal.valueOf(29.99));
         entity.setLikes(500);
         entity.setPublicationDate(LocalDate.of(2024, 1, 15));
         entity.setCreator(creator);
@@ -60,7 +61,7 @@ public class WorkMapperTest {
         assertEquals("cover.jpg", work.getCover());
         assertEquals("banner.jpg", work.getBanner());
         assertEquals("PUBLISHED", work.getState());
-        assertEquals(29.99, work.getPrice());
+        assertEquals(BigDecimal.valueOf(29.99), work.getPrice());
         assertEquals(500, work.getLikes());
         assertEquals(LocalDate.of(2024, 1, 15), work.getPublicationDate());
         
