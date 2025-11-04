@@ -293,6 +293,23 @@ public class WorksPersistenceAdapter implements ObtainWorkByIdPort, WorkPort {
         return predicates;
     }
 
+    @Override
+    public List<Work> getWorksCurrentlyReading(Long userId) {
+        String jpql = "SELECT DISTINCT w FROM WorkEntity w " +
+                    "LEFT JOIN FETCH w.creator " +
+                    "LEFT JOIN FETCH w.formatEntity " +
+                    "LEFT JOIN FETCH w.categories " +
+                    "WHERE w.id IN " +
+                    "(SELECT KEY(rp).id FROM UserEntity u JOIN u.readingProgress rp WHERE u.id = :userId)";
+
+        List<WorkEntity> entities = entityManager.createQuery(jpql, WorkEntity.class)
+                .setParameter("userId", userId)
+                .getResultList();
+
+        return entities.stream()
+                .map(WorkMapper::toDomain)
+                .collect(Collectors.toList());
+}
 
 
 

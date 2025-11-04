@@ -35,6 +35,7 @@ public class UseCasesConfig {
     private final LoadUserPort loadUserPort;
     private final WorkPort workPort;
     private final SaveWorkPort saveWorkPort;
+    private final ReadingProgressPort readingProgressPort;
 
     private final ImagesService imagesService;
 
@@ -61,7 +62,8 @@ public class UseCasesConfig {
             LoadUserPort loadUserPort,
             ImagesService imagesService,
             WorkPort workPort,
-            SaveWorkPort saveWorkPort
+            SaveWorkPort saveWorkPort,
+            ReadingProgressPort readingProgressPort
             ) {
         this.awsS3Port = awsS3Port;
         this.authPort = authPort;
@@ -86,6 +88,7 @@ public class UseCasesConfig {
         this.imagesService = imagesService;
         this.workPort = workPort;
         this.saveWorkPort = saveWorkPort;
+        this.readingProgressPort = readingProgressPort;
     }
 
     @Bean
@@ -284,5 +287,15 @@ public class UseCasesConfig {
     @Bean
     public GetAllWorksUseCase getAllWorksUseCase() {
         return new GetAllWorksUseCase(workPort);
+    }
+
+    @Bean
+    public ObtainWorkListUseCase obtainWorkListUseCase() {
+        return new ObtainWorkListUseCase(workPort);
+    }
+
+    @Bean
+    public UpdateReadingProgressUseCase updateReadingProgressUseCase() {
+        return new UpdateReadingProgressUseCase(readingProgressPort);
     }
 }
