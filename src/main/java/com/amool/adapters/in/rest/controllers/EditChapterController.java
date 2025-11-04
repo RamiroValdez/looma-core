@@ -16,6 +16,7 @@ import org.springframework.web.multipart.MultipartFile;
 import com.amool.adapters.in.rest.dtos.ChapterResponseDto;
 import com.amool.adapters.in.rest.dtos.UpdateChapterRequest;
 import com.amool.adapters.in.rest.dtos.FileTextResponseDto;
+import com.amool.adapters.in.rest.dtos.UpdatePriceRequest;
 import org.springframework.http.ResponseEntity;
 
 import java.io.IOException;
@@ -92,6 +93,42 @@ public class EditChapterController {
 
         boolean updated = updateChapterUseCase.execute(chapterId, updateRequest);
         return updated ? ResponseEntity.ok("Capítulo actualizado") : ResponseEntity.notFound().build();
+    }
+
+    @PatchMapping("/price/{chapterId}")
+    @PreAuthorize("isAuthenticated()")
+    public ResponseEntity<?> updateChapterPrice(
+            @PathVariable Long chapterId,
+            @RequestBody UpdatePriceRequest request) {
+
+        Long userId = extractUserIdFromAuthentication();
+        if (userId == null) {
+            throw new SecurityException("Usuario no autenticado");
+        }
+
+        ValidateChapterAccessUseCase.ChapterAccessResult accessResult =
+                validateChapterAccessUseCase.validateAccess(chapterId, userId);
+
+        if (!accessResult.isChapterFound()) {
+            throw new java.util.NoSuchElementException("Capítulo no encontrado");
+        }
+
+        if (!accessResult.isAccessGranted()) {
+            throw new SecurityException("Acceso denegado");
+        }
+
+        if (request == null || request.price() == null || request.price().signum() < 0) {
+            throw new IllegalArgumentException("Precio inválido");
+        }
+
+        UpdateChapterRequest update = new UpdateChapterRequest();
+        update.setPrice(request.price());
+
+        boolean updated = updateChapterUseCase.execute(chapterId, update);
+        if (!updated) {
+            throw new java.util.NoSuchElementException("Capítulo no encontrado");
+        }
+        return ResponseEntity.noContent().build();
     }
 
     @PostMapping(value = "/import-text", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)

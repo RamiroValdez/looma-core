@@ -183,8 +183,8 @@ class ToggleWorkLikeTest {
 
     private void givenMultipleToggleScenario() {
         when(likePort.hasUserLikedWork(WORK_ID, USER_ID))
-                .thenReturn(false) // Primera llamada: no tiene like
-                .thenReturn(true); // Segunda llamada: ya tiene like
+                .thenReturn(false)  
+                .thenReturn(true);
         when(likePort.likeWork(WORK_ID, USER_ID)).thenReturn(1L);
         when(likePort.unlikeWork(WORK_ID, USER_ID)).thenReturn(0L);
     }

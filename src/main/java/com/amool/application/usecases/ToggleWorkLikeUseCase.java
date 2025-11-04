@@ -23,14 +23,11 @@ public class ToggleWorkLikeUseCase {
         Long likeCount;
         
         if (currentlyLiked) {
-            // Si ya tiene like, lo quitamos
             likeCount = likePort.unlikeWork(workId, userId);
         } else {
-            // Si no tiene like, lo agregamos
             likeCount = likePort.likeWork(workId, userId);
         }
         
-        // El estado se invierte después de la operación
         boolean likedByUser = !currentlyLiked;
         return new LikeResponseDto(workId, likeCount, likedByUser);
     }

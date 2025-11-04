@@ -214,7 +214,6 @@ public class WorksPersistenceAdapter implements ObtainWorkByIdPort, WorkPort {
             predicates.add(cb.greaterThanOrEqualTo(root.get("likes"), filter.getMinLikes()));
         }
 
-        // Filtro de rangos de episodios
         if (filter.getRangeEpisodes() != null && !filter.getRangeEpisodes().isEmpty()) {
             List<Predicate> episodePredicates = new ArrayList<>();
 
@@ -254,7 +253,6 @@ public class WorksPersistenceAdapter implements ObtainWorkByIdPort, WorkPort {
             }
         }
 
-        // Filtro de períodos de actualización (última publicación de capítulo)
         if (filter.getLastUpdated() != null && !filter.getLastUpdated().isEmpty()) {
             List<Predicate> updatePredicates = new ArrayList<>();
             java.time.LocalDate today = java.time.LocalDate.now();

@@ -11,11 +11,10 @@ import org.springframework.test.context.ActiveProfiles;
 class LoomaCoreApplicationTests {
 
     @Autowired
-    MongoTemplate mongoTemplate; // Para verificar que Mongo embebido arrancó
+    MongoTemplate mongoTemplate;
 
     @Test
     void contextLoads() {
-        // Solo para verificar que el contexto y Mongo se levantaron correctamente
         long count = mongoTemplate.getCollectionNames().size();
         System.out.println("Mongo collections: " + count);
     }
