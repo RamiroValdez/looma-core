@@ -15,5 +15,7 @@ public interface WorkPort {
      
      List<Work> getAllWorks();
 
+     List<Work> getWorksCurrentlyReading(Long userId);
+
     public Page<Work> findByFilters(WorkSearchFilter filter, Pageable pageable);
 }

@@ -1,6 +1,8 @@
 package com.amool.adapters.out.persistence.entity;
 
+import java.util.HashMap;
 import java.util.HashSet;
+import java.util.Map;
 import java.util.Set;
 import java.math.BigDecimal;
 
@@ -36,6 +38,15 @@ public class UserEntity {
     private BigDecimal money = BigDecimal.ZERO;
 
 
+    @ElementCollection
+    @CollectionTable(
+    name = "user_reading_progress",
+    joinColumns = @JoinColumn(name = "user_id")
+    )
+    @MapKeyJoinColumn(name = "work_id")
+    @Column(name = "chapter_id")
+    private Map<WorkEntity, Long> readingProgress = new HashMap<>();
+    
     @ManyToMany
     @JoinTable(name = "worksaved_user", joinColumns = @JoinColumn(name = "user_id"), inverseJoinColumns = @JoinColumn(name = "work_id"))
     private Set<WorkEntity> savedWorks = new HashSet<>();

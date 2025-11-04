@@ -34,6 +34,7 @@ public class UseCasesConfig {
     private final SaveWorkPort saveWorkPort;
     private final LikePort likePort;
     private final RatingPort ratingPort;
+    private final ReadingProgressPort readingProgressPort;
     private final ImagesService imagesService;
     private final LoadWorkOwnershipPort loadWorkOwnershipPort;
     private final SubscriptionQueryPort subscriptionQueryPort;
@@ -75,7 +76,8 @@ public class UseCasesConfig {
             PaymentRecordPort paymentRecordPort,
             SubscriptionPersistencePort subscriptionPersistencePort,
             RestTemplate restTemplate,
-            RatingPort ratingPort
+            RatingPort ratingPort,
+            ReadingProgressPort readingProgressPort
             ) {
         this.awsS3Port = awsS3Port;
         this.authPort = authPort;
@@ -109,6 +111,7 @@ public class UseCasesConfig {
         this.paymentRecordPort = paymentRecordPort;
         this.subscriptionPersistencePort = subscriptionPersistencePort;
         this.restTemplate = restTemplate;
+        this.readingProgressPort = readingProgressPort;
     }
 
     @Bean
@@ -236,7 +239,7 @@ public class UseCasesConfig {
     public GetUserByIdUseCase getUserByIdUseCase() {
         return new GetUserByIdUseCase(loadUserPort);
     }
-    
+
     @Bean
     public ObtainWorkByIdUseCase obtainWorkByIdUseCase() {
         return new ObtainWorkByIdUseCase(
@@ -378,5 +381,15 @@ public class UseCasesConfig {
                 loadChapterPort,
                 subscribeUserUseCase()
         );
+    }
+
+    @Bean
+    public ObtainWorkListUseCase obtainWorkListUseCase() {
+        return new ObtainWorkListUseCase(workPort);
+    }
+
+    @Bean
+    public UpdateReadingProgressUseCase updateReadingProgressUseCase() {
+        return new UpdateReadingProgressUseCase(readingProgressPort);
     }
 }
