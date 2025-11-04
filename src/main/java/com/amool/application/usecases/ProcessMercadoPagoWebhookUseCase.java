@@ -60,7 +60,6 @@ public class ProcessMercadoPagoWebhookUseCase {
             return ProcessMercadoPagoWebhookResult.error("MercadoPago access token is not configured");
         }
 
-        // Obtener datos del pago desde MercadoPago API si no se proporcionaron
         Map<?, ?> payment = paymentData;
         if (payment == null && paymentId != null) {
             try {
@@ -70,12 +69,10 @@ public class ProcessMercadoPagoWebhookUseCase {
             }
         }
 
-        // Validar estado del pago
         if (payment == null || !isPaymentApproved(payment)) {
             return ProcessMercadoPagoWebhookResult.ignored("Payment not approved or not found");
         }
 
-        // Obtener external_reference del pago si no se proporcionó
         if (externalReference == null) {
             Object externalRefObj = payment.get("external_reference");
             externalReference = externalRefObj == null ? null : externalRefObj.toString();
@@ -85,7 +82,6 @@ public class ProcessMercadoPagoWebhookUseCase {
             return ProcessMercadoPagoWebhookResult.error("Payment missing external_reference");
         }
 
-        // Decodificar referencia externa
         DecodedRef ref;
         try {
             ref = decodeExternalReference(externalReference);
@@ -95,16 +91,13 @@ public class ProcessMercadoPagoWebhookUseCase {
 
         String finalPaymentId = paymentId != null ? paymentId : "manual-" + System.currentTimeMillis();
 
-        // Procesar pago solo si es la primera vez
         boolean firstTime = paymentAuditPort.markProcessedIfFirst(finalPaymentId);
         if (firstTime) {
             processAuthorPayout(payment, ref);
         }
 
-        // Guardar registro de pago
         savePaymentRecord(finalPaymentId, payment, ref);
 
-        // Crear suscripción
         subscribeUserUseCase.execute(ref.userId, ref.type, ref.targetId);
 
         return ProcessMercadoPagoWebhookResult.success();
@@ -138,7 +131,6 @@ public class ProcessMercadoPagoWebhookUseCase {
                 userBalancePort.addMoney(authorId, payout);
             }
         } catch (Exception ignore) {
-            // Fallo silencioso para el payout del autor
         }
     }
 
@@ -178,7 +170,6 @@ public class ProcessMercadoPagoWebhookUseCase {
             
             paymentRecordPort.save(rec);
         } catch (Exception ignore) {
-            // Fallo silencioso para el registro de pago
         }
     }
 

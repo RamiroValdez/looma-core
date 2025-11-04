@@ -21,7 +21,6 @@ public class UpdateChapterContentUseCase {
 
         Long workIdLong = Long.valueOf(workId);
 
-        // Verificar propiedad
         boolean isOwner = loadWorkOwnershipPort.isOwner(workIdLong, userId);
         if (!isOwner) {
             throw new SecurityException("User is not the owner of this work");

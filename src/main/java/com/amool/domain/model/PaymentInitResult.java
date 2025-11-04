@@ -28,7 +28,6 @@ public class PaymentInitResult {
         return preferenceId;
     }
 
-    // Aliases for backwards compatibility
     public String getCheckoutUrl() {
         return redirectUrl;
     }

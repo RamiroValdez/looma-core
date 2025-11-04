@@ -51,7 +51,6 @@ class ChatServiceTest {
         assertEquals("Hola", convo.get(0).getContent());
         assertEquals("Respuesta simulada", convo.get(1).getContent());
 
-        // Cambiar a verificaciones más flexibles
         verify(mockChatClient, atLeastOnce()).prompt();
         verify(mockChatClient.prompt(), atLeastOnce()).user(anyString());
         verify(mockChatClient.prompt().user(anyString()), atLeastOnce()).call();

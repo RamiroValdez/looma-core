@@ -28,7 +28,6 @@ public class DeleteChapterUseCase {
     }
 
     public void execute(Long workId, Long chapterId, Long userId) {
-        // Validar propiedad de la obra
         if (!loadWorkOwnershipPort.isOwner(workId, userId)) {
             throw new SecurityException("El usuario no es propietario de la obra");
         }

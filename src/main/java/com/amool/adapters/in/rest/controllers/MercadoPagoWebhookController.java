@@ -37,7 +37,6 @@ public class MercadoPagoWebhookController {
 
     private ResponseEntity<?> process(String type, String topic, String id, Map<String, Object> body) {
         try {
-            // Extraer el payment ID del webhook
             ExtractPaymentIdFromWebhookUseCase.ExtractPaymentIdResult extractResult =
                 extractPaymentIdUseCase.execute(id, body);
 
@@ -45,7 +44,6 @@ public class MercadoPagoWebhookController {
                 return ResponseEntity.badRequest().body(extractResult.getErrorMessage());
             }
 
-            // Procesar el webhook de MercadoPago
             ProcessMercadoPagoWebhookUseCase.ProcessMercadoPagoWebhookResult result =
                 processMercadoPagoWebhookUseCase.execute(
                     extractResult.getPaymentId(),
