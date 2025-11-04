@@ -25,7 +25,7 @@ public class WorkMapper {
         work.setChapters(ChapterMapper.toDomainList(entity.getChapters()));
         work.setCategories(CategoryMapper.toDomainList(entity.getCategories()));
         work.setTags(TagMapper.toDomainSet(entity.getTags()));
-
+        work.setAverageRating(entity.getAverageRating());
         return work;
     }
 

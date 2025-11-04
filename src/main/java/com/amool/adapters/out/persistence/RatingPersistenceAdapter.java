@@ -5,6 +5,7 @@ import com.amool.application.port.out.RatingPort;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.PersistenceContext;
 import jakarta.persistence.TypedQuery;
+import jakarta.transaction.Transactional;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
@@ -21,7 +22,7 @@ public class RatingPersistenceAdapter implements RatingPort {
     private EntityManager entityManager;
 
     @Override
-    @jakarta.transaction.Transactional
+    @Transactional
     public double rateWork(Long workId, Long userId, double rating) {
         TypedQuery<RatingEntity> query = entityManager.createQuery(
             "SELECT r FROM RatingEntity r WHERE r.workId = :workId AND r.userId = :userId", 
@@ -68,7 +69,7 @@ public class RatingPersistenceAdapter implements RatingPort {
     }
 
     @Override
-    public Page<RatingDto> getWorkRatings(Long workId, Pageable pageable) {
+    public Integer getTotalRatingsCount(Long workId) {
         Long total = entityManager.createQuery(
             "SELECT COUNT(r) FROM RatingEntity r WHERE r.workId = :workId", 
             Long.class
@@ -76,6 +77,11 @@ public class RatingPersistenceAdapter implements RatingPort {
         .setParameter("workId", workId)
         .getSingleResult();
 
+        return total.intValue();
+    }
+
+    @Override
+    public Page<RatingDto> getWorkRatings(Long workId, Pageable pageable) {
         TypedQuery<RatingEntity> query = entityManager.createQuery(
             "SELECT r FROM RatingEntity r WHERE r.workId = :workId", 
             RatingEntity.class
@@ -88,10 +94,11 @@ public class RatingPersistenceAdapter implements RatingPort {
             .map(r -> new RatingDto(r.getUserId(), r.getRating()))
             .collect(Collectors.toList());
 
+        Integer total = getTotalRatingsCount(workId);
         return new PageImpl<>(ratings, pageable, total);
     }
 
-    @jakarta.transaction.Transactional
+    @Transactional
     protected void updateWorkAverageRating(Long workId) {
         Double averageRating = getAverageRating(workId);
         Long ratingCount = entityManager.createQuery(

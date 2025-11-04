@@ -7,7 +7,7 @@ import java.util.List;
 public record RatingListResponse(
     @JsonProperty("work_id") Long workId,
     @JsonProperty("average_rating") Double averageRating,
-    @JsonProperty("total_ratings") Long totalRatings,
+    @JsonProperty("total_ratings") Integer totalRatings,
     @JsonProperty("ratings") List<RatingDto> ratings
 ) {
     public record RatingDto(

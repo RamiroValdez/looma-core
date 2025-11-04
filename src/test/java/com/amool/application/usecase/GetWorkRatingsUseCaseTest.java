@@ -40,6 +40,7 @@ public class GetWorkRatingsUseCaseTest {
         Page<RatingDto> ratingsPage = new PageImpl<>(ratings, pageable, 2);
 
         when(ratingPort.getAverageRating(workId)).thenReturn(averageRating);
+        when(ratingPort.getTotalRatingsCount(workId)).thenReturn(2);
         when(ratingPort.getWorkRatings(workId, pageable)).thenReturn(ratingsPage);
 
         var result = getWorkRatingsUseCase.execute(workId, pageable);
@@ -54,6 +55,7 @@ public class GetWorkRatingsUseCaseTest {
         );
 
         verify(ratingPort).getAverageRating(workId);
+        verify(ratingPort).getTotalRatingsCount(workId);
         verify(ratingPort).getWorkRatings(workId, pageable);
     }
 
@@ -64,6 +66,7 @@ public class GetWorkRatingsUseCaseTest {
         Page<RatingDto> emptyPage = Page.empty(pageable);
 
         when(ratingPort.getAverageRating(workId)).thenReturn(null);
+        when(ratingPort.getTotalRatingsCount(workId)).thenReturn(0);
         when(ratingPort.getWorkRatings(workId, pageable)).thenReturn(emptyPage);
 
         var result = getWorkRatingsUseCase.execute(workId, pageable);
@@ -76,6 +79,7 @@ public class GetWorkRatingsUseCaseTest {
         );
 
         verify(ratingPort).getAverageRating(workId);
+        verify(ratingPort).getTotalRatingsCount(workId);
         verify(ratingPort).getWorkRatings(workId, pageable);
     }
 
@@ -92,6 +96,7 @@ public class GetWorkRatingsUseCaseTest {
         Page<RatingDto> secondPageResult = new PageImpl<>(secondPageRatings, secondPage, 2);
 
         when(ratingPort.getAverageRating(workId)).thenReturn(4.5);
+        when(ratingPort.getTotalRatingsCount(workId)).thenReturn(2);
         when(ratingPort.getWorkRatings(workId, firstPage)).thenReturn(firstPageResult);
         when(ratingPort.getWorkRatings(workId, secondPage)).thenReturn(secondPageResult);
 
@@ -106,6 +111,7 @@ public class GetWorkRatingsUseCaseTest {
         );
 
         verify(ratingPort, times(2)).getAverageRating(workId);
+        verify(ratingPort, times(2)).getTotalRatingsCount(workId);
         verify(ratingPort).getWorkRatings(workId, firstPage);
         verify(ratingPort).getWorkRatings(workId, secondPage);
     }
