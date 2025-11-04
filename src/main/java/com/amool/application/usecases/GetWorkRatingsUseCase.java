@@ -15,25 +15,19 @@ public class GetWorkRatingsUseCase {
         this.ratingPort = ratingPort;
     }
 
-    public WorkRatings execute(Long workId, Pageable pageable) {
-        Double averageRating = ratingPort.getAverageRating(workId);
-        Page<RatingDto> ratingsPage = ratingPort.getWorkRatings(workId, pageable);
-        
-        return new WorkRatings(
-            workId,
-            averageRating,
-            ratingsPage.getTotalElements(),
-            ratingsPage.getContent()
-        );
+    public Integer execute(Long workId, Pageable pageable) {
+        Integer totalRatings = ratingPort.getTotalRatingsCount(workId);
+
+        return totalRatings;
     }
 
     public static final class WorkRatings {
         private final Long workId;
         private final Double averageRating;
-        private final long totalRatings;
+        private final Integer totalRatings;
         private final List<RatingDto> ratings;
 
-        public WorkRatings(Long workId, Double averageRating, long totalRatings, List<RatingDto> ratings) {
+        public WorkRatings(Long workId, Double averageRating, Integer totalRatings, List<RatingDto> ratings) {
             this.workId = workId;
             this.averageRating = averageRating;
             this.totalRatings = totalRatings;
@@ -48,7 +42,7 @@ public class GetWorkRatingsUseCase {
             return averageRating;
         }
 
-        public long getTotalRatings() {
+        public Integer getTotalRatings() {
             return totalRatings;
         }
 

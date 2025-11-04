@@ -38,6 +38,7 @@ public class WorkMapper {
             dto.setPublicationDate(java.sql.Date.valueOf(work.getPublicationDate()));
         }
         dto.setLikedByUser(work.getLikedByUser());
+        dto.setAverageRating(work.getAverageRating());
         return dto;
     }
 

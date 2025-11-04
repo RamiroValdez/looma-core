@@ -20,7 +20,7 @@ public class WorkResponseDto {
     List<ChapterDto> chapters;
     List<CategoryDto> categories;
     List<TagDto> tags;
-
+    Double averageRating;
     Boolean subscribedToAuthor;
     Boolean subscribedToWork;
     Boolean likedByUser;
@@ -128,4 +128,12 @@ public class WorkResponseDto {
     public void setSubscribedToWork(Boolean subscribedToWork) { this.subscribedToWork = subscribedToWork; }
     public void setUnlockedChapters(List<Long> unlockedChapters) { this.unlockedChapters = unlockedChapters; }
     public void setLikedByUser(Boolean likedByUser) { this.likedByUser = likedByUser; }
+
+    public Double getAverageRating() {
+        return averageRating;
+    }
+
+    public void setAverageRating(Double averageRating) {
+        this.averageRating = averageRating;
+    }
 }

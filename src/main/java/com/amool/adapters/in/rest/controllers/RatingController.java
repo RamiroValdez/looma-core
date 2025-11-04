@@ -18,6 +18,8 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.Optional;
+
 @RestController
 @RequestMapping("/api/works/{workId}/ratings")
 @RequiredArgsConstructor
@@ -43,9 +45,9 @@ public class RatingController {
             @AuthenticationPrincipal JwtUserPrincipal userPrincipal) {
         
         Long userId = userPrincipal.getUserId();
-        double ratingValue = request.getRating();
+        Double ratingValue = request.getRating();
         
-        double averageRating = rateWorkUseCase.execute(workId, userId, ratingValue);
+        Double averageRating = rateWorkUseCase.execute(workId, userId, ratingValue);
         
         RatingResponse response = new RatingResponse(
             workId,
@@ -57,56 +59,25 @@ public class RatingController {
         return ResponseEntity.ok(response);
     }
 
-    @Operation(summary = "Obtener la calificación del usuario", 
-              description = "Obtiene la calificación que el usuario autenticado le dio a una obra específica")
-    @ApiResponses(value = {
-        @ApiResponse(responseCode = "200", description = "Calificación encontrada"),
-        @ApiResponse(responseCode = "404", description = "Calificación no encontrada")
-    })
-    @GetMapping("/me")
-    public ResponseEntity<RatingResponse> getUserRating(
-            @Parameter(description = "ID de la obra") 
-            @PathVariable Long workId,
-            @AuthenticationPrincipal JwtUserPrincipal userPrincipal) {
-        
-        return getUserRatingUseCase.execute(workId, userPrincipal.getUserId())
-                .map(rating -> {
-                    var workRatings = getWorkRatingsUseCase.execute(workId, Pageable.unpaged());
-                    return new RatingResponse(
-                        workId,
-                        userPrincipal.getUserId(),
-                        rating,
-                        workRatings.getAverageRating()
-                    );
-                })
-                .map(ResponseEntity::ok)
-                .orElse(ResponseEntity.notFound().build());
-    }
-
-    @Operation(summary = "Obtener todas las calificaciones de una obra", 
-              description = "Obtiene una lista paginada de todas las calificaciones de una obra específica")
-    @ApiResponses(value = {
-        @ApiResponse(responseCode = "200", description = "Calificaciones obtenidas exitosamente")
-    })
     @GetMapping
-    public ResponseEntity<RatingListResponse> getWorkRatings(
+    public ResponseEntity<Integer> getWorkRatings(
             @Parameter(description = "ID de la obra") 
             @PathVariable Long workId,
             @PageableDefault(size = 10) Pageable pageable) {
         
-        var workRatings = getWorkRatingsUseCase.execute(workId, pageable);
+        Integer workRatings = getWorkRatingsUseCase.execute(workId, pageable);
         
-        var ratings = workRatings.getRatings().stream()
-                .map(dto -> new RatingListResponse.RatingDto(dto.userId(), dto.rating()))
-                .toList();
-        
-        var response = new RatingListResponse(
-            workId,
-            workRatings.getAverageRating(),
-            workRatings.getTotalRatings(),
-            ratings
-        );
-        
-        return ResponseEntity.ok(response);
+        return ResponseEntity.ok(workRatings);
+    }
+
+    @GetMapping("/me")
+    public ResponseEntity<Double> getUserRating(
+            @Parameter(description = "ID de la obra")
+            @PathVariable Long workId,
+            @AuthenticationPrincipal JwtUserPrincipal userPrincipal) {
+
+        Optional<Double> result = getUserRatingUseCase.execute(workId, userPrincipal.getUserId());
+
+        return ResponseEntity.ok(result.orElse(null));
     }
 }

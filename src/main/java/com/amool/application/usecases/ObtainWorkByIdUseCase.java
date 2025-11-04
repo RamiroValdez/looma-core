@@ -32,7 +32,6 @@ public class ObtainWorkByIdUseCase {
                 work.setCover(this.awsS3Port.obtainPublicUrl(work.getCover()));
                 work.getCategories().sort(Comparator.comparing(Category::getName));
                 work.setLikedByUser(likePort.isWorkLikedByUser(work.getId(), userId));
-
                 work.getChapters().forEach(chapter -> {
                     chapter.setLikedByUser(likePort.isChapterLikedByUser(chapter.getId(), userId));
                 });
