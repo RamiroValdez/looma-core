@@ -236,18 +236,13 @@ public class UseCasesConfig {
     public GetUserByIdUseCase getUserByIdUseCase() {
         return new GetUserByIdUseCase(loadUserPort);
     }
-
-    @Bean
-    public CheckWorkLikesUseCase checkWorkLikesUseCase() {
-        return new CheckWorkLikesUseCase(likePort);
-    }
     
     @Bean
     public ObtainWorkByIdUseCase obtainWorkByIdUseCase() {
         return new ObtainWorkByIdUseCase(
                 obtainWorkByIdPort,
                 awsS3Port,
-                checkWorkLikesUseCase());
+                likePort);
     }
 
     @Bean
