@@ -14,9 +14,9 @@ jobs:
       postgres:
         image: postgres:15
         env:
-          POSTGRES_DB: testdb
-          POSTGRES_USER: postgres
-          POSTGRES_PASSWORD: postgres
+          POSTGRES_DB: looma_dev
+          POSTGRES_USER: dev_user
+          POSTGRES_PASSWORD: 1234
         ports:
           - 5432:5432
         options: >-
@@ -78,13 +78,11 @@ jobs:
       - name: Run tests
         env:
           SPRING_PROFILES_ACTIVE: test
-          SPRING_DATA_MONGODB_URI: mongodb://localhost:27017/testdb
-          SPRING_TEST_DATABASE_REPLACE: NONE
-          SPRING_DATASOURCE_URL: jdbc:postgresql://localhost:5432/testdb
-          SPRING_DATASOURCE_USERNAME: postgres
-          SPRING_DATASOURCE_PASSWORD: postgres
+          SPRING_DATASOURCE_URL: jdbc:postgresql://localhost:5432/looma_dev
+          SPRING_DATASOURCE_USERNAME: dev_user
+          SPRING_DATASOURCE_PASSWORD: 1234
+          SPRING_DATA_MONGODB_URI: mongodb://localhost:27017/looma_mongo
           SPRING_JPA_HIBERNATE_DDL_AUTO: create-drop
-          SPRING_JPA_DATABASE_PLATFORM: org.hibernate.dialect.PostgreSQLDialect
           SPRING_AI_OPENAI_ENABLED: false
           OPENAI_API_KEY: dummy
         run: |
