@@ -36,8 +36,8 @@ Diseñado con Arquitectura Hexagonal separada entre aplicación, dominio, adapta
 Deben usar siempre el perfil `development` para desarrollo local.
 
 ## Acerca de la estructura de ramas
-Main -> Producción
-Development -> Nodo central de cualquier desarrollo.
-Feature/xxx -> Ramas centradas en desarrollos nuevos.
-Fix/xxx -> Ramas de solución de errores.
+- Main -> Producción
+- Development -> Nodo central de cualquier desarrollo.
+- Feature/xxx -> Ramas centradas en desarrollos nuevos.
+- Fix/xxx -> Ramas de solución de errores.
 
