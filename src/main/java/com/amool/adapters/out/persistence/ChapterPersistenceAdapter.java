@@ -5,6 +5,7 @@ import com.amool.adapters.out.persistence.entity.LanguageEntity;
 import com.amool.adapters.out.persistence.entity.WorkEntity;
 import com.amool.adapters.out.persistence.mappers.ChapterMapper;
 import com.amool.application.port.out.LoadChapterPort;
+import com.amool.application.port.out.ObtainChapterByIdPort;
 import com.amool.application.port.out.SaveChapterPort;
 import com.amool.application.port.out.DeleteChapterPort;
 import com.amool.application.port.out.UpdateChapterPort;
@@ -23,7 +24,7 @@ import java.util.Optional;
 
 @Component
 @RequiredArgsConstructor
-public class ChapterPersistenceAdapter implements LoadChapterPort, SaveChapterPort, DeleteChapterPort, UpdateChapterPort, UpdateChapterStatusPort, FindChaptersDueForPublicationPort {
+public class ChapterPersistenceAdapter implements LoadChapterPort, SaveChapterPort, DeleteChapterPort, UpdateChapterPort, UpdateChapterStatusPort, FindChaptersDueForPublicationPort, ObtainChapterByIdPort {
 
     @PersistenceContext
     private EntityManager entityManager;
@@ -213,4 +214,12 @@ public class ChapterPersistenceAdapter implements LoadChapterPort, SaveChapterPo
         }
         return result;
     }
+
+    @Override
+    public Optional<Chapter> obtainChapterById(Long chapterId) {
+        return Optional.ofNullable(entityManager.find(ChapterEntity.class, chapterId))
+                .map(ChapterMapper::toDomain);
+    }
+
+    
 }

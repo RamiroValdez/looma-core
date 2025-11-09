@@ -11,9 +11,9 @@ public class Notification {
     private LocalDateTime createdAt; 
     private NotificationType type;
 
-    private String relatedWork;   
-    private String relatedChapter; 
-    private String relatedUser;
+    private Long relatedWork;   
+    private Long relatedChapter; 
+    private Long relatedUser;
 
     public enum NotificationType {
         WORK_UPDATED,              
@@ -41,13 +41,13 @@ public class Notification {
     public NotificationType getType() { return type; }
     public void setType(NotificationType type) { this.type = type; }
     
-    public String getRelatedWork() { return relatedWork; }
-    public void setRelatedWork(String relatedWork) { this.relatedWork = relatedWork; }
+    public Long getRelatedWork() { return relatedWork; }
+    public void setRelatedWork(Long relatedWork) { this.relatedWork = relatedWork; }
     
-    public String getRelatedChapter() { return relatedChapter; }
-    public void setRelatedChapter(String relatedChapter) { this.relatedChapter = relatedChapter; }
+    public Long getRelatedChapter() { return relatedChapter; }
+    public void setRelatedChapter(Long relatedChapter) { this.relatedChapter = relatedChapter; }
     
-    public String getRelatedUser() { return relatedUser; }
-    public void setRelatedUser(String relatedUser) { this.relatedUser = relatedUser; }
+    public Long getRelatedUser() { return relatedUser; }
+    public void setRelatedUser(Long relatedUser) { this.relatedUser = relatedUser; }
     
 }

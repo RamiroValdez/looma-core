@@ -44,6 +44,7 @@ public class UseCasesConfig {
     private final SubscriptionPersistencePort subscriptionPersistencePort;
     private final RestTemplate restTemplate;
     private final NotificationPort notificationPort;
+    private final ObtainChapterByIdPort obtainChapterByIdPort;
 
     public UseCasesConfig(
             AwsS3Port awsS3Port,
@@ -79,7 +80,8 @@ public class UseCasesConfig {
             RestTemplate restTemplate,
             RatingPort ratingPort,
             ReadingProgressPort readingProgressPort,
-            NotificationPort notificationPort
+            NotificationPort notificationPort,
+            ObtainChapterByIdPort obtainChapterByIdPort
             ) {
         this.awsS3Port = awsS3Port;
         this.authPort = authPort;
@@ -115,6 +117,7 @@ public class UseCasesConfig {
         this.restTemplate = restTemplate;
         this.readingProgressPort = readingProgressPort;
         this.notificationPort = notificationPort;
+        this.obtainChapterByIdPort = obtainChapterByIdPort;
     }
 
     @Bean
@@ -406,7 +409,7 @@ public class UseCasesConfig {
 
     @Bean
     public SaveNotificationUseCase saveNotificationUseCase() {
-        return new SaveNotificationUseCase(notificationPort);
+        return new SaveNotificationUseCase(notificationPort, obtainWorkByIdPort, obtainChapterByIdPort, loadUserPort);
     }
     
     @Bean

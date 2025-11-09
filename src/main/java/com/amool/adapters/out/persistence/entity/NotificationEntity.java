@@ -37,13 +37,13 @@ public class NotificationEntity {
     private NotificationType type;
 
     @Column(name = "related_work")
-    private String relatedWork;
+    private Long relatedWork;
 
     @Column(name = "related_chapter")
-    private String relatedChapter;
+    private Long relatedChapter;
 
     @Column(name = "related_user")
-    private String relatedUser;
+    private Long relatedUser;
 
     @PrePersist
     protected void onCreate() {
