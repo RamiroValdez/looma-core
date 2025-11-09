@@ -46,4 +46,16 @@ public class NotificationPersistenceAdapter implements NotificationPort {
             return false;
         }
     }
+
+    @Override
+    @Transactional
+    public void updateNotificationRead(Long notificationId) {
+        String jpql = "UPDATE NotificationEntity n " +
+                     "SET n.read = true " +
+                     "WHERE n.id = :notificationId";
+        
+        entityManager.createQuery(jpql)
+            .setParameter("notificationId", notificationId)
+            .executeUpdate();
+    }
 }

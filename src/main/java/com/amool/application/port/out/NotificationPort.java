@@ -10,4 +10,6 @@ public interface NotificationPort {
 
     boolean saveNotification(Notification notification);
 
+    void updateNotificationRead(Long notificationId);
+
 }

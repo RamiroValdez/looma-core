@@ -416,4 +416,9 @@ public class UseCasesConfig {
     public ObtainNotificationsUseCase obtainNotificationsUseCase() {
         return new ObtainNotificationsUseCase(notificationPort);
     }
+
+    @Bean
+    public UpdateNotificationReadUseCase updateNotificationReadUseCase() {
+        return new UpdateNotificationReadUseCase(notificationPort);
+    }
 }
