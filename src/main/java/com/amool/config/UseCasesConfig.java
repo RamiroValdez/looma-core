@@ -405,6 +405,11 @@ public class UseCasesConfig {
     }
 
     @Bean
+    public SaveNotificationUseCase saveNotificationUseCase() {
+        return new SaveNotificationUseCase(notificationPort);
+    }
+    
+    @Bean
     public ObtainNotificationsUseCase obtainNotificationsUseCase() {
         return new ObtainNotificationsUseCase(notificationPort);
     }

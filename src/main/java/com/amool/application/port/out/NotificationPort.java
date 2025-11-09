@@ -8,4 +8,6 @@ public interface NotificationPort {
 
     List<Notification> getNotifications(Long userId);
 
+    boolean saveNotification(Notification notification);
+
 }

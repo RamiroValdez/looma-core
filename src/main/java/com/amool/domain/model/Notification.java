@@ -17,7 +17,7 @@ public class Notification {
 
     public enum NotificationType {
         WORK_UPDATED,              
-        NEW_CHAPTER_PUBLISHED,     
+        NEW_WORK_PUBLISHED,     
         NEW_WORK_SUBSCRIBER,       
         NEW_AUTHOR_SUBSCRIBER,     
         NEW_CHAPTER_SUBSCRIBER    

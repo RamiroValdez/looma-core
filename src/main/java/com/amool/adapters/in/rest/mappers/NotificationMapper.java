@@ -14,6 +14,7 @@ public class NotificationMapper {
         
         NotificationDto dto = new NotificationDto();
         dto.setId(notification.getId());
+        dto.setUserId(notification.getUserId());
         dto.setMessage(notification.getMessage());
         dto.setRead(notification.isRead());
         dto.setCreatedAt(notification.getCreatedAt());
@@ -23,5 +24,24 @@ public class NotificationMapper {
         dto.setRelatedUser(notification.getRelatedUser());
         
         return dto;
+    }
+
+    public static Notification toDomain(NotificationDto notificationDto) {
+        if (notificationDto == null) {
+            return null;
+        }
+        
+        Notification notification = new Notification();
+        notification.setId(notificationDto.getId());
+        notification.setUserId(notificationDto.getUserId());
+        notification.setMessage(notificationDto.getMessage());
+        notification.setRead(notificationDto.isRead());
+        notification.setCreatedAt(notificationDto.getCreatedAt());
+        notification.setType(notificationDto.getType());
+        notification.setRelatedWork(notificationDto.getRelatedWork());
+        notification.setRelatedChapter(notificationDto.getRelatedChapter());
+        notification.setRelatedUser(notificationDto.getRelatedUser());
+        
+        return notification;
     }
 }

@@ -9,6 +9,8 @@ import com.amool.domain.model.Notification;
 
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.PersistenceContext;
+import jakarta.transaction.Transactional;
+
 import org.springframework.stereotype.Component;
 
 @Component
@@ -31,5 +33,17 @@ public class NotificationPersistenceAdapter implements NotificationPort {
         return entities.stream()
                 .map(NotificationMapper::toDomain)
                 .toList();
+    }
+
+    @Override
+    @Transactional
+    public boolean saveNotification(Notification notification) {
+        try{
+            NotificationEntity notificationEntity = NotificationMapper.toEntity(notification);
+            entityManager.persist(notificationEntity);
+            return true;
+        }catch(Exception e){
+            return false;
+        }
     }
 }
