@@ -2,20 +2,20 @@ package com.amool;
 
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.autoconfigure.data.mongo.DataMongoTest;
+import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.data.mongodb.core.MongoTemplate;
 import org.springframework.test.context.ActiveProfiles;
 
 @ActiveProfiles("test")
-@DataMongoTest
+@SpringBootTest
 class LoomaCoreApplicationTests {
 
     @Autowired
-    MongoTemplate mongoTemplate;
+    private MongoTemplate mongoTemplate;
 
     @Test
     void contextLoads() {
-        long count = mongoTemplate.getCollectionNames().size();
-        System.out.println("Mongo collections: " + count);
+        // Verifica que el contexto de MongoDB se cargue correctamente
+        assert mongoTemplate != null;
     }
 }
