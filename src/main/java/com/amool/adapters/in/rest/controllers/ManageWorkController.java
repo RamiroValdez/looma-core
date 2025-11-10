@@ -2,14 +2,17 @@ package com.amool.adapters.in.rest.controllers;
 
 import com.amool.adapters.in.rest.dtos.CreateEmptyChapterRequest;
 import com.amool.adapters.in.rest.dtos.CreateEmptyChapterResponse;
+import com.amool.adapters.in.rest.dtos.UpdatePriceRequest;
 import com.amool.adapters.in.rest.dtos.WorkResponseDto;
 import com.amool.adapters.in.rest.mappers.WorkMapper;
 import com.amool.application.usecases.CreateEmptyChapterUseCase;
 import com.amool.application.usecases.GetWorkPermissionsUseCase;
 import com.amool.application.usecases.ObtainWorkByIdUseCase;
+import com.amool.application.usecases.UpdateWorkPriceUseCase;
 import com.amool.domain.model.Chapter;
 import com.amool.domain.model.WorkPermissions;
 import com.amool.security.JwtUserPrincipal;
+import jakarta.validation.Valid;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.Authentication;
@@ -24,13 +27,16 @@ public class ManageWorkController {
     private final ObtainWorkByIdUseCase obtainWorkByIdUseCase;
     private final CreateEmptyChapterUseCase createEmptyChapterUseCase;
     private final GetWorkPermissionsUseCase getWorkPermissionsUseCase;
+    private final UpdateWorkPriceUseCase updateWorkPriceUseCase;
 
     public ManageWorkController(ObtainWorkByIdUseCase obtainWorkByIdUseCase,
                                 CreateEmptyChapterUseCase createEmptyChapterUseCase,
-                                GetWorkPermissionsUseCase getWorkPermissionsUseCase) {
+                                GetWorkPermissionsUseCase getWorkPermissionsUseCase,
+                                UpdateWorkPriceUseCase updateWorkPriceUseCase) {
         this.obtainWorkByIdUseCase = obtainWorkByIdUseCase;
         this.createEmptyChapterUseCase = createEmptyChapterUseCase;
         this.getWorkPermissionsUseCase = getWorkPermissionsUseCase;
+        this.updateWorkPriceUseCase = updateWorkPriceUseCase;
     }
 
     @GetMapping("/{workId}")
@@ -68,11 +74,20 @@ public class ManageWorkController {
 
             CreateEmptyChapterResponse response = new CreateEmptyChapterResponse();
             response.setChapterId(chapter.getId());
-            response.setContentType(request.getContentType());
             return ResponseEntity.ok(response);
 
         } catch (Exception e) {
             return ResponseEntity.badRequest().build();
         }
+    }
+
+    @PatchMapping("/{workId}/price")
+    @PreAuthorize("isAuthenticated()")
+    public ResponseEntity<?> updateWorkPrice(@PathVariable Long workId,
+                                             @RequestBody @Valid UpdatePriceRequest request,
+                                             @AuthenticationPrincipal JwtUserPrincipal user) {
+        Long userId = (user != null ? user.getUserId() : null);
+        updateWorkPriceUseCase.execute(workId, request.price(), userId);
+        return ResponseEntity.noContent().build();
     }
 }

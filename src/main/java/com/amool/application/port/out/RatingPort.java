@@ -13,6 +13,8 @@ public interface RatingPort {
     
     Double getAverageRating(Long workId);
     
+    Integer getTotalRatingsCount(Long workId);
+
     Page<RatingDto> getWorkRatings(Long workId, Pageable pageable);
     
     record RatingDto(Long userId, Double rating) {}
