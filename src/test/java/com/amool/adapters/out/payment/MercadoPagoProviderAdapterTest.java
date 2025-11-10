@@ -1,4 +1,4 @@
-package com.amool.hexagonal.adapters.out.payment;
+package com.amool.adapters.out.payment;
 
 import com.amool.adapters.out.payment.MercadoPagoProviderAdapter;
 import com.amool.application.port.out.LoadChapterPort;

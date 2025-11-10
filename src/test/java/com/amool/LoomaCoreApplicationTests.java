@@ -15,7 +15,6 @@ class LoomaCoreApplicationTests {
 
     @Test
     void contextLoads() {
-        // Verifica que el contexto de MongoDB se cargue correctamente
         assert mongoTemplate != null;
     }
 }
