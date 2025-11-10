@@ -10,16 +10,23 @@ import java.security.Key;
 import java.time.Instant;
 import java.util.Date;
 import java.util.Map;
+
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
 @Service
 public class JwtService {
 
-    private static final String SECRET_BASE64 = "bG9vbWEtY29yZS1zZWNyZXQta2V5LXNob3VsZC1iZS1sb25nLWVuY3J5cHRlZA==";
     private static final long EXP_SECONDS = 3600;
 
+    @Value("${JWT_SECRET:}")
+    private String secretBase64;
+
     private Key key() {
-        byte[] keyBytes = Decoders.BASE64.decode(SECRET_BASE64);
+        if (secretBase64 == null || secretBase64.isBlank()) {
+            throw new IllegalStateException("La propiedad `JWT_SECRET` no está definida");
+        }
+        byte[] keyBytes = Decoders.BASE64.decode(secretBase64);
         return Keys.hmacShaKeyFor(keyBytes);
     }
 
