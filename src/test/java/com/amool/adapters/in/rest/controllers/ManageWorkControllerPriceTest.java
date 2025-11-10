@@ -1,6 +1,5 @@
 package com.amool.adapters.in.rest.controllers;
 
-import com.amool.adapters.in.rest.dtos.UpdatePriceRequest;
 import com.amool.application.usecases.CreateEmptyChapterUseCase;
 import com.amool.application.usecases.GetWorkPermissionsUseCase;
 import com.amool.application.usecases.ObtainWorkByIdUseCase;
@@ -11,10 +10,10 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
-import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.http.MediaType;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.MockMvc;
 
 import static org.mockito.Mockito.doThrow;
@@ -29,10 +28,10 @@ public class ManageWorkControllerPriceTest {
     @Autowired
     private MockMvc mockMvc;
 
-    @MockBean private ObtainWorkByIdUseCase obtainWorkByIdUseCase;
-    @MockBean private CreateEmptyChapterUseCase createEmptyChapterUseCase;
-    @MockBean private GetWorkPermissionsUseCase getWorkPermissionsUseCase;
-    @MockBean private UpdateWorkPriceUseCase updateWorkPriceUseCase;
+    @MockitoBean private ObtainWorkByIdUseCase obtainWorkByIdUseCase;
+    @MockitoBean private CreateEmptyChapterUseCase createEmptyChapterUseCase;
+    @MockitoBean private GetWorkPermissionsUseCase getWorkPermissionsUseCase;
+    @MockitoBean private UpdateWorkPriceUseCase updateWorkPriceUseCase;
 
     private static final Long USER_ID = 100L;
 
