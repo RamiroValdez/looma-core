@@ -11,7 +11,10 @@ import org.springframework.web.bind.annotation.RestController;
 import java.util.stream.Collectors;
 
 import com.amool.adapters.in.rest.dtos.AnalyticsLikeWorkDto;
+import com.amool.adapters.in.rest.dtos.AnalyticsLikeChapterDto;
+import com.amool.adapters.in.rest.mappers.AnalyticsLikeChapterMapper;
 import com.amool.adapters.in.rest.mappers.AnalyticsLikeWorkMapper;
+import com.amool.application.usecases.GetLikesPerChapterUseCase;
 import com.amool.application.usecases.GetLikesPerWorkUseCase;
 
 @RestController
@@ -19,9 +22,11 @@ import com.amool.application.usecases.GetLikesPerWorkUseCase;
 public class AnalyticsController {
 
     private final GetLikesPerWorkUseCase getLikesPerWorkUseCase;
+    private final GetLikesPerChapterUseCase getLikesPerChapterUseCase;
 
-    public AnalyticsController(GetLikesPerWorkUseCase getLikesPerWorkUseCase) {
+    public AnalyticsController(GetLikesPerWorkUseCase getLikesPerWorkUseCase, GetLikesPerChapterUseCase getLikesPerChapterUseCase) {
         this.getLikesPerWorkUseCase = getLikesPerWorkUseCase;
+        this.getLikesPerChapterUseCase = getLikesPerChapterUseCase;
     }
 
     @GetMapping("/likesPerWork/{workId}")
@@ -33,12 +38,14 @@ public class AnalyticsController {
     }
 
     @GetMapping("/likesPerChapter/{chapterId}")
-    public ResponseEntity<?> getLikesPerChapter(){
-        return ResponseEntity.ok().build();
+    public ResponseEntity<List<AnalyticsLikeChapterDto>> getLikesPerChapter(@PathVariable Long chapterId){
+        List<AnalyticsLikeChapterDto> likesPerChapter = getLikesPerChapterUseCase.execute(chapterId).stream().map(AnalyticsLikeChapterMapper::toDto).collect(Collectors.toList());
+        return ResponseEntity.ok().body(likesPerChapter);
     }
 
     @GetMapping("/ratingPerWork/{workId}")
     public ResponseEntity<?> getRatingPerWork(){
+        
         return ResponseEntity.ok().build();
     }
 

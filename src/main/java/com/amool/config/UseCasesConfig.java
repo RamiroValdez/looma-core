@@ -408,4 +408,9 @@ public class UseCasesConfig {
     public GetLikesPerWorkUseCase getLikesPerWorkUseCase() {
         return new GetLikesPerWorkUseCase(analyticsPort);
     }   
+
+    @Bean
+    public GetLikesPerChapterUseCase getLikesPerChapterUseCase() {
+        return new GetLikesPerChapterUseCase(analyticsPort);
+    }
 }
