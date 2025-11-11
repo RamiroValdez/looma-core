@@ -307,10 +307,10 @@ public class UseCasesConfig {
         return new IsWorkSavedUseCase(saveWorkPort);
     }
 
-    @Bean
+     @Bean
     public GetSavedWorksUseCase getSavedWorksUseCase() {
-        return new GetSavedWorksUseCase(saveWorkPort);
-    }
+    return new GetSavedWorksUseCase(saveWorkPort, awsS3Port);
+}
 
     @Bean
     public ToggleSaveWorkUseCase toggleSaveWorkUseCase() {
