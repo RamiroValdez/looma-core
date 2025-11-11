@@ -29,22 +29,26 @@ public class CreateWorkNotification {
                 return false;
             }
             
-            for (Long subscriberId : subscribers) {
-                    Notification notificacion = new Notification();
-                    notificacion.setRelatedWork(workId);
-                    notificacion.setRelatedUser(authorId);
-                    notificacion.setType(NotificationType.WORK_UPDATED);
-                    notificacion.setRead(false);
-                    notificacion.setCreatedAt(LocalDateTime.now());
-                    notificacion.setUserId(subscriberId);
-                    notificacion.setMessage(generateMessage(notificacion));
-                    notificacion.setRelatedChapter(chapterId);
-                    
-                    notificationPort.saveLectorNotification(notificacion);
-            }
+            createNotification(workId, authorId, chapterId, subscribers);
             return true;
         } catch (Exception e) {
             return false;
+        }
+    }
+
+    private void createNotification(Long workId, Long authorId, Long chapterId, List<Long> subscribers) {
+        for (Long subscriberId : subscribers) {
+                Notification notificacion = new Notification();
+                notificacion.setRelatedWork(workId);
+                notificacion.setRelatedUser(authorId);
+                notificacion.setType(NotificationType.WORK_UPDATED);
+                notificacion.setRead(false);
+                notificacion.setCreatedAt(LocalDateTime.now());
+                notificacion.setUserId(subscriberId);
+                notificacion.setMessage(generateMessage(notificacion));
+                notificacion.setRelatedChapter(chapterId);
+                
+                notificationPort.saveLectorNotification(notificacion);
         }
     }
 

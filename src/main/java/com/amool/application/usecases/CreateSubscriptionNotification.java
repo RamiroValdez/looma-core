@@ -34,7 +34,7 @@ public class CreateSubscriptionNotification {
         int published = 0;
         for (var notification : pendingNotifications) {
             try {
-                createAuthorNotification(notification);
+                createNotification(notification);
                 published++;
             } catch (Exception e) {
                 log.error("Error al procesar la notificación: " + notification, e);
@@ -43,7 +43,7 @@ public class CreateSubscriptionNotification {
         return published;
     }
 
-    public boolean createAuthorNotification(Notification notification) {
+    public boolean createNotification(Notification notification) {
         try {
             String message = generateMessage(notification);
             notification.setMessage(message);
