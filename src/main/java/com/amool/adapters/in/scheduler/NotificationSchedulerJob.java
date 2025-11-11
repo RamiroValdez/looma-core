@@ -5,21 +5,21 @@ import org.slf4j.LoggerFactory;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
 
-import com.amool.application.usecases.SaveNotificationUseCase;
+import com.amool.application.usecases.CreateSubscriptionNotification;
 
 @Component
 public class NotificationSchedulerJob {
     private static final Logger log = LoggerFactory.getLogger(NotificationSchedulerJob.class);
-    private final SaveNotificationUseCase saveNotificationUseCase;
+    private final CreateSubscriptionNotification saveNotificationUseCase;
 
-    public NotificationSchedulerJob(SaveNotificationUseCase saveNotificationUseCase) {
+    public NotificationSchedulerJob(CreateSubscriptionNotification saveNotificationUseCase) {
         this.saveNotificationUseCase = saveNotificationUseCase;
         log.info("Iniciando NotificationSchedulerJob");
     }
 
     @Scheduled(fixedRate = 15000, initialDelay = 5000)
     public void run() {
-            int count = saveNotificationUseCase.publishNotification(100);
+            int count = saveNotificationUseCase.execute(100);
             
             if (count > 0) {
             log.info("Published {} scheduled notification(s)", count);

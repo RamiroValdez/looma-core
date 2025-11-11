@@ -4,9 +4,6 @@ import com.amool.adapters.in.rest.dtos.ChapterWithContentDto;
 import com.amool.adapters.in.rest.dtos.LikeResponseDto;
 import com.amool.adapters.in.rest.dtos.UpdateChapterContentRequest;
 import com.amool.adapters.in.rest.mappers.ChapterMapper;
-import com.amool.application.port.out.LoadChapterContentPort;
-import com.amool.application.port.out.SaveChapterContentPort;
-import com.amool.application.port.out.LoadWorkOwnershipPort;
 import com.amool.application.usecases.*;
 import com.amool.domain.model.ChapterContent;
 import com.amool.domain.model.ChapterWithContentResult;
@@ -14,7 +11,6 @@ import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-import java.util.List;
 import java.util.Optional;
 import java.util.NoSuchElementException;
 import org.springframework.security.core.Authentication;
@@ -38,7 +34,7 @@ public class ChapterController {
     private final CancelScheduledPublicationUseCase cancelScheduledPublicationUseCase;
     private final UpdateChapterContentUseCase updateChapterContentUseCase;
     private final ToggleChapterLikeUseCase toggleChapterLikeUseCase;
-    private final SaveNotificationUseCase saveNotificationUseCase;
+    private final CreateWorkNotification createWorkNotification;
     private static final java.time.ZoneId AR = java.time.ZoneId.of("America/Argentina/Buenos_Aires");
     private static final Logger log = LoggerFactory.getLogger(ChapterController.class);
 
@@ -133,7 +129,7 @@ public class ChapterController {
 
         try {
             publishChapterUseCase.execute(Long.valueOf(workId), Long.valueOf(chapterId), principal.getUserId());
-            this.saveNotificationUseCase.createChapterNotification(Long.valueOf(workId), principal.getUserId(), Long.valueOf(chapterId));
+            this.createWorkNotification.execute(Long.valueOf(workId), principal.getUserId(), Long.valueOf(chapterId));
             return ResponseEntity.noContent().build();
 
         } catch (NoSuchElementException e) {

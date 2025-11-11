@@ -408,10 +408,19 @@ public class UseCasesConfig {
     }
 
     @Bean
-    public SaveNotificationUseCase saveNotificationUseCase() {
-        return new SaveNotificationUseCase(notificationPort, obtainWorkByIdPort, obtainChapterByIdPort, loadUserPort);
+    public CreateSubscriptionNotification saveNotificationUseCase() {
+        return new CreateSubscriptionNotification(notificationPort, obtainWorkByIdPort, obtainChapterByIdPort, loadUserPort);
     }
-    
+
+    @Bean
+    public CreateWorkNotification createWorkNotification() {
+        return new CreateWorkNotification(loadUserPort, notificationPort, obtainWorkByIdPort);
+    }
+
+    @Bean
+    public CreateAuthorNotification createAuthorNotification() {
+        return new CreateAuthorNotification(notificationPort, loadUserPort, obtainWorkByIdPort);
+    }
     @Bean
     public ObtainNotificationsUseCase obtainNotificationsUseCase() {
         return new ObtainNotificationsUseCase(notificationPort);
@@ -421,4 +430,6 @@ public class UseCasesConfig {
     public UpdateNotificationReadUseCase updateNotificationReadUseCase() {
         return new UpdateNotificationReadUseCase(notificationPort);
     }
+
+
 }

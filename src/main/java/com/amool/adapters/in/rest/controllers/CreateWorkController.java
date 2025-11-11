@@ -3,8 +3,8 @@ package com.amool.adapters.in.rest.controllers;
 import com.amool.adapters.in.rest.dtos.CreateWorkDto;
 import com.amool.adapters.in.rest.dtos.TagSuggestionRequestDto;
 import com.amool.adapters.in.rest.dtos.TagSuggestionResponseDto;
+import com.amool.application.usecases.CreateAuthorNotification;
 import com.amool.application.usecases.CreateWorkUseCase;
-import com.amool.application.usecases.SaveNotificationUseCase;
 import com.amool.application.usecases.SuggestTagsUseCase;
 import com.amool.security.JwtUserPrincipal;
 import org.springframework.http.ResponseEntity;
@@ -22,13 +22,13 @@ public class CreateWorkController {
 
     private final CreateWorkUseCase createWorkUseCase;
     private final SuggestTagsUseCase suggestTagsUseCase;
-    private final SaveNotificationUseCase saveNotificationUseCase;
+    private final CreateAuthorNotification createAuthorNotification;
 
 
-    public CreateWorkController(CreateWorkUseCase createWorkUseCase, SuggestTagsUseCase suggestTagsUseCase, SaveNotificationUseCase saveNotificationUseCase) {
+    public CreateWorkController(CreateWorkUseCase createWorkUseCase, SuggestTagsUseCase suggestTagsUseCase, CreateAuthorNotification createAuthorNotification) {
         this.createWorkUseCase = createWorkUseCase;
         this.suggestTagsUseCase = suggestTagsUseCase;
-        this.saveNotificationUseCase = saveNotificationUseCase;
+        this.createAuthorNotification = createAuthorNotification;
     }
 
 
@@ -53,7 +53,7 @@ public class CreateWorkController {
                             bannerFile,
                             principal.getUserId());
                     
-                        this.saveNotificationUseCase.createLectorNotification(result, principal.getUserId());
+                        this.createAuthorNotification.execute(result, principal.getUserId());
                     
 
                     return ResponseEntity.ok(result);
