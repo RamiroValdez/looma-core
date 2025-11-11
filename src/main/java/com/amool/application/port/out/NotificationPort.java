@@ -12,4 +12,6 @@ public interface NotificationPort {
 
     void updateNotificationRead(Long notificationId);
 
+    List<Notification> getPendingNotifications(int batchSize);
+
 }
