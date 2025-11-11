@@ -1,6 +1,7 @@
 package com.amool.application.usecases;
 
 import java.time.LocalDateTime;
+import java.util.List;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -10,6 +11,7 @@ import com.amool.application.port.out.NotificationPort;
 import com.amool.application.port.out.ObtainChapterByIdPort;
 import com.amool.application.port.out.ObtainWorkByIdPort;
 import com.amool.domain.model.Notification;
+import com.amool.domain.model.Notification.NotificationType;
 
 public class SaveNotificationUseCase {
     private static final Logger log = LoggerFactory.getLogger(SaveNotificationUseCase.class);
@@ -34,7 +36,7 @@ public class SaveNotificationUseCase {
         int published = 0;
         for (var notification : pendingNotifications) {
             try {
-                createNotification(notification);
+                createAuthorNotification(notification);
                 published++;
             } catch (Exception e) {
                 log.error("Error al procesar la notificación: " + notification, e);
@@ -43,12 +45,12 @@ public class SaveNotificationUseCase {
         return published;
     }
 
-    public boolean createNotification(Notification notification) {
+    public boolean createAuthorNotification(Notification notification) {
         try {
             String message = generateMessage(notification);
             notification.setMessage(message);
             notification.setCreatedAt(LocalDateTime.now());
-            return notificationPort.saveNotification(notification);
+            return notificationPort.saveAuthorNotification(notification);
         } catch (Exception e) {
             return false;
         }
@@ -73,5 +75,58 @@ public class SaveNotificationUseCase {
                 String.format("%s se ha suscrito al capítulo %s", username, obtainChapterByIdPort.obtainChapterById(notification.getRelatedChapter()).get().getTitle());
              default -> "Tienes una nueva notificación";
         };
+    }
+
+    public boolean createLectorNotification(Long workId, Long authorId) {
+        try {
+            List<Long> subscribers = loadUserPort.getAllAuthorSubscribers(authorId);
+            
+            if (subscribers.isEmpty()) {
+                return false;
+            }
+            
+            for (Long subscriberId : subscribers) {
+                    Notification notificacion = new Notification();
+                    notificacion.setRelatedWork(workId);
+                    notificacion.setRelatedUser(authorId);
+                    notificacion.setType(NotificationType.NEW_WORK_PUBLISHED);
+                    notificacion.setRead(false);
+                    notificacion.setCreatedAt(LocalDateTime.now());
+                    notificacion.setUserId(subscriberId);
+                    notificacion.setMessage(generateMessage(notificacion));
+                    
+                    notificationPort.saveLectorNotification(notificacion);
+            }
+            return true;
+        } catch (Exception e) {
+            return false;
+        }
+    }
+
+    public boolean createChapterNotification(Long workId, Long authorId, Long chapterId) {
+        try {
+            List<Long> subscribers = loadUserPort.getAllWorkSubscribers(workId);
+            
+            if (subscribers.isEmpty()) {
+                return false;
+            }
+            
+            for (Long subscriberId : subscribers) {
+                    Notification notificacion = new Notification();
+                    notificacion.setRelatedWork(workId);
+                    notificacion.setRelatedUser(authorId);
+                    notificacion.setType(NotificationType.WORK_UPDATED);
+                    notificacion.setRead(false);
+                    notificacion.setCreatedAt(LocalDateTime.now());
+                    notificacion.setUserId(subscriberId);
+                    notificacion.setMessage(generateMessage(notificacion));
+                    notificacion.setRelatedChapter(chapterId);
+                    
+                    notificationPort.saveLectorNotification(notificacion);
+            }
+            return true;
+        } catch (Exception e) {
+            return false;
+        }
     }
 }

@@ -41,18 +41,16 @@ public class NotificationPersistenceAdapter implements NotificationPort {
 
     @Override
     @Transactional
-    public boolean saveNotification(Notification notification) {
+    public boolean saveAuthorNotification(Notification notification) {
         try {
-            // Guardar la notificación
             NotificationEntity notificationEntity = NotificationMapper.toEntity(notification);
             entityManager.persist(notificationEntity);
             
-            // Marcar como notificado en la tabla correspondiente
             String type = notification.getType().name();
             if (type.startsWith("NEW_") && type.endsWith("_SUBSCRIBER")) {
                 String entityType = type.replace("NEW_", "").replace("_SUBSCRIBER", "");
                 Long relatedId = switch (entityType) {
-                    case "AUTHOR" -> notification.getUserId(); // Para autores, el relatedId es el ID del autor
+                    case "AUTHOR" -> notification.getUserId(); 
                     case "WORK" -> notification.getRelatedWork();
                     case "CHAPTER" -> notification.getRelatedChapter();
                     default -> null;
@@ -86,7 +84,6 @@ public class NotificationPersistenceAdapter implements NotificationPort {
     public List<Notification> getPendingNotifications(int batchSize) {
         List<Notification> pendingNotifications = new ArrayList<>();
         
-        // Obtener notificaciones pendientes de cada tipo
         pendingNotifications.addAll(getPendingAuthorSubscriptions(batchSize));
         if (pendingNotifications.size() < batchSize) {
             int remaining = batchSize - pendingNotifications.size();
@@ -103,13 +100,13 @@ public class NotificationPersistenceAdapter implements NotificationPort {
     private List<Notification> getPendingAuthorSubscriptions(int limit) {
         String sql = 
             "SELECT " +
-            "  sa.user_id, " +                    // [0] Quien se suscribió (related_user)
-            "  sa.autor_id as related_id, " +     // [1] ID del autor (user_id)
-            "  sa.autor_id as recipient_id, " +   // [2] El autor es el destinatario
-            "  'AUTHOR' as type, " +              // [3] Tipo de notificación
-            "  sa.created_at " +                  // [4] Fecha de creación
+            "  sa.user_id, " +                    
+            "  sa.autor_id as related_id, " +     
+            "  sa.autor_id as recipient_id, " +   
+            "  'AUTHOR' as type, " +              
+            "  sa.created_at " +                  
             "FROM suscribe_autor sa " +
-            "WHERE sa.notified = false " +        // Solo suscripciones no notificadas
+            "WHERE sa.notified = false " +        
             "  AND sa.created_at >= :since " +
             "ORDER BY sa.created_at " +
             "LIMIT :limit";
@@ -120,14 +117,14 @@ public class NotificationPersistenceAdapter implements NotificationPort {
     private List<Notification> getPendingWorkSubscriptions(int limit) {
         String sql = 
             "SELECT " +
-            "  sw.user_id, " +                    // [0] Quien se suscribió (related_user)
-            "  sw.work_id as related_id, " +      // [1] ID de la obra (related_work)
-            "  w.creator_id as recipient_id, " +  // [2] Dueño de la obra (user_id)
-            "  'WORK' as type, " +                // [3] Tipo de notificación
-            "  sw.created_at " +                  // [4] Fecha de creación
+            "  sw.user_id, " +                    
+            "  sw.work_id as related_id, " +      
+            "  w.creator_id as recipient_id, " + 
+            "  'WORK' as type, " +              
+            "  sw.created_at " +                  
             "FROM suscribe_work sw " +
             "JOIN work w ON sw.work_id = w.id " +
-            "WHERE sw.notified = false " +        // Solo suscripciones no notificadas
+            "WHERE sw.notified = false " +      
             "  AND sw.created_at >= :since " +
             "ORDER BY sw.created_at " +
             "LIMIT :limit";
@@ -138,15 +135,15 @@ public class NotificationPersistenceAdapter implements NotificationPort {
     private List<Notification> getPendingChapterSubscriptions(int limit) {
         String sql = 
             "SELECT " +
-            "  sc.user_id, " +                    // [0] Quien se suscribió (related_user)
-            "  sc.chapter_id as related_id, " +   // [1] ID del capítulo (related_chapter)
-            "  w.creator_id as recipient_id, " +  // [2] Dueño de la obra (user_id)
-            "  'CHAPTER' as type, " +             // [3] Tipo de notificación
-            "  sc.created_at " +                  // [4] Fecha de creación
+            "  sc.user_id, " +                   
+            "  sc.chapter_id as related_id, " +   
+            "  w.creator_id as recipient_id, " +  
+            "  'CHAPTER' as type, " +           
+            "  sc.created_at " +                  
             "FROM suscribe_chapter sc " +
             "JOIN chapter c ON sc.chapter_id = c.id " +
             "JOIN work w ON c.work_id = w.id " +
-            "WHERE sc.notified = false " +        // Solo suscripciones no notificadas
+            "WHERE sc.notified = false " +        
             "  AND sc.created_at >= :since " +
             "ORDER BY sc.created_at " +
             "LIMIT :limit";
@@ -171,20 +168,19 @@ public class NotificationPersistenceAdapter implements NotificationPort {
     }
 
     private Notification mapToNotification(Object[] result) {
-        Long subscriberId = ((Number) result[0]).longValue();  // Quien se suscribió
-        Long relatedId = ((Number) result[1]).longValue();     // ID del contenido
-        Long recipientId = ((Number) result[2]).longValue();   // Dueño del contenido
-        String type = ((String) result[3]).toUpperCase();      // Tipo en mayúsculas
+        Long subscriberId = ((Number) result[0]).longValue();  
+        Long relatedId = ((Number) result[1]).longValue();     
+        Long recipientId = ((Number) result[2]).longValue();  
+        String type = ((String) result[3]).toUpperCase();      
         
         Notification notification = new Notification();
         notification.setType(NotificationType.valueOf("NEW_" + type + "_SUBSCRIBER"));
-        notification.setRelatedUser(subscriberId);  // Quien se suscribió
-        notification.setUserId(recipientId);        // Dueño del contenido
+        notification.setRelatedUser(subscriberId);  
+        notification.setUserId(recipientId);        
         notification.setCreatedAt(LocalDateTime.now());
         notification.setRead(false);
         
         
-        // Establecer el ID relacionado según el tipo
         switch (type) {
             case "WORK" -> notification.setRelatedWork(relatedId);
             case "CHAPTER" -> notification.setRelatedChapter(relatedId);
@@ -210,6 +206,18 @@ public class NotificationPersistenceAdapter implements NotificationPort {
                 .setParameter("userId", subscriberId)
                 .setParameter("relatedId", relatedId)
                 .executeUpdate();
+        }
+    }
+
+    @Override
+    @Transactional
+    public boolean saveLectorNotification(Notification notification) {
+        try {
+            NotificationEntity notificationEntity = NotificationMapper.toEntity(notification);
+            entityManager.persist(notificationEntity);
+            return true;
+        } catch (Exception e) {
+            return false;
         }
     }
 }

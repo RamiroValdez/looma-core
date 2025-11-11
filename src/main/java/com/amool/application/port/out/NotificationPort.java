@@ -8,10 +8,12 @@ public interface NotificationPort {
 
     List<Notification> getNotifications(Long userId);
 
-    boolean saveNotification(Notification notification);
+    boolean saveAuthorNotification(Notification notification);
 
     void updateNotificationRead(Long notificationId);
 
     List<Notification> getPendingNotifications(int batchSize);
+
+    boolean saveLectorNotification(Notification notification);
 
 }

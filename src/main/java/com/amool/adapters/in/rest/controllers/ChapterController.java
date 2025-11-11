@@ -38,6 +38,7 @@ public class ChapterController {
     private final CancelScheduledPublicationUseCase cancelScheduledPublicationUseCase;
     private final UpdateChapterContentUseCase updateChapterContentUseCase;
     private final ToggleChapterLikeUseCase toggleChapterLikeUseCase;
+    private final SaveNotificationUseCase saveNotificationUseCase;
     private static final java.time.ZoneId AR = java.time.ZoneId.of("America/Argentina/Buenos_Aires");
     private static final Logger log = LoggerFactory.getLogger(ChapterController.class);
 
@@ -132,7 +133,9 @@ public class ChapterController {
 
         try {
             publishChapterUseCase.execute(Long.valueOf(workId), Long.valueOf(chapterId), principal.getUserId());
+            this.saveNotificationUseCase.createChapterNotification(Long.valueOf(workId), principal.getUserId(), Long.valueOf(chapterId));
             return ResponseEntity.noContent().build();
+
         } catch (NoSuchElementException e) {
             return ResponseEntity.notFound().build();
         } catch (SecurityException e) {
