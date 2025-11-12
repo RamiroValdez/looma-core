@@ -1,7 +1,8 @@
 package com.amool.adapters.in.rest.controllers;
 
 import com.amool.adapters.in.rest.dtos.ChatRequestDto;
-import com.amool.application.service.ChatService;
+import com.amool.application.usecases.GetChatConversationUseCase;
+import com.amool.application.usecases.ProcessChatMessageUseCase;
 import com.amool.domain.model.ChatMessage;
 import com.amool.security.JwtUserPrincipal;
 import org.springframework.http.ResponseEntity;
@@ -14,10 +15,14 @@ import java.util.List;
 @RequestMapping("/api/chat")
 public class ChatController {
 
-    private final ChatService chatService;
+    private final ProcessChatMessageUseCase processChatMessageUseCase;
+    private final GetChatConversationUseCase getChatConversationUseCase;
 
-    public ChatController(ChatService chatService) {
-        this.chatService = chatService;
+    public ChatController(
+            ProcessChatMessageUseCase processChatMessageUseCase,
+            GetChatConversationUseCase getChatConversationUseCase) {
+        this.processChatMessageUseCase = processChatMessageUseCase;
+        this.getChatConversationUseCase = getChatConversationUseCase;
     }
 
     @PostMapping("/message")
@@ -25,7 +30,7 @@ public class ChatController {
             @RequestBody ChatRequestDto request,
             @AuthenticationPrincipal JwtUserPrincipal user) {
         
-        ChatMessage response = chatService.processMessage(
+        ChatMessage response = processChatMessageUseCase.execute(
             user.getUserId(),
             request.getChapterId(), 
             request.getMessage(), 
@@ -40,7 +45,7 @@ public class ChatController {
             @AuthenticationPrincipal JwtUserPrincipal user) {
         
         return ResponseEntity.ok(
-            chatService.getConversation(user.getUserId(), chapterId)
+            getChatConversationUseCase.execute(user.getUserId(), chapterId)
         );
     }
 }

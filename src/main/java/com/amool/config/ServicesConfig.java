@@ -1,7 +1,6 @@
 package com.amool.config;
 
 import com.amool.application.port.out.*;
-import com.amool.application.service.ChatService;
 import com.amool.application.service.ImagesService;
 import com.amool.application.service.PaymentService;
 import com.amool.application.service.PublishingSchedulerService;
@@ -40,11 +39,6 @@ public class ServicesConfig {
     @Bean
     public ImagesService uploaderService() {
         return new ImagesService(awsS3Port, httpDownloadPort);
-    }
-
-    @Bean
-    public ChatService chatService() {
-        return new ChatService(chatClientBuilder);
     }
 
     @Bean

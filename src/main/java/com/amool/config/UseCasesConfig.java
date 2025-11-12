@@ -45,6 +45,8 @@ public class UseCasesConfig {
     private final RestTemplate restTemplate;
     private final NotificationPort notificationPort;
     private final ObtainChapterByIdPort obtainChapterByIdPort;
+    private final ChatConversationPort chatConversationPort;
+    private final ChatAIPort chatAIPort;
 
     public UseCasesConfig(
             AwsS3Port awsS3Port,
@@ -81,7 +83,9 @@ public class UseCasesConfig {
             RatingPort ratingPort,
             ReadingProgressPort readingProgressPort,
             NotificationPort notificationPort,
-            ObtainChapterByIdPort obtainChapterByIdPort
+            ObtainChapterByIdPort obtainChapterByIdPort,
+            ChatConversationPort chatConversationPort,
+            ChatAIPort chatAIPort
             ) {
         this.awsS3Port = awsS3Port;
         this.authPort = authPort;
@@ -118,6 +122,8 @@ public class UseCasesConfig {
         this.readingProgressPort = readingProgressPort;
         this.notificationPort = notificationPort;
         this.obtainChapterByIdPort = obtainChapterByIdPort;
+        this.chatConversationPort = chatConversationPort;
+        this.chatAIPort = chatAIPort;
     }
 
     @Bean
@@ -429,6 +435,16 @@ public class UseCasesConfig {
     @Bean
     public UpdateNotificationReadUseCase updateNotificationReadUseCase() {
         return new UpdateNotificationReadUseCase(notificationPort);
+    }
+
+    @Bean
+    public ProcessChatMessageUseCase processChatMessageUseCase() {
+        return new ProcessChatMessageUseCase(chatConversationPort, chatAIPort);
+    }
+
+    @Bean
+    public GetChatConversationUseCase getChatConversationUseCase() {
+        return new GetChatConversationUseCase(chatConversationPort);
     }
 
 
