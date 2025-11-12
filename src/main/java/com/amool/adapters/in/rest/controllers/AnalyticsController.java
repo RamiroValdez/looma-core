@@ -11,11 +11,14 @@ import org.springframework.web.bind.annotation.RestController;
 import java.util.stream.Collectors;
 
 import com.amool.adapters.in.rest.dtos.AnalyticsLikeWorkDto;
+import com.amool.adapters.in.rest.dtos.AnalyticsRatingWorkDto;
 import com.amool.adapters.in.rest.dtos.AnalyticsLikeChapterDto;
 import com.amool.adapters.in.rest.mappers.AnalyticsLikeChapterMapper;
 import com.amool.adapters.in.rest.mappers.AnalyticsLikeWorkMapper;
+import com.amool.adapters.in.rest.mappers.AnalyticsRatingWorkMapper;
 import com.amool.application.usecases.GetLikesPerChapterUseCase;
 import com.amool.application.usecases.GetLikesPerWorkUseCase;
+import com.amool.application.usecases.GetRatingsPerWorkUseCase;
 
 @RestController
 @RequestMapping("/api/analytics")
@@ -23,10 +26,12 @@ public class AnalyticsController {
 
     private final GetLikesPerWorkUseCase getLikesPerWorkUseCase;
     private final GetLikesPerChapterUseCase getLikesPerChapterUseCase;
+    private final GetRatingsPerWorkUseCase getRatingPerWorkUseCase;
 
-    public AnalyticsController(GetLikesPerWorkUseCase getLikesPerWorkUseCase, GetLikesPerChapterUseCase getLikesPerChapterUseCase) {
+    public AnalyticsController(GetLikesPerWorkUseCase getLikesPerWorkUseCase, GetLikesPerChapterUseCase getLikesPerChapterUseCase, GetRatingsPerWorkUseCase getRatingPerWorkUseCase) {
         this.getLikesPerWorkUseCase = getLikesPerWorkUseCase;
         this.getLikesPerChapterUseCase = getLikesPerChapterUseCase;
+        this.getRatingPerWorkUseCase = getRatingPerWorkUseCase;
     }
 
     @GetMapping("/likesPerWork/{workId}")
@@ -44,9 +49,9 @@ public class AnalyticsController {
     }
 
     @GetMapping("/ratingPerWork/{workId}")
-    public ResponseEntity<?> getRatingPerWork(){
-        
-        return ResponseEntity.ok().build();
+    public ResponseEntity<List<AnalyticsRatingWorkDto>> getRatingPerWork(@PathVariable Long workId){
+        List<AnalyticsRatingWorkDto> ratingsPerWork = getRatingPerWorkUseCase.execute(workId).stream().map(AnalyticsRatingWorkMapper::toDto).collect(Collectors.toList());
+        return ResponseEntity.ok().body(ratingsPerWork);
     }
 
     @GetMapping("/savesPerWork/{workId}")

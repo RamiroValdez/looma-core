@@ -6,9 +6,13 @@ import com.amool.adapters.out.persistence.entity.UserLikeEntity;
 import com.amool.application.port.out.AnalyticsPort;
 import com.amool.domain.model.AnalyticsLikeChapter;
 import com.amool.domain.model.AnalyticsLikeWork;
+import com.amool.domain.model.AnalyticsRatingWork;
 import java.util.List;
 import java.util.stream.Collectors;
+
+import com.amool.adapters.out.persistence.mappers.AnalyticsRatingWorkMapper;
 import com.amool.adapters.out.persistence.entity.ChapterLikeEntity;
+import com.amool.adapters.out.persistence.entity.RatingEntity;
 import org.springframework.stereotype.Component;
 import jakarta.persistence.EntityManager;
 
@@ -41,5 +45,16 @@ public class AnalyticsPersistenceAdapter implements AnalyticsPort {
                                     .getResultList();
 
         return result.stream().map(AnalyticsLikeChapterMapper::toDomain).collect(Collectors.toList());
+    }
+
+    @Override
+    public List<AnalyticsRatingWork> getRatingsPerWork(Long workId) {
+        String jpql = "SELECT ul FROM RatingEntity ul WHERE ul.workId = :workId";
+        
+       List<RatingEntity> result = entityManager.createQuery(jpql, RatingEntity.class)
+                                    .setParameter("workId", workId)
+                                    .getResultList();
+
+        return result.stream().map(AnalyticsRatingWorkMapper::toDomain).collect(Collectors.toList());
     }
 }

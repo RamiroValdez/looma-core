@@ -1,6 +1,6 @@
 package com.amool.adapters.in.rest.dtos;
 
-import org.threeten.bp.LocalDateTime;
+import java.time.LocalDateTime;
 
 public record AnalyticsRatingWorkDto(
     Long ratingId, 
