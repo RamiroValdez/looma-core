@@ -16,9 +16,9 @@ public class SubscriptionPersistenceAdapter implements SubscriptionPersistencePo
     @Override
     public void subscribeChapter(Long userId, Long chapterId) {
         entityManager.createNativeQuery(
-                "INSERT INTO suscribe_chapter (user_id, work_id, chapter_id) " +
-                        "SELECT :userId, c.work_id, c.id FROM chapter c WHERE c.id = :chapterId " +
-                        "ON CONFLICT DO NOTHING")
+                "INSERT INTO suscribe_chapter (user_id, work_id, chapter_id, subscribed_at) " +
+                "SELECT :userId, c.work_id, c.id, CURRENT_TIMESTAMP FROM chapter c WHERE c.id = :chapterId " +
+                "ON CONFLICT (user_id, chapter_id) DO UPDATE SET subscribed_at = CURRENT_TIMESTAMP")
                 .setParameter("userId", userId)
                 .setParameter("chapterId", chapterId)
                 .executeUpdate();
@@ -27,7 +27,9 @@ public class SubscriptionPersistenceAdapter implements SubscriptionPersistencePo
     @Override
     public void subscribeAuthor(Long userId, Long authorId) {
         entityManager.createNativeQuery(
-                "INSERT INTO suscribe_autor (user_id, autor_id) VALUES (:userId, :authorId) ON CONFLICT DO NOTHING")
+                "INSERT INTO suscribe_autor (user_id, autor_id, subscribed_at) " +
+                "VALUES (:userId, :authorId, CURRENT_TIMESTAMP) " +
+                "ON CONFLICT (user_id, autor_id) DO UPDATE SET subscribed_at = CURRENT_TIMESTAMP")
                 .setParameter("userId", userId)
                 .setParameter("authorId", authorId)
                 .executeUpdate();
@@ -36,7 +38,9 @@ public class SubscriptionPersistenceAdapter implements SubscriptionPersistencePo
     @Override
     public void subscribeWork(Long userId, Long workId) {
         entityManager.createNativeQuery(
-                "INSERT INTO suscribe_work (user_id, work_id) VALUES (:userId, :workId) ON CONFLICT DO NOTHING")
+                "INSERT INTO suscribe_work (user_id, work_id, subscribed_at) " +
+                "VALUES (:userId, :workId, CURRENT_TIMESTAMP) " +
+                "ON CONFLICT (user_id, work_id) DO UPDATE SET subscribed_at = CURRENT_TIMESTAMP")
                 .setParameter("userId", userId)
                 .setParameter("workId", workId)
                 .executeUpdate();
