@@ -450,4 +450,34 @@ public class UseCasesConfig {
     public GetRatingsPerWorkUseCase getRatingsPerWorkUseCase() {
         return new GetRatingsPerWorkUseCase(analyticsPort);
     }
+    
+    @Bean
+    public GetSavesPerWorkUseCase getSavesPerWorkUseCase() {
+        return new GetSavesPerWorkUseCase(analyticsPort);
+    }
+
+    @Bean
+    public GetSuscribersPerAuthorUseCase getSuscribersPerAuthorUseCase() {
+        return new GetSuscribersPerAuthorUseCase(analyticsPort);
+    }
+
+    @Bean
+    public GetSuscribersPerWorkUseCase getSuscribersPerWorkUseCase() {
+        return new GetSuscribersPerWorkUseCase(analyticsPort);
+    }
+
+    @Bean
+    public GetTotalPerAuthorUseCase getTotalPerAuthorUseCase() {
+        return new GetTotalPerAuthorUseCase(analyticsPort);
+    }
+
+    @Bean
+    public GetTotalPerWorkUseCase getTotalPerWorkUseCase() {
+        return new GetTotalPerWorkUseCase(analyticsPort);
+    }
+
+    @Bean
+    public GetTotalSuscribersUseCase getTotalSuscribersUseCase() {
+        return new GetTotalSuscribersUseCase(analyticsPort, obtainWorkByIdPort);
+    }
 }

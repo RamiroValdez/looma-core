@@ -1,4 +1,4 @@
-/*package com.amool.adapters.out.persistence.entity;
+package com.amool.adapters.out.persistence.entity;
 
 import java.time.LocalDateTime;
 
@@ -36,4 +36,4 @@ public class WorkSavedEntity {
     public void setWork(WorkEntity work) { this.work = work; }
     public LocalDateTime getSavedAt() { return savedAt; }
     public void setSavedAt(LocalDateTime savedAt) { this.savedAt = savedAt; }
-}*/
+}
