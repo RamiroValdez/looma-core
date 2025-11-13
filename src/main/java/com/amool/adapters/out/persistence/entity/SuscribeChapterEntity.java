@@ -2,7 +2,9 @@ package com.amool.adapters.out.persistence.entity;
 
 import jakarta.persistence.*;
 import java.io.Serializable;
+import java.time.LocalDateTime;
 import java.util.Objects;
+import org.hibernate.annotations.CreationTimestamp;
 
 @Entity
 @Table(name = "suscribe_chapter")
@@ -21,9 +23,27 @@ public class SuscribeChapterEntity {
     @Column(name = "chapter_id")
     private Long chapterId;
 
+    @Column(name = "created_at", nullable = false, updatable = false)
+    @CreationTimestamp
+    private LocalDateTime createdAt;
+    
+    @Column(name = "notified", nullable = false)
+    private boolean notified = false;
+
     public SuscribeChapterEntity() {}
     public SuscribeChapterEntity(Long userId, Long workId, Long chapterId) {
-        this.userId = userId; this.workId = workId; this.chapterId = chapterId;
+        this.userId = userId; 
+        this.workId = workId; 
+        this.chapterId = chapterId;
+        this.notified = false;
+    }
+    
+    public boolean isNotified() {
+        return notified;
+    }
+    
+    public void markAsNotified() {
+        this.notified = true;
     }
 
     public Long getUserId() { return userId; }
@@ -32,6 +52,9 @@ public class SuscribeChapterEntity {
     public void setWorkId(Long workId) { this.workId = workId; }
     public Long getChapterId() { return chapterId; }
     public void setChapterId(Long chapterId) { this.chapterId = chapterId; }
+    
+    public LocalDateTime getCreatedAt() { return createdAt; }
+    public void setCreatedAt(LocalDateTime createdAt) { this.createdAt = createdAt; }
 
     public static class PK implements Serializable {
         private Long userId; private Long workId; private Long chapterId;
