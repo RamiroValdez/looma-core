@@ -20,6 +20,7 @@ public class WorkListMapper {
         dto.setTitle(work.getTitle());
         dto.setDescription(work.getDescription());
         dto.setCover(work.getCover());
+        dto.setBanner(work.getBanner());
         dto.setLikes(work.getLikes());
         
         if (work.getFormat() != null) {
