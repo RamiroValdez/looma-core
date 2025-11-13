@@ -2,7 +2,6 @@ package com.amool.config;
 
 import com.amool.application.port.out.*;
 import com.amool.application.service.ImagesService;
-import com.amool.application.service.PaymentService;
 import com.amool.application.service.PublishingSchedulerService;
 import org.springframework.ai.chat.client.ChatClient;
 import org.springframework.context.annotation.Bean;
@@ -39,11 +38,6 @@ public class ServicesConfig {
     @Bean
     public ImagesService uploaderService() {
         return new ImagesService(awsS3Port, httpDownloadPort);
-    }
-
-    @Bean
-    public PaymentService paymentService() {
-        return new PaymentService(subscriptionPersistencePort, paymentProviders);
     }
 
     @Bean
