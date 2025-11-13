@@ -43,6 +43,8 @@ public class UseCasesConfig {
     private final PaymentRecordPort paymentRecordPort;
     private final SubscriptionPersistencePort subscriptionPersistencePort;
     private final RestTemplate restTemplate;
+    private final NotificationPort notificationPort;
+    private final ObtainChapterByIdPort obtainChapterByIdPort;
     private final AnalyticsPort analyticsPort;
 
     public UseCasesConfig(
@@ -79,7 +81,9 @@ public class UseCasesConfig {
             RestTemplate restTemplate,
             RatingPort ratingPort,
             ReadingProgressPort readingProgressPort,
-            AnalyticsPort analyticsPort
+            AnalyticsPort analyticsPort,
+            NotificationPort notificationPort,
+            ObtainChapterByIdPort obtainChapterByIdPort
             ) {
         this.awsS3Port = awsS3Port;
         this.authPort = authPort;
@@ -114,6 +118,8 @@ public class UseCasesConfig {
         this.subscriptionPersistencePort = subscriptionPersistencePort;
         this.restTemplate = restTemplate;
         this.readingProgressPort = readingProgressPort;
+        this.notificationPort = notificationPort;
+        this.obtainChapterByIdPort = obtainChapterByIdPort;
         this.analyticsPort = analyticsPort;
     }
 
@@ -310,10 +316,10 @@ public class UseCasesConfig {
         return new IsWorkSavedUseCase(saveWorkPort);
     }
 
-    @Bean
+     @Bean
     public GetSavedWorksUseCase getSavedWorksUseCase() {
-        return new GetSavedWorksUseCase(saveWorkPort);
-    }
+    return new GetSavedWorksUseCase(saveWorkPort, awsS3Port);
+}
 
     @Bean
     public ToggleSaveWorkUseCase toggleSaveWorkUseCase() {
@@ -403,6 +409,32 @@ public class UseCasesConfig {
     public UpdateReadingProgressUseCase updateReadingProgressUseCase() {
         return new UpdateReadingProgressUseCase(readingProgressPort);
     }
+
+    @Bean
+    public CreateSubscriptionNotification saveNotificationUseCase() {
+        return new CreateSubscriptionNotification(notificationPort, obtainWorkByIdPort, obtainChapterByIdPort, loadUserPort);
+    }
+
+    @Bean
+    public CreateWorkNotification createWorkNotification() {
+        return new CreateWorkNotification(loadUserPort, notificationPort, obtainWorkByIdPort);
+    }
+
+    @Bean
+    public CreateAuthorNotification createAuthorNotification() {
+        return new CreateAuthorNotification(notificationPort, loadUserPort, obtainWorkByIdPort);
+    }
+    @Bean
+    public ObtainNotificationsUseCase obtainNotificationsUseCase() {
+        return new ObtainNotificationsUseCase(notificationPort);
+    }
+
+    @Bean
+    public UpdateNotificationReadUseCase updateNotificationReadUseCase() {
+        return new UpdateNotificationReadUseCase(notificationPort);
+    }
+
+
 
     @Bean
     public GetLikesPerWorkUseCase getLikesPerWorkUseCase() {
