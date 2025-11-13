@@ -2,6 +2,7 @@ package com.amool.adapters.out.persistence;
 
 import com.amool.adapters.out.persistence.entity.UserEntity;
 import com.amool.adapters.out.persistence.entity.WorkEntity;
+import com.amool.adapters.out.persistence.entity.WorkSavedEntity;
 import com.amool.adapters.out.persistence.mappers.WorkMapper;
 import com.amool.application.port.out.SaveWorkPort;
 import com.amool.domain.model.Work;
@@ -10,6 +11,7 @@ import jakarta.persistence.EntityManager;
 import jakarta.persistence.EntityNotFoundException;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
+import java.time.LocalDateTime;
 
 import java.util.List;
 import java.util.stream.Collectors;
@@ -34,40 +36,32 @@ public class SaveWorkPersistenceAdapter implements SaveWorkPort {
 
     @Override
     public void saveWorkForUser(Long userId, Long workId) {
-        User user = userPersistenceAdapter.getById(userId)
-                .orElseThrow(() -> new EntityNotFoundException("User not found with id: " + userId));
-        
-        Work work = worksPersistenceAdapter.obtainWorkById(workId)
-                .orElseThrow(() -> new EntityNotFoundException("Work not found with id: " + workId));
-        
+        WorkSavedEntity workSavedEntity = new WorkSavedEntity();
         UserEntity userEntity = entityManager.find(UserEntity.class, userId);
         WorkEntity workEntity = entityManager.find(WorkEntity.class, workId);
-        
-        if (userEntity != null && workEntity != null) {
-            userEntity.getSavedWorks().add(workEntity);
-            entityManager.merge(userEntity);
-        }
+        workSavedEntity.setUser(userEntity);
+        workSavedEntity.setWork(workEntity);
+        workSavedEntity.setSavedAt(LocalDateTime.now());
+        entityManager.persist(workSavedEntity);
     }
 
     @Override
     public void removeSavedWorkForUser(Long userId, Long workId) {
-        UserEntity userEntity = entityManager.find(UserEntity.class, userId);
-        if (userEntity == null) {
-            throw new EntityNotFoundException("User not found with id: " + userId);
+        if (!isWorkSavedByUser(userId, workId)) {
+            throw new EntityNotFoundException("Work not saved by user");
         }
-        
-        WorkEntity workEntity = entityManager.find(WorkEntity.class, workId);
-        if (workEntity == null) {
-            throw new EntityNotFoundException("Work not found with id: " + workId);
-        }
-        
-        userEntity.getSavedWorks().remove(workEntity);
-        entityManager.merge(userEntity);
-    }
-
+        WorkSavedEntity workSavedEntity = entityManager
+                .createQuery("SELECT ws FROM WorkSavedEntity ws WHERE ws.work.id = :workId AND ws.user.id = :userId", 
+                WorkSavedEntity.class)
+                .setParameter("userId", userId)
+                .setParameter("workId", workId)
+                .getSingleResult();
+                
+        entityManager.remove(workSavedEntity);
+    } 
     @Override
     public boolean isWorkSavedByUser(Long userId, Long workId) {
-        String jpql = "SELECT COUNT(w) > 0 FROM UserEntity u JOIN u.savedWorks w WHERE u.id = :userId AND w.id = :workId";
+        String jpql = "SELECT COUNT(ws) > 0 FROM WorkSavedEntity ws WHERE ws.work.id = :workId AND ws.user.id = :userId";
         return entityManager.createQuery(jpql, Boolean.class)
                 .setParameter("userId", userId)
                 .setParameter("workId", workId)

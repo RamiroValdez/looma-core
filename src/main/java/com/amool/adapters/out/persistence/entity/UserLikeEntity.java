@@ -1,6 +1,8 @@
 package com.amool.adapters.out.persistence.entity;
 
 import jakarta.persistence.*;
+
+import java.time.LocalDateTime;
 import java.util.Objects;
 
 @Entity
@@ -21,6 +23,8 @@ public class UserLikeEntity {
     @JoinColumn(name = "work_id", nullable = false)
     private WorkEntity work;
 
+    private LocalDateTime likedAt;
+
     protected UserLikeEntity() {}
 
     public UserLikeEntity(UserEntity user, WorkEntity work) {
@@ -31,9 +35,11 @@ public class UserLikeEntity {
     public void setId(Long id) { this.id = id; }
     public void setUser(UserEntity user) { this.user = user; }
     public void setWork(WorkEntity work) { this.work = work; }
+    public void setLikedAt(LocalDateTime likedAt) { this.likedAt = likedAt; }
     public Long getId() { return id; }
     public UserEntity getUser() { return user; }
     public WorkEntity getWork() { return work; }
+    public LocalDateTime getLikedAt() { return likedAt; }
 
     @Override
     public boolean equals(Object o) {

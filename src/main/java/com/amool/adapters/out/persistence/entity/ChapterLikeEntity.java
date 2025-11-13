@@ -1,6 +1,8 @@
 package com.amool.adapters.out.persistence.entity;
 
 import jakarta.persistence.*;
+
+import java.time.LocalDateTime;
 import java.util.Objects;
 
 @Entity
@@ -18,6 +20,8 @@ public class ChapterLikeEntity {
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "chapter_id", nullable = false)
     private ChapterEntity chapter;
+
+    private LocalDateTime likedAt;
     
     public ChapterLikeEntity() {}
     
@@ -45,6 +49,12 @@ public class ChapterLikeEntity {
     }
     public ChapterEntity getChapter() { 
         return chapter; 
+    }
+    public LocalDateTime getLikedAt() { 
+        return likedAt; 
+    }
+    public void setLikedAt(LocalDateTime likedAt) { 
+        this.likedAt = likedAt; 
     }
 
     @Override

@@ -10,6 +10,7 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Component;
+import java.time.LocalDateTime;
 
 import java.util.List;
 import java.util.Optional;
@@ -23,7 +24,7 @@ public class RatingPersistenceAdapter implements RatingPort {
 
     @Override
     @Transactional
-    public double rateWork(Long workId, Long userId, double rating) {
+    public double rateWork(Long workId, Long userId, double rating, LocalDateTime createdAt) {
         TypedQuery<RatingEntity> query = entityManager.createQuery(
             "SELECT r FROM RatingEntity r WHERE r.workId = :workId AND r.userId = :userId", 
             RatingEntity.class
@@ -35,6 +36,7 @@ public class RatingPersistenceAdapter implements RatingPort {
             .findFirst()
             .orElseGet(() -> {
                 RatingEntity newRating = new RatingEntity(workId, userId, rating);
+                newRating.setCreatedAt(createdAt);
                 entityManager.persist(newRating);
                 return newRating;
             });

@@ -1,13 +1,15 @@
 package com.amool.application.port.out;
 
+import java.time.LocalDateTime;
+
 public interface LikePort {
-    Long likeWork(Long workId, Long userId);
+    Long likeWork(Long workId, Long userId, LocalDateTime likedAt);
     
     Long unlikeWork(Long workId, Long userId);
     
     boolean hasUserLikedWork(Long workId, Long userId);
 
-    Long likeChapter(Long chapterId, Long userId);
+    Long likeChapter(Long chapterId, Long userId, LocalDateTime likedAt);
 
     Long unlikeChapter(Long chapterId, Long userId);
 
