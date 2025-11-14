@@ -47,4 +47,30 @@ public class UserPersistenceAdapter implements LoadUserPort {
             .setParameter("workId", workId)
             .getResultList();
     }
+
+    @Transactional
+    @Override
+    public boolean updateUser(User user, String newPassword) {
+        try {
+            UserEntity existingEntity = entityManager.find(UserEntity.class, user.getId());
+            if (existingEntity == null) {
+                return false;
+            }
+
+            existingEntity.setName(user.getName());
+            existingEntity.setSurname(user.getSurname());
+            existingEntity.setUsername(user.getUsername());
+            existingEntity.setEmail(user.getEmail());
+            existingEntity.setPhoto(user.getPhoto());
+
+            if (newPassword != null && !newPassword.isBlank()) {
+                existingEntity.setPassword(newPassword);
+            }
+
+            entityManager.merge(existingEntity);
+            return true;
+        } catch (Exception e) {
+            return false;
+        }
+    }
 }
