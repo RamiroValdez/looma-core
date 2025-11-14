@@ -38,11 +38,11 @@ class ChatServiceTest {
 
         Long userId = 1L;
         Long chapterId = 10L;
-        ChatMessage assistant = chatService.processMessage(userId, chapterId, "Hola", "Contenido del capítulo");
+        List<ChatMessage> assistant = chatService.processMessage(userId, chapterId, "Hola", "Contenido del capítulo");
 
         assertNotNull(assistant);
-        assertFalse(assistant.isUserMessage());
-        assertEquals("Respuesta simulada", assistant.getContent());
+        assertFalse(assistant.get(0).isUserMessage());
+        assertEquals("Respuesta simulada", assistant.get(0).getContent());
 
         List<ChatMessage> convo = chatService.getConversation(userId, chapterId);
         assertEquals(2, convo.size());
@@ -63,11 +63,11 @@ class ChatServiceTest {
 
         Long userId = 2L;
         Long chapterId = 20L;
-        ChatMessage assistant = chatService.processMessage(userId, chapterId, "Test error", null);
+        List<ChatMessage> assistant = chatService.processMessage(userId, chapterId, "Test error", null);
 
         assertNotNull(assistant);
-        assertFalse(assistant.isUserMessage());
-        assertTrue(assistant.getContent().startsWith("Lo siento, hubo un error"));
+        assertFalse(assistant.get(0).isUserMessage());
+        assertTrue(assistant.get(0).getContent().startsWith("Lo siento, hubo un error"));
     }
 
     @Test
