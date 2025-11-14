@@ -46,7 +46,6 @@ public class UseCasesConfig {
     private final RestTemplate restTemplate;
     private final NotificationPort notificationPort;
     private final ObtainChapterByIdPort obtainChapterByIdPort;
-    private final PasswordEncoder passwordEncoder;
 
     public UseCasesConfig(
             AwsS3Port awsS3Port,
@@ -121,7 +120,6 @@ public class UseCasesConfig {
         this.readingProgressPort = readingProgressPort;
         this.notificationPort = notificationPort;
         this.obtainChapterByIdPort = obtainChapterByIdPort;
-        this.passwordEncoder = passwordEncoder;
     }
 
     @Bean
@@ -437,7 +435,7 @@ public class UseCasesConfig {
 
     @Bean
     public UpdateUserUseCase updateUserUseCase() {
-        return new UpdateUserUseCase(loadUserPort, passwordEncoder);
+        return new UpdateUserUseCase(loadUserPort);
     }
 
 

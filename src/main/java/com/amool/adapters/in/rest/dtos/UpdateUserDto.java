@@ -12,6 +12,9 @@ public class UpdateUserDto {
     private String photo;
 
     @JsonProperty(access = JsonProperty.Access.WRITE_ONLY)
+    private String money;
+
+    @JsonProperty(access = JsonProperty.Access.WRITE_ONLY)
     private String newPassword;
 
     public Long getId() { return id; }
@@ -34,6 +37,9 @@ public class UpdateUserDto {
     
     public String getNewPassword() { return newPassword; }
     public void setNewPassword(String newPassword) { this.newPassword = newPassword; }
+
+    public String getMoney() { return money; }
+    public void setMoney(String money) { this.money = money; }
 
 
 }

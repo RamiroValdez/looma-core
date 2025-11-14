@@ -1,5 +1,7 @@
 package com.amool.adapters.in.rest.mappers;
 
+import java.math.BigDecimal;
+
 import com.amool.adapters.in.rest.dtos.UpdateUserDto;
 import com.amool.adapters.in.rest.dtos.UserDto;
 import com.amool.domain.model.User;
@@ -14,18 +16,22 @@ public class UserRestMapper {
         dto.setUsername(user.getUsername());
         dto.setEmail(user.getEmail());
         dto.setPhoto(user.getPhoto());
+        dto.setMoney(user.getMoney().toString());
         return dto;
         }
 
-        public static User updateUserToDomain(UpdateUserDto userDto) {
-            if (userDto == null) return null;
-            User user = new User();
-            user.setId(userDto.getId());
-            user.setName(userDto.getName());
-            user.setSurname(userDto.getSurname());
-            user.setUsername(userDto.getUsername());
-            user.setEmail(userDto.getEmail());
-            user.setPhoto(userDto.getPhoto());
-            return user;
+    public static User updateUserToDomain(UpdateUserDto userDto) {
+        if (userDto == null) return null;
+        User user = new User();
+        user.setId(userDto.getId());
+        user.setName(userDto.getName());
+        user.setSurname(userDto.getSurname());
+        user.setUsername(userDto.getUsername());
+        user.setEmail(userDto.getEmail());
+        user.setPhoto(userDto.getPhoto());
+        if(userDto.getMoney() != null) {
+            user.setMoney(new BigDecimal(userDto.getMoney()));
         }
+        return user;
+    }
 }

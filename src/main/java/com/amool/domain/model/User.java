@@ -1,5 +1,6 @@
 package com.amool.domain.model;
 
+import java.math.BigDecimal;
 import java.util.HashSet;
 import java.util.Set;
 
@@ -10,6 +11,7 @@ public class User {
     private String username;
     private String email;
     private String photo;
+    private BigDecimal money;
     private Set<Work> savedWorks = new HashSet<>();
 
     public Long getId() { return id; }
@@ -32,6 +34,10 @@ public class User {
     
     public Set<Work> getSavedWorks() { return savedWorks; }
     public void setSavedWorks(Set<Work> savedWorks) { this.savedWorks = savedWorks; }
+
     public void addSavedWork(Work work) { this.savedWorks.add(work); }
     public void removeSavedWork(Work work) { this.savedWorks.remove(work); }
+
+    public BigDecimal getMoney() { return money; }
+    public void setMoney(BigDecimal money) { this.money = money; }
 }
