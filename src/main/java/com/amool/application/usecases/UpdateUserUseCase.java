@@ -3,9 +3,7 @@ package com.amool.application.usecases;
 import com.amool.application.port.out.LoadUserPort;
 import com.amool.domain.model.User;
 import org.springframework.security.crypto.password.PasswordEncoder;
-import org.springframework.stereotype.Service;
 
-@Service
 public class UpdateUserUseCase {
 
     private final LoadUserPort loadUserPort;
