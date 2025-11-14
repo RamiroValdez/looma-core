@@ -1,13 +1,21 @@
 package com.amool.adapters.in.rest.dtos;
 
-public class UserDto {
+import com.fasterxml.jackson.annotation.JsonProperty;
+
+public class UpdateUserDto {
+
     private Long id;
     private String name;
     private String surname;
     private String username;
     private String email;
     private String photo;
+
+    @JsonProperty(access = JsonProperty.Access.WRITE_ONLY)
     private String money;
+
+    @JsonProperty(access = JsonProperty.Access.WRITE_ONLY)
+    private String newPassword;
 
     public Long getId() { return id; }
     public void setId(Long id) { this.id = id; }
@@ -26,7 +34,12 @@ public class UserDto {
 
     public String getPhoto() { return photo; }
     public void setPhoto(String photo) { this.photo = photo; }
+    
+    public String getNewPassword() { return newPassword; }
+    public void setNewPassword(String newPassword) { this.newPassword = newPassword; }
 
     public String getMoney() { return money; }
     public void setMoney(String money) { this.money = money; }
+
+
 }

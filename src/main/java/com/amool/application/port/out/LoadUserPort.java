@@ -11,4 +11,6 @@ public interface LoadUserPort {
     List<Long> getAllAuthorSubscribers(Long authorId);
 
     List<Long> getAllWorkSubscribers(Long workId);
+
+    boolean updateUser(User user, String newPassword);
 }

@@ -5,6 +5,7 @@ import com.amool.application.service.ImagesService;
 import com.amool.application.usecases.*;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.web.client.RestTemplate;
 
 @Configuration
@@ -81,7 +82,8 @@ public class UseCasesConfig {
             RatingPort ratingPort,
             ReadingProgressPort readingProgressPort,
             NotificationPort notificationPort,
-            ObtainChapterByIdPort obtainChapterByIdPort
+            ObtainChapterByIdPort obtainChapterByIdPort,
+            PasswordEncoder passwordEncoder
             ) {
         this.awsS3Port = awsS3Port;
         this.authPort = authPort;
@@ -429,6 +431,11 @@ public class UseCasesConfig {
     @Bean
     public UpdateNotificationReadUseCase updateNotificationReadUseCase() {
         return new UpdateNotificationReadUseCase(notificationPort);
+    }
+
+    @Bean
+    public UpdateUserUseCase updateUserUseCase() {
+        return new UpdateUserUseCase(loadUserPort);
     }
 
 
