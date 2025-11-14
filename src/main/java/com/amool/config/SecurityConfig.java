@@ -33,6 +33,7 @@ public class SecurityConfig {
                         .requestMatchers("/api/explore").permitAll()
                         .requestMatchers("/api/my-works/**").authenticated()
                         .requestMatchers("/api/works/**").permitAll()
+                        .requestMatchers("/api/export/epub/**").permitAll()
                         .anyRequest().authenticated()
                 )
                 .addFilterBefore(new JwtAuthenticationFilter(jwtService), UsernamePasswordAuthenticationFilter.class);

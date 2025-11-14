@@ -121,7 +121,8 @@ public class WorksPersistenceAdapter implements ObtainWorkByIdPort, WorkPort {
 
             if (work.getCategories() != null) existingEntity.setCategories(CategoryMapper.toEntitySet(work.getCategories()));
             if (work.getTags() != null) existingEntity.setTags(TagMapper.toEntitySet(work.getTags()));
-
+            if (work.getHasEpub() != null) existingEntity.setHasEpub(work.getHasEpub());
+            if (work.getLengthEpub() != null) existingEntity.setLengthEpub(work.getLengthEpub());
             entityManager.merge(existingEntity);
             entityManager.flush();
             return Boolean.TRUE;

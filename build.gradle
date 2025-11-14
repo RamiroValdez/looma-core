@@ -50,7 +50,8 @@ dependencies {
     testImplementation 'org.springframework.security:spring-security-test'
     testRuntimeOnly 'org.junit.platform:junit-platform-launcher'
     testImplementation 'de.flapdoodle.embed:de.flapdoodle.embed.mongo:4.12.2'
-
+    implementation 'io.documentnode:epub4j-core:4.2.1'
+    implementation 'com.vladsch.flexmark:flexmark-all:0.64.8'
     compileOnly 'org.projectlombok:lombok'
     annotationProcessor 'org.projectlombok:lombok'
 }
