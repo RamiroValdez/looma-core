@@ -27,6 +27,7 @@ public class Work {
     private List<Category> categories = new ArrayList<>();
     private Set<Tag> tags = new HashSet<>();
     private transient Boolean likedByUser;
+    private Integer lengthEpub;
 
     public Work() {}
 
@@ -87,4 +88,7 @@ public class Work {
 
     public Boolean getHasEpub() { return hasEpub; }
     public void setHasEpub(Boolean hasEpub) { this.hasEpub = hasEpub; }
+
+    public Integer getLengthEpub() { return lengthEpub; }
+    public void setLengthEpub(Integer lengthEpub) { this.lengthEpub = lengthEpub; } 
 }

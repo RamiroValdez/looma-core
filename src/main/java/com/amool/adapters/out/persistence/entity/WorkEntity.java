@@ -47,8 +47,11 @@ public class WorkEntity {
     @Column(name = "rating_count")
     private Integer ratingCount = 0;
 
-    @Column(name = "has_epub")
+    @Column(name = "has_epub", nullable = false)
     private Boolean hasEpub = false;
+
+    @Column(name = "lenghtEpub")
+    private Integer lengthEpub;
 
     @ManyToOne
     @JoinColumn(name = "creator_id", nullable = false)
@@ -142,5 +145,8 @@ public class WorkEntity {
 
     public Boolean getHasEpub() { return hasEpub; }
     public void setHasEpub(Boolean hasEpub) { this.hasEpub = hasEpub; }
+
+    public Integer getLengthEpub() { return lengthEpub; }
+    public void setLengthEpub(Integer lengthEpub) { this.lengthEpub = lengthEpub; }
 }
 
