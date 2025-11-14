@@ -118,7 +118,7 @@ public class ExportEpubUseCase {
                  work.getCreator().getSurname())
                  );
         
-        Resource cover = new Resource(downloadImage(awsS3Port.obtainPublicUrl(EPUBPATH.replace("{workId}", work.getId().toString()) + "/" + work.getTitle() + ".epub")), "cover.png");
+        Resource cover = new Resource(downloadImage(awsS3Port.obtainPublicUrl(work.getCover())), "cover.png");
         book.setCoverImage(cover);
         work.getChapters().stream().forEach(chapter -> {
 
