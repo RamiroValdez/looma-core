@@ -22,6 +22,7 @@ public class Work {
     private User creator;
     private Format format;
     private Language originalLanguage;
+    private Boolean hasEpub;
     private List<Chapter> chapters = new ArrayList<>();
     private List<Category> categories = new ArrayList<>();
     private Set<Tag> tags = new HashSet<>();
@@ -83,4 +84,7 @@ public class Work {
     
     public Boolean getLikedByUser() { return likedByUser; }
     public void setLikedByUser(Boolean likedByUser) { this.likedByUser = likedByUser; }
+
+    public Boolean getHasEpub() { return hasEpub; }
+    public void setHasEpub(Boolean hasEpub) { this.hasEpub = hasEpub; }
 }

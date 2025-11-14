@@ -47,6 +47,9 @@ public class WorkEntity {
     @Column(name = "rating_count")
     private Integer ratingCount = 0;
 
+    @Column(name = "has_epub")
+    private Boolean hasEpub = false;
+
     @ManyToOne
     @JoinColumn(name = "creator_id", nullable = false)
     private UserEntity creator;
@@ -136,5 +139,8 @@ public class WorkEntity {
 
     public Set<TagEntity> getTags() { return tags; }
     public void setTags(Set<TagEntity> tags) { this.tags = tags; }
+
+    public Boolean getHasEpub() { return hasEpub; }
+    public void setHasEpub(Boolean hasEpub) { this.hasEpub = hasEpub; }
 }
 

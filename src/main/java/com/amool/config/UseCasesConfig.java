@@ -431,5 +431,13 @@ public class UseCasesConfig {
         return new UpdateNotificationReadUseCase(notificationPort);
     }
 
+    @Bean
+    public ExportEpubUseCase exportEpubUseCase() {
+        return new ExportEpubUseCase(
+                obtainWorkByIdPort,
+                loadChapterContentPort,
+                awsS3Port
+        );
+    }
 
 }
