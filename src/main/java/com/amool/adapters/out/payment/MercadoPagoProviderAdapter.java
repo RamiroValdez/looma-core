@@ -25,6 +25,8 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.HashMap;
 import java.util.Map;
+import java.net.URI;
+import com.amool.application.port.out.PaymentSessionLinkPort;
 
 @Component
 public class MercadoPagoProviderAdapter implements PaymentProviderPort {
@@ -60,15 +62,18 @@ public class MercadoPagoProviderAdapter implements PaymentProviderPort {
     private final ObtainWorkByIdPort obtainWorkByIdPort;
     private final LoadChapterPort loadChapterPort;
     private final UserQueryPort userQueryPort;
+    private final PaymentSessionLinkPort paymentSessionLinkPort;
 
     public MercadoPagoProviderAdapter(RestTemplate restTemplate,
                                       ObtainWorkByIdPort obtainWorkByIdPort,
                                       LoadChapterPort loadChapterPort,
-                                      UserQueryPort userQueryPort) {
+                                      UserQueryPort userQueryPort,
+                                      PaymentSessionLinkPort paymentSessionLinkPort) {
         this.restTemplate = restTemplate;
         this.obtainWorkByIdPort = obtainWorkByIdPort;
         this.loadChapterPort = loadChapterPort;
         this.userQueryPort = userQueryPort;
+        this.paymentSessionLinkPort = paymentSessionLinkPort;
     }
 
     @Override
@@ -81,13 +86,36 @@ public class MercadoPagoProviderAdapter implements PaymentProviderPort {
         return startCheckout(userId, type, targetId, null);
     }
 
-    @Override
     public PaymentInitResult startCheckout(Long userId, SubscriptionType type, Long targetId, String returnUrl) {
         if (accessToken == null || accessToken.isBlank()) {
             throw new IllegalStateException("MercadoPago access token not configured (payments.mercadopago.accessToken)");
         }
 
+        String sessionUuid = null;
+        try {
+            if (returnUrl != null && !returnUrl.isBlank()) {
+                URI u = URI.create(returnUrl);
+                String path = u.getPath();
+                if (path != null) {
+                    int idx = path.indexOf("/payment/");
+                    if (idx >= 0) {
+                        String tail = path.substring(idx + "/payment/".length());
+                        int nextSlash = tail.indexOf('/');
+                        if (nextSlash > 0) tail = tail.substring(0, nextSlash);
+                        String candidate = tail;
+                        if (candidate.matches("(?i)[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}")) {
+                            sessionUuid = candidate;
+                        }
+                    }
+                }
+            }
+        } catch (Exception ignore) {}
         String externalRef = encodeRef(userId, type, targetId);
+        if (sessionUuid != null) {
+            paymentSessionLinkPort.saveLink(externalRef, sessionUuid);
+        }
+        System.out.println("sessionUuid sessionUuid: " + sessionUuid);
+        System.out.println("returnUrl returnUrl: " + returnUrl);
         BigDecimal amount;
         String title;
         switch (type) {
@@ -161,6 +189,11 @@ public class MercadoPagoProviderAdapter implements PaymentProviderPort {
         Map<String, Object> payload = new HashMap<>();
         payload.put("items", new ArrayList<>(List.of(item)));
         payload.put("external_reference", externalRef);
+        if (sessionUuid != null) {
+            Map<String, Object> metadata = new HashMap<>();
+            metadata.put("session_uuid", sessionUuid);
+            payload.put("metadata", metadata);
+        }
         payload.put("back_urls", backUrls);
         payload.put("notification_url", notificationUrl);
         String autoReturnTarget = (returnUrl != null && !returnUrl.isBlank()) ? returnUrl : successUrl;

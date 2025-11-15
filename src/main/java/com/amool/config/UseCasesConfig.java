@@ -45,6 +45,9 @@ public class UseCasesConfig {
     private final RestTemplate restTemplate;
     private final NotificationPort notificationPort;
     private final ObtainChapterByIdPort obtainChapterByIdPort;
+    private final UserAccountPort userAccountPort;
+    private final EmailPort emailPort;
+    private final PaymentSessionLinkPort paymentSessionLinkPort;
 
     public UseCasesConfig(
             AwsS3Port awsS3Port,
@@ -81,7 +84,10 @@ public class UseCasesConfig {
             RatingPort ratingPort,
             ReadingProgressPort readingProgressPort,
             NotificationPort notificationPort,
-            ObtainChapterByIdPort obtainChapterByIdPort
+            ObtainChapterByIdPort obtainChapterByIdPort,
+            UserAccountPort userAccountPort,
+            EmailPort emailPort,
+            PaymentSessionLinkPort paymentSessionLinkPort
             ) {
         this.awsS3Port = awsS3Port;
         this.authPort = authPort;
@@ -118,6 +124,9 @@ public class UseCasesConfig {
         this.readingProgressPort = readingProgressPort;
         this.notificationPort = notificationPort;
         this.obtainChapterByIdPort = obtainChapterByIdPort;
+        this.userAccountPort = userAccountPort;
+        this.emailPort = emailPort;
+        this.paymentSessionLinkPort = paymentSessionLinkPort;
     }
 
     @Bean
@@ -393,7 +402,8 @@ public class UseCasesConfig {
                 paymentRecordPort,
                 obtainWorkByIdPort,
                 loadChapterPort,
-                subscribeUserUseCase()
+                subscribeUserUseCase(),
+                paymentSessionLinkPort
         );
     }
 
@@ -432,4 +442,13 @@ public class UseCasesConfig {
     }
 
 
+    @Bean
+    public StartRegistrationUseCase startRegistrationUseCase() {
+        return new StartRegistrationUseCase(userAccountPort, emailPort);
+    }
+
+    @Bean
+    public VerifyRegistrationUseCase verifyRegistrationUseCase() {
+        return new VerifyRegistrationUseCase(userAccountPort);
+    }
 }
