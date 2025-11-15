@@ -93,8 +93,8 @@ SELECT 'gl', 'Gallego'    WHERE NOT EXISTS (SELECT 1 FROM language WHERE code = 
 -- Se asume que username y/o email son únicos; se evita duplicar por username.
 -- La tabla se llama "user" (entre comillas) tal como se usó en el proyecto.
 -- -----------------------------------------------------------------------------
-INSERT INTO "user" (name, surname, username, email, password, photo, money)
-SELECT 'Juan', 'Pérez', 'jperez', 'juanperez@gmail.com', 'Password1234', 'none', 100.00
+INSERT INTO "user" (name, surname, username, email, password, photo, money, enabled, verification_code, verification_expires_at)
+SELECT 'Juan', 'Pérez', 'jperez', 'juanperez@gmail.com', 'Password1234', 'none', 100.00, true, '123456', '2025-12-31 23:59:59'
 WHERE NOT EXISTS (SELECT 1 FROM "user" WHERE username = 'jperez' OR email = 'juanperez@gmail.com');
 
 -- -----------------------------------------------------------------------------

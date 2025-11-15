@@ -19,15 +19,10 @@ public class PaymentAuditPersistenceAdapter implements PaymentAuditPort {
     @Override
     public boolean markProcessedIfFirst(String paymentId) {
         if (paymentId == null || paymentId.isBlank()) return false;
-        try {
-            PaymentProcessedEntity e = new PaymentProcessedEntity(paymentId);
-            entityManager.persist(e);
-            entityManager.flush();
-            return true;
-        } catch (EntityExistsException | DataIntegrityViolationException ex) {
-            return false;
-        } catch (Exception ex) {
-            return false;
-        }
+        int affected = entityManager.createNativeQuery(
+                "INSERT INTO payment_processed (payment_id) VALUES (:pid) ON CONFLICT DO NOTHING")
+            .setParameter("pid", paymentId)
+            .executeUpdate();
+        return affected > 0;
     }
 }

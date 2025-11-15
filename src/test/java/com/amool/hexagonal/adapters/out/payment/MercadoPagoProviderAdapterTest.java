@@ -3,6 +3,7 @@ package com.amool.hexagonal.adapters.out.payment;
 import com.amool.adapters.out.payment.MercadoPagoProviderAdapter;
 import com.amool.application.port.out.LoadChapterPort;
 import com.amool.application.port.out.ObtainWorkByIdPort;
+import com.amool.application.port.out.PaymentSessionLinkPort;
 import com.amool.domain.model.Chapter;
 import com.amool.domain.model.User;
 import com.amool.domain.model.Work;
@@ -34,6 +35,7 @@ public class MercadoPagoProviderAdapterTest {
     private ObtainWorkByIdPort obtainWorkByIdPort;
     private LoadChapterPort loadChapterPort;
     private UserQueryPort userQueryPort;
+    private PaymentSessionLinkPort paymentSessionLinkPort;
 
     private MercadoPagoProviderAdapter adapter;
 
@@ -44,7 +46,8 @@ public class MercadoPagoProviderAdapterTest {
         obtainWorkByIdPort = Mockito.mock(ObtainWorkByIdPort.class);
         loadChapterPort = Mockito.mock(LoadChapterPort.class);
         userQueryPort = Mockito.mock(UserQueryPort.class);
-        adapter = new MercadoPagoProviderAdapter(restTemplate, obtainWorkByIdPort, loadChapterPort, userQueryPort);
+        paymentSessionLinkPort = Mockito.mock(PaymentSessionLinkPort.class);
+        adapter = new MercadoPagoProviderAdapter(restTemplate, obtainWorkByIdPort, loadChapterPort, userQueryPort, paymentSessionLinkPort);
         ReflectionTestUtils.setField(adapter, "accessToken", "test_access_token");
         ReflectionTestUtils.setField(adapter, "apiBase", "https://api.mercadopago.com");
         ReflectionTestUtils.setField(adapter, "successUrl", "http://localhost:5173/return");

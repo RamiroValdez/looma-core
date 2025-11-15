@@ -34,9 +34,8 @@ public class DatabaseInitializer {
                 
                 String sqlScript = readResource(resource);
 
-                // Eliminar comentarios de bloque y líneas de comentario
-                sqlScript = sqlScript.replaceAll("--[^\n]*", ""); // Comentarios de línea
-                sqlScript = sqlScript.replaceAll("/\\*[^*]*\\*+(?:[^/*][^*]*\\*+)*/", ""); // Comentarios de bloque
+                sqlScript = sqlScript.replaceAll("--[^\n]*", "");
+                sqlScript = sqlScript.replaceAll("/\\*[^*]*\\*+(?:[^/*][^*]*\\*+)*/", "");
 
                 String[] sqlStatements = sqlScript.split(";");
                 

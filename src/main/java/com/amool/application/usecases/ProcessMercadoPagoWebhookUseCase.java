@@ -5,6 +5,7 @@ import com.amool.application.port.out.UserBalancePort;
 import com.amool.application.port.out.PaymentRecordPort;
 import com.amool.application.port.out.ObtainWorkByIdPort;
 import com.amool.application.port.out.LoadChapterPort;
+import com.amool.application.port.out.PaymentSessionLinkPort;
 import com.amool.domain.model.Work;
 import com.amool.domain.model.Chapter;
 import com.amool.domain.model.PaymentRecord;
@@ -29,6 +30,7 @@ public class ProcessMercadoPagoWebhookUseCase {
     private final ObtainWorkByIdPort obtainWorkByIdPort;
     private final LoadChapterPort loadChapterPort;
     private final SubscribeUserUseCase subscribeUserUseCase;
+    private final PaymentSessionLinkPort paymentSessionLinkPort;
 
     @Value("${payments.mercadopago.accessToken}")
     private String accessToken;
@@ -45,7 +47,8 @@ public class ProcessMercadoPagoWebhookUseCase {
                                             PaymentRecordPort paymentRecordPort,
                                             ObtainWorkByIdPort obtainWorkByIdPort,
                                             LoadChapterPort loadChapterPort,
-                                            SubscribeUserUseCase subscribeUserUseCase) {
+                                            SubscribeUserUseCase subscribeUserUseCase,
+                                            PaymentSessionLinkPort paymentSessionLinkPort) {
         this.restTemplate = restTemplate;
         this.paymentAuditPort = paymentAuditPort;
         this.userBalancePort = userBalancePort;
@@ -53,6 +56,7 @@ public class ProcessMercadoPagoWebhookUseCase {
         this.obtainWorkByIdPort = obtainWorkByIdPort;
         this.loadChapterPort = loadChapterPort;
         this.subscribeUserUseCase = subscribeUserUseCase;
+        this.paymentSessionLinkPort = paymentSessionLinkPort;
     }
 
     public ProcessMercadoPagoWebhookResult execute(String paymentId, String externalReference, Map<?, ?> paymentData) {
@@ -96,7 +100,7 @@ public class ProcessMercadoPagoWebhookUseCase {
             processAuthorPayout(payment, ref);
         }
 
-        savePaymentRecord(finalPaymentId, payment, ref);
+        savePaymentRecord(finalPaymentId, payment, ref, externalReference);
 
         subscribeUserUseCase.execute(ref.userId, ref.type, ref.targetId);
 
@@ -134,7 +138,7 @@ public class ProcessMercadoPagoWebhookUseCase {
         }
     }
 
-    private void savePaymentRecord(String paymentId, Map<?, ?> payment, DecodedRef ref) {
+    private void savePaymentRecord(String paymentId, Map<?, ?> payment, DecodedRef ref, String externalReference) {
         try {
             PaymentRecord rec = new PaymentRecord();
             rec.setId(paymentId);
@@ -143,16 +147,24 @@ public class ProcessMercadoPagoWebhookUseCase {
             rec.setStatus("approved");
             rec.setSubscriptionType(ref.type.name());
             rec.setTargetId(ref.targetId);
+            rec.setExternalReference(externalReference);
+
+            String sessionUuid = null;
+            if (payment != null) {
+                Object metaObj = payment.get("metadata");
+                if (metaObj instanceof Map<?, ?> meta) {
+                    Object sid = meta.get("session_uuid");
+                    if (sid != null) sessionUuid = sid.toString();
+                }
+            }
+            if (sessionUuid == null) {
+                String normalized = ref.userId + ":" + ref.type.name().toLowerCase() + ":" + ref.targetId;
+                sessionUuid = paymentSessionLinkPort.findSessionUuid(normalized).orElse(null);
+            }
+            rec.setSessionUuid(sessionUuid);
             
-            BigDecimal amountPaid = extractTransactionAmount(payment);
-            rec.setAmount(amountPaid);
-            
-            String currency = payment != null && payment.get("currency_id") != null ? 
-                payment.get("currency_id").toString() : null;
-            rec.setCurrency(currency);
-            
-            String method = payment != null && payment.get("payment_method_id") != null ? 
-                payment.get("payment_method_id").toString() : null;
+            String method = payment != null && payment.get("payment_method_id") != null ?
+                    payment.get("payment_method_id").toString() : null;
             rec.setPaymentMethod(method);
             
             String description = payment != null && payment.get("description") != null ? 
@@ -162,6 +174,13 @@ public class ProcessMercadoPagoWebhookUseCase {
             }
             rec.setTitle(description);
             
+            BigDecimal amountPaid = extractTransactionAmount(payment);
+            rec.setAmount(amountPaid);
+
+            String currency = payment != null && payment.get("currency_id") != null ?
+                    payment.get("currency_id").toString() : null;
+            rec.setCurrency(currency);
+
             OffsetDateTime created = extractApprovedAt(payment);
             if (created == null) {
                 created = OffsetDateTime.now();
