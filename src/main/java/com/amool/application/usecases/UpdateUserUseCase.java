@@ -16,6 +16,11 @@ public class UpdateUserUseCase {
 
     public boolean execute(User user, String newPassword) {
         try {
+
+            if(user.getPhoto() != null || user.getPhoto() != "none"){
+                imagesService.deleteImage(user.getPhoto());
+            }
+
             user.setPhoto(imagesService.uploadUserImage(user.getMultipartFile(), user.getId().toString()));
             boolean result = loadUserPort.updateUser(user, newPassword);
             return result;
