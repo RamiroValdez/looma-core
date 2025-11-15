@@ -13,6 +13,7 @@ public class User {
     private String photo;
     private BigDecimal money;
     private Set<Work> savedWorks = new HashSet<>();
+    private InMemoryMultipartFile multipartFile;
 
     public Long getId() { return id; }
     public void setId(Long id) { this.id = id; }
@@ -40,4 +41,7 @@ public class User {
 
     public BigDecimal getMoney() { return money; }
     public void setMoney(BigDecimal money) { this.money = money; }
+
+    public InMemoryMultipartFile getMultipartFile() { return multipartFile; }
+    public void setMultipartFile(InMemoryMultipartFile multipartFile) { this.multipartFile = multipartFile; }
 }

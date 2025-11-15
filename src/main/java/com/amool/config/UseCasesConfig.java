@@ -245,7 +245,7 @@ public class UseCasesConfig {
 
     @Bean
     public GetUserByIdUseCase getUserByIdUseCase() {
-        return new GetUserByIdUseCase(loadUserPort);
+        return new GetUserByIdUseCase(loadUserPort, awsS3Port);
     }
 
     @Bean
@@ -435,7 +435,7 @@ public class UseCasesConfig {
 
     @Bean
     public UpdateUserUseCase updateUserUseCase() {
-        return new UpdateUserUseCase(loadUserPort);
+        return new UpdateUserUseCase(loadUserPort, imagesService);
     }
 
 

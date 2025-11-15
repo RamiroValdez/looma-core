@@ -1,9 +1,11 @@
 package com.amool.adapters.in.rest.mappers;
 
+import java.io.IOException;
 import java.math.BigDecimal;
 
 import com.amool.adapters.in.rest.dtos.UpdateUserDto;
 import com.amool.adapters.in.rest.dtos.UserDto;
+import com.amool.domain.model.InMemoryMultipartFile;
 import com.amool.domain.model.User;
 
 public class UserRestMapper {
@@ -30,7 +32,12 @@ public class UserRestMapper {
         user.setEmail(userDto.getEmail());
         user.setPhoto(userDto.getPhoto());
         if(userDto.getMoney() != null) {
-            user.setMoney(new BigDecimal(userDto.getMoney()));
+            user.setMoney(userDto.getMoney());
+        }
+        try{
+            user.setMultipartFile(new InMemoryMultipartFile(userDto.getFile().getName(), userDto.getFile().getName(), userDto.getFile().getContentType(), userDto.getFile().getBytes()));
+        } catch (IOException e) {
+            user.setMultipartFile(null);
         }
         return user;
     }

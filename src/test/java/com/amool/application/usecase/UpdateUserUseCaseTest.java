@@ -5,6 +5,7 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.when;
 
+import com.amool.application.service.ImagesService;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
@@ -17,11 +18,13 @@ public class UpdateUserUseCaseTest {
 
     private UpdateUserUseCase updateUserUseCase;
     private LoadUserPort loadUserPort;
-    
+    private ImagesService imagesService;
+
     @BeforeEach
     public void setUp() {
         loadUserPort = Mockito.mock(LoadUserPort.class);
-        updateUserUseCase = new UpdateUserUseCase(loadUserPort);
+        imagesService = Mockito.mock(ImagesService.class);
+        updateUserUseCase = new UpdateUserUseCase(loadUserPort, imagesService);
     }
     
     @Test
