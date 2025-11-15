@@ -7,7 +7,7 @@ import org.springframework.context.annotation.Profile;
 import org.springframework.stereotype.Component;
 
 @Component
-@Profile("test")
+@Profile("dev")
 public class ConsoleEmailAdapter implements EmailPort {
     private static final Logger log = LoggerFactory.getLogger(ConsoleEmailAdapter.class);
     @Override
