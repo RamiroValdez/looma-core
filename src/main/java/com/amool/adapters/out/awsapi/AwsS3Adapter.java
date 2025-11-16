@@ -107,4 +107,18 @@ public class AwsS3Adapter implements AwsS3Port {
         s3Client.deleteObject(request);
     }
 
+    @Override
+    public Boolean uploadPrivateByte (String key, String header, byte[] bytes) {
+        s3Client.putObject(
+                    PutObjectRequest.builder()
+                            .bucket(bucketName)
+                            .key(key)
+                            .contentType(header)
+                            .build(),
+                    RequestBody.fromBytes(bytes)
+                    );
+
+            return true;
+    }
+
 }
