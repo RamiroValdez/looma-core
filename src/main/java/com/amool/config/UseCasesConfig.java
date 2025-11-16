@@ -402,7 +402,7 @@ public class UseCasesConfig {
 
     @Bean
     public ObtainWorkListUseCase obtainWorkListUseCase() {
-        return new ObtainWorkListUseCase(workPort);
+        return new ObtainWorkListUseCase(workPort, awsS3Port);
     }
 
     @Bean

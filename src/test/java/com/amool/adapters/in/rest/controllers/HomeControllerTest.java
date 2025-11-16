@@ -1,5 +1,6 @@
 package com.amool.adapters.in.rest.controllers;
 
+import com.amool.application.port.out.AwsS3Port;
 import org.mockito.Mockito;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -19,11 +20,12 @@ public class HomeControllerTest {
     private HomeController homeController;
     private ObtainWorkListUseCase obtainWorkListUseCase;
     private WorkPort workPort;
+    private AwsS3Port awsS3Port;
     
     @BeforeEach
     public void setUp() {
         workPort = Mockito.mock(WorkPort.class);
-        obtainWorkListUseCase = new ObtainWorkListUseCase(workPort);
+        obtainWorkListUseCase = new ObtainWorkListUseCase(workPort, awsS3Port);
         homeController = new HomeController(obtainWorkListUseCase);
     }
 
