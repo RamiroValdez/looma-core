@@ -15,6 +15,8 @@ public class PaymentRecord {
     private String subscriptionType;
     private Long targetId;
     private OffsetDateTime createdAt;
+    private String externalReference;
+    private String sessionUuid;
 
     public PaymentRecord() {}
 
@@ -50,4 +52,10 @@ public class PaymentRecord {
 
     public OffsetDateTime getCreatedAt() { return createdAt; }
     public void setCreatedAt(OffsetDateTime createdAt) { this.createdAt = createdAt; }
+
+    public String getExternalReference() { return externalReference; }
+    public void setExternalReference(String externalReference) { this.externalReference = externalReference; }
+
+    public String getSessionUuid() { return sessionUuid; }
+    public void setSessionUuid(String sessionUuid) { this.sessionUuid = sessionUuid; }
 }

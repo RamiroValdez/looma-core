@@ -47,6 +47,9 @@ public class UseCasesConfig {
     private final NotificationPort notificationPort;
     private final ObtainChapterByIdPort obtainChapterByIdPort;
     private final AnalyticsPort analyticsPort;
+    private final UserAccountPort userAccountPort;
+    private final EmailPort emailPort;
+    private final PaymentSessionLinkPort paymentSessionLinkPort;
 
     public UseCasesConfig(
             AwsS3Port awsS3Port,
@@ -85,7 +88,9 @@ public class UseCasesConfig {
             AnalyticsPort analyticsPort,
             NotificationPort notificationPort,
             ObtainChapterByIdPort obtainChapterByIdPort,
-            PasswordEncoder passwordEncoder
+            UserAccountPort userAccountPort,
+            EmailPort emailPort,
+            PaymentSessionLinkPort paymentSessionLinkPort
             ) {
         this.awsS3Port = awsS3Port;
         this.authPort = authPort;
@@ -123,6 +128,9 @@ public class UseCasesConfig {
         this.notificationPort = notificationPort;
         this.obtainChapterByIdPort = obtainChapterByIdPort;
         this.analyticsPort = analyticsPort;
+        this.userAccountPort = userAccountPort;
+        this.emailPort = emailPort;
+        this.paymentSessionLinkPort = paymentSessionLinkPort;
     }
 
     @Bean
@@ -398,7 +406,8 @@ public class UseCasesConfig {
                 paymentRecordPort,
                 obtainWorkByIdPort,
                 loadChapterPort,
-                subscribeUserUseCase()
+                subscribeUserUseCase(),
+                paymentSessionLinkPort
         );
     }
 
@@ -446,7 +455,7 @@ public class UseCasesConfig {
     @Bean
     public GetLikesPerWorkUseCase getLikesPerWorkUseCase() {
         return new GetLikesPerWorkUseCase(analyticsPort);
-    }   
+    }
 
     @Bean
     public GetLikesPerChapterUseCase getLikesPerChapterUseCase() {
@@ -457,7 +466,7 @@ public class UseCasesConfig {
     public GetRatingsPerWorkUseCase getRatingsPerWorkUseCase() {
         return new GetRatingsPerWorkUseCase(analyticsPort);
     }
-    
+
     @Bean
     public GetSavesPerWorkUseCase getSavesPerWorkUseCase() {
         return new GetSavesPerWorkUseCase(analyticsPort);
@@ -486,5 +495,14 @@ public class UseCasesConfig {
     @Bean
     public GetTotalSuscribersUseCase getTotalSuscribersUseCase() {
         return new GetTotalSuscribersUseCase(analyticsPort, obtainWorkByIdPort);
+    }
+    @Bean
+    public StartRegistrationUseCase startRegistrationUseCase() {
+        return new StartRegistrationUseCase(userAccountPort, emailPort);
+    }
+
+    @Bean
+    public VerifyRegistrationUseCase verifyRegistrationUseCase() {
+        return new VerifyRegistrationUseCase(userAccountPort);
     }
 }
