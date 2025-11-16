@@ -88,7 +88,6 @@ public class UseCasesConfig {
             AnalyticsPort analyticsPort,
             NotificationPort notificationPort,
             ObtainChapterByIdPort obtainChapterByIdPort,
-            PasswordEncoder passwordEncoder,
             UserAccountPort userAccountPort,
             EmailPort emailPort,
             PaymentSessionLinkPort paymentSessionLinkPort

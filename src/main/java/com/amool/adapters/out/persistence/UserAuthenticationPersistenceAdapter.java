@@ -19,9 +19,8 @@ public class UserAuthenticationPersistenceAdapter implements AuthenticateUserPor
     private final EntityManager entityManager;
     private final BCryptPasswordEncoder encoder = new BCryptPasswordEncoder();
 
-    public UserAuthenticationPersistenceAdapter(EntityManager entityManager, PasswordEncoder passwordEncoder) {
+    public UserAuthenticationPersistenceAdapter(EntityManager entityManager) {
         this.entityManager = entityManager;
-        this.passwordEncoder = passwordEncoder;
     }
 
     @Override
