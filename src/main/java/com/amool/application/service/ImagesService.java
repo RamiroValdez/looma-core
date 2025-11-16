@@ -75,6 +75,20 @@ public class ImagesService {
         return filePath;
     }
 
+    public String uploadUserImage(InMemoryMultipartFile file, String userId) throws IOException {
+
+        if (file == null || file.isEmpty()) {
+            throw new IllegalArgumentException("El archivo no puede estar vacío");
+        }
+
+        String fileName = UUID.randomUUID()+ "." + getFileExtension(Objects.requireNonNull(file.getOriginalFilename()));
+        String filePath = "users/" + userId + "/profile/" + fileName;
+
+        this.awsS3Port.uploadPublicFile(filePath,file);
+
+        return filePath;
+    }
+
     public void deleteImage(String filePath) {
         if (filePath == null) return;
         if ("none".equalsIgnoreCase(filePath)) return;
