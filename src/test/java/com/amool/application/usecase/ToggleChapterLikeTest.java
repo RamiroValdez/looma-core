@@ -7,6 +7,8 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
 
+import java.time.LocalDateTime;
+
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
 
@@ -14,7 +16,6 @@ public class ToggleChapterLikeTest {
 
     private LikePort likePort;
     private ToggleChapterLikeUseCase useCase;
-
     @BeforeEach
     void setUp() {
         likePort = Mockito.mock(LikePort.class);
@@ -91,7 +92,7 @@ public class ToggleChapterLikeTest {
 
     private void givenChapterIsNotLikedByUser(Long chapterId, Long userId, Long expectedLikeCount) {
         when(likePort.hasUserLikedChapter(chapterId, userId)).thenReturn(false);
-        when(likePort.likeChapter(chapterId, userId)).thenReturn(expectedLikeCount);
+        when(likePort.likeChapter(eq(chapterId), eq(userId), any(LocalDateTime.class))).thenReturn(expectedLikeCount);
     }
 
     private void givenChapterIsAlreadyLikedByUser(Long chapterId, Long userId, Long expectedLikeCount) {
@@ -139,13 +140,13 @@ public class ToggleChapterLikeTest {
 
     private void thenLikeOperationIsPerformed(Long chapterId, Long userId) {
         verify(likePort).hasUserLikedChapter(chapterId, userId);
-        verify(likePort).likeChapter(chapterId, userId);
+        verify(likePort).likeChapter(eq(chapterId), eq(userId), any(LocalDateTime.class));
         verify(likePort, never()).unlikeChapter(chapterId, userId);
     }
 
     private void thenUnlikeOperationIsPerformed(Long chapterId, Long userId) {
         verify(likePort).hasUserLikedChapter(chapterId, userId);
         verify(likePort).unlikeChapter(chapterId, userId);
-        verify(likePort, never()).likeChapter(chapterId, userId);
+        verify(likePort, never()).likeChapter(eq(chapterId), eq(userId), any(LocalDateTime.class));
     }
 }

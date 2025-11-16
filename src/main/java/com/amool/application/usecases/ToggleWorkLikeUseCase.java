@@ -13,6 +13,12 @@ public class ToggleWorkLikeUseCase {
     }
 
     public LikeResponseDto execute(Long workId, Long userId) {
+        if (workId == null) {
+            throw new IllegalArgumentException("Work ID cannot be null");
+        }
+        if (userId == null) {
+            throw new IllegalArgumentException("User ID cannot be null");
+        }
         boolean currentlyLiked = likePort.hasUserLikedWork(workId, userId);
         Long likeCount;
         
