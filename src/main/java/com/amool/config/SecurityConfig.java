@@ -34,8 +34,6 @@ public class SecurityConfig {
                         .requestMatchers("/api/my-works/**").authenticated()
                         .requestMatchers("/api/works/**").permitAll()
                         .requestMatchers("/api/home/**").permitAll()
-                        .requestMatchers("/api/analytics/**").permitAll()
-                        .requestMatchers("/api/saved-works/**").permitAll()
                         .anyRequest().authenticated()
                 )
                 .addFilterBefore(new JwtAuthenticationFilter(jwtService), UsernamePasswordAuthenticationFilter.class);
