@@ -26,11 +26,11 @@ public class ChatController {
     }
 
     @PostMapping("/message")
-    public ResponseEntity<ChatMessage> sendMessage(
+    public ResponseEntity<List<ChatMessage>> sendMessage(
             @RequestBody ChatRequestDto request,
             @AuthenticationPrincipal JwtUserPrincipal user) {
         
-        ChatMessage response = processChatMessageUseCase.execute(
+        List<ChatMessage> response = processChatMessageUseCase.execute(
             user.getUserId(),
             request.getChapterId(), 
             request.getMessage(), 

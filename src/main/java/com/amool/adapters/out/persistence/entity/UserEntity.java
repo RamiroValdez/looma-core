@@ -46,10 +46,6 @@ public class UserEntity {
     @MapKeyJoinColumn(name = "work_id")
     @Column(name = "chapter_id")
     private Map<WorkEntity, Long> readingProgress = new HashMap<>();
-    
-    @ManyToMany
-    @JoinTable(name = "worksaved_user", joinColumns = @JoinColumn(name = "user_id"), inverseJoinColumns = @JoinColumn(name = "work_id"))
-    private Set<WorkEntity> savedWorks = new HashSet<>();
 
     @ManyToMany
     @JoinTable(name = "user_chapter", joinColumns = @JoinColumn(name = "user_id"), inverseJoinColumns = @JoinColumn(name = "chapter_id"))
@@ -97,9 +93,6 @@ public class UserEntity {
 
     public BigDecimal getMoney() { return money; }
     public void setMoney(BigDecimal money) { this.money = money; }
-
-    public Set<WorkEntity> getSavedWorks() { return savedWorks; }
-    public void setSavedWorks(Set<WorkEntity> savedWorks) { this.savedWorks = savedWorks; }
 
     public Set<ChapterEntity> getAcquiredChapterEntities() { return acquiredChapterEntities; }
     public void setAcquiredChapterEntities(Set<ChapterEntity> acquiredChapterEntities) { this.acquiredChapterEntities = acquiredChapterEntities; }

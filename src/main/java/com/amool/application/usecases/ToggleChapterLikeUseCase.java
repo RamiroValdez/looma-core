@@ -1,5 +1,7 @@
 package com.amool.application.usecases;
 
+import java.time.LocalDateTime;
+
 import com.amool.adapters.in.rest.dtos.LikeResponseDto;
 import com.amool.application.port.out.LikePort;
 
@@ -14,10 +16,12 @@ public class ToggleChapterLikeUseCase {
         boolean isCurrentlyLiked = likePort.hasUserLikedChapter(chapterId, userId);
         Long likeCount;
         
+        LocalDateTime likedAt = LocalDateTime.now();
+
         if (isCurrentlyLiked) {
             likeCount = likePort.unlikeChapter(chapterId, userId);
         } else {
-            likeCount = likePort.likeChapter(chapterId, userId);
+            likeCount = likePort.likeChapter(chapterId, userId, likedAt);
         }
         
         boolean newLikeStatus = !isCurrentlyLiked;

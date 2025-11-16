@@ -3,11 +3,12 @@ package com.amool.application.port.out;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 
+import java.time.LocalDateTime;
 import java.util.Optional;
 
 public interface RatingPort {
    
-    double rateWork(Long workId, Long userId, double rating);
+    double rateWork(Long workId, Long userId, double rating, LocalDateTime createdAt);
 
     Optional<Double> getUserRating(Long workId, Long userId);
     

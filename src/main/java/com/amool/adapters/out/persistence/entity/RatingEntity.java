@@ -4,6 +4,7 @@ import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
+import java.time.LocalDateTime;
 
 @Entity
 @Table(name = "ratings")
@@ -23,6 +24,9 @@ public class RatingEntity {
 
     @Column(nullable = false)
     private Double rating;
+
+    @Column(nullable = false)
+    private LocalDateTime createdAt;
 
     public RatingEntity(Long workId, Long userId, Double rating) {
         this.workId = workId;
