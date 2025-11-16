@@ -1,95 +1,113 @@
 package com.amool.adapters.in.rest.controllers;
 
-/*
-import com.amool.application.port.in.CategoryService;
-import com.amool.domain.model.Category;
-import org.junit.jupiter.api.Test;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
-import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
-import org.springframework.boot.test.mock.mockito.MockBean;
-import org.springframework.http.MediaType;
-import org.springframework.test.web.servlet.MockMvc;
-
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.List;
-import java.util.Optional;
-
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.mockito.Mockito.when;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
-@WebMvcTest(controllers = CategoryController.class)
-@AutoConfigureMockMvc(addFilters = false)
+import java.util.ArrayList;
+import java.util.List;
+
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.mockito.Mockito;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
+
+import com.amool.adapters.in.rest.dtos.CategoryDto;
+import com.amool.application.port.out.CategoryPort;
+import com.amool.application.usecases.ObtainAllCategoriesUseCase;
+import com.amool.domain.model.Category;
+
 public class CategoryControllerTest {
 
-    @Autowired
-    private MockMvc mockMvc;
+    private CategoryController categoryController;
+    private ObtainAllCategoriesUseCase obtainAllCategoriesUseCase;
+    private CategoryPort categoryPort;
 
-    @MockBean
-    private CategoryService categoryService;
-
-    @Test
-    public void obtainAllCategories_ShouldReturnCategories_WhenCategoriesExist() throws Exception {
-        Category category1 = new Category();
-        category1.setId(1L);
-        category1.setName("Fiction");
-
-        Category category2 = new Category();
-        category2.setId(2L);
-        category2.setName("Science");
-
-        List<Category> categories = Arrays.asList(category1, category2);
-        when(categoryService.obtainAllCategories()).thenReturn(Optional.of(categories));
-
-        mockMvc.perform(get("/api/category/{obtain-all}", "obtain-all")
-                .contentType(MediaType.APPLICATION_JSON))
-            .andExpect(status().isOk())
-            .andExpect(jsonPath("$").isArray())
-            .andExpect(jsonPath("$.length()").value(2))
-            .andExpect(jsonPath("$[0].id").value(1))
-            .andExpect(jsonPath("$[0].name").value("Fiction"))
-            .andExpect(jsonPath("$[1].id").value(2))
-            .andExpect(jsonPath("$[1].name").value("Science"));
+    @BeforeEach
+    public void setUp() {
+        categoryPort = Mockito.mock(CategoryPort.class);
+        obtainAllCategoriesUseCase = new ObtainAllCategoriesUseCase(categoryPort);
+        categoryController = new CategoryController(obtainAllCategoriesUseCase);
     }
 
     @Test
-    public void obtainAllCategories_ShouldReturnNotFound_WhenNoCategoriesExist() throws Exception {
-        when(categoryService.obtainAllCategories()).thenReturn(Optional.empty());
+    public void when_ObtainAllCategories_ThenReturnCategoryList() {
+        // Arrange
+        givenCategoriesExistInTheSystem();
 
-        mockMvc.perform(get("/api/category/{obtain-all}", "obtain-all")
-                .contentType(MediaType.APPLICATION_JSON))
-            .andExpect(status().isNotFound());
+        // Act
+        ResponseEntity<List<CategoryDto>> response = categoryController.obtainAllCategories();
+
+        // Assert
+        thenResponseIsSuccessful(response);
+        thenResponseContainsExpectedCategories(response);
     }
 
     @Test
-    public void obtainAllCategories_ShouldReturnEmptyArray_WhenServiceReturnsEmptyList() throws Exception {
-        when(categoryService.obtainAllCategories()).thenReturn(Optional.of(Collections.emptyList()));
+    public void when_NoCategoriesExist_ThenReturnNotFound() {
+        // Arrange
+        givenNoCategoriesExist();
 
-        mockMvc.perform(get("/api/category/{obtain-all}", "obtain-all")
-                .contentType(MediaType.APPLICATION_JSON))
-            .andExpect(status().isOk())
-            .andExpect(jsonPath("$").isArray())
-            .andExpect(jsonPath("$.length()").value(0));
+        // Act
+        ResponseEntity<List<CategoryDto>> response = categoryController.obtainAllCategories();
+
+        // Assert
+        thenResponseIsNotFound(response);
     }
 
-    @Test
-    public void obtainAllCategories_ShouldReturnSingleCategory_WhenOnlyOneCategoryExists() throws Exception {
+    // Helper methods for data setup
+
+    private void givenCategoriesExistInTheSystem() {
+        List<Category> categories = createCategoryList();
+        when(categoryPort.findAllCategories()).thenReturn(categories);
+    }
+
+    private void givenNoCategoriesExist() {
+        List<Category> emptyList = new ArrayList<>();
+        when(categoryPort.findAllCategories()).thenReturn(emptyList);
+    }
+
+    private List<Category> createCategoryList() {
+        List<Category> categories = new ArrayList<>();
+        categories.add(createCategory(1L, "Ficción"));
+        categories.add(createCategory(2L, "No Ficción"));
+        categories.add(createCategory(3L, "Ciencia Ficción"));
+        return categories;
+    }
+
+    private Category createCategory(Long id, String name) {
         Category category = new Category();
-        category.setId(1L);
-        category.setName("Fantasy");
-
-        List<Category> categories = Collections.singletonList(category);
-        when(categoryService.obtainAllCategories()).thenReturn(Optional.of(categories));
-
-        mockMvc.perform(get("/api/category/{obtain-all}", "obtain-all")
-                .contentType(MediaType.APPLICATION_JSON))
-            .andExpect(status().isOk())
-            .andExpect(jsonPath("$").isArray())
-            .andExpect(jsonPath("$.length()").value(1))
-            .andExpect(jsonPath("$[0].id").value(1))
-            .andExpect(jsonPath("$[0].name").value("Fantasy"));
+        category.setId(id);
+        category.setName(name);
+        return category;
     }
+
+    // Helper methods for assertions
+
+    private void thenResponseIsSuccessful(ResponseEntity<List<CategoryDto>> response) {
+        assertNotNull(response);
+        assertEquals(HttpStatus.OK, response.getStatusCode());
+        assertNotNull(response.getBody());
+    }
+
+    private void thenResponseContainsExpectedCategories(ResponseEntity<List<CategoryDto>> response) {
+        List<CategoryDto> categories = response.getBody();
+        assertEquals(3, categories.size());
+
+        assertCategoryDto(categories.get(0), 1L, "Ficción");
+        assertCategoryDto(categories.get(1), 2L, "No Ficción");
+        assertCategoryDto(categories.get(2), 3L, "Ciencia Ficción");
+    }
+
+    private void assertCategoryDto(CategoryDto categoryDto, Long expectedId, String expectedName) {
+        assertEquals(expectedId, categoryDto.getId());
+        assertEquals(expectedName, categoryDto.getName());
+    }
+
+    private void thenResponseIsNotFound(ResponseEntity<List<CategoryDto>> response) {
+        assertNotNull(response);
+        assertEquals(HttpStatus.NOT_FOUND, response.getStatusCode());
+    }
+
 }
-*/

@@ -1,6 +1,5 @@
-package com.amool.hexagonal.adapters.in.rest.controllers;
+package com.amool.adapters.in.rest.controllers;
 
-import com.amool.adapters.in.rest.controllers.MercadoPagoWebhookController;
 import com.amool.application.usecases.ExtractPaymentIdFromWebhookUseCase;
 import com.amool.application.usecases.ProcessMercadoPagoWebhookUseCase;
 import org.junit.jupiter.api.BeforeEach;

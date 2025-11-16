@@ -3,10 +3,12 @@ package com.amool.config;
 import com.amool.application.port.out.*;
 import com.amool.application.service.ImagesService;
 import com.amool.application.usecases.*;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.web.client.RestTemplate;
+import java.math.BigDecimal;
 
 @Configuration
 public class UseCasesConfig {
@@ -50,6 +52,11 @@ public class UseCasesConfig {
     private final UserAccountPort userAccountPort;
     private final EmailPort emailPort;
     private final PaymentSessionLinkPort paymentSessionLinkPort;
+    private final ChatConversationPort chatConversationPort;
+    private final ChatAIPort chatAIPort;
+
+    @Value("${payments.pricing.author:#{null}}")
+    private BigDecimal authorPrice;
 
     public UseCasesConfig(
             AwsS3Port awsS3Port,
@@ -88,6 +95,9 @@ public class UseCasesConfig {
             AnalyticsPort analyticsPort,
             NotificationPort notificationPort,
             ObtainChapterByIdPort obtainChapterByIdPort,
+            PasswordEncoder passwordEncoder,
+            ChatConversationPort chatConversationPort,
+            ChatAIPort chatAIPort,
             UserAccountPort userAccountPort,
             EmailPort emailPort,
             PaymentSessionLinkPort paymentSessionLinkPort
@@ -128,6 +138,8 @@ public class UseCasesConfig {
         this.notificationPort = notificationPort;
         this.obtainChapterByIdPort = obtainChapterByIdPort;
         this.analyticsPort = analyticsPort;
+        this.chatConversationPort = chatConversationPort;
+        this.chatAIPort = chatAIPort;
         this.userAccountPort = userAccountPort;
         this.emailPort = emailPort;
         this.paymentSessionLinkPort = paymentSessionLinkPort;
@@ -471,6 +483,21 @@ public class UseCasesConfig {
     public GetSavesPerWorkUseCase getSavesPerWorkUseCase() {
         return new GetSavesPerWorkUseCase(analyticsPort);
     }
+    @Bean
+    public ProcessChatMessageUseCase processChatMessageUseCase() {
+        return new ProcessChatMessageUseCase(chatConversationPort, chatAIPort);
+    }
+
+    @Bean
+    public GetChatConversationUseCase getChatConversationUseCase() {
+        return new GetChatConversationUseCase(chatConversationPort);
+    }
+
+    @Bean
+    public StartSubscriptionFlowUseCase startSubscriptionFlowUseCase(java.util.List<PaymentProviderPort> paymentProviders) {
+        return new StartSubscriptionFlowUseCase(obtainWorkByIdPort, loadChapterPort, subscribeUserUseCase(), paymentProviders, authorPrice);
+    }
+
 
     @Bean
     public GetSuscribersPerAuthorUseCase getSuscribersPerAuthorUseCase() {
