@@ -49,6 +49,9 @@ public class UseCasesConfig {
     private final NotificationPort notificationPort;
     private final ObtainChapterByIdPort obtainChapterByIdPort;
     private final AnalyticsPort analyticsPort;
+    private final UserAccountPort userAccountPort;
+    private final EmailPort emailPort;
+    private final PaymentSessionLinkPort paymentSessionLinkPort;
     private final ChatConversationPort chatConversationPort;
     private final ChatAIPort chatAIPort;
 
@@ -95,6 +98,9 @@ public class UseCasesConfig {
             PasswordEncoder passwordEncoder,
             ChatConversationPort chatConversationPort,
             ChatAIPort chatAIPort
+            UserAccountPort userAccountPort,
+            EmailPort emailPort,
+            PaymentSessionLinkPort paymentSessionLinkPort
             ) {
         this.awsS3Port = awsS3Port;
         this.authPort = authPort;
@@ -134,6 +140,9 @@ public class UseCasesConfig {
         this.analyticsPort = analyticsPort;
         this.chatConversationPort = chatConversationPort;
         this.chatAIPort = chatAIPort;
+        this.userAccountPort = userAccountPort;
+        this.emailPort = emailPort;
+        this.paymentSessionLinkPort = paymentSessionLinkPort;
     }
 
     @Bean
@@ -409,7 +418,8 @@ public class UseCasesConfig {
                 paymentRecordPort,
                 obtainWorkByIdPort,
                 loadChapterPort,
-                subscribeUserUseCase()
+                subscribeUserUseCase(),
+                paymentSessionLinkPort
         );
     }
 
@@ -512,5 +522,14 @@ public class UseCasesConfig {
     @Bean
     public GetTotalSuscribersUseCase getTotalSuscribersUseCase() {
         return new GetTotalSuscribersUseCase(analyticsPort, obtainWorkByIdPort);
+    }
+    @Bean
+    public StartRegistrationUseCase startRegistrationUseCase() {
+        return new StartRegistrationUseCase(userAccountPort, emailPort);
+    }
+
+    @Bean
+    public VerifyRegistrationUseCase verifyRegistrationUseCase() {
+        return new VerifyRegistrationUseCase(userAccountPort);
     }
 }
