@@ -6,6 +6,8 @@ import com.amool.application.port.out.AuthenticateUserPort;
 import com.amool.domain.model.User;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.TypedQuery;
+
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Component;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 
@@ -17,8 +19,9 @@ public class UserAuthenticationPersistenceAdapter implements AuthenticateUserPor
     private final EntityManager entityManager;
     private final BCryptPasswordEncoder encoder = new BCryptPasswordEncoder();
 
-    public UserAuthenticationPersistenceAdapter(EntityManager entityManager) {
+    public UserAuthenticationPersistenceAdapter(EntityManager entityManager, PasswordEncoder passwordEncoder) {
         this.entityManager = entityManager;
+        this.passwordEncoder = passwordEncoder;
     }
 
     @Override

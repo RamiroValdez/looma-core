@@ -1,5 +1,6 @@
 package com.amool.application.usecase;
 
+import com.amool.application.port.out.AwsS3Port;
 import com.amool.application.port.out.LoadUserPort;
 import com.amool.domain.model.User;
 import com.amool.application.usecases.GetUserByIdUseCase;
@@ -15,6 +16,7 @@ import static org.mockito.Mockito.when;
 public class GetUserByIdUseCaseTest {
 
     private LoadUserPort loadUserPort;
+    private AwsS3Port awsS3Port;
     private GetUserByIdUseCase useCase;
     private static final Long USER_ID = 1L;
     private static final String USER_NAME = "testuser";
@@ -23,7 +25,8 @@ public class GetUserByIdUseCaseTest {
     @BeforeEach
     public void setUp() {
         loadUserPort = Mockito.mock(LoadUserPort.class);
-        useCase = new GetUserByIdUseCase(loadUserPort);
+        awsS3Port = Mockito.mock(AwsS3Port.class);
+        useCase = new GetUserByIdUseCase(loadUserPort, awsS3Port);
     }
 
     @Test

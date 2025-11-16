@@ -4,7 +4,7 @@
 -- Este script está escrito de forma idempotente: si ya existen los registros
 -- no se volverán a insertar en ejecuciones posteriores.
 -- =============================================================================
-
+CREATE EXTENSION IF NOT EXISTS pgcrypto;
 -- -----------------------------------------------------------------------------
 -- CATEGORÍAS LITERARIAS (idempotente)
 -- -----------------------------------------------------------------------------
@@ -29,10 +29,6 @@ SELECT 'Aventura'     WHERE NOT EXISTS (SELECT 1 FROM category WHERE name = 'Ave
 INSERT INTO category (name)
 SELECT 'Histórica'    WHERE NOT EXISTS (SELECT 1 FROM category WHERE name = 'Histórica');
 INSERT INTO category (name)
-SELECT 'Biografía'    WHERE NOT EXISTS (SELECT 1 FROM category WHERE name = 'Biografía');
-INSERT INTO category (name)
-SELECT 'Poesía'       WHERE NOT EXISTS (SELECT 1 FROM category WHERE name = 'Poesía');
-INSERT INTO category (name)
 SELECT 'Drama'        WHERE NOT EXISTS (SELECT 1 FROM category WHERE name = 'Drama');
 INSERT INTO category (name)
 SELECT 'Comedia'      WHERE NOT EXISTS (SELECT 1 FROM category WHERE name = 'Comedia');
@@ -44,8 +40,6 @@ INSERT INTO category (name)
 SELECT 'Literatura Infantil' WHERE NOT EXISTS (SELECT 1 FROM category WHERE name = 'Literatura Infantil');
 INSERT INTO category (name)
 SELECT 'Literatura Juvenil' WHERE NOT EXISTS (SELECT 1 FROM category WHERE name = 'Literatura Juvenil');
-INSERT INTO category (name)
-SELECT 'Ensayo'       WHERE NOT EXISTS (SELECT 1 FROM category WHERE name = 'Ensayo');
 INSERT INTO category (name)
 SELECT 'Autoayuda'    WHERE NOT EXISTS (SELECT 1 FROM category WHERE name = 'Autoayuda');
 
@@ -66,6 +60,15 @@ INSERT INTO format (name)
 SELECT 'Novela Gráfica' WHERE NOT EXISTS (SELECT 1 FROM format WHERE name = 'Novela Gráfica');
 INSERT INTO format (name)
 SELECT 'Antología'    WHERE NOT EXISTS (SELECT 1 FROM format WHERE name = 'Antología');
+INSERT INTO format (name)
+SELECT 'Ensayo'       WHERE NOT EXISTS (SELECT 1 FROM format WHERE name = 'Ensayo');
+INSERT INTO format (name)
+SELECT 'Biografía'    WHERE NOT EXISTS (SELECT 1 FROM format WHERE name = 'Biografía');
+INSERT INTO format (name)
+SELECT 'Autobiografía' WHERE NOT EXISTS (SELECT 1 FROM format WHERE name = 'Autobiografía');
+INSERT INTO format (name)
+SELECT 'Poesía'       WHERE NOT EXISTS (SELECT 1 FROM format WHERE name = 'Poesía');
+
 
 -- -----------------------------------------------------------------------------
 -- IDIOMAS (Lenguas latinas + Inglés) (idempotente)
@@ -94,7 +97,7 @@ SELECT 'gl', 'Gallego'    WHERE NOT EXISTS (SELECT 1 FROM language WHERE code = 
 -- La tabla se llama "user" (entre comillas) tal como se usó en el proyecto.
 -- -----------------------------------------------------------------------------
 INSERT INTO "user" (name, surname, username, email, password, photo, money, enabled, verification_code, verification_expires_at)
-SELECT 'Juan', 'Pérez', 'jperez', 'juanperez@gmail.com', 'Password1234', 'none', 100.00, true, '123456', '2025-12-31 23:59:59'
+SELECT 'Juan', 'Pérez', 'jperez', 'juanperez@gmail.com', crypt('Password1234', gen_salt('bf')), 'none', 100.00, true, '123456', '2025-12-31 23:59:59'
 WHERE NOT EXISTS (SELECT 1 FROM "user" WHERE username = 'jperez' OR email = 'juanperez@gmail.com');
 
 -- -----------------------------------------------------------------------------

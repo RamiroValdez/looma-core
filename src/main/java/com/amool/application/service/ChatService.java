@@ -19,31 +19,41 @@ public class ChatService {
         this.chatClient = chatClientBuilder.build();
     }
 
-    public ChatMessage processMessage(Long userId, Long chapterId, String message, String chapterContent) {
-        String convKey = getConversationKey(userId, chapterId);
-        
-        if (chapterContent != null && !chapterContent.trim().isEmpty()) {
-            chapterContexts.put(convKey, chapterContent);
-        }
+    public List<ChatMessage> processMessage(Long userId, Long chapterId, String message, String chapterContent) {
+    String convKey = getConversationKey(userId, chapterId);
 
-        List<ChatMessage> conversation = conversations.computeIfAbsent(convKey, k -> new ArrayList<>());
-        
-        ChatMessage userMessage = new ChatMessage(userId, chapterId, message, true);
-        conversation.add(userMessage);
-        
-        String assistantResponse = generateResponse(convKey, message);
-        ChatMessage assistantMessage = new ChatMessage(userId, chapterId, assistantResponse, false);
-        conversation.add(assistantMessage);
-        
-        if (conversation.size() > MAX_MESSAGES) {
-            List<ChatMessage> limited = new ArrayList<>(
-                conversation.subList(conversation.size() - MAX_MESSAGES, conversation.size())
-            );
-            conversations.put(convKey, limited);
-        }
-        
-        return assistantMessage;
+    if (chapterContent != null && !chapterContent.trim().isEmpty()) {
+        chapterContexts.put(convKey, chapterContent);
     }
+
+    List<ChatMessage> conversation = conversations.computeIfAbsent(convKey, k -> new ArrayList<>());
+
+    ChatMessage userMessage = new ChatMessage(userId, chapterId, message, true);
+    conversation.add(userMessage);
+
+    String assistantResponse = generateResponse(convKey, message);
+
+    String[] segments = assistantResponse.split("---");
+    List<ChatMessage> responseMessages = new ArrayList<>();
+
+    for (String segment : segments) {
+        String cleanSegment = segment.trim();
+        if (!cleanSegment.isEmpty() && !cleanSegment.equals("---")) {
+            ChatMessage assistantMessage = new ChatMessage(userId, chapterId, cleanSegment, false);
+            conversation.add(assistantMessage);
+            responseMessages.add(assistantMessage);
+        }
+    }
+
+    if (conversation.size() > MAX_MESSAGES) {
+        List<ChatMessage> limited = new ArrayList<>(
+            conversation.subList(conversation.size() - MAX_MESSAGES, conversation.size())
+        );
+        conversations.put(convKey, limited);
+    }
+
+    return responseMessages;
+}
 
     public List<ChatMessage> getConversation(Long userId, Long chapterId) {
         return conversations.getOrDefault(
@@ -77,18 +87,20 @@ public class ChatService {
     try {
         String fullPrompt = """
             Eres un asistente de escritura creativa que ayuda a los escritores a mejorar sus historias.
-            
+
             CONTEXTO DEL CAPÍTULO ACTUAL:
             %s
-            
+
             HISTORIAL DE LA CONVERSACIÓN:
             %s
-            
+
             MENSAJE ACTUAL DEL USUARIO:
             %s
-            
+
             Por favor, proporciona una respuesta útil, creativa y detallada en el idioma del usuario.
-            """.formatted(
+            Si el mensaje del usuario requiere ideas, sugerencias o desarrollo narrativo, utiliza el contenido del capítulo y el historial de mensajes como referencia.
+            Si el mensaje del usuario es una despedida, saludo, agradecimiento o indica que no necesita más ideas, responde SOLO con una frase breve y NO continúes la historia ni generes contenido adicional.
+            Si tu respuesta tiene más de una idea o párrafo, SEPARA cada parte usando exactamente tres guiones (---) en una línea aparte. No uses ningún otro separador.            """.formatted(
                 limitedContext.isEmpty() ? "(Sin contexto aún)" : limitedContext,
                 conversationHistoryText.isEmpty() ? "(No hay historial previo)" : conversationHistoryText,
                 userMessage

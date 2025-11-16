@@ -5,6 +5,7 @@ import com.amool.application.service.ImagesService;
 import com.amool.application.usecases.*;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.web.client.RestTemplate;
 
 @Configuration
@@ -45,6 +46,7 @@ public class UseCasesConfig {
     private final RestTemplate restTemplate;
     private final NotificationPort notificationPort;
     private final ObtainChapterByIdPort obtainChapterByIdPort;
+    private final AnalyticsPort analyticsPort;
     private final UserAccountPort userAccountPort;
     private final EmailPort emailPort;
     private final PaymentSessionLinkPort paymentSessionLinkPort;
@@ -83,8 +85,10 @@ public class UseCasesConfig {
             RestTemplate restTemplate,
             RatingPort ratingPort,
             ReadingProgressPort readingProgressPort,
+            AnalyticsPort analyticsPort,
             NotificationPort notificationPort,
             ObtainChapterByIdPort obtainChapterByIdPort,
+            PasswordEncoder passwordEncoder,
             UserAccountPort userAccountPort,
             EmailPort emailPort,
             PaymentSessionLinkPort paymentSessionLinkPort
@@ -124,6 +128,7 @@ public class UseCasesConfig {
         this.readingProgressPort = readingProgressPort;
         this.notificationPort = notificationPort;
         this.obtainChapterByIdPort = obtainChapterByIdPort;
+        this.analyticsPort = analyticsPort;
         this.userAccountPort = userAccountPort;
         this.emailPort = emailPort;
         this.paymentSessionLinkPort = paymentSessionLinkPort;
@@ -252,7 +257,7 @@ public class UseCasesConfig {
 
     @Bean
     public GetUserByIdUseCase getUserByIdUseCase() {
-        return new GetUserByIdUseCase(loadUserPort);
+        return new GetUserByIdUseCase(loadUserPort, awsS3Port);
     }
 
     @Bean
@@ -409,7 +414,7 @@ public class UseCasesConfig {
 
     @Bean
     public ObtainWorkListUseCase obtainWorkListUseCase() {
-        return new ObtainWorkListUseCase(workPort);
+        return new ObtainWorkListUseCase(workPort, awsS3Port);
     }
 
     @Bean
@@ -441,7 +446,57 @@ public class UseCasesConfig {
         return new UpdateNotificationReadUseCase(notificationPort);
     }
 
+    @Bean
+    public UpdateUserUseCase updateUserUseCase() {
+        return new UpdateUserUseCase(loadUserPort, imagesService);
+    }
 
+
+
+    @Bean
+    public GetLikesPerWorkUseCase getLikesPerWorkUseCase() {
+        return new GetLikesPerWorkUseCase(analyticsPort);
+    }
+
+    @Bean
+    public GetLikesPerChapterUseCase getLikesPerChapterUseCase() {
+        return new GetLikesPerChapterUseCase(analyticsPort);
+    }
+
+    @Bean
+    public GetRatingsPerWorkUseCase getRatingsPerWorkUseCase() {
+        return new GetRatingsPerWorkUseCase(analyticsPort);
+    }
+
+    @Bean
+    public GetSavesPerWorkUseCase getSavesPerWorkUseCase() {
+        return new GetSavesPerWorkUseCase(analyticsPort);
+    }
+
+    @Bean
+    public GetSuscribersPerAuthorUseCase getSuscribersPerAuthorUseCase() {
+        return new GetSuscribersPerAuthorUseCase(analyticsPort);
+    }
+
+    @Bean
+    public GetSuscribersPerWorkUseCase getSuscribersPerWorkUseCase() {
+        return new GetSuscribersPerWorkUseCase(analyticsPort);
+    }
+
+    @Bean
+    public GetTotalPerAuthorUseCase getTotalPerAuthorUseCase() {
+        return new GetTotalPerAuthorUseCase(analyticsPort);
+    }
+
+    @Bean
+    public GetTotalPerWorkUseCase getTotalPerWorkUseCase() {
+        return new GetTotalPerWorkUseCase(analyticsPort);
+    }
+
+    @Bean
+    public GetTotalSuscribersUseCase getTotalSuscribersUseCase() {
+        return new GetTotalSuscribersUseCase(analyticsPort, obtainWorkByIdPort);
+    }
     @Bean
     public StartRegistrationUseCase startRegistrationUseCase() {
         return new StartRegistrationUseCase(userAccountPort, emailPort);

@@ -16,6 +16,7 @@ public class UserMapper {
         user.setUsername(entity.getUsername());
         user.setEmail(entity.getEmail());
         user.setPhoto(entity.getPhoto());
+        user.setMoney(entity.getMoney());
         return user;
     }
 
@@ -30,6 +31,7 @@ public class UserMapper {
         entity.setUsername(user.getUsername());
         entity.setEmail(user.getEmail());
         entity.setPhoto(user.getPhoto());
+        entity.setMoney(user.getMoney());
         return entity;
     }
 }

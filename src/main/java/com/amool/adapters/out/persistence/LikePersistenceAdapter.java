@@ -13,6 +13,8 @@ import jakarta.persistence.TypedQuery;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.time.LocalDateTime;
+
 @Component
 public class LikePersistenceAdapter implements LikePort {
 
@@ -21,7 +23,7 @@ public class LikePersistenceAdapter implements LikePort {
 
     @Override
     @Transactional
-    public Long likeWork(Long workId, Long userId) {
+    public Long likeWork(Long workId, Long userId, LocalDateTime likedAt) {
         WorkEntity work = entityManager.find(WorkEntity.class, workId);
         UserEntity user = entityManager.find(UserEntity.class, userId);
         
@@ -34,6 +36,7 @@ public class LikePersistenceAdapter implements LikePort {
         }
 
         UserLikeEntity like = new UserLikeEntity(user, work);
+        like.setLikedAt(likedAt);
         entityManager.persist(like);
         
         work.setLikes(work.getLikes() + 1);
@@ -82,7 +85,7 @@ public class LikePersistenceAdapter implements LikePort {
 
     @Override
     @Transactional
-    public Long likeChapter(Long chapterId, Long userId) {
+    public Long likeChapter(Long chapterId, Long userId, LocalDateTime likedAt) {
         ChapterEntity chapter = entityManager.find(ChapterEntity.class, chapterId);
         UserEntity user = entityManager.find(UserEntity.class, userId);
         
@@ -95,6 +98,7 @@ public class LikePersistenceAdapter implements LikePort {
         }
 
         ChapterLikeEntity like = new ChapterLikeEntity(user, chapter);
+        like.setLikedAt(likedAt);
         entityManager.persist(like);
         
         chapter.setLikes(chapter.getLikes() + 1);
