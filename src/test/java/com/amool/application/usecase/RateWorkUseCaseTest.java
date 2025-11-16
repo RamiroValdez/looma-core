@@ -8,6 +8,8 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
+import java.time.LocalDateTime;
+
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
 
@@ -18,7 +20,6 @@ public class RateWorkUseCaseTest {
     private RatingPort ratingPort;
 
     private RateWorkUseCase rateWorkUseCase;
-
     @BeforeEach
     void setUp() {
         rateWorkUseCase = new RateWorkUseCase(ratingPort);
@@ -31,12 +32,12 @@ public class RateWorkUseCaseTest {
         double ratingValue = 4.5;
         double expectedRating = 4.5;
 
-        when(ratingPort.rateWork(workId, userId, ratingValue)).thenReturn(expectedRating);
+        when(ratingPort.rateWork(eq(workId), eq(userId), eq(ratingValue), any(LocalDateTime.class))).thenReturn(expectedRating);
 
         double result = rateWorkUseCase.execute(workId, userId, ratingValue);
 
         assertEquals(expectedRating, result);
-        verify(ratingPort).rateWork(workId, userId, ratingValue);
+        verify(ratingPort).rateWork(eq(workId), eq(userId), eq(ratingValue), any(LocalDateTime.class));
     }
 
     @Test
@@ -60,12 +61,14 @@ public class RateWorkUseCaseTest {
         double minRating = 0.5;
         double expectedRating = 0.5;
 
-        when(ratingPort.rateWork(workId, userId, minRating)).thenReturn(expectedRating);
+
+        when(ratingPort.rateWork(eq(workId), eq(userId), eq(minRating), any(LocalDateTime.class)))
+                .thenReturn(expectedRating);
 
         double result = rateWorkUseCase.execute(workId, userId, minRating);
 
         assertEquals(expectedRating, result);
-        verify(ratingPort).rateWork(workId, userId, minRating);
+        verify(ratingPort).rateWork(eq(workId), eq(userId), eq(minRating), any(LocalDateTime.class));
     }
 
     @Test
@@ -75,11 +78,11 @@ public class RateWorkUseCaseTest {
         double maxRating = 5.0;
         double expectedRating = 5.0;
 
-        when(ratingPort.rateWork(workId, userId, maxRating)).thenReturn(expectedRating);
+        when(ratingPort.rateWork(eq(workId), eq(userId), eq(maxRating), any(LocalDateTime.class))).thenReturn(expectedRating);
 
         double result = rateWorkUseCase.execute(workId, userId, maxRating);
 
         assertEquals(expectedRating, result);
-        verify(ratingPort).rateWork(workId, userId, maxRating);
+        verify(ratingPort).rateWork(eq(workId), eq(userId), eq(maxRating), any(LocalDateTime.class));
     }
 }
