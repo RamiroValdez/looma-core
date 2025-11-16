@@ -57,18 +57,18 @@ public class ChatControllerTest {
     // ========== Tests for sendMessage endpoint ==========
 
     @Test
-    @DisplayName("POST /api/chat/message - Should process message and return AI response")
+    @DisplayName("POST /api/chat/message - Should process message and return AI response segments")
     public void sendMessage_shouldProcessMessage_whenValid() {
         // Given
         ChatRequestDto request = givenValidChatRequest();
-        ChatMessage expectedResponse = givenAIWillRespond();
+        List<ChatMessage> expectedResponse = givenAIWillRespondSegments();
 
         // When
-        ResponseEntity<ChatMessage> response = whenSendMessage(request);
+        ResponseEntity<List<ChatMessage>> response = whenSendMessage(request);
 
         // Then
         thenResponseIsOk(response);
-        thenResponseContainsAIMessage(response, expectedResponse);
+        thenResponseContainsSegments(response, expectedResponse);
         thenProcessMessageUseCaseWasInvoked();
     }
 
@@ -77,10 +77,10 @@ public class ChatControllerTest {
     public void sendMessage_shouldHandleEmptyMessage_whenMessageIsEmpty() {
         // Given
         ChatRequestDto request = givenChatRequestWithEmptyMessage();
-        givenAIWillRespondToEmptyMessage();
+        givenAIWillRespondSegments();
 
         // When
-        ResponseEntity<ChatMessage> response = whenSendMessage(request);
+        ResponseEntity<List<ChatMessage>> response = whenSendMessage(request);
 
         // Then
         thenResponseIsOk(response);
@@ -97,10 +97,10 @@ public class ChatControllerTest {
     public void sendMessage_shouldProcessMessage_whenChapterContentIsNull() {
         // Given
         ChatRequestDto request = givenChatRequestWithoutChapterContent();
-        givenAIWillRespond();
+        givenAIWillRespondSegments();
 
         // When
-        ResponseEntity<ChatMessage> response = whenSendMessage(request);
+        ResponseEntity<List<ChatMessage>> response = whenSendMessage(request);
 
         // Then
         thenResponseIsOk(response);
@@ -182,37 +182,23 @@ public class ChatControllerTest {
         return request;
     }
 
-    private ChatMessage givenAIWillRespond() {
-        ChatMessage aiResponse = new ChatMessage(
-                TEST_USER_ID,
-                TEST_CHAPTER_ID,
-                TEST_RESPONSE,
-                false,
-                LocalDateTime.now()
+    private List<ChatMessage> givenAIWillRespondSegments() {
+        List<ChatMessage> segments = List.of(
+                new ChatMessage(
+                        TEST_USER_ID,
+                        TEST_CHAPTER_ID,
+                        TEST_RESPONSE,
+                        false,
+                        LocalDateTime.now()
+                )
         );
         when(processChatMessageUseCase.execute(
                 eq(TEST_USER_ID),
                 eq(TEST_CHAPTER_ID),
                 anyString(),
-                anyString()
-        )).thenReturn(aiResponse);
-        return aiResponse;
-    }
-
-    private void givenAIWillRespondToEmptyMessage() {
-        ChatMessage aiResponse = new ChatMessage(
-                TEST_USER_ID,
-                TEST_CHAPTER_ID,
-                "¿En qué puedo ayudarte?",
-                false,
-                LocalDateTime.now()
-        );
-        when(processChatMessageUseCase.execute(
-                eq(TEST_USER_ID),
-                eq(TEST_CHAPTER_ID),
-                eq(""),
-                anyString()
-        )).thenReturn(aiResponse);
+                any()
+        )).thenReturn(segments);
+        return segments;
     }
 
     private List<ChatMessage> givenConversationExists() {
@@ -234,7 +220,7 @@ public class ChatControllerTest {
 
     // ========== When Methods ==========
 
-    private ResponseEntity<ChatMessage> whenSendMessage(ChatRequestDto request) {
+    private ResponseEntity<List<ChatMessage>> whenSendMessage(ChatRequestDto request) {
         return chatController.sendMessage(request, testUserPrincipal);
     }
 
@@ -248,12 +234,15 @@ public class ChatControllerTest {
         assertEquals(HttpStatus.OK, response.getStatusCode());
     }
 
-    private void thenResponseContainsAIMessage(ResponseEntity<ChatMessage> response, ChatMessage expected) {
+    private void thenResponseContainsSegments(ResponseEntity<List<ChatMessage>> response, List<ChatMessage> expected) {
         assertNotNull(response.getBody());
-        assertEquals(expected.getContent(), response.getBody().getContent());
-        assertEquals(expected.getUserId(), response.getBody().getUserId());
-        assertEquals(expected.getChapterId(), response.getBody().getChapterId());
-        assertFalse(response.getBody().isUserMessage());
+        assertEquals(expected.size(), response.getBody().size());
+        for (int i = 0; i < expected.size(); i++) {
+            assertEquals(expected.get(i).getContent(), response.getBody().get(i).getContent());
+            assertEquals(expected.get(i).getUserId(), response.getBody().get(i).getUserId());
+            assertEquals(expected.get(i).getChapterId(), response.getBody().get(i).getChapterId());
+            assertFalse(response.getBody().get(i).isUserMessage());
+        }
     }
 
     private void thenResponseContainsConversation(ResponseEntity<List<ChatMessage>> response, List<ChatMessage> expected) {
@@ -275,7 +264,7 @@ public class ChatControllerTest {
                 eq(TEST_USER_ID),
                 eq(TEST_CHAPTER_ID),
                 anyString(),
-                anyString()
+                any()
         );
     }
 
@@ -283,4 +272,3 @@ public class ChatControllerTest {
         verify(getChatConversationUseCase, times(1)).execute(TEST_USER_ID, TEST_CHAPTER_ID);
     }
 }
-

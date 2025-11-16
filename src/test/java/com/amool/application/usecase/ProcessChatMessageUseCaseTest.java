@@ -106,7 +106,7 @@ public class ProcessChatMessageUseCaseTest {
         givenValidChapterContent();
 
         // When: Se procesa un mensaje y se genera una respuesta
-        ChatMessage result = whenExecuteWithChapterContent();
+        List<ChatMessage> result = whenExecuteWithChapterContent();
 
         // Then: La respuesta del asistente debe guardarse
         thenAssistantMessageShouldBeSaved(result);
@@ -119,10 +119,12 @@ public class ProcessChatMessageUseCaseTest {
         givenValidChapterContent();
 
         // When: Se procesa un mensaje
-        ChatMessage result = whenExecuteWithChapterContent();
+        List<ChatMessage> result = whenExecuteWithChapterContent();
 
-        // Then: Debe retornar el mensaje del asistente
-        thenShouldReturnAssistantMessage(result);
+        // Then: Debe retornar la lista de mensajes del asistente (al menos 1)
+        assertNotNull(result);
+        assertFalse(result.isEmpty());
+        assertFalse(result.get(0).isUserMessage());
     }
 
     // ==================== Tests de Gestión de Historial ====================
@@ -270,15 +272,15 @@ public class ProcessChatMessageUseCaseTest {
 
     // ==================== When Methods ====================
 
-    private ChatMessage whenExecuteWithChapterContent() {
+    private List<ChatMessage> whenExecuteWithChapterContent() {
         return processChatMessageUseCase.execute(USER_ID, CHAPTER_ID, USER_MESSAGE, CHAPTER_CONTENT);
     }
 
-    private ChatMessage whenExecuteWithoutChapterContent() {
+    private List<ChatMessage> whenExecuteWithoutChapterContent() {
         return processChatMessageUseCase.execute(USER_ID, CHAPTER_ID, USER_MESSAGE, null);
     }
 
-    private ChatMessage whenExecuteWithEmptyChapterContent() {
+    private List<ChatMessage> whenExecuteWithEmptyChapterContent() {
         return processChatMessageUseCase.execute(USER_ID, CHAPTER_ID, USER_MESSAGE, "   ");
     }
 
@@ -304,7 +306,7 @@ public class ProcessChatMessageUseCaseTest {
         assertNotNull(userMsg.getTimestamp());
     }
 
-    private void thenAssistantMessageShouldBeSaved(ChatMessage result) {
+    private void thenAssistantMessageShouldBeSaved(List<ChatMessage> result) {
         ArgumentCaptor<ChatMessage> messageCaptor = ArgumentCaptor.forClass(ChatMessage.class);
         verify(chatConversationPort, times(2)).saveMessage(messageCaptor.capture());
 
@@ -314,14 +316,12 @@ public class ProcessChatMessageUseCaseTest {
         assertEquals(AI_RESPONSE, assistantMsg.getContent());
         assertFalse(assistantMsg.isUserMessage());
         assertNotNull(assistantMsg.getTimestamp());
-        assertEquals(assistantMsg, result);
+        assertNotNull(result);
+        assertFalse(result.isEmpty());
+        assertEquals(assistantMsg.getContent(), result.get(0).getContent());
     }
 
-    private void thenShouldReturnAssistantMessage(ChatMessage result) {
-        assertNotNull(result);
-        assertEquals(AI_RESPONSE, result.getContent());
-        assertFalse(result.isUserMessage());
-    }
+    // ==================== Historial checks ====================
 
     private void thenHistoryShouldBeIncludedInPrompt(int expectedSize) {
         @SuppressWarnings("unchecked")

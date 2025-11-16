@@ -1,6 +1,7 @@
 package com.amool.adapters.in.rest.controllers;
 
 import com.amool.application.usecases.GetUserByIdUseCase;
+import com.amool.application.usecases.UpdateUserUseCase;
 import com.amool.domain.model.User;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -12,6 +13,7 @@ import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.ResultActions;
 
+import java.math.BigDecimal;
 import java.util.Optional;
 
 import static org.mockito.ArgumentMatchers.eq;
@@ -30,6 +32,9 @@ public class UserControllerTest {
 
     @MockitoBean
     private GetUserByIdUseCase getUserByIdUseCase;
+
+    @MockitoBean
+    private UpdateUserUseCase updateUserUseCase;
 
     private static final Long USER_ID = 5L;
 
@@ -58,7 +63,13 @@ public class UserControllerTest {
     // ===== Given =====
     private void givenUserExists(Long id, String name, String surname, String username, String email, String photo) {
         User u = new User();
-        u.setId(id); u.setName(name); u.setSurname(surname); u.setUsername(username); u.setEmail(email); u.setPhoto(photo);
+        u.setId(id);
+        u.setName(name);
+        u.setSurname(surname);
+        u.setUsername(username);
+        u.setEmail(email);
+        u.setPhoto(photo);
+        u.setMoney(BigDecimal.ZERO);
         when(getUserByIdUseCase.execute(eq(id))).thenReturn(Optional.of(u));
     }
 

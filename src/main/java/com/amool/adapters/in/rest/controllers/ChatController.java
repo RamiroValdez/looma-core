@@ -29,12 +29,11 @@ public class ChatController {
     public ResponseEntity<List<ChatMessage>> sendMessage(
             @RequestBody ChatRequestDto request,
             @AuthenticationPrincipal JwtUserPrincipal user) {
-        
         List<ChatMessage> response = processChatMessageUseCase.execute(
-            user.getUserId(),
-            request.getChapterId(), 
-            request.getMessage(), 
-            request.getChapterContent()
+                user.getUserId(),
+                request.getChapterId(),
+                request.getMessage(),
+                request.getChapterContent()
         );
         return ResponseEntity.ok(response);
     }
@@ -43,7 +42,6 @@ public class ChatController {
     public ResponseEntity<List<ChatMessage>> getConversation(
             @PathVariable Long chapterId,
             @AuthenticationPrincipal JwtUserPrincipal user) {
-        
         return ResponseEntity.ok(
             getChatConversationUseCase.execute(user.getUserId(), chapterId)
         );

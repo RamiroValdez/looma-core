@@ -97,7 +97,7 @@ public class UseCasesConfig {
             ObtainChapterByIdPort obtainChapterByIdPort,
             PasswordEncoder passwordEncoder,
             ChatConversationPort chatConversationPort,
-            ChatAIPort chatAIPort
+            ChatAIPort chatAIPort,
             UserAccountPort userAccountPort,
             EmailPort emailPort,
             PaymentSessionLinkPort paymentSessionLinkPort
