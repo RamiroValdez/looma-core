@@ -64,7 +64,12 @@ public class UserPersistenceAdapter implements LoadUserPort {
             existingEntity.setSurname(user.getSurname());
             existingEntity.setUsername(user.getUsername());
             existingEntity.setEmail(user.getEmail());
-            existingEntity.setPhoto(user.getPhoto());
+
+            if(user.getPhoto() != null){
+                if (user.getMultipartFile() != null){
+                    existingEntity.setPhoto(user.getPhoto());
+                }
+            }
 
             if(user.getMoney() != null) {
                 existingEntity.setMoney(user.getMoney());

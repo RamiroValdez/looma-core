@@ -35,7 +35,9 @@ public class UserRestMapper {
             user.setMoney(userDto.getMoney());
         }
         try{
-            user.setMultipartFile(new InMemoryMultipartFile(userDto.getFile().getName(), userDto.getFile().getName(), userDto.getFile().getContentType(), userDto.getFile().getBytes()));
+            if(userDto.getFile() != null){
+                user.setMultipartFile(new InMemoryMultipartFile(userDto.getFile().getName(), userDto.getFile().getName(), userDto.getFile().getContentType(), userDto.getFile().getBytes()));
+            }
         } catch (IOException e) {
             user.setMultipartFile(null);
         }

@@ -42,13 +42,11 @@ public class UserController {
             return ResponseEntity.badRequest().build();
         }
 
-        // Normalizar password vacío
         String newPassword = form.hasNewPassword() ? form.getNewPassword() : null;
 
         boolean ok = updateUserUseCase.execute(
                 UserRestMapper.updateUserToDomain(form),
                 newPassword
-                // Si el caso de uso soporta archivo, agregar form.getFile()
         );
 
         if (!ok) {

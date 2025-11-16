@@ -17,11 +17,14 @@ public class UpdateUserUseCase {
     public boolean execute(User user, String newPassword) {
         try {
 
-            if(user.getPhoto() != null || user.getPhoto() != "none"){
-                imagesService.deleteImage(user.getPhoto());
+            if(user.getPhoto() != null){
+                if(user.getMultipartFile() != null){
+                    imagesService.deleteImage(user.getPhoto());
+                    user.setPhoto(imagesService.uploadUserImage(user.getMultipartFile(), user.getId().toString()));
+                }
+            } else {
+                user.setPhoto(imagesService.uploadUserImage(user.getMultipartFile(), user.getId().toString()));
             }
-
-            user.setPhoto(imagesService.uploadUserImage(user.getMultipartFile(), user.getId().toString()));
             boolean result = loadUserPort.updateUser(user, newPassword);
             return result;
         } catch (Exception e) {
