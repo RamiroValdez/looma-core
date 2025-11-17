@@ -3,10 +3,11 @@ package com.amool.adapters.in.rest.controllers;
 import com.amool.adapters.in.rest.dtos.CreateEmptyChapterRequest;
 import com.amool.adapters.in.rest.dtos.CreateEmptyChapterResponse;
 import com.amool.adapters.in.rest.dtos.WorkResponseDto;
+import com.amool.adapters.in.rest.dtos.UpdateWorkDto;
 import com.amool.application.usecases.CreateEmptyChapterUseCase;
 import com.amool.application.usecases.GetWorkPermissionsUseCase;
 import com.amool.application.usecases.ObtainWorkByIdUseCase;
-import com.amool.application.usecases.UpdateWorkPriceUseCase;
+import com.amool.application.usecases.UpdateWorkUseCase;
 import com.amool.domain.model.Chapter;
 import com.amool.domain.model.User;
 import com.amool.domain.model.Work;
@@ -21,8 +22,10 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.context.SecurityContextHolder;
 
+import java.math.BigDecimal;
 import java.util.List;
 import java.util.Optional;
+import java.util.Set;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.*;
@@ -34,7 +37,7 @@ public class ManageWorkControllerTest {
     private ObtainWorkByIdUseCase obtainWorkByIdUseCase;
     private CreateEmptyChapterUseCase createEmptyChapterUseCase;
     private GetWorkPermissionsUseCase getWorkPermissionsUseCase;
-    private UpdateWorkPriceUseCase updateWorkPriceUseCase;
+    private UpdateWorkUseCase updateWorkUseCase;
 
     private static final Long USER_ID = 10L;
     private static final Long WORK_ID = 100L;
@@ -44,8 +47,8 @@ public class ManageWorkControllerTest {
         obtainWorkByIdUseCase = Mockito.mock(ObtainWorkByIdUseCase.class);
         createEmptyChapterUseCase = Mockito.mock(CreateEmptyChapterUseCase.class);
         getWorkPermissionsUseCase = Mockito.mock(GetWorkPermissionsUseCase.class);
-        updateWorkPriceUseCase = Mockito.mock(UpdateWorkPriceUseCase.class);
-        controller = new ManageWorkController(obtainWorkByIdUseCase, createEmptyChapterUseCase, getWorkPermissionsUseCase, updateWorkPriceUseCase);
+        updateWorkUseCase = Mockito.mock(UpdateWorkUseCase.class);
+        controller = new ManageWorkController(obtainWorkByIdUseCase, createEmptyChapterUseCase, getWorkPermissionsUseCase, updateWorkUseCase);
         SecurityContextHolder.clearContext();
     }
 
@@ -112,6 +115,41 @@ public class ManageWorkControllerTest {
 
         // When
         ResponseEntity<CreateEmptyChapterResponse> response = whenCreatingEmptyChapter(request);
+
+        // Then
+        thenShouldReturnBadRequest(response);
+    }
+
+    // ========== updateWork ==========
+
+    @Test
+    @DisplayName("PUT /api/manage-work/{workId} - Debe devolver 200 (true) cuando el use case actualiza")
+    void updateWork_shouldReturnTrue_onSuccess() {
+        // Given
+        JwtUserPrincipal principal = givenAuthenticatedUser(USER_ID);
+        UpdateWorkDto request = new UpdateWorkDto(new BigDecimal("9.99"), "PUBLISHED", Set.of("t1","t2"));
+        when(updateWorkUseCase.execute(eq(WORK_ID), eq(new BigDecimal("9.99")), eq(Set.of("t1","t2")), eq("PUBLISHED")))
+                .thenReturn(true);
+
+        // When
+        ResponseEntity<Boolean> response = controller.updateWork(WORK_ID, request, principal);
+
+        // Then
+        thenShouldReturnOk(response);
+        assertTrue(Boolean.TRUE.equals(response.getBody()));
+        verify(updateWorkUseCase, times(1)).execute(eq(WORK_ID), eq(new BigDecimal("9.99")), eq(Set.of("t1","t2")), eq("PUBLISHED"));
+    }
+
+    @Test
+    @DisplayName("PUT /api/manage-work/{workId} - Debe devolver 400 cuando el use case lanza excepción")
+    void updateWork_shouldReturnBadRequest_onException() {
+        // Given
+        JwtUserPrincipal principal = givenAuthenticatedUser(USER_ID);
+        UpdateWorkDto request = new UpdateWorkDto(new BigDecimal("5.00"), "DRAFT", Set.of());
+        when(updateWorkUseCase.execute(anyLong(), any(), anySet(), anyString())).thenThrow(new RuntimeException("error"));
+
+        // When
+        ResponseEntity<Boolean> response = controller.updateWork(WORK_ID, request, principal);
 
         // Then
         thenShouldReturnBadRequest(response);
