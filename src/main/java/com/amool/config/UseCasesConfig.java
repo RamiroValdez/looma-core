@@ -296,14 +296,6 @@ public class UseCasesConfig {
     }
 
     @Bean
-    public UpdateWorkPriceUseCase updateWorkPriceUseCase() {
-        return new UpdateWorkPriceUseCase(
-                obtainWorkByIdPort,
-                workPort
-        );
-    }
-
-    @Bean
     public SearchAndFiltrateUseCase searchAndFiltrateUseCase() {
         return new SearchAndFiltrateUseCase(workPort, awsS3Port);
     }
@@ -431,5 +423,13 @@ public class UseCasesConfig {
         return new UpdateNotificationReadUseCase(notificationPort);
     }
 
+    @Bean
+    public UpdateWorkUseCase updateWorkUseCase() {
+        return new UpdateWorkUseCase(
+                workPort,
+                obtainWorkByIdPort,
+                tagPort
+        );
+    }
 
 }

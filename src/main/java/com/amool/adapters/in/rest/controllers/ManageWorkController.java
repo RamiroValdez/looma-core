@@ -2,13 +2,13 @@ package com.amool.adapters.in.rest.controllers;
 
 import com.amool.adapters.in.rest.dtos.CreateEmptyChapterRequest;
 import com.amool.adapters.in.rest.dtos.CreateEmptyChapterResponse;
-import com.amool.adapters.in.rest.dtos.UpdatePriceRequest;
+import com.amool.adapters.in.rest.dtos.UpdateWorkDto;
 import com.amool.adapters.in.rest.dtos.WorkResponseDto;
 import com.amool.adapters.in.rest.mappers.WorkMapper;
 import com.amool.application.usecases.CreateEmptyChapterUseCase;
 import com.amool.application.usecases.GetWorkPermissionsUseCase;
 import com.amool.application.usecases.ObtainWorkByIdUseCase;
-import com.amool.application.usecases.UpdateWorkPriceUseCase;
+import com.amool.application.usecases.UpdateWorkUseCase;
 import com.amool.domain.model.Chapter;
 import com.amool.domain.model.WorkPermissions;
 import com.amool.security.JwtUserPrincipal;
@@ -27,16 +27,16 @@ public class ManageWorkController {
     private final ObtainWorkByIdUseCase obtainWorkByIdUseCase;
     private final CreateEmptyChapterUseCase createEmptyChapterUseCase;
     private final GetWorkPermissionsUseCase getWorkPermissionsUseCase;
-    private final UpdateWorkPriceUseCase updateWorkPriceUseCase;
+    private final UpdateWorkUseCase updateWorkUseCase;
 
     public ManageWorkController(ObtainWorkByIdUseCase obtainWorkByIdUseCase,
                                 CreateEmptyChapterUseCase createEmptyChapterUseCase,
                                 GetWorkPermissionsUseCase getWorkPermissionsUseCase,
-                                UpdateWorkPriceUseCase updateWorkPriceUseCase) {
+                                UpdateWorkUseCase updateWorkUseCase) {
         this.obtainWorkByIdUseCase = obtainWorkByIdUseCase;
         this.createEmptyChapterUseCase = createEmptyChapterUseCase;
         this.getWorkPermissionsUseCase = getWorkPermissionsUseCase;
-        this.updateWorkPriceUseCase = updateWorkPriceUseCase;
+        this.updateWorkUseCase = updateWorkUseCase;
     }
 
     @GetMapping("/{workId}")
@@ -80,14 +80,23 @@ public class ManageWorkController {
             return ResponseEntity.badRequest().build();
         }
     }
-
-    @PatchMapping("/{workId}/price")
+    
+    @PutMapping(value = "/{workId}")
     @PreAuthorize("isAuthenticated()")
-    public ResponseEntity<?> updateWorkPrice(@PathVariable Long workId,
-                                             @RequestBody @Valid UpdatePriceRequest request,
-                                             @AuthenticationPrincipal JwtUserPrincipal user) {
-        Long userId = (user != null ? user.getUserId() : null);
-        updateWorkPriceUseCase.execute(workId, request.price(), userId);
-        return ResponseEntity.noContent().build();
+    public ResponseEntity<Boolean> updateWork( 
+            @PathVariable Long workId,
+            @RequestBody UpdateWorkDto request,
+            @AuthenticationPrincipal JwtUserPrincipal user) {
+    
+        try {
+            Boolean updatedWorkId = updateWorkUseCase.execute(workId, 
+                                            request.price(),
+                                            request.tagIds(), 
+                                            request.state());
+                    return ResponseEntity.ok(updatedWorkId);
+        } catch (Exception e) {
+            return ResponseEntity.badRequest().build();
+        }
     }
+
 }

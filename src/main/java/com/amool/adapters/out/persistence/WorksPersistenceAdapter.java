@@ -105,21 +105,8 @@ public class WorksPersistenceAdapter implements ObtainWorkByIdPort, WorkPort {
             if (existingEntity == null) {
                 return Boolean.FALSE;
             }
-
-            if (work.getTitle() != null) existingEntity.setTitle(work.getTitle());
-            if (work.getDescription() != null) existingEntity.setDescription(work.getDescription());
-            if (work.getCover() != null) existingEntity.setCover(work.getCover());
-            if (work.getBanner() != null) existingEntity.setBanner(work.getBanner());
             if (work.getState() != null) existingEntity.setState(work.getState());
             if (work.getPrice() != null) existingEntity.setPrice(work.getPrice());
-            if (work.getLikes() != null) existingEntity.setLikes(work.getLikes());
-            if (work.getPublicationDate() != null) existingEntity.setPublicationDate(work.getPublicationDate());
-
-            if (work.getCreator() != null) existingEntity.setCreator(UserMapper.toEntity(work.getCreator()));
-            if (work.getFormat() != null) existingEntity.setFormatEntity(FormatMapper.toEntity(work.getFormat()));
-            if (work.getOriginalLanguage() != null) existingEntity.setOriginalLanguageEntity(LanguageMapper.toEntity(work.getOriginalLanguage()));
-
-            if (work.getCategories() != null) existingEntity.setCategories(CategoryMapper.toEntitySet(work.getCategories()));
             if (work.getTags() != null) existingEntity.setTags(TagMapper.toEntitySet(work.getTags()));
 
             entityManager.merge(existingEntity);
