@@ -20,4 +20,5 @@ public interface AwsS3Port {
 
     void deleteObject(String key);
 
+    Boolean uploadPrivateByte (String key, String header, byte[] bytes);
 }

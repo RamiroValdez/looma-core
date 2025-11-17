@@ -26,6 +26,8 @@ public class WorkMapper {
         work.setCategories(CategoryMapper.toDomainList(entity.getCategories()));
         work.setTags(TagMapper.toDomainSet(entity.getTags()));
         work.setAverageRating(entity.getAverageRating());
+        work.setHasEpub(entity.getHasEpub());
+        work.setLengthEpub(entity.getLengthEpub());
         return work;
     }
 
@@ -49,7 +51,9 @@ public class WorkMapper {
         entity.setChapters(ChapterMapper.toEntityList(work.getChapters()));
         entity.setCategories(CategoryMapper.toEntitySet(work.getCategories()));
         entity.setTags(TagMapper.toEntitySet(work.getTags()));
-
+        entity.setAverageRating(work.getAverageRating());
+        entity.setHasEpub(work.getHasEpub());
+        entity.setLengthEpub(work.getLengthEpub());
         return entity;
     }
 

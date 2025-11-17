@@ -48,6 +48,7 @@ public class UseCasesConfig {
     private final RestTemplate restTemplate;
     private final NotificationPort notificationPort;
     private final ObtainChapterByIdPort obtainChapterByIdPort;
+    private final HttpDownloadPort httpDownloadPort;
     private final AnalyticsPort analyticsPort;
     private final UserAccountPort userAccountPort;
     private final EmailPort emailPort;
@@ -94,6 +95,7 @@ public class UseCasesConfig {
             ReadingProgressPort readingProgressPort,
             AnalyticsPort analyticsPort,
             NotificationPort notificationPort,
+            HttpDownloadPort httpDownloadPort,
             ObtainChapterByIdPort obtainChapterByIdPort,
             PasswordEncoder passwordEncoder,
             ChatConversationPort chatConversationPort,
@@ -137,6 +139,7 @@ public class UseCasesConfig {
         this.readingProgressPort = readingProgressPort;
         this.notificationPort = notificationPort;
         this.obtainChapterByIdPort = obtainChapterByIdPort;
+        this.httpDownloadPort = httpDownloadPort;
         this.analyticsPort = analyticsPort;
         this.chatConversationPort = chatConversationPort;
         this.chatAIPort = chatAIPort;
@@ -502,6 +505,16 @@ public class UseCasesConfig {
     @Bean
     public GetSuscribersPerAuthorUseCase getSuscribersPerAuthorUseCase() {
         return new GetSuscribersPerAuthorUseCase(analyticsPort);
+    }
+    @Bean
+    public ExportEpubUseCase exportEpubUseCase() {
+        return new ExportEpubUseCase(
+                obtainWorkByIdPort,
+                loadChapterContentPort,
+                awsS3Port,
+                httpDownloadPort,
+                workPort
+        );
     }
 
     @Bean
