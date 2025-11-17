@@ -83,6 +83,7 @@ public class CreateWorkUseCase {
         work.setState("InProgress");
         work.setPrice(price == null ? BigDecimal.ZERO : price);
         work.setLikes(0);
+        work.setHasEpub(false);
         work.setPublicationDate(LocalDate.now());
         return work;
     }
