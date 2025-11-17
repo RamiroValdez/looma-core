@@ -47,6 +47,12 @@ public class WorkEntity {
     @Column(name = "rating_count")
     private Integer ratingCount = 0;
 
+    @Column(name = "has_epub", nullable = false)
+    private Boolean hasEpub = false;
+
+    @Column(name = "lenghtEpub")
+    private Integer lengthEpub;
+
     @ManyToOne
     @JoinColumn(name = "creator_id", nullable = false)
     private UserEntity creator;
@@ -62,9 +68,6 @@ public class WorkEntity {
 
     @OneToMany(mappedBy = "workEntity", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<ChapterEntity> chapters = new ArrayList<>();
-
-    @ManyToMany(mappedBy = "savedWorks")
-    private Set<UserEntity> usersWhoSaved = new HashSet<>();
 
     @ManyToMany
     @JoinTable(name = "work_category", joinColumns = @JoinColumn(name = "work_id"), inverseJoinColumns = @JoinColumn(name = "category_id"))
@@ -123,9 +126,6 @@ public class WorkEntity {
     public LanguageEntity getOriginalLanguageEntity() { return originalLanguageEntity; }
     public void setOriginalLanguageEntity(LanguageEntity originalLanguageEntity) { this.originalLanguageEntity = originalLanguageEntity; }
 
-    public Set<UserEntity> getUsersWhoSaved() { return usersWhoSaved; }
-    public void setUsersWhoSaved(Set<UserEntity> usersWhoSaved) { this.usersWhoSaved = usersWhoSaved; }
-
     public Set<CategoryEntity> getCategories() { return categories; }
     public void setCategories(Set<CategoryEntity> categories) { this.categories = categories; }
     public Set<UserEntity> getSubscribers() { return subscribers; }
@@ -136,5 +136,11 @@ public class WorkEntity {
 
     public Set<TagEntity> getTags() { return tags; }
     public void setTags(Set<TagEntity> tags) { this.tags = tags; }
+
+    public Boolean getHasEpub() { return hasEpub; }
+    public void setHasEpub(Boolean hasEpub) { this.hasEpub = hasEpub; }
+
+    public Integer getLengthEpub() { return lengthEpub; }
+    public void setLengthEpub(Integer lengthEpub) { this.lengthEpub = lengthEpub; }
 }
 

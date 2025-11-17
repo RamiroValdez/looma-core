@@ -9,6 +9,8 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
+import java.time.LocalDateTime;
+
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
 
@@ -24,7 +26,6 @@ class ToggleWorkLikeTest {
     private static final Long WORK_ID = 1L;
     private static final Long USER_ID = 1L;
     private static final Long INITIAL_LIKES = 5L;
-
     @Test
     void execute_WhenUserHasNotLikedWork_ShouldAddLike() {
         givenUserHasNotLikedWork();
@@ -153,7 +154,7 @@ class ToggleWorkLikeTest {
 
     private void givenUserHasNotLikedWork() {
         when(likePort.hasUserLikedWork(WORK_ID, USER_ID)).thenReturn(false);
-        when(likePort.likeWork(WORK_ID, USER_ID)).thenReturn(INITIAL_LIKES + 1);
+        when(likePort.likeWork(eq(WORK_ID), eq(USER_ID), any(LocalDateTime.class))).thenReturn(INITIAL_LIKES + 1);
     }
 
     private void givenUserHasLikedWork() {
@@ -163,7 +164,7 @@ class ToggleWorkLikeTest {
 
     private void givenWorkHasNoLikes() {
         when(likePort.hasUserLikedWork(WORK_ID, USER_ID)).thenReturn(false);
-        when(likePort.likeWork(WORK_ID, USER_ID)).thenReturn(1L);
+        when(likePort.likeWork(eq(WORK_ID), eq(USER_ID), any(LocalDateTime.class))).thenReturn(1L);
     }
 
     private void givenWorkHasOnlyOneLikeFromUser() {
@@ -173,19 +174,19 @@ class ToggleWorkLikeTest {
 
     private void givenUserHasNotLikedWorkForSpecificWork(Long workId) {
         when(likePort.hasUserLikedWork(workId, USER_ID)).thenReturn(false);
-        when(likePort.likeWork(workId, USER_ID)).thenReturn(1L);
+        when(likePort.likeWork(eq(workId), eq(USER_ID), any(LocalDateTime.class))).thenReturn(1L);
     }
 
     private void givenSpecificUserHasNotLikedWork(Long userId) {
         when(likePort.hasUserLikedWork(WORK_ID, userId)).thenReturn(false);
-        when(likePort.likeWork(WORK_ID, userId)).thenReturn(1L);
+        when(likePort.likeWork(eq(WORK_ID), eq(userId), any(LocalDateTime.class))).thenReturn(1L);
     }
 
     private void givenMultipleToggleScenario() {
         when(likePort.hasUserLikedWork(WORK_ID, USER_ID))
                 .thenReturn(false)  
                 .thenReturn(true);
-        when(likePort.likeWork(WORK_ID, USER_ID)).thenReturn(1L);
+        when(likePort.likeWork(eq(WORK_ID), eq(USER_ID), any(LocalDateTime.class))).thenReturn(1L);
         when(likePort.unlikeWork(WORK_ID, USER_ID)).thenReturn(0L);
     }
 
@@ -204,7 +205,7 @@ class ToggleWorkLikeTest {
 
     private void givenLikeOperationThrowsException() {
         when(likePort.hasUserLikedWork(WORK_ID, USER_ID)).thenReturn(false);
-        when(likePort.likeWork(WORK_ID, USER_ID))
+        when(likePort.likeWork(eq(WORK_ID), eq(USER_ID), any(LocalDateTime.class)))
                 .thenThrow(new RuntimeException("Like operation failed"));
     }
 
@@ -259,7 +260,7 @@ class ToggleWorkLikeTest {
 
     private void thenLikeOperationShouldBeVerified() {
         verify(likePort).hasUserLikedWork(WORK_ID, USER_ID);
-        verify(likePort).likeWork(WORK_ID, USER_ID);
+        verify(likePort).likeWork(eq(WORK_ID), eq(USER_ID), any(LocalDateTime.class));
         verify(likePort, never()).unlikeWork(WORK_ID, USER_ID);
     }
 
@@ -272,7 +273,7 @@ class ToggleWorkLikeTest {
     private void thenUnlikeOperationShouldBeVerified() {
         verify(likePort).hasUserLikedWork(WORK_ID, USER_ID);
         verify(likePort).unlikeWork(WORK_ID, USER_ID);
-        verify(likePort, never()).likeWork(WORK_ID, USER_ID);
+        verify(likePort, never()).likeWork(eq(WORK_ID), eq(USER_ID), any(LocalDateTime.class));
     }
 
     private void thenFirstLikeShouldBeAdded(LikeResponseDto response) {
@@ -293,7 +294,7 @@ class ToggleWorkLikeTest {
 
     private void thenLikeOperationShouldBeVerifiedForSpecificWork(Long workId) {
         verify(likePort).hasUserLikedWork(workId, USER_ID);
-        verify(likePort).likeWork(workId, USER_ID);
+        verify(likePort).likeWork(eq(workId), eq(USER_ID), any(LocalDateTime.class));
     }
 
     private void thenLikeShouldBeAddedForSpecificUser(LikeResponseDto response) {
@@ -303,7 +304,7 @@ class ToggleWorkLikeTest {
 
     private void thenLikeOperationShouldBeVerifiedForSpecificUser(Long userId) {
         verify(likePort).hasUserLikedWork(WORK_ID, userId);
-        verify(likePort).likeWork(WORK_ID, userId);
+        verify(likePort).likeWork(eq(WORK_ID), eq(userId), any(LocalDateTime.class));
     }
 
     private void thenFirstToggleShouldAddLike(LikeResponseDto response) {
@@ -318,7 +319,7 @@ class ToggleWorkLikeTest {
 
     private void thenMultipleToggleOperationsShouldBeVerified() {
         verify(likePort, times(2)).hasUserLikedWork(WORK_ID, USER_ID);
-        verify(likePort).likeWork(WORK_ID, USER_ID);
+        verify(likePort).likeWork(eq(WORK_ID), eq(USER_ID), any(LocalDateTime.class));
         verify(likePort).unlikeWork(WORK_ID, USER_ID);
     }
 
@@ -328,7 +329,7 @@ class ToggleWorkLikeTest {
 
     private void thenLikeOperationAttemptShouldBeVerified() {
         verify(likePort).hasUserLikedWork(WORK_ID, USER_ID);
-        verify(likePort).likeWork(WORK_ID, USER_ID);
+        verify(likePort).likeWork(eq(WORK_ID), eq(USER_ID), any(LocalDateTime.class));
     }
 
     private void thenUnlikeOperationAttemptShouldBeVerified() {

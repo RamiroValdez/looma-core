@@ -3,9 +3,12 @@ package com.amool.config;
 import com.amool.application.port.out.*;
 import com.amool.application.service.ImagesService;
 import com.amool.application.usecases.*;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.web.client.RestTemplate;
+import java.math.BigDecimal;
 
 @Configuration
 public class UseCasesConfig {
@@ -45,6 +48,16 @@ public class UseCasesConfig {
     private final RestTemplate restTemplate;
     private final NotificationPort notificationPort;
     private final ObtainChapterByIdPort obtainChapterByIdPort;
+    private final HttpDownloadPort httpDownloadPort;
+    private final AnalyticsPort analyticsPort;
+    private final UserAccountPort userAccountPort;
+    private final EmailPort emailPort;
+    private final PaymentSessionLinkPort paymentSessionLinkPort;
+    private final ChatConversationPort chatConversationPort;
+    private final ChatAIPort chatAIPort;
+
+    @Value("${payments.pricing.author:#{null}}")
+    private BigDecimal authorPrice;
 
     public UseCasesConfig(
             AwsS3Port awsS3Port,
@@ -80,8 +93,16 @@ public class UseCasesConfig {
             RestTemplate restTemplate,
             RatingPort ratingPort,
             ReadingProgressPort readingProgressPort,
+            AnalyticsPort analyticsPort,
             NotificationPort notificationPort,
-            ObtainChapterByIdPort obtainChapterByIdPort
+            HttpDownloadPort httpDownloadPort,
+            ObtainChapterByIdPort obtainChapterByIdPort,
+            PasswordEncoder passwordEncoder,
+            ChatConversationPort chatConversationPort,
+            ChatAIPort chatAIPort,
+            UserAccountPort userAccountPort,
+            EmailPort emailPort,
+            PaymentSessionLinkPort paymentSessionLinkPort
             ) {
         this.awsS3Port = awsS3Port;
         this.authPort = authPort;
@@ -118,6 +139,13 @@ public class UseCasesConfig {
         this.readingProgressPort = readingProgressPort;
         this.notificationPort = notificationPort;
         this.obtainChapterByIdPort = obtainChapterByIdPort;
+        this.httpDownloadPort = httpDownloadPort;
+        this.analyticsPort = analyticsPort;
+        this.chatConversationPort = chatConversationPort;
+        this.chatAIPort = chatAIPort;
+        this.userAccountPort = userAccountPort;
+        this.emailPort = emailPort;
+        this.paymentSessionLinkPort = paymentSessionLinkPort;
     }
 
     @Bean
@@ -243,7 +271,7 @@ public class UseCasesConfig {
 
     @Bean
     public GetUserByIdUseCase getUserByIdUseCase() {
-        return new GetUserByIdUseCase(loadUserPort);
+        return new GetUserByIdUseCase(loadUserPort, awsS3Port);
     }
 
     @Bean
@@ -385,13 +413,14 @@ public class UseCasesConfig {
                 paymentRecordPort,
                 obtainWorkByIdPort,
                 loadChapterPort,
-                subscribeUserUseCase()
+                subscribeUserUseCase(),
+                paymentSessionLinkPort
         );
     }
 
     @Bean
     public ObtainWorkListUseCase obtainWorkListUseCase() {
-        return new ObtainWorkListUseCase(workPort);
+        return new ObtainWorkListUseCase(workPort, awsS3Port);
     }
 
     @Bean
@@ -424,6 +453,62 @@ public class UseCasesConfig {
     }
 
     @Bean
+    public UpdateUserUseCase updateUserUseCase() {
+        return new UpdateUserUseCase(loadUserPort, imagesService);
+    }
+
+
+
+    @Bean
+    public GetLikesPerWorkUseCase getLikesPerWorkUseCase() {
+        return new GetLikesPerWorkUseCase(analyticsPort);
+    }
+
+    @Bean
+    public GetLikesPerChapterUseCase getLikesPerChapterUseCase() {
+        return new GetLikesPerChapterUseCase(analyticsPort);
+    }
+
+    @Bean
+    public GetRatingsPerWorkUseCase getRatingsPerWorkUseCase() {
+        return new GetRatingsPerWorkUseCase(analyticsPort);
+    }
+
+    @Bean
+    public GetSavesPerWorkUseCase getSavesPerWorkUseCase() {
+        return new GetSavesPerWorkUseCase(analyticsPort);
+    }
+    @Bean
+    public ProcessChatMessageUseCase processChatMessageUseCase() {
+        return new ProcessChatMessageUseCase(chatConversationPort, chatAIPort);
+    }
+
+    @Bean
+    public GetChatConversationUseCase getChatConversationUseCase() {
+        return new GetChatConversationUseCase(chatConversationPort);
+    }
+
+    @Bean
+    public StartSubscriptionFlowUseCase startSubscriptionFlowUseCase(java.util.List<PaymentProviderPort> paymentProviders) {
+        return new StartSubscriptionFlowUseCase(obtainWorkByIdPort, loadChapterPort, subscribeUserUseCase(), paymentProviders, authorPrice);
+    }
+
+
+    @Bean
+    public GetSuscribersPerAuthorUseCase getSuscribersPerAuthorUseCase() {
+        return new GetSuscribersPerAuthorUseCase(analyticsPort);
+    }
+    @Bean
+    public ExportEpubUseCase exportEpubUseCase() {
+        return new ExportEpubUseCase(
+                obtainWorkByIdPort,
+                loadChapterContentPort,
+                awsS3Port,
+                httpDownloadPort,
+                workPort
+        );
+    }
+    @Bean
     public UpdateWorkUseCase updateWorkUseCase() {
         return new UpdateWorkUseCase(
                 workPort,
@@ -432,4 +517,32 @@ public class UseCasesConfig {
         );
     }
 
+    @Bean
+    public GetSuscribersPerWorkUseCase getSuscribersPerWorkUseCase() {
+        return new GetSuscribersPerWorkUseCase(analyticsPort);
+    }
+
+    @Bean
+    public GetTotalPerAuthorUseCase getTotalPerAuthorUseCase() {
+        return new GetTotalPerAuthorUseCase(analyticsPort);
+    }
+
+    @Bean
+    public GetTotalPerWorkUseCase getTotalPerWorkUseCase() {
+        return new GetTotalPerWorkUseCase(analyticsPort);
+    }
+
+    @Bean
+    public GetTotalSuscribersUseCase getTotalSuscribersUseCase() {
+        return new GetTotalSuscribersUseCase(analyticsPort, obtainWorkByIdPort);
+    }
+    @Bean
+    public StartRegistrationUseCase startRegistrationUseCase() {
+        return new StartRegistrationUseCase(userAccountPort, emailPort);
+    }
+
+    @Bean
+    public VerifyRegistrationUseCase verifyRegistrationUseCase() {
+        return new VerifyRegistrationUseCase(userAccountPort);
+    }
 }

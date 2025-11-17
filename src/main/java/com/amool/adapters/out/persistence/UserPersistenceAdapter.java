@@ -7,6 +7,7 @@ import com.amool.domain.model.User;
 import jakarta.persistence.EntityManager;
 import jakarta.transaction.Transactional;
 
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Component;
 
 import java.util.List;
@@ -16,9 +17,11 @@ import java.util.Optional;
 public class UserPersistenceAdapter implements LoadUserPort {
 
     private final EntityManager entityManager;
+    private final PasswordEncoder passwordEncoder;
 
-    public UserPersistenceAdapter(EntityManager entityManager) {
+    public UserPersistenceAdapter(EntityManager entityManager, PasswordEncoder passwordEncoder) {
         this.entityManager = entityManager;
+        this.passwordEncoder = passwordEncoder;
     }
 
     @Override
@@ -46,5 +49,40 @@ public class UserPersistenceAdapter implements LoadUserPort {
         return entityManager.createQuery(jpql, Long.class)
             .setParameter("workId", workId)
             .getResultList();
+    }
+
+    @Transactional
+    @Override
+    public boolean updateUser(User user, String newPassword) {
+        try {
+            UserEntity existingEntity = entityManager.find(UserEntity.class, user.getId());
+            if (existingEntity == null) {
+                return false;
+            }
+
+            existingEntity.setName(user.getName());
+            existingEntity.setSurname(user.getSurname());
+            existingEntity.setUsername(user.getUsername());
+            existingEntity.setEmail(user.getEmail());
+
+            if(user.getPhoto() != null){
+                if (user.getMultipartFile() != null){
+                    existingEntity.setPhoto(user.getPhoto());
+                }
+            }
+
+            if(user.getMoney() != null) {
+                existingEntity.setMoney(user.getMoney());
+            }
+
+            if (newPassword != null && !newPassword.isBlank()) {
+                existingEntity.setPassword(passwordEncoder.encode(newPassword));
+            }
+
+            entityManager.merge(existingEntity);
+            return true;
+        } catch (Exception e) {
+            return false;
+        }
     }
 }

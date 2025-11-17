@@ -42,6 +42,12 @@ public class PaymentRecordEntity {
     @Column(name = "created_at")
     private OffsetDateTime createdAt;
 
+    @Column(name = "external_reference", length = 128)
+    private String externalReference;
+
+    @Column(name = "session_uuid", length = 64)
+    private String sessionUuid;
+
     public String getId() { return id; }
     public void setId(String id) { this.id = id; }
     public Long getUserId() { return userId; }
@@ -64,4 +70,10 @@ public class PaymentRecordEntity {
     public void setTargetId(Long targetId) { this.targetId = targetId; }
     public OffsetDateTime getCreatedAt() { return createdAt; }
     public void setCreatedAt(OffsetDateTime createdAt) { this.createdAt = createdAt; }
+
+    public String getExternalReference() { return externalReference; }
+    public void setExternalReference(String externalReference) { this.externalReference = externalReference; }
+
+    public String getSessionUuid() { return sessionUuid; }
+    public void setSessionUuid(String sessionUuid) { this.sessionUuid = sessionUuid; }
 }
