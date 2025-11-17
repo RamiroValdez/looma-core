@@ -7,6 +7,7 @@ public class UserDto {
     private String username;
     private String email;
     private String photo;
+    private String money;
 
     public Long getId() { return id; }
     public void setId(Long id) { this.id = id; }
@@ -25,4 +26,7 @@ public class UserDto {
 
     public String getPhoto() { return photo; }
     public void setPhoto(String photo) { this.photo = photo; }
+
+    public String getMoney() { return money; }
+    public void setMoney(String money) { this.money = money; }
 }

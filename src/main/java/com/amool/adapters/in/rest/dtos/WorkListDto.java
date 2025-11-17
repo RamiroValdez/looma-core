@@ -8,6 +8,7 @@ public class WorkListDto {
     String title;
     String description;
     String cover;
+    String banner;
     Integer likes;
     FormatDto format;
     List<CategoryDto> categories;
@@ -57,7 +58,13 @@ public class WorkListDto {
     public void setFormat(FormatDto format) {
         this.format = format;
     }
-    
+
+    public String getBanner() {
+        return banner;
+    }
+    public void setBanner(String banner) {
+        this.banner = banner;
+    }
     
     public void setCategories(List<CategoryDto> categories) {
         this.categories = categories;

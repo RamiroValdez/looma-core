@@ -5,6 +5,7 @@ import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
 import java.math.BigDecimal;
+import java.time.LocalDateTime;
 
 import jakarta.persistence.*;
 
@@ -37,6 +38,15 @@ public class UserEntity {
     @Column(name = "money", nullable = false)
     private BigDecimal money = BigDecimal.ZERO;
 
+    @Column(name = "enabled", nullable = false, columnDefinition = "boolean not null default false")
+    private Boolean enabled = Boolean.FALSE;
+
+    @Column(name = "verification_code")
+    private String verificationCode;
+
+    @Column(name = "verification_expires_at")
+    private LocalDateTime verificationExpiresAt;
+
 
     @ElementCollection
     @CollectionTable(
@@ -46,10 +56,6 @@ public class UserEntity {
     @MapKeyJoinColumn(name = "work_id")
     @Column(name = "chapter_id")
     private Map<WorkEntity, Long> readingProgress = new HashMap<>();
-    
-    @ManyToMany
-    @JoinTable(name = "worksaved_user", joinColumns = @JoinColumn(name = "user_id"), inverseJoinColumns = @JoinColumn(name = "work_id"))
-    private Set<WorkEntity> savedWorks = new HashSet<>();
 
     @ManyToMany
     @JoinTable(name = "user_chapter", joinColumns = @JoinColumn(name = "user_id"), inverseJoinColumns = @JoinColumn(name = "chapter_id"))
@@ -98,8 +104,14 @@ public class UserEntity {
     public BigDecimal getMoney() { return money; }
     public void setMoney(BigDecimal money) { this.money = money; }
 
-    public Set<WorkEntity> getSavedWorks() { return savedWorks; }
-    public void setSavedWorks(Set<WorkEntity> savedWorks) { this.savedWorks = savedWorks; }
+    public Boolean getEnabled() { return enabled; }
+    public void setEnabled(Boolean enabled) { this.enabled = enabled; }
+
+    public String getVerificationCode() { return verificationCode; }
+    public void setVerificationCode(String verificationCode) { this.verificationCode = verificationCode; }
+
+    public LocalDateTime getVerificationExpiresAt() { return verificationExpiresAt; }
+    public void setVerificationExpiresAt(LocalDateTime verificationExpiresAt) { this.verificationExpiresAt = verificationExpiresAt; }
 
     public Set<ChapterEntity> getAcquiredChapterEntities() { return acquiredChapterEntities; }
     public void setAcquiredChapterEntities(Set<ChapterEntity> acquiredChapterEntities) { this.acquiredChapterEntities = acquiredChapterEntities; }

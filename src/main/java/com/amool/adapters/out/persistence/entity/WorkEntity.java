@@ -69,9 +69,6 @@ public class WorkEntity {
     @OneToMany(mappedBy = "workEntity", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<ChapterEntity> chapters = new ArrayList<>();
 
-    @ManyToMany(mappedBy = "savedWorks")
-    private Set<UserEntity> usersWhoSaved = new HashSet<>();
-
     @ManyToMany
     @JoinTable(name = "work_category", joinColumns = @JoinColumn(name = "work_id"), inverseJoinColumns = @JoinColumn(name = "category_id"))
     private Set<CategoryEntity> categories = new HashSet<>();
@@ -128,9 +125,6 @@ public class WorkEntity {
 
     public LanguageEntity getOriginalLanguageEntity() { return originalLanguageEntity; }
     public void setOriginalLanguageEntity(LanguageEntity originalLanguageEntity) { this.originalLanguageEntity = originalLanguageEntity; }
-
-    public Set<UserEntity> getUsersWhoSaved() { return usersWhoSaved; }
-    public void setUsersWhoSaved(Set<UserEntity> usersWhoSaved) { this.usersWhoSaved = usersWhoSaved; }
 
     public Set<CategoryEntity> getCategories() { return categories; }
     public void setCategories(Set<CategoryEntity> categories) { this.categories = categories; }
