@@ -12,6 +12,7 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
 
+import com.amool.application.port.out.EmailPort;
 import com.amool.application.port.out.LoadUserPort;
 import com.amool.application.port.out.NotificationPort;
 import com.amool.application.port.out.ObtainWorkByIdPort;
@@ -26,13 +27,14 @@ public class CreateAuthorNotificationTest {
     private NotificationPort notificationPort;
     private LoadUserPort loadUserPort;
     private ObtainWorkByIdPort obtainWorkByIdPort;
+    private EmailPort emailPort;
 
     @BeforeEach
     public void setUp() {
         notificationPort = Mockito.mock(NotificationPort.class);
         loadUserPort = Mockito.mock(LoadUserPort.class);
         obtainWorkByIdPort = Mockito.mock(ObtainWorkByIdPort.class);
-        createAuthorNotification = new CreateAuthorNotification(notificationPort, loadUserPort, obtainWorkByIdPort);
+        createAuthorNotification = new CreateAuthorNotification(notificationPort, loadUserPort, obtainWorkByIdPort, emailPort);
     }
 
     @Test
