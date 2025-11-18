@@ -435,12 +435,12 @@ public class UseCasesConfig {
 
     @Bean
     public CreateWorkNotification createWorkNotification() {
-        return new CreateWorkNotification(loadUserPort, notificationPort, obtainWorkByIdPort);
+        return new CreateWorkNotification(loadUserPort, notificationPort, obtainWorkByIdPort, emailPort);
     }
 
     @Bean
     public CreateAuthorNotification createAuthorNotification() {
-        return new CreateAuthorNotification(notificationPort, loadUserPort, obtainWorkByIdPort);
+        return new CreateAuthorNotification(notificationPort, loadUserPort, obtainWorkByIdPort, emailPort);
     }
     @Bean
     public ObtainNotificationsUseCase obtainNotificationsUseCase() {
