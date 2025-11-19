@@ -20,7 +20,6 @@ public class InMemoryChatConversationAdapter implements ChatConversationPort {
         List<ChatMessage> conversation = conversations.computeIfAbsent(key, k -> new ArrayList<>());
         conversation.add(message);
         
-        // Limitar el tamaño de la conversación
         if (conversation.size() > MAX_MESSAGES) {
             List<ChatMessage> limited = new ArrayList<>(
                 conversation.subList(conversation.size() - MAX_MESSAGES, conversation.size())

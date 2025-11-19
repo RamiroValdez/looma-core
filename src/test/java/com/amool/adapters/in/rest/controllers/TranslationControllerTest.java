@@ -33,7 +33,6 @@ public class TranslationControllerTest {
     private static final String ORIGINAL = "Hello world";
     private static final String RESULT = "Hola mundo";
 
-    // ===== Tests =====
 
     @Test
     @DisplayName("POST /api/translation/create-version - 200 OK returns translated version string")
@@ -76,7 +75,6 @@ public class TranslationControllerTest {
         thenStatusIsForbidden(response);
     }
 
-    // ===== Given =====
     private void givenCreateVersionSucceedsWith(String result) {
         when(createLanguageVersionUseCase.execute(eq(SOURCE), eq(TARGET), eq(ORIGINAL))).thenReturn(result);
     }
@@ -96,7 +94,6 @@ public class TranslationControllerTest {
                 .execute(eq(SOURCE), eq(TARGET), eq(ORIGINAL));
     }
 
-    // ===== When =====
     private ResultActions whenClientCreatesVersion(String source, String target, String original) throws Exception {
         String body = asJson(source, target, original);
         return mockMvc.perform(post("/api/translation/create-version")
@@ -104,7 +101,6 @@ public class TranslationControllerTest {
                 .content(body));
     }
 
-    // ===== Then =====
     private void thenResponseIsOkWithBody(ResultActions response, String expectedBody) throws Exception {
         response.andExpect(status().isOk())
                 .andExpect(content().string(expectedBody));
@@ -126,7 +122,6 @@ public class TranslationControllerTest {
         verify(createLanguageVersionUseCase).execute(eq(source), eq(target), eq(original));
     }
 
-    // ===== Utils =====
     private String asJson(String source, String target, String original) {
         return "{"
                 + "\"sourceLanguage\":\"" + escape(source) + "\","

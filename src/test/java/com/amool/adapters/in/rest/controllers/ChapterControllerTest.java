@@ -81,18 +81,14 @@ public class ChapterControllerTest {
         SecurityContextHolder.clearContext();
     }
 
-    // ========== Tests for getChapter endpoint ==========
 
     @Test
     @DisplayName("GET /api/work/{workId}/chapter/{chapterId} - Should return chapter when found")
     public void getChapter_shouldReturnChapter_whenFound() {
-        // Given
         givenChapterExists();
 
-        // When
         ResponseEntity<ChapterWithContentDto> response = whenGetChapter();
 
-        // Then
         thenResponseIsOk(response);
         thenResponseContainsChapterData(response);
         thenGetChapterUseCaseWasInvoked();
@@ -101,30 +97,23 @@ public class ChapterControllerTest {
     @Test
     @DisplayName("GET /api/work/{workId}/chapter/{chapterId} - Should return 404 when not found")
     public void getChapter_shouldReturn404_whenNotFound() {
-        // Given
         givenChapterDoesNotExist();
 
-        // When
         ResponseEntity<ChapterWithContentDto> response = whenGetChapter();
 
-        // Then
         thenResponseIsNotFound(response);
         thenResponseBodyIsNull(response);
     }
 
-    // ========== Tests for updateChapterContent endpoint ==========
 
     @Test
     @DisplayName("POST /api/work/{workId}/chapter/{chapterId}/content - Should update content successfully")
     public void updateChapterContent_shouldUpdateContent_whenValid() {
-        // Given
         UpdateChapterContentRequest request = givenValidUpdateContentRequest();
         givenContentUpdateWillSucceed();
 
-        // When
         ResponseEntity<ChapterContent> response = whenUpdateChapterContent(request);
 
-        // Then
         thenResponseIsOk(response);
         thenUpdateContentUseCaseWasInvoked();
     }
@@ -132,13 +121,10 @@ public class ChapterControllerTest {
     @Test
     @DisplayName("POST /api/work/{workId}/chapter/{chapterId}/content - Should return 400 when IDs don't match")
     public void updateChapterContent_shouldReturn400_whenIdsMismatch() {
-        // Given
         UpdateChapterContentRequest request = givenUpdateContentRequestWithMismatchedIds();
 
-        // When
         ResponseEntity<ChapterContent> response = whenUpdateChapterContent(request);
 
-        // Then
         thenResponseIsBadRequest(response);
         thenUpdateContentUseCaseWasNotInvoked();
     }
@@ -146,29 +132,22 @@ public class ChapterControllerTest {
     @Test
     @DisplayName("POST /api/work/{workId}/chapter/{chapterId}/content - Should return 403 when forbidden")
     public void updateChapterContent_shouldReturn403_whenForbidden() {
-        // Given
         UpdateChapterContentRequest request = givenValidUpdateContentRequest();
         givenContentUpdateWillBeForbidden();
 
-        // When
         ResponseEntity<ChapterContent> response = whenUpdateChapterContent(request);
 
-        // Then
         thenResponseIsForbidden(response);
     }
 
-    // ========== Tests for deleteChapter endpoint ==========
 
     @Test
     @DisplayName("DELETE /api/work/{workId}/chapter/{chapterId}/delete - Should delete chapter successfully")
     public void deleteChapter_shouldDeleteChapter_whenValid() {
-        // Given
         givenChapterCanBeDeleted();
 
-        // When
         ResponseEntity<Void> response = whenDeleteChapter();
 
-        // Then
         thenResponseIsNoContent(response);
         thenDeleteChapterUseCaseWasInvoked();
     }
@@ -176,55 +155,42 @@ public class ChapterControllerTest {
     @Test
     @DisplayName("DELETE /api/work/{workId}/chapter/{chapterId}/delete - Should return 404 when not found")
     public void deleteChapter_shouldReturn404_whenNotFound() {
-        // Given
         givenChapterToDeleteDoesNotExist();
 
-        // When
         ResponseEntity<Void> response = whenDeleteChapter();
 
-        // Then
         thenResponseIsNotFound(response);
     }
 
     @Test
     @DisplayName("DELETE /api/work/{workId}/chapter/{chapterId}/delete - Should return 403 when forbidden")
     public void deleteChapter_shouldReturn403_whenForbidden() {
-        // Given
         givenChapterDeleteWillBeForbidden();
 
-        // When
         ResponseEntity<Void> response = whenDeleteChapter();
 
-        // Then
         thenResponseIsForbidden(response);
     }
 
     @Test
     @DisplayName("DELETE /api/work/{workId}/chapter/{chapterId}/delete - Should return 409 when illegal state")
     public void deleteChapter_shouldReturn409_whenIllegalState() {
-        // Given
         givenChapterDeleteWillFailDueToIllegalState();
 
-        // When
         ResponseEntity<Void> response = whenDeleteChapter();
 
-        // Then
         thenResponseIsConflict(response);
     }
 
-    // ========== Tests for publishChapter endpoint ==========
 
     @Test
     @DisplayName("POST /api/work/{workId}/chapter/{chapterId}/publish - Should publish chapter successfully")
     public void publishChapter_shouldPublishChapter_whenValid() {
-        // Given
         givenUserIsAuthenticated();
         givenChapterCanBePublished();
 
-        // When
         ResponseEntity<Void> response = whenPublishChapter();
 
-        // Then
         thenResponseIsNoContent(response);
         thenPublishChapterUseCaseWasInvoked();
         thenWorkNotificationWasCreated();
@@ -233,13 +199,10 @@ public class ChapterControllerTest {
     @Test
     @DisplayName("POST /api/work/{workId}/chapter/{chapterId}/publish - Should return 401 when not authenticated")
     public void publishChapter_shouldReturn401_whenNotAuthenticated() {
-        // Given
         givenUserIsNotAuthenticated();
 
-        // When
         ResponseEntity<Void> response = whenPublishChapter();
 
-        // Then
         thenResponseIsUnauthorized(response);
         thenPublishChapterUseCaseWasNotInvoked();
     }
@@ -247,59 +210,46 @@ public class ChapterControllerTest {
     @Test
     @DisplayName("POST /api/work/{workId}/chapter/{chapterId}/publish - Should return 404 when not found")
     public void publishChapter_shouldReturn404_whenNotFound() {
-        // Given
         givenUserIsAuthenticated();
         givenChapterToPublishDoesNotExist();
 
-        // When
         ResponseEntity<Void> response = whenPublishChapter();
 
-        // Then
         thenResponseIsNotFound(response);
     }
 
     @Test
     @DisplayName("POST /api/work/{workId}/chapter/{chapterId}/publish - Should return 403 when forbidden")
     public void publishChapter_shouldReturn403_whenForbidden() {
-        // Given
         givenUserIsAuthenticated();
         givenChapterPublishWillBeForbidden();
 
-        // When
         ResponseEntity<Void> response = whenPublishChapter();
 
-        // Then
         thenResponseIsForbidden(response);
     }
 
     @Test
     @DisplayName("POST /api/work/{workId}/chapter/{chapterId}/publish - Should return 409 when already published")
     public void publishChapter_shouldReturn409_whenAlreadyPublished() {
-        // Given
         givenUserIsAuthenticated();
         givenChapterIsAlreadyPublished();
 
-        // When
         ResponseEntity<Void> response = whenPublishChapter();
 
-        // Then
         thenResponseIsConflict(response);
     }
 
-    // ========== Tests for scheduleChapter endpoint ==========
 
     @Test
     @DisplayName("POST /api/work/{workId}/chapter/{chapterId}/schedule - Should schedule chapter successfully")
     public void scheduleChapter_shouldScheduleChapter_whenValid() {
-        // Given
         givenUserIsAuthenticated();
         SchedulePublicationRequestDto request = givenValidScheduleRequest();
         givenChapterCanBeScheduled();
 
-        // When
         ResponseEntity<Void> response = whenScheduleChapter(request);
 
-        // Then
         thenResponseIsNoContent(response);
         thenSchedulePublicationUseCaseWasInvoked();
     }
@@ -307,104 +257,82 @@ public class ChapterControllerTest {
     @Test
     @DisplayName("POST /api/work/{workId}/chapter/{chapterId}/schedule - Should return 401 when not authenticated")
     public void scheduleChapter_shouldReturn401_whenNotAuthenticated() {
-        // Given
         givenUserIsNotAuthenticated();
         SchedulePublicationRequestDto request = givenValidScheduleRequest();
 
-        // When
         ResponseEntity<Void> response = whenScheduleChapter(request);
 
-        // Then
         thenResponseIsUnauthorized(response);
     }
 
     @Test
     @DisplayName("POST /api/work/{workId}/chapter/{chapterId}/schedule - Should return 400 when invalid date format")
     public void scheduleChapter_shouldReturn400_whenInvalidDateFormat() {
-        // Given
         givenUserIsAuthenticated();
         SchedulePublicationRequestDto request = givenInvalidScheduleRequest();
 
-        // When
         ResponseEntity<Void> response = whenScheduleChapter(request);
 
-        // Then
         thenResponseIsBadRequest(response);
     }
 
     @Test
     @DisplayName("POST /api/work/{workId}/chapter/{chapterId}/schedule - Should return 403 when forbidden")
     public void scheduleChapter_shouldReturn403_whenForbidden() {
-        // Given
         givenUserIsAuthenticated();
         SchedulePublicationRequestDto request = givenValidScheduleRequest();
         givenSchedulePublicationWillBeForbidden();
 
-        // When
         ResponseEntity<Void> response = whenScheduleChapter(request);
 
-        // Then
         thenResponseIsForbidden(response);
     }
 
     @Test
     @DisplayName("POST /api/work/{workId}/chapter/{chapterId}/schedule - Should return 404 when chapter not found")
     public void scheduleChapter_shouldReturn404_whenNotFound() {
-        // Given
         givenUserIsAuthenticated();
         SchedulePublicationRequestDto request = givenValidScheduleRequest();
         givenChapterToScheduleDoesNotExist();
 
-        // When
         ResponseEntity<Void> response = whenScheduleChapter(request);
 
-        // Then
         thenResponseIsNotFound(response);
     }
 
     @Test
     @DisplayName("POST /api/work/{workId}/chapter/{chapterId}/schedule - Should return 400 when date in past")
     public void scheduleChapter_shouldReturn400_whenDateInPast() {
-        // Given
         givenUserIsAuthenticated();
         SchedulePublicationRequestDto request = givenValidScheduleRequest();
         givenScheduleDateIsInThePast();
 
-        // When
         ResponseEntity<Void> response = whenScheduleChapter(request);
 
-        // Then
         thenResponseIsBadRequest(response);
     }
 
     @Test
     @DisplayName("POST /api/work/{workId}/chapter/{chapterId}/schedule - Should return 409 when illegal state")
     public void scheduleChapter_shouldReturn409_whenIllegalState() {
-        // Given
         givenUserIsAuthenticated();
         SchedulePublicationRequestDto request = givenValidScheduleRequest();
         givenChapterScheduleWillFailDueToIllegalState();
 
-        // When
         ResponseEntity<Void> response = whenScheduleChapter(request);
 
-        // Then
         thenResponseIsConflict(response);
     }
 
-    // ========== Tests for cancelSchedule endpoint ==========
 
     @Test
     @DisplayName("DELETE /api/work/{workId}/chapter/{chapterId}/schedule - Should cancel schedule successfully")
     public void cancelSchedule_shouldCancelSchedule_whenValid() {
-        // Given
         givenUserIsAuthenticated();
         givenScheduleCanBeCancelled();
 
-        // When
         ResponseEntity<Void> response = whenCancelSchedule();
 
-        // Then
         thenResponseIsNoContent(response);
         thenCancelScheduledPublicationUseCaseWasInvoked();
     }
@@ -412,70 +340,54 @@ public class ChapterControllerTest {
     @Test
     @DisplayName("DELETE /api/work/{workId}/chapter/{chapterId}/schedule - Should return 401 when not authenticated")
     public void cancelSchedule_shouldReturn401_whenNotAuthenticated() {
-        // Given
         givenUserIsNotAuthenticated();
 
-        // When
         ResponseEntity<Void> response = whenCancelSchedule();
 
-        // Then
         thenResponseIsUnauthorized(response);
     }
 
     @Test
     @DisplayName("DELETE /api/work/{workId}/chapter/{chapterId}/schedule - Should return 404 when not found")
     public void cancelSchedule_shouldReturn404_whenNotFound() {
-        // Given
         givenUserIsAuthenticated();
         givenScheduleToCancelDoesNotExist();
 
-        // When
         ResponseEntity<Void> response = whenCancelSchedule();
 
-        // Then
         thenResponseIsNotFound(response);
     }
 
     @Test
     @DisplayName("DELETE /api/work/{workId}/chapter/{chapterId}/schedule - Should return 403 when forbidden")
     public void cancelSchedule_shouldReturn403_whenForbidden() {
-        // Given
         givenUserIsAuthenticated();
         givenCancelScheduleWillBeForbidden();
 
-        // When
         ResponseEntity<Void> response = whenCancelSchedule();
 
-        // Then
         thenResponseIsForbidden(response);
     }
 
     @Test
     @DisplayName("DELETE /api/work/{workId}/chapter/{chapterId}/schedule - Should return 409 when illegal state")
     public void cancelSchedule_shouldReturn409_whenIllegalState() {
-        // Given
         givenUserIsAuthenticated();
         givenCancelScheduleWillFailDueToIllegalState();
 
-        // When
         ResponseEntity<Void> response = whenCancelSchedule();
 
-        // Then
         thenResponseIsConflict(response);
     }
 
-    // ========== Tests for toggleChapterLike endpoint ==========
 
     @Test
     @DisplayName("POST /api/work/{workId}/chapter/{chapterId}/like - Should toggle like successfully")
     public void toggleChapterLike_shouldToggleLike_whenValid() {
-        // Given
         givenChapterCanBeLiked();
 
-        // When
         ResponseEntity<LikeResponseDto> response = whenToggleChapterLike();
 
-        // Then
         thenResponseIsOk(response);
         thenResponseContainsLikeData(response, true);
         thenToggleChapterLikeUseCaseWasInvoked();
@@ -484,19 +396,15 @@ public class ChapterControllerTest {
     @Test
     @DisplayName("POST /api/work/{workId}/chapter/{chapterId}/like - Should unlike when toggling off")
     public void toggleChapterLike_shouldUnlike_whenTogglingOff() {
-        // Given
         givenChapterCanBeUnliked();
 
-        // When
         ResponseEntity<LikeResponseDto> response = whenToggleChapterLike();
 
-        // Then
         thenResponseIsOk(response);
         thenResponseContainsLikeData(response, false);
         thenToggleChapterLikeUseCaseWasInvoked();
     }
 
-    // ========== Helper methods ==========
 
     private ChapterWithContentResult createChapterWithContentResult() {
         Chapter chapter = new Chapter();
@@ -528,9 +436,7 @@ public class ChapterControllerTest {
         SecurityContextHolder.getContext().setAuthentication(authentication);
     }
 
-    // ========== Given methods (Arrange) ==========
 
-    // GetChapter Given methods
     private void givenChapterExists() {
         ChapterWithContentResult result = createChapterWithContentResult();
         when(getChapterWithContentUseCase.execute(TEST_WORK_ID, TEST_CHAPTER_ID, TEST_LANGUAGE))
@@ -542,7 +448,6 @@ public class ChapterControllerTest {
                 .thenReturn(Optional.empty());
     }
 
-    // UpdateChapterContent Given methods
     private UpdateChapterContentRequest givenValidUpdateContentRequest() {
         return new UpdateChapterContentRequest(
                 TEST_WORK_ID.toString(),
@@ -577,7 +482,6 @@ public class ChapterControllerTest {
                 .thenThrow(new SecurityException("Not authorized"));
     }
 
-    // DeleteChapter Given methods
     private void givenChapterCanBeDeleted() {
         doNothing().when(deleteChapterUseCase).execute(TEST_WORK_ID, TEST_CHAPTER_ID, TEST_USER_ID);
     }
@@ -597,7 +501,6 @@ public class ChapterControllerTest {
                 .when(deleteChapterUseCase).execute(TEST_WORK_ID, TEST_CHAPTER_ID, TEST_USER_ID);
     }
 
-    // PublishChapter Given methods
     private void givenUserIsAuthenticated() {
         setSecurityContext();
     }
@@ -626,7 +529,6 @@ public class ChapterControllerTest {
                 .when(publishChapterUseCase).execute(TEST_WORK_ID, TEST_CHAPTER_ID, TEST_USER_ID);
     }
 
-    // ScheduleChapter Given methods
     private SchedulePublicationRequestDto givenValidScheduleRequest() {
         return new SchedulePublicationRequestDto("2025-12-31T10:00:00-03:00");
     }
@@ -664,7 +566,6 @@ public class ChapterControllerTest {
                 .when(schedulePublicationUseCase).execute(any(), any(), any(), any());
     }
 
-    // CancelSchedule Given methods
     private void givenScheduleCanBeCancelled() {
         doNothing().when(cancelScheduledPublicationUseCase).execute(TEST_WORK_ID, TEST_CHAPTER_ID, TEST_USER_ID);
     }
@@ -684,7 +585,6 @@ public class ChapterControllerTest {
                 .when(cancelScheduledPublicationUseCase).execute(TEST_WORK_ID, TEST_CHAPTER_ID, TEST_USER_ID);
     }
 
-    // ToggleChapterLike Given methods
     private void givenChapterCanBeLiked() {
         LikeResponseDto response = new LikeResponseDto(TEST_WORK_ID, 5L, true);
         when(toggleChapterLikeUseCase.execute(TEST_CHAPTER_ID, TEST_USER_ID))
@@ -697,7 +597,6 @@ public class ChapterControllerTest {
                 .thenReturn(response);
     }
 
-    // ========== When methods (Act) ==========
 
     private ResponseEntity<ChapterWithContentDto> whenGetChapter() {
         return chapterController.getChapter(
@@ -754,9 +653,7 @@ public class ChapterControllerTest {
         );
     }
 
-    // ========== Then methods (Assert) ==========
 
-    // Common assertions
     private void thenResponseIsOk(ResponseEntity<?> response) {
         assertNotNull(response);
         assertEquals(HttpStatus.OK, response.getStatusCode());
@@ -797,7 +694,6 @@ public class ChapterControllerTest {
         assertNull(response.getBody());
     }
 
-    // GetChapter Then methods
     private void thenResponseContainsChapterData(ResponseEntity<ChapterWithContentDto> response) {
         ChapterWithContentDto body = response.getBody();
         assertEquals(TEST_CHAPTER_ID, body.id());
@@ -808,7 +704,6 @@ public class ChapterControllerTest {
         verify(getChapterWithContentUseCase).execute(TEST_WORK_ID, TEST_CHAPTER_ID, TEST_LANGUAGE);
     }
 
-    // UpdateChapterContent Then methods
     private void thenUpdateContentUseCaseWasInvoked() {
         verify(updateChapterContentUseCase).execute(
                 TEST_WORK_ID.toString(),
@@ -823,12 +718,10 @@ public class ChapterControllerTest {
         verify(updateChapterContentUseCase, never()).execute(any(), any(), any(), any(), any());
     }
 
-    // DeleteChapter Then methods
     private void thenDeleteChapterUseCaseWasInvoked() {
         verify(deleteChapterUseCase).execute(TEST_WORK_ID, TEST_CHAPTER_ID, TEST_USER_ID);
     }
 
-    // PublishChapter Then methods
     private void thenPublishChapterUseCaseWasInvoked() {
         verify(publishChapterUseCase).execute(TEST_WORK_ID, TEST_CHAPTER_ID, TEST_USER_ID);
     }
@@ -841,7 +734,6 @@ public class ChapterControllerTest {
         verify(createWorkNotification).execute(TEST_WORK_ID, TEST_USER_ID, TEST_CHAPTER_ID);
     }
 
-    // ScheduleChapter Then methods
     private void thenSchedulePublicationUseCaseWasInvoked() {
         verify(schedulePublicationUseCase).execute(
                 eq(TEST_WORK_ID),
@@ -851,12 +743,10 @@ public class ChapterControllerTest {
         );
     }
 
-    // CancelSchedule Then methods
     private void thenCancelScheduledPublicationUseCaseWasInvoked() {
         verify(cancelScheduledPublicationUseCase).execute(TEST_WORK_ID, TEST_CHAPTER_ID, TEST_USER_ID);
     }
 
-    // ToggleChapterLike Then methods
     private void thenResponseContainsLikeData(ResponseEntity<LikeResponseDto> response, boolean isLiked) {
         LikeResponseDto body = response.getBody();
         assertEquals(TEST_WORK_ID, body.getWorkId());

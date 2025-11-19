@@ -35,19 +35,14 @@ public class PaymentControllerTest {
         SecurityContextHolder.clearContext();
     }
 
-    // ======= Auth handling =======
-
     @Test
     @DisplayName("POST /api/payments/subscribe - 401 cuando no hay autenticación")
     void subscribe_shouldReturn401_whenNoAuth() {
-        // Given: sin authentication en el contexto
         SecurityContextHolder.clearContext();
         SubscribeRequest request = anyValidRequest();
 
-        // When
         ResponseEntity<?> response = controller.subscribe(request);
 
-        // Then
         assertStatus(response, HttpStatus.UNAUTHORIZED);
         verify(startSubscriptionFlowUseCase, never()).execute(any(), any(), any(), any(), any(), any());
     }
@@ -55,33 +50,26 @@ public class PaymentControllerTest {
     @Test
     @DisplayName("POST /api/payments/subscribe - 401 cuando el principal no es JwtUserPrincipal")
     void subscribe_shouldReturn401_whenPrincipalNotJwt() {
-        // Given
         setAuthentication(new UsernamePasswordAuthenticationToken("someone", null));
         SubscribeRequest request = anyValidRequest();
 
-        // When
         ResponseEntity<?> response = controller.subscribe(request);
 
-        // Then
         assertStatus(response, HttpStatus.UNAUTHORIZED);
         verify(startSubscriptionFlowUseCase, never()).execute(any(), any(), any(), any(), any(), any());
     }
 
-    // ======= Happy paths =======
 
     @Test
     @DisplayName("POST /api/payments/subscribe - 201 cuando la suscripción es gratuita")
     void subscribe_shouldReturn201_whenFree() {
-        // Given
         setAuthenticatedUser();
         SubscribeRequest request = new SubscribeRequest("work", 10L, null, null, "https://return");
         when(startSubscriptionFlowUseCase.execute(eq(USER_ID), eq("work"), eq(10L), isNull(), isNull(), eq("https://return")))
                 .thenReturn(StartSubscriptionFlowUseCase.Result.free());
 
-        // When
         ResponseEntity<?> response = controller.subscribe(request);
 
-        // Then
         assertEquals(HttpStatus.CREATED, response.getStatusCode());
         assertNull(response.getBody());
     }
@@ -89,17 +77,14 @@ public class PaymentControllerTest {
     @Test
     @DisplayName("POST /api/payments/subscribe - 200 y body cuando requiere pago")
     void subscribe_shouldReturn200_withPaymentInit_whenPaymentRequired() {
-        // Given
         setAuthenticatedUser();
         SubscribeRequest request = new SubscribeRequest("author", 55L, null, "mercadopago", "https://return-url");
         PaymentInitResult init = PaymentInitResult.of(PaymentProviderType.MERCADOPAGO, "https://pay.example/abc", "pref-123");
         when(startSubscriptionFlowUseCase.execute(eq(USER_ID), eq("author"), eq(55L), isNull(), eq("mercadopago"), eq("https://return-url")))
                 .thenReturn(StartSubscriptionFlowUseCase.Result.payment(init));
 
-        // When
         ResponseEntity<?> response = controller.subscribe(request);
 
-        // Then
         assertStatus(response, HttpStatus.OK);
         assertNotNull(response.getBody());
         PaymentInitResponse body = assertInstanceOf(PaymentInitResponse.class, response.getBody());
@@ -111,16 +96,13 @@ public class PaymentControllerTest {
     @Test
     @DisplayName("POST /api/payments/subscribe - llama al use case con los parámetros correctos")
     void subscribe_shouldCallUseCase_withCorrectArgs() {
-        // Given
         setAuthenticatedUser();
         SubscribeRequest request = new SubscribeRequest("chapter", 77L, 999L, "mp", "http://back");
         when(startSubscriptionFlowUseCase.execute(anyLong(), anyString(), anyLong(), any(), anyString(), anyString()))
                 .thenReturn(StartSubscriptionFlowUseCase.Result.free());
 
-        // When
         controller.subscribe(request);
 
-        // Then
         ArgumentCaptor<Long> userId = ArgumentCaptor.forClass(Long.class);
         ArgumentCaptor<String> type = ArgumentCaptor.forClass(String.class);
         ArgumentCaptor<Long> target = ArgumentCaptor.forClass(Long.class);
@@ -140,7 +122,6 @@ public class PaymentControllerTest {
         assertEquals("http://back", returnUrl.getValue());
     }
 
-    // ======= Error mapping (400) =======
 
     @Test
     @DisplayName("subscribe - 400 Invalid subscriptionType")
@@ -190,46 +171,37 @@ public class PaymentControllerTest {
         assertMapsToBadRequest("Invalid provider");
     }
 
-    // ======= Error mapping (412) =======
 
     @Test
     @DisplayName("subscribe - 412 Payment provider not configured")
     void subscribe_shouldReturn412_providerNotConfigured() {
-        // Given
         setAuthenticatedUser();
         SubscribeRequest request = anyValidRequest();
         when(startSubscriptionFlowUseCase.execute(anyLong(), anyString(), anyLong(), any(), anyString(), anyString()))
                 .thenThrow(new IllegalArgumentException("Payment provider not configured: MERCADOPAGO"));
 
-        // When
         ResponseEntity<?> response = controller.subscribe(request);
 
-        // Then
         assertStatus(response, HttpStatus.PRECONDITION_FAILED);
         assertEquals("Payment provider not configured: MERCADOPAGO", response.getBody());
     }
 
-    // ======= Error mapping (500) =======
 
     @Test
     @DisplayName("subscribe - 500 en IllegalArgumentException desconocido")
     void subscribe_shouldReturn500_onUnknownIllegalArgument() {
-        // Given
         setAuthenticatedUser();
         SubscribeRequest request = anyValidRequest();
         when(startSubscriptionFlowUseCase.execute(anyLong(), anyString(), anyLong(), any(), anyString(), anyString()))
                 .thenThrow(new IllegalArgumentException("Some other error"));
 
-        // When
         ResponseEntity<?> response = controller.subscribe(request);
 
-        // Then
         assertStatus(response, HttpStatus.INTERNAL_SERVER_ERROR);
         assertNull(response.getBody());
     }
 
-    // ======= Helpers =======
-
+        
     private SubscribeRequest anyValidRequest() {
         return new SubscribeRequest("work", 1L, null, "mp", "http://return");
     }

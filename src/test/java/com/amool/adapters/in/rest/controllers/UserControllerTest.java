@@ -60,7 +60,6 @@ public class UserControllerTest {
         thenUseCaseWasCalledWith(USER_ID);
     }
 
-    // ===== Given =====
     private void givenUserExists(Long id, String name, String surname, String username, String email, String photo) {
         User u = new User();
         u.setId(id);
@@ -77,12 +76,10 @@ public class UserControllerTest {
         when(getUserByIdUseCase.execute(eq(id))).thenReturn(Optional.empty());
     }
 
-    // ===== When =====
     private ResultActions whenClientRequestsUser(Long id) throws Exception {
         return mockMvc.perform(get("/api/users/{id}", id).accept(MediaType.APPLICATION_JSON));
     }
 
-    // ===== Then =====
     private void thenResponseIsOkWithUser(ResultActions response, Long id, String name, String surname, String username, String email, String photo) throws Exception {
         response.andExpect(status().isOk())
                 .andExpect(jsonPath("$.id").value(id))

@@ -54,19 +54,15 @@ public class ChatControllerTest {
         );
     }
 
-    // ========== Tests for sendMessage endpoint ==========
 
     @Test
     @DisplayName("POST /api/chat/message - Should process message and return AI response segments")
     public void sendMessage_shouldProcessMessage_whenValid() {
-        // Given
         ChatRequestDto request = givenValidChatRequest();
         List<ChatMessage> expectedResponse = givenAIWillRespondSegments();
 
-        // When
         ResponseEntity<List<ChatMessage>> response = whenSendMessage(request);
 
-        // Then
         thenResponseIsOk(response);
         thenResponseContainsSegments(response, expectedResponse);
         thenProcessMessageUseCaseWasInvoked();
@@ -75,14 +71,11 @@ public class ChatControllerTest {
     @Test
     @DisplayName("POST /api/chat/message - Should handle empty message")
     public void sendMessage_shouldHandleEmptyMessage_whenMessageIsEmpty() {
-        // Given
         ChatRequestDto request = givenChatRequestWithEmptyMessage();
         givenAIWillRespondSegments();
 
-        // When
         ResponseEntity<List<ChatMessage>> response = whenSendMessage(request);
 
-        // Then
         thenResponseIsOk(response);
         verify(processChatMessageUseCase).execute(
                 eq(TEST_USER_ID),
@@ -95,14 +88,11 @@ public class ChatControllerTest {
     @Test
     @DisplayName("POST /api/chat/message - Should process message without chapter content")
     public void sendMessage_shouldProcessMessage_whenChapterContentIsNull() {
-        // Given
         ChatRequestDto request = givenChatRequestWithoutChapterContent();
         givenAIWillRespondSegments();
 
-        // When
         ResponseEntity<List<ChatMessage>> response = whenSendMessage(request);
 
-        // Then
         thenResponseIsOk(response);
         verify(processChatMessageUseCase).execute(
                 eq(TEST_USER_ID),
@@ -112,18 +102,14 @@ public class ChatControllerTest {
         );
     }
 
-    // ========== Tests for getConversation endpoint ==========
 
     @Test
     @DisplayName("GET /api/chat/conversation/{chapterId} - Should return conversation history")
     public void getConversation_shouldReturnHistory_whenMessagesExist() {
-        // Given
         List<ChatMessage> expectedConversation = givenConversationExists();
 
-        // When
         ResponseEntity<List<ChatMessage>> response = whenGetConversation();
 
-        // Then
         thenResponseIsOk(response);
         thenResponseContainsConversation(response, expectedConversation);
         thenGetConversationUseCaseWasInvoked();
@@ -132,13 +118,10 @@ public class ChatControllerTest {
     @Test
     @DisplayName("GET /api/chat/conversation/{chapterId} - Should return empty list when no messages")
     public void getConversation_shouldReturnEmptyList_whenNoMessages() {
-        // Given
         givenNoConversationExists();
 
-        // When
         ResponseEntity<List<ChatMessage>> response = whenGetConversation();
 
-        // Then
         thenResponseIsOk(response);
         thenResponseContainsEmptyConversation(response);
     }
@@ -146,17 +129,13 @@ public class ChatControllerTest {
     @Test
     @DisplayName("GET /api/chat/conversation/{chapterId} - Should call use case with correct parameters")
     public void getConversation_shouldPassCorrectParameters() {
-        // Given
         givenConversationExists();
 
-        // When
         whenGetConversation();
 
-        // Then
         verify(getChatConversationUseCase).execute(TEST_USER_ID, TEST_CHAPTER_ID);
     }
 
-    // ========== Given Methods ==========
 
     private ChatRequestDto givenValidChatRequest() {
         ChatRequestDto request = new ChatRequestDto();
@@ -218,7 +197,6 @@ public class ChatControllerTest {
                 .thenReturn(Collections.emptyList());
     }
 
-    // ========== When Methods ==========
 
     private ResponseEntity<List<ChatMessage>> whenSendMessage(ChatRequestDto request) {
         return chatController.sendMessage(request, testUserPrincipal);
@@ -228,7 +206,6 @@ public class ChatControllerTest {
         return chatController.getConversation(TEST_CHAPTER_ID, testUserPrincipal);
     }
 
-    // ========== Then Methods ==========
 
     private void thenResponseIsOk(ResponseEntity<?> response) {
         assertEquals(HttpStatus.OK, response.getStatusCode());

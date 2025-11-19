@@ -46,7 +46,6 @@ public class RatingControllerTest {
         SecurityContextHolder.getContext().setAuthentication(auth);
     }
 
-    // ========== POST /api/works/{workId}/ratings ==========
 
     @Test
     @DisplayName("POST /api/works/{workId}/ratings - 200 OK on success")
@@ -107,7 +106,6 @@ public class RatingControllerTest {
         thenStatusIsForbidden(response);
     }
 
-    // ========== GET /api/works/{workId}/ratings ==========
 
     @Test
     @DisplayName("GET /api/works/{workId}/ratings - 200 OK returns total count")
@@ -120,7 +118,6 @@ public class RatingControllerTest {
         thenGetWorkRatingsUseCaseWasCalled();
     }
 
-    // ========== GET /api/works/{workId}/ratings/me ==========
 
     @Test
     @DisplayName("GET /api/works/{workId}/ratings/me - 200 OK returns user's rating")
@@ -144,7 +141,6 @@ public class RatingControllerTest {
         thenGetUserRatingUseCaseWasCalled();
     }
 
-    // ===== Given =====
     private void givenRateSucceeds(double requestRating, double average) {
         when(rateWorkUseCase.execute(eq(WORK_ID), eq(USER_ID), eq(requestRating))).thenReturn(average);
     }
@@ -172,7 +168,6 @@ public class RatingControllerTest {
         when(getUserRatingUseCase.execute(eq(WORK_ID), eq(USER_ID))).thenReturn(rating);
     }
 
-    // ===== When =====
     private ResultActions whenClientRates(double rating) throws Exception {
         return whenClientRatesRawBody(bodyWithRating(rating));
     }
@@ -193,7 +188,6 @@ public class RatingControllerTest {
                 .accept(MediaType.APPLICATION_JSON));
     }
 
-    // ===== Then =====
     private void thenResponseIsOkWithRating(ResultActions response, double rating, double average) throws Exception {
         response.andExpect(status().isOk())
                 .andExpect(content().contentTypeCompatibleWith(MediaType.APPLICATION_JSON))
@@ -241,7 +235,6 @@ public class RatingControllerTest {
         verify(getUserRatingUseCase).execute(WORK_ID, USER_ID);
     }
 
-    // ===== Utils =====
     private String bodyWithRating(double rating) {
         return String.format("{\"rating\": %s}", Double.toString(rating));
     }

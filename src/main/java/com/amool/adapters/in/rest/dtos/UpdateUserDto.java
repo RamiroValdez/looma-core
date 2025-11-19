@@ -12,14 +12,13 @@ public class UpdateUserDto {
     private String email;
     private BigDecimal money;
     private String newPassword;
-    private String photo;// puede venir vacío
-    private MultipartFile file; // foto opcional
+    private String photo;
+    private MultipartFile file;
 
     public boolean hasNewPassword() {
         return newPassword != null && !newPassword.isBlank();
     }
 
-    // getters y setters
     public Long getId() { return id; }
     public void setId(Long id) { this.id = id; }
     public String getName() { return name; }

@@ -52,21 +52,17 @@ public class ManageWorkControllerTest {
         SecurityContextHolder.clearContext();
     }
 
-    // ========== getWorkById ==========
 
     @Test
     @DisplayName("GET /api/manage-work/{workId} - Debe devolver WorkResponseDto con permisos cuando existe y autenticado")
     void getWorkById_shouldReturnDtoWithPermissions_whenExistsAndAuthenticated() {
-        // Given
         JwtUserPrincipal principal = givenAuthenticatedUser(USER_ID);
         Work work = givenWork(WORK_ID, "Mi Obra", 20L);
         givenWorkFound(work, USER_ID);
         givenPermissionsForUser(work, USER_ID, true, false, List.of(1L, 2L, 3L));
 
-        // When
         ResponseEntity<WorkResponseDto> response = whenGettingWorkById(WORK_ID, principal);
 
-        // Then
         thenShouldReturnOk(response);
         thenWorkIdIs(response.getBody(), WORK_ID);
         thenWorkTitleIs(response.getBody(), "Mi Obra");
@@ -77,31 +73,24 @@ public class ManageWorkControllerTest {
     @Test
     @DisplayName("GET /api/manage-work/{workId} - Debe devolver 404 cuando no existe")
     void getWorkById_shouldReturn404_whenNotFound() {
-        // Given
         JwtUserPrincipal principal = givenAuthenticatedUser(USER_ID);
         givenWorkNotFound(USER_ID);
 
-        // When
         ResponseEntity<WorkResponseDto> response = whenGettingWorkById(WORK_ID, principal);
 
-        // Then
         thenShouldReturnNotFound(response);
         thenPermissionsUseCaseNotCalled();
     }
 
-    // ========== createEmptyChapter ==========
 
     @Test
     @DisplayName("POST /api/manage-work/create-chapter - Debe devolver 200 con chapterId")
     void createEmptyChapter_shouldReturnChapterId_onSuccess() {
-        // Given
         CreateEmptyChapterRequest request = givenCreateEmptyChapterRequest(WORK_ID, 1L, "TEXT");
         givenCreateEmptyChapterSucceeds(99L);
 
-        // When
         ResponseEntity<CreateEmptyChapterResponse> response = whenCreatingEmptyChapter(request);
 
-        // Then
         thenShouldReturnOk(response);
         thenChapterIdIs(response.getBody(), 99L);
     }
@@ -109,32 +98,25 @@ public class ManageWorkControllerTest {
     @Test
     @DisplayName("POST /api/manage-work/create-chapter - Debe devolver 400 cuando use case lanza excepción")
     void createEmptyChapter_shouldReturnBadRequest_onException() {
-        // Given
         CreateEmptyChapterRequest request = givenCreateEmptyChapterRequest(WORK_ID, 1L, "TEXT");
         givenCreateEmptyChapterFails(new RuntimeException("failure"));
 
-        // When
         ResponseEntity<CreateEmptyChapterResponse> response = whenCreatingEmptyChapter(request);
 
-        // Then
         thenShouldReturnBadRequest(response);
     }
 
-    // ========== updateWork ==========
 
     @Test
     @DisplayName("PUT /api/manage-work/{workId} - Debe devolver 200 (true) cuando el use case actualiza")
     void updateWork_shouldReturnTrue_onSuccess() {
-        // Given
         JwtUserPrincipal principal = givenAuthenticatedUser(USER_ID);
         UpdateWorkDto request = new UpdateWorkDto(new BigDecimal("9.99"), "PUBLISHED", Set.of("t1","t2"));
         when(updateWorkUseCase.execute(eq(WORK_ID), eq(new BigDecimal("9.99")), eq(Set.of("t1","t2")), eq("PUBLISHED")))
                 .thenReturn(true);
 
-        // When
         ResponseEntity<Boolean> response = controller.updateWork(WORK_ID, request, principal);
 
-        // Then
         thenShouldReturnOk(response);
         assertTrue(Boolean.TRUE.equals(response.getBody()));
         verify(updateWorkUseCase, times(1)).execute(eq(WORK_ID), eq(new BigDecimal("9.99")), eq(Set.of("t1","t2")), eq("PUBLISHED"));
@@ -143,19 +125,15 @@ public class ManageWorkControllerTest {
     @Test
     @DisplayName("PUT /api/manage-work/{workId} - Debe devolver 400 cuando el use case lanza excepción")
     void updateWork_shouldReturnBadRequest_onException() {
-        // Given
         JwtUserPrincipal principal = givenAuthenticatedUser(USER_ID);
         UpdateWorkDto request = new UpdateWorkDto(new BigDecimal("5.00"), "DRAFT", Set.of());
         when(updateWorkUseCase.execute(anyLong(), any(), anySet(), anyString())).thenThrow(new RuntimeException("error"));
 
-        // When
         ResponseEntity<Boolean> response = controller.updateWork(WORK_ID, request, principal);
 
-        // Then
         thenShouldReturnBadRequest(response);
     }
 
-    // ===== Given =====
     private JwtUserPrincipal givenAuthenticatedUser(Long userId) {
         JwtUserPrincipal principal = new JwtUserPrincipal(userId, "u@e.com", "Name", "Surname", "user");
         var auth = new UsernamePasswordAuthenticationToken(principal, null, java.util.Collections.emptyList());
@@ -206,7 +184,6 @@ public class ManageWorkControllerTest {
         when(createEmptyChapterUseCase.execute(anyLong(), anyLong(), anyString())).thenThrow(e);
     }
 
-    // ===== When =====
     private ResponseEntity<WorkResponseDto> whenGettingWorkById(Long workId, JwtUserPrincipal principal) {
         return controller.getWorkById(workId, principal);
     }
@@ -215,7 +192,6 @@ public class ManageWorkControllerTest {
         return controller.createEmptyChapter(request);
     }
 
-    // ===== Then =====
     private void thenShouldReturnOk(ResponseEntity<?> response) {
         assertNotNull(response);
         assertEquals(HttpStatus.OK, response.getStatusCode());

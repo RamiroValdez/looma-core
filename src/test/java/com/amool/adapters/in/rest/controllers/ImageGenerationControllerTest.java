@@ -29,15 +29,12 @@ public class ImageGenerationControllerTest {
     @Test
     @DisplayName("POST /api/images/generate - Should return URL when prompt is valid")
     void generate_shouldReturnUrl_whenPromptIsValid() {
-        // Given
         ImagePromptDto prompt = givenValidPrompt();
         String expectedUrl = "https://cdn.example.com/image.png";
         givenGenerationWillReturn(expectedUrl);
 
-        // When
         ResponseEntity<ImageUrlResponseDto> response = whenGenerating(prompt);
 
-        // Then
         thenShouldReturnOk(response);
         thenBodyHasUrl(response, expectedUrl);
         thenUseCaseWasCalledWith("style-1", "palette-2", "comp-3", "An epic dragon over mountains");
@@ -46,10 +43,8 @@ public class ImageGenerationControllerTest {
     @Test
     @DisplayName("GET /api/images/color-palettes/obtain-all - Should return 8 color palettes")
     void getAllColorPalettes_shouldReturnEightPalettes() {
-        // When
         ResponseEntity<List<ColorPaletteDto>> response = whenGettingAllColorPalettes();
 
-        // Then
         thenShouldReturnOk(response);
         thenListSizeIs(response.getBody(), 8);
         thenItemNameIs(response.getBody(), 0, "Tonos Neblinosos y Pastel");
@@ -58,10 +53,8 @@ public class ImageGenerationControllerTest {
     @Test
     @DisplayName("GET /api/images/compositions/obtain-all - Should return 8 compositions")
     void getAllCompositions_shouldReturnEightCompositions() {
-        // When
         ResponseEntity<List<CompositionDto>> response = whenGettingAllCompositions();
 
-        // Then
         thenShouldReturnOk(response);
         thenListSizeIs(response.getBody(), 8);
         thenItemNameIs(response.getBody(), 0, "Primer Plano y Foco");
@@ -70,16 +63,13 @@ public class ImageGenerationControllerTest {
     @Test
     @DisplayName("GET /api/images/artistic-styles/obtain-all - Should return 8 artistic styles")
     void getAllArtisticStyles_shouldReturnEightStyles() {
-        // When
         ResponseEntity<List<ArtisticStyleDto>> response = whenGettingAllArtisticStyles();
 
-        // Then
         thenShouldReturnOk(response);
         thenListSizeIs(response.getBody(), 8);
         thenItemNameIs(response.getBody(), 0, "Fotorrealista");
     }
 
-    // ===== Given =====
     private ImagePromptDto givenValidPrompt() {
         return new ImagePromptDto(
                 "style-1",
@@ -94,7 +84,6 @@ public class ImageGenerationControllerTest {
                 .thenReturn(url);
     }
 
-    // ===== When =====
     private ResponseEntity<ImageUrlResponseDto> whenGenerating(ImagePromptDto prompt) {
         return controller.generate(prompt);
     }
@@ -111,7 +100,6 @@ public class ImageGenerationControllerTest {
         return controller.getAllArtisticStyles();
     }
 
-    // ===== Then =====
     private void thenShouldReturnOk(ResponseEntity<?> response) {
         assertNotNull(response);
         assertEquals(HttpStatus.OK, response.getStatusCode());

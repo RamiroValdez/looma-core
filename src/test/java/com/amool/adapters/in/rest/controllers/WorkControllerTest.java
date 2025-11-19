@@ -46,7 +46,6 @@ public class WorkControllerTest {
         SecurityContextHolder.getContext().setAuthentication(auth);
     }
 
-    // ========== GET /api/works ==========
 
     @Test
     @DisplayName("GET /api/works - 200 OK returns list of works")
@@ -74,7 +73,6 @@ public class WorkControllerTest {
         thenGetAllWorksUseCaseWasCalled();
     }
 
-    // ========== POST /api/works/{id}/like ==========
 
     @Test
     @DisplayName("POST /api/works/{id}/like - 200 OK toggles like")
@@ -117,7 +115,6 @@ public class WorkControllerTest {
         thenStatusIsBadRequest(response);
     }
 
-    // ===== Given =====
     private void givenWorksExist(List<Work> works) {
         when(getAllWorksUseCase.execute()).thenReturn(works);
     }
@@ -153,7 +150,6 @@ public class WorkControllerTest {
                 .thenThrow(new IllegalArgumentException("bad"));
     }
 
-    // ===== When =====
     private ResultActions whenClientRequestsAllWorks() throws Exception {
         return mockMvc.perform(get("/api/works")
                 .accept(MediaType.APPLICATION_JSON));
@@ -164,7 +160,6 @@ public class WorkControllerTest {
                 .accept(MediaType.APPLICATION_JSON));
     }
 
-    // ===== Then =====
     private void thenResponseIsOkWithWorks(ResultActions response, int expectedSize) throws Exception {
         response.andExpect(status().isOk())
                 .andExpect(jsonPath("$.length()").value(expectedSize));

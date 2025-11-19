@@ -65,21 +65,17 @@ public class CreateWorkControllerTest {
         );
     }
 
-    // ========== Tests for saveWork endpoint ==========
 
     @Test
     @DisplayName("POST /api/create-work/save - Should create work successfully with all files")
     public void saveWork_shouldCreateWork_whenAllFilesProvided() throws Exception {
-        // Given
         CreateWorkDto workDto = givenValidWorkDto();
         MultipartFile coverFile = givenValidCoverFile();
         MultipartFile bannerFile = givenValidBannerFile();
         givenWorkCreationWillSucceed();
 
-        // When
         ResponseEntity<Long> response = whenSaveWork(workDto, coverFile, bannerFile);
 
-        // Then
         thenResponseIsOk(response);
         thenResponseContainsWorkId(response, TEST_WORK_ID);
         thenCreateWorkUseCaseWasInvoked();
@@ -89,15 +85,12 @@ public class CreateWorkControllerTest {
     @Test
     @DisplayName("POST /api/create-work/save - Should create work successfully without cover file")
     public void saveWork_shouldCreateWork_whenNoCoverFile() throws Exception {
-        // Given
         CreateWorkDto workDto = givenValidWorkDto();
         MultipartFile bannerFile = givenValidBannerFile();
         givenWorkCreationWillSucceed();
 
-        // When
         ResponseEntity<Long> response = whenSaveWork(workDto, null, bannerFile);
 
-        // Then
         thenResponseIsOk(response);
         thenResponseContainsWorkId(response, TEST_WORK_ID);
         verify(createWorkUseCase).execute(
@@ -118,16 +111,13 @@ public class CreateWorkControllerTest {
     @Test
     @DisplayName("POST /api/create-work/save - Should return 400 when creation fails")
     public void saveWork_shouldReturnBadRequest_whenCreationFails() throws Exception {
-        // Given
         CreateWorkDto workDto = givenValidWorkDto();
         MultipartFile coverFile = givenValidCoverFile();
         MultipartFile bannerFile = givenValidBannerFile();
         givenWorkCreationWillFail();
 
-        // When
         ResponseEntity<Long> response = whenSaveWork(workDto, coverFile, bannerFile);
 
-        // Then
         thenResponseIsBadRequest(response);
         thenResponseBodyIsNull(response);
         thenAuthorNotificationWasNotCreated();
@@ -136,15 +126,12 @@ public class CreateWorkControllerTest {
     @Test
     @DisplayName("POST /api/create-work/save - Should create work with free price")
     public void saveWork_shouldCreateWork_whenPriceIsZero() throws Exception {
-        // Given
         CreateWorkDto workDto = givenWorkDtoWithPrice(BigDecimal.ZERO);
         MultipartFile bannerFile = givenValidBannerFile();
         givenWorkCreationWillSucceed();
 
-        // When
         ResponseEntity<Long> response = whenSaveWork(workDto, null, bannerFile);
 
-        // Then
         thenResponseIsOk(response);
         verify(createWorkUseCase).execute(
                 anyString(),
@@ -161,19 +148,15 @@ public class CreateWorkControllerTest {
         );
     }
 
-    // ========== Tests for suggestTags endpoint ==========
 
     @Test
     @DisplayName("POST /api/create-work/suggest-tags - Should return tag suggestions")
     public void suggestTags_shouldReturnSuggestions_whenValidRequest() {
-        // Given
         TagSuggestionRequestDto request = givenValidTagSuggestionRequest();
         List<String> expectedSuggestions = givenTagSuggestionsWillBeReturned();
 
-        // When
         ResponseEntity<TagSuggestionResponseDto> response = whenSuggestTags(request);
 
-        // Then
         thenResponseIsOk(response);
         thenResponseContainsSuggestions(response, expectedSuggestions);
         thenSuggestTagsUseCaseWasInvoked();
@@ -182,10 +165,8 @@ public class CreateWorkControllerTest {
     @Test
     @DisplayName("POST /api/create-work/suggest-tags - Should return 400 when request is null")
     public void suggestTags_shouldReturnBadRequest_whenRequestIsNull() {
-        // When
         ResponseEntity<TagSuggestionResponseDto> response = whenSuggestTags(null);
 
-        // Then
         thenResponseIsBadRequest(response);
         thenSuggestTagsUseCaseWasNotInvoked();
     }
@@ -193,13 +174,10 @@ public class CreateWorkControllerTest {
     @Test
     @DisplayName("POST /api/create-work/suggest-tags - Should return 400 when description is empty")
     public void suggestTags_shouldReturnBadRequest_whenDescriptionIsEmpty() {
-        // Given
         TagSuggestionRequestDto request = givenTagSuggestionRequestWithEmptyDescription();
 
-        // When
         ResponseEntity<TagSuggestionResponseDto> response = whenSuggestTags(request);
 
-        // Then
         thenResponseIsBadRequest(response);
         thenSuggestTagsUseCaseWasNotInvoked();
     }
@@ -207,13 +185,10 @@ public class CreateWorkControllerTest {
     @Test
     @DisplayName("POST /api/create-work/suggest-tags - Should return 400 when description is null")
     public void suggestTags_shouldReturnBadRequest_whenDescriptionIsNull() {
-        // Given
         TagSuggestionRequestDto request = givenTagSuggestionRequestWithNullDescription();
 
-        // When
         ResponseEntity<TagSuggestionResponseDto> response = whenSuggestTags(request);
 
-        // Then
         thenResponseIsBadRequest(response);
         thenSuggestTagsUseCaseWasNotInvoked();
     }
@@ -221,14 +196,11 @@ public class CreateWorkControllerTest {
     @Test
     @DisplayName("POST /api/create-work/suggest-tags - Should handle request without existing tags")
     public void suggestTags_shouldHandleRequest_whenNoExistingTags() {
-        // Given
         TagSuggestionRequestDto request = givenTagSuggestionRequestWithoutExistingTags();
         givenTagSuggestionsWillBeReturned();
 
-        // When
         ResponseEntity<TagSuggestionResponseDto> response = whenSuggestTags(request);
 
-        // Then
         thenResponseIsOk(response);
         verify(suggestTagsUseCase).execute(
                 eq(TEST_DESCRIPTION),
@@ -240,15 +212,12 @@ public class CreateWorkControllerTest {
     @Test
     @DisplayName("POST /api/create-work/suggest-tags - Should pass existing tags to use case")
     public void suggestTags_shouldPassExistingTags_whenProvided() {
-        // Given
         Set<String> existingTags = Set.of("fantasy", "adventure");
         TagSuggestionRequestDto request = givenTagSuggestionRequestWithExistingTags(existingTags);
         givenTagSuggestionsWillBeReturned();
 
-        // When
         ResponseEntity<TagSuggestionResponseDto> response = whenSuggestTags(request);
 
-        // Then
         thenResponseIsOk(response);
         verify(suggestTagsUseCase).execute(
                 eq(TEST_DESCRIPTION),
@@ -257,7 +226,6 @@ public class CreateWorkControllerTest {
         );
     }
 
-    // ========== Helper methods - Given ==========
 
     private CreateWorkDto givenValidWorkDto() {
         return new CreateWorkDto(
@@ -382,7 +350,6 @@ public class CreateWorkControllerTest {
         return suggestions;
     }
 
-    // ========== Helper methods - When ==========
 
     private ResponseEntity<Long> whenSaveWork(CreateWorkDto workDto, MultipartFile coverFile, MultipartFile bannerFile) {
         return createWorkController.saveWork(workDto, coverFile, bannerFile, testUserPrincipal);
@@ -392,7 +359,6 @@ public class CreateWorkControllerTest {
         return createWorkController.suggestTags(request);
     }
 
-    // ========== Helper methods - Then ==========
 
     private void thenResponseIsOk(ResponseEntity<?> response) {
         assertNotNull(response);

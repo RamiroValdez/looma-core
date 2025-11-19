@@ -40,14 +40,11 @@ public class MySavesControllerTest {
     @Test
     @DisplayName("POST /api/saved-works/{workId}/toggle - Debe alternar y devolver estado actual")
     void toggleSaveWork_shouldToggleAndReturnStatus() {
-        // Given
         JwtUserPrincipal principal = givenAuthenticatedPrincipal(USER_ID);
         givenIsWorkSavedWillReturn(true);
 
-        // When
         ResponseEntity<?> response = whenTogglingSave(principal, WORK_ID);
 
-        // Then
         thenShouldReturnOk(response);
         thenResponseHasSaveStatus(response, WORK_ID, true);
         thenToggleAndCheckWereCalled(USER_ID, WORK_ID);
@@ -56,14 +53,11 @@ public class MySavesControllerTest {
     @Test
     @DisplayName("GET /api/saved-works/{workId}/status - Debe devolver estado actual")
     void getSaveStatus_shouldReturnCurrentStatus() {
-        // Given
         JwtUserPrincipal principal = givenAuthenticatedPrincipal(USER_ID);
         givenIsWorkSavedWillReturn(false);
 
-        // When
         ResponseEntity<?> response = whenGettingStatus(principal, WORK_ID);
 
-        // Then
         thenShouldReturnOk(response);
         thenResponseHasSaveStatus(response, WORK_ID, false);
         thenIsSavedWasCalled(USER_ID, WORK_ID);
@@ -72,7 +66,6 @@ public class MySavesControllerTest {
     @Test
     @DisplayName("GET /api/saved-works - Debe devolver lista de obras guardadas del usuario")
     void getSavedWorks_shouldReturnUserSavedWorks() {
-        // Given
         JwtUserPrincipal principal = givenAuthenticatedPrincipal(USER_ID);
         List<Work> saved = givenSavedWorks(
                 givenWork(1L, "Work A"),
@@ -80,16 +73,13 @@ public class MySavesControllerTest {
         );
         givenGetSavedWorksWillReturn(saved);
 
-        // When
         ResponseEntity<List<Work>> response = whenGettingSavedWorks(principal);
 
-        // Then
         thenShouldReturnOk(response);
         thenBodyIsSameInstance(response, saved);
         thenGetSavedWorksWasCalled(USER_ID);
     }
 
-    // ===== Given =====
     private JwtUserPrincipal givenAuthenticatedPrincipal(Long userId) {
         return new JwtUserPrincipal(userId, "user@example.com", "Name", "Surname", "username");
     }
@@ -113,7 +103,6 @@ public class MySavesControllerTest {
         when(getSavedWorksUseCase.execute(eq(USER_ID))).thenReturn(works);
     }
 
-    // ===== When =====
     private ResponseEntity<?> whenTogglingSave(JwtUserPrincipal principal, Long workId) {
         return controller.toggleSaveWork(principal, workId);
     }
@@ -126,7 +115,6 @@ public class MySavesControllerTest {
         return controller.getSavedWorks(principal);
     }
 
-    // ===== Then =====
     private void thenShouldReturnOk(ResponseEntity<?> response) {
         assertNotNull(response);
         assertEquals(HttpStatus.OK, response.getStatusCode());
