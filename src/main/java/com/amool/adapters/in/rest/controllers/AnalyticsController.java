@@ -12,6 +12,7 @@ import java.util.stream.Collectors;
 
 import com.amool.adapters.in.rest.dtos.AnalyticsLikeWorkDto;
 import com.amool.adapters.in.rest.dtos.AnalyticsRatingWorkDto;
+import com.amool.adapters.in.rest.dtos.AnalyticsRetentionTotalDto;
 import com.amool.adapters.in.rest.dtos.AnalyticsSavedWorkDto;
 import com.amool.adapters.in.rest.dtos.AnalyticsSuscribersPerAuthorDto;
 import com.amool.adapters.in.rest.dtos.AnalyticsSuscribersPerWorkDto;
@@ -28,7 +29,9 @@ import com.amool.application.usecases.GetRatingsPerWorkUseCase;
 import com.amool.application.usecases.GetSavesPerWorkUseCase;
 import com.amool.application.usecases.GetTotalPerAuthorUseCase;
 import com.amool.application.usecases.GetTotalPerWorkUseCase;
+import com.amool.application.usecases.GetTotalRetention;
 import com.amool.application.usecases.GetTotalSuscribersUseCase;
+import com.amool.domain.model.AnalyticsRetentionTotal;
 import com.amool.application.usecases.GetSuscribersPerWorkUseCase;
 import com.amool.application.usecases.GetSuscribersPerAuthorUseCase;
 
@@ -45,8 +48,18 @@ public class AnalyticsController {
     private final GetTotalSuscribersUseCase getTotalSuscribersUseCase;
     private final GetSuscribersPerWorkUseCase getSuscribersPerWorkUseCase;
     private final GetSuscribersPerAuthorUseCase getSuscribersPerAuthorUseCase;
+    private final GetTotalRetention getTotalRetention;
 
-    public AnalyticsController(GetLikesPerWorkUseCase getLikesPerWorkUseCase, GetLikesPerChapterUseCase getLikesPerChapterUseCase, GetRatingsPerWorkUseCase getRatingPerWorkUseCase, GetSavesPerWorkUseCase getSavesPerWorkUseCase, GetTotalPerAuthorUseCase getTotalPerAuthorUseCase, GetTotalPerWorkUseCase getTotalPerWorkUseCase, GetTotalSuscribersUseCase getTotalSuscribersUseCase, GetSuscribersPerWorkUseCase getSuscribersPerWorkUseCase, GetSuscribersPerAuthorUseCase getSuscribersPerAuthorUseCase) {
+    public AnalyticsController(GetLikesPerWorkUseCase getLikesPerWorkUseCase, 
+            GetLikesPerChapterUseCase getLikesPerChapterUseCase, 
+            GetRatingsPerWorkUseCase getRatingPerWorkUseCase, 
+            GetSavesPerWorkUseCase getSavesPerWorkUseCase, 
+            GetTotalPerAuthorUseCase getTotalPerAuthorUseCase, 
+            GetTotalPerWorkUseCase getTotalPerWorkUseCase, 
+            GetTotalSuscribersUseCase getTotalSuscribersUseCase, 
+            GetSuscribersPerWorkUseCase getSuscribersPerWorkUseCase, 
+            GetSuscribersPerAuthorUseCase getSuscribersPerAuthorUseCase,
+            GetTotalRetention getTotalRetention) {
         this.getLikesPerWorkUseCase = getLikesPerWorkUseCase;
         this.getLikesPerChapterUseCase = getLikesPerChapterUseCase;
         this.getRatingPerWorkUseCase = getRatingPerWorkUseCase;
@@ -56,6 +69,7 @@ public class AnalyticsController {
         this.getTotalSuscribersUseCase = getTotalSuscribersUseCase;
         this.getSuscribersPerWorkUseCase = getSuscribersPerWorkUseCase;
         this.getSuscribersPerAuthorUseCase = getSuscribersPerAuthorUseCase;
+        this.getTotalRetention = getTotalRetention;
     }
 
     @GetMapping("/likesPerWork/{workId}")
@@ -111,5 +125,15 @@ public class AnalyticsController {
         List<AnalyticsSuscribersPerAuthorDto> suscribersPerAuthor = getSuscribersPerAuthorUseCase.execute(authorId).stream().map(AnalyticsSuscribersPerAuthorMapper::toDto).collect(Collectors.toList());
         
         return ResponseEntity.ok().body(suscribersPerAuthor);
+    }
+
+    @GetMapping("/readerRetention/{workId}")
+    public ResponseEntity<List<AnalyticsRetentionTotalDto>> getReaderRetention(@PathVariable Long workId){
+        
+        List<AnalyticsRetentionTotalDto> result = this.getTotalRetention.execute(workId)
+                                                .stream()
+                                                .map(AnalyticsRetentionTotal::toDto).toList();
+
+        return ResponseEntity.ok().body(result);
     }
 }

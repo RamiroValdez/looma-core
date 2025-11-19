@@ -545,4 +545,10 @@ public class UseCasesConfig {
     public VerifyRegistrationUseCase verifyRegistrationUseCase() {
         return new VerifyRegistrationUseCase(userAccountPort);
     }
+
+    @Bean
+    public GetTotalRetention getTotalRetention(){
+        return new GetTotalRetention(analyticsPort);
+    }
+    
 }
