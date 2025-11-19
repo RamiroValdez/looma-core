@@ -508,6 +508,19 @@ public class UseCasesConfig {
                 workPort
         );
     }
+
+
+    @Bean
+    public ExportPdfUseCase exportPdfUseCase() {
+        return new ExportPdfUseCase(
+                obtainWorkByIdPort,
+                loadChapterContentPort,
+                awsS3Port,
+                httpDownloadPort,
+                workPort
+        );
+    }
+
     @Bean
     public UpdateWorkUseCase updateWorkUseCase() {
         return new UpdateWorkUseCase(
