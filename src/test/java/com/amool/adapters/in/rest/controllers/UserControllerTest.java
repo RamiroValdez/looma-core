@@ -2,6 +2,7 @@ package com.amool.adapters.in.rest.controllers;
 
 import com.amool.application.usecases.GetUserByIdUseCase;
 import com.amool.application.usecases.UpdateUserUseCase;
+import com.amool.application.usecases.SetUserPreferencesUseCase;
 import com.amool.domain.model.User;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -35,6 +36,9 @@ public class UserControllerTest {
 
     @MockitoBean
     private UpdateUserUseCase updateUserUseCase;
+
+    @MockitoBean
+    private SetUserPreferencesUseCase setUserPreferencesUseCase;
 
     private static final Long USER_ID = 5L;
 
