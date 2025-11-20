@@ -4,6 +4,7 @@ import com.amool.application.port.out.LoadChapterPort;
 import com.amool.application.port.out.ObtainWorkByIdPort;
 import com.amool.application.port.out.SubscriptionQueryPort;
 import com.amool.domain.model.Chapter;
+import java.math.BigDecimal;
 
 import java.util.Optional;
 
@@ -33,6 +34,11 @@ public class ValidateChapterAccessUseCase {
         Long authorId = obtainWorkByIdPort.obtainWorkById(workId)
                 .map(w -> w.getCreator() != null ? w.getCreator().getId() : null)
                 .orElse(null);
+
+    if (chapter.getPrice() != null && chapter.getPrice().compareTo(BigDecimal.ZERO) == 0) {
+        boolean isOwner = (authorId != null && authorId.equals(userId));
+        return ChapterAccessResult.accessGranted(chapter, workId, authorId, isOwner);
+    }
 
         boolean isOwner = (authorId != null && authorId.equals(userId));
         boolean hasAccess = isOwner
