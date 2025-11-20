@@ -28,6 +28,8 @@ public class WorkMapper {
         work.setAverageRating(entity.getAverageRating());
         work.setHasEpub(entity.getHasEpub());
         work.setLengthEpub(entity.getLengthEpub());
+        work.setHasPdf(entity.getHasPdf());
+        work.setLengthPdf(entity.getLengthPdf());
         return work;
     }
 
@@ -54,6 +56,8 @@ public class WorkMapper {
         entity.setAverageRating(work.getAverageRating());
         entity.setHasEpub(work.getHasEpub());
         entity.setLengthEpub(work.getLengthEpub());
+        entity.setHasPdf(work.getHasPdf());
+        entity.setLengthPdf(work.getLengthPdf());
         return entity;
     }
 

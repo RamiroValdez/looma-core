@@ -84,6 +84,7 @@ public class CreateWorkUseCase {
         work.setPrice(price == null ? BigDecimal.ZERO : price);
         work.setLikes(0);
         work.setHasEpub(false);
+        work.setHasPdf(false);
         work.setPublicationDate(LocalDate.now());
         return work;
     }

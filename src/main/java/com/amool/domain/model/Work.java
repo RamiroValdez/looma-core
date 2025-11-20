@@ -23,6 +23,8 @@ public class Work {
     private Format format;
     private Language originalLanguage;
     private Boolean hasEpub;
+    private Boolean hasPdf;
+    private Integer lengthPdf;
     private List<Chapter> chapters = new ArrayList<>();
     private List<Category> categories = new ArrayList<>();
     private Set<Tag> tags = new HashSet<>();
@@ -64,6 +66,11 @@ public class Work {
     public LocalDate getPublicationDate() { return publicationDate; }
     public void setPublicationDate(LocalDate publicationDate) { this.publicationDate = publicationDate; }
     
+    public Boolean getHasPdf() { return hasPdf; }
+    public void setHasPdf(Boolean hasPdf) { this.hasPdf = hasPdf; }
+
+    public Integer getLengthPdf() { return lengthPdf; }
+    public void setLengthPdf(Integer lengthPdf) { this.lengthPdf = lengthPdf; }
     
     public User getCreator() { return creator; }
     public void setCreator(User creator) { this.creator = creator; }
