@@ -19,9 +19,9 @@ public class UseCasesConfig {
     private final FormatPort formatPort;
     private final LoadChapterPort loadChapterPort;
     private final LoadChapterContentPort loadChapterContentPort;
-    private final LoadLanguagePort loadLanguagePort;
     private final SaveChapterPort saveChapterPort;
     private final SaveChapterContentPort saveChapterContentPort;
+    private final LoadLanguagePort loadLanguagePort;
     private final ObtainWorkByIdPort obtainWorkByIdPort;
     private final DeleteChapterContentPort deleteChapterContentPort;
     private final DeleteChapterPort deleteChapterPort;
@@ -48,6 +48,7 @@ public class UseCasesConfig {
     private final RestTemplate restTemplate;
     private final NotificationPort notificationPort;
     private final ObtainChapterByIdPort obtainChapterByIdPort;
+    private final UserPreferencesPort userPreferencesPort;
     private final HttpDownloadPort httpDownloadPort;
     private final AnalyticsPort analyticsPort;
     private final UserAccountPort userAccountPort;
@@ -102,7 +103,8 @@ public class UseCasesConfig {
             ChatAIPort chatAIPort,
             UserAccountPort userAccountPort,
             EmailPort emailPort,
-            PaymentSessionLinkPort paymentSessionLinkPort
+            PaymentSessionLinkPort paymentSessionLinkPort,
+            UserPreferencesPort userPreferencesPort
             ) {
         this.awsS3Port = awsS3Port;
         this.authPort = authPort;
@@ -146,6 +148,7 @@ public class UseCasesConfig {
         this.userAccountPort = userAccountPort;
         this.emailPort = emailPort;
         this.paymentSessionLinkPort = paymentSessionLinkPort;
+        this.userPreferencesPort = userPreferencesPort;
     }
 
     @Bean
@@ -450,6 +453,11 @@ public class UseCasesConfig {
     @Bean
     public UpdateNotificationReadUseCase updateNotificationReadUseCase() {
         return new UpdateNotificationReadUseCase(notificationPort);
+    }
+
+    @Bean
+    public SetUserPreferencesUseCase setUserPreferencesUseCase() {
+        return new SetUserPreferencesUseCase(userPreferencesPort);
     }
 
     @Bean

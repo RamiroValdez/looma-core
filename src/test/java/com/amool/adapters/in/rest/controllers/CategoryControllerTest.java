@@ -33,30 +33,23 @@ public class CategoryControllerTest {
 
     @Test
     public void when_ObtainAllCategories_ThenReturnCategoryList() {
-        // Arrange
         givenCategoriesExistInTheSystem();
 
-        // Act
         ResponseEntity<List<CategoryDto>> response = categoryController.obtainAllCategories();
 
-        // Assert
         thenResponseIsSuccessful(response);
         thenResponseContainsExpectedCategories(response);
     }
 
     @Test
     public void when_NoCategoriesExist_ThenReturnNotFound() {
-        // Arrange
         givenNoCategoriesExist();
 
-        // Act
         ResponseEntity<List<CategoryDto>> response = categoryController.obtainAllCategories();
 
-        // Assert
         thenResponseIsNotFound(response);
     }
 
-    // Helper methods for data setup
 
     private void givenCategoriesExistInTheSystem() {
         List<Category> categories = createCategoryList();
@@ -83,7 +76,6 @@ public class CategoryControllerTest {
         return category;
     }
 
-    // Helper methods for assertions
 
     private void thenResponseIsSuccessful(ResponseEntity<List<CategoryDto>> response) {
         assertNotNull(response);

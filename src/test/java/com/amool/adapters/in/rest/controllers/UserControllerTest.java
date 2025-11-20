@@ -2,6 +2,7 @@ package com.amool.adapters.in.rest.controllers;
 
 import com.amool.application.usecases.GetUserByIdUseCase;
 import com.amool.application.usecases.UpdateUserUseCase;
+import com.amool.application.usecases.SetUserPreferencesUseCase;
 import com.amool.domain.model.User;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -36,6 +37,9 @@ public class UserControllerTest {
     @MockitoBean
     private UpdateUserUseCase updateUserUseCase;
 
+    @MockitoBean
+    private SetUserPreferencesUseCase setUserPreferencesUseCase;
+
     private static final Long USER_ID = 5L;
 
     @Test
@@ -60,7 +64,6 @@ public class UserControllerTest {
         thenUseCaseWasCalledWith(USER_ID);
     }
 
-    // ===== Given =====
     private void givenUserExists(Long id, String name, String surname, String username, String email, String photo) {
         User u = new User();
         u.setId(id);
@@ -77,12 +80,10 @@ public class UserControllerTest {
         when(getUserByIdUseCase.execute(eq(id))).thenReturn(Optional.empty());
     }
 
-    // ===== When =====
     private ResultActions whenClientRequestsUser(Long id) throws Exception {
         return mockMvc.perform(get("/api/users/{id}", id).accept(MediaType.APPLICATION_JSON));
     }
 
-    // ===== Then =====
     private void thenResponseIsOkWithUser(ResultActions response, Long id, String name, String surname, String username, String email, String photo) throws Exception {
         response.andExpect(status().isOk())
                 .andExpect(jsonPath("$.id").value(id))

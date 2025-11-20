@@ -40,12 +40,10 @@ public class MyWorksControllerTest {
         controller = new MyWorksController(getAuthenticatedUserWorksUseCase, updateCoverUseCase, updateBannerUseCase);
     }
 
-    // ========== getWorksByUserId ==========
 
     @Test
     @DisplayName("GET /api/my-works/{userId} - Debe devolver lista mapeada cuando el usuario está autorizado")
     void getWorksByUserId_shouldReturnMappedList_whenAuthorized() {
-        // Given
         JwtUserPrincipal principal = givenPrincipal(USER_ID);
         List<Work> works = givenWorks(
                 givenWork(1L, "Obra A"),
@@ -53,10 +51,8 @@ public class MyWorksControllerTest {
         );
         givenUseCaseReturnsWorks(works);
 
-        // When
         ResponseEntity<List<WorkResponseDto>> response = whenGettingWorksByUserId(USER_ID, principal);
 
-        // Then
         thenShouldReturnOk(response);
         thenListHasTitles(response.getBody(), "Obra A", "Obra B");
         thenGetWorksUseCaseWasCalledWith(USER_ID);
@@ -65,30 +61,24 @@ public class MyWorksControllerTest {
     @Test
     @DisplayName("GET /api/my-works/{userId} - Debe lanzar UnauthorizedAccessException cuando el caso de uso falla")
     void getWorksByUserId_shouldThrowUnauthorized_whenUseCaseThrows() {
-        // Given
         JwtUserPrincipal principal = givenPrincipal(USER_ID);
         givenUseCaseThrows(new RuntimeException("internal error"));
 
-        // When / Then
         UnauthorizedAccessException ex = assertThrows(UnauthorizedAccessException.class,
                 () -> whenGettingWorksByUserId(USER_ID, principal));
         assertTrue(ex.getMessage().contains("No se pudo obtener las obras del usuario autenticado"));
     }
 
-    // ========== updateCover ==========
 
     @Test
     @DisplayName("PATCH /api/my-works/{workId}/cover - Debe devolver 204 cuando actualiza correctamente")
     void updateCover_shouldReturnNoContent_onSuccess() throws Exception {
-        // Given
         JwtUserPrincipal principal = givenPrincipal(USER_ID);
         MultipartFile file = givenCoverFile();
         String coverIaUrl = "https://cdn.example.com/cover.png";
 
-        // When
         ResponseEntity<Void> response = whenUpdatingCover(10L, coverIaUrl, file, principal);
 
-        // Then
         thenShouldReturnNoContent(response);
         thenUpdateCoverWasCalled(10L, file, USER_ID, coverIaUrl);
     }
@@ -96,55 +86,45 @@ public class MyWorksControllerTest {
     @Test
     @DisplayName("PATCH /api/my-works/{workId}/cover - Debe devolver 404 cuando IllegalArgumentException")
     void updateCover_shouldReturnNotFound_onIllegalArgument() throws Exception {
-        // Given
         JwtUserPrincipal principal = givenPrincipal(USER_ID);
         MultipartFile file = givenCoverFile();
         doThrow(new IllegalArgumentException("not found")).when(updateCoverUseCase)
                 .execute(eq(10L), any(), eq(USER_ID), any());
 
-        // When
         ResponseEntity<Void> response = whenUpdatingCover(10L, null, file, principal);
 
-        // Then
         thenShouldReturnNotFound(response);
     }
 
     @Test
     @DisplayName("PATCH /api/my-works/{workId}/cover - Debe devolver 403 cuando SecurityException")
     void updateCover_shouldReturnForbidden_onSecurityException() throws Exception {
-        // Given
         JwtUserPrincipal principal = givenPrincipal(USER_ID);
         MultipartFile file = givenCoverFile();
         doThrow(new SecurityException("forbidden")).when(updateCoverUseCase)
                 .execute(eq(10L), any(), eq(USER_ID), any());
 
-        // When
         ResponseEntity<Void> response = whenUpdatingCover(10L, null, file, principal);
 
-        // Then
         thenShouldReturnForbidden(response);
     }
 
     @Test
     @DisplayName("PATCH /api/my-works/{workId}/cover - Debe devolver 400 cuando IOException")
     void updateCover_shouldReturnBadRequest_onIOException() throws Exception {
-        // Given
         JwtUserPrincipal principal = givenPrincipal(USER_ID);
         MultipartFile file = givenCoverFile();
         doThrow(new IOException("io error")).when(updateCoverUseCase)
                 .execute(eq(10L), any(), eq(USER_ID), any());
 
-        // When
         ResponseEntity<Void> response = whenUpdatingCover(10L, null, file, principal);
 
-        // Then
         thenShouldReturnBadRequest(response);
     }
 
     @Test
     @DisplayName("PATCH /api/my-works/{workId}/cover - Debe devolver 500 cuando InterruptedException y marcar el hilo")
     void updateCover_shouldReturn500_onInterruptedException() throws Exception {
-        // Given
         JwtUserPrincipal principal = givenPrincipal(USER_ID);
         MultipartFile file = givenCoverFile();
         doThrow(new InterruptedException("interrupted")).when(updateCoverUseCase)
@@ -152,32 +132,25 @@ public class MyWorksControllerTest {
 
         boolean wasInterruptedBefore = Thread.currentThread().isInterrupted();
         try {
-            // When
             ResponseEntity<Void> response = whenUpdatingCover(10L, null, file, principal);
 
-            // Then
             thenShouldReturnStatus(response, 500);
             assertTrue(Thread.currentThread().isInterrupted());
         } finally {
-            // clear interrupt flag for the test thread
             Thread.interrupted();
             assertFalse(wasInterruptedBefore && Thread.currentThread().isInterrupted());
         }
     }
 
-    // ========== updateBanner ==========
 
     @Test
     @DisplayName("PATCH /api/my-works/{workId}/banner - Debe devolver 204 cuando actualiza correctamente")
     void updateBanner_shouldReturnNoContent_onSuccess() throws Exception {
-        // Given
         JwtUserPrincipal principal = givenPrincipal(USER_ID);
         MultipartFile file = givenBannerFile();
 
-        // When
         ResponseEntity<Void> response = whenUpdatingBanner(10L, file, principal);
 
-        // Then
         thenShouldReturnNoContent(response);
         thenUpdateBannerWasCalled(10L, file, USER_ID);
     }
@@ -185,52 +158,42 @@ public class MyWorksControllerTest {
     @Test
     @DisplayName("PATCH /api/my-works/{workId}/banner - Debe devolver 404 cuando IllegalArgumentException")
     void updateBanner_shouldReturnNotFound_onIllegalArgument() throws Exception {
-        // Given
         JwtUserPrincipal principal = givenPrincipal(USER_ID);
         MultipartFile file = givenBannerFile();
         doThrow(new IllegalArgumentException("not found")).when(updateBannerUseCase)
                 .execute(eq(10L), any(), eq(USER_ID));
 
-        // When
         ResponseEntity<Void> response = whenUpdatingBanner(10L, file, principal);
 
-        // Then
         thenShouldReturnNotFound(response);
     }
 
     @Test
     @DisplayName("PATCH /api/my-works/{workId}/banner - Debe devolver 403 cuando SecurityException")
     void updateBanner_shouldReturnForbidden_onSecurityException() throws Exception {
-        // Given
         JwtUserPrincipal principal = givenPrincipal(USER_ID);
         MultipartFile file = givenBannerFile();
         doThrow(new SecurityException("forbidden")).when(updateBannerUseCase)
                 .execute(eq(10L), any(), eq(USER_ID));
 
-        // When
         ResponseEntity<Void> response = whenUpdatingBanner(10L, file, principal);
 
-        // Then
         thenShouldReturnForbidden(response);
     }
 
     @Test
     @DisplayName("PATCH /api/my-works/{workId}/banner - Debe devolver 400 cuando IOException")
     void updateBanner_shouldReturnBadRequest_onIOException() throws Exception {
-        // Given
         JwtUserPrincipal principal = givenPrincipal(USER_ID);
         MultipartFile file = givenBannerFile();
         doThrow(new IOException("io error")).when(updateBannerUseCase)
                 .execute(eq(10L), any(), eq(USER_ID));
 
-        // When
         ResponseEntity<Void> response = whenUpdatingBanner(10L, file, principal);
 
-        // Then
         thenShouldReturnBadRequest(response);
     }
 
-    // ===== Given =====
     private JwtUserPrincipal givenPrincipal(Long userId) {
         return new JwtUserPrincipal(userId, "user@example.com", "Name", "Surname", "username");
     }
@@ -262,7 +225,6 @@ public class MyWorksControllerTest {
         return new MockMultipartFile("banner", "banner.jpg", "image/jpeg", "bytes".getBytes());
     }
 
-    // ===== When =====
     private ResponseEntity<List<WorkResponseDto>> whenGettingWorksByUserId(Long userId, JwtUserPrincipal principal) {
         return controller.getWorksByUserId(userId, principal);
     }
@@ -275,7 +237,6 @@ public class MyWorksControllerTest {
         return controller.updateBanner(workId, file, principal);
     }
 
-    // ===== Then =====
     private void thenShouldReturnOk(ResponseEntity<?> response) {
         assertNotNull(response);
         assertEquals(HttpStatus.OK, response.getStatusCode());

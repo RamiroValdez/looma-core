@@ -45,199 +45,150 @@ public class ProcessChatMessageUseCaseTest {
         processChatMessageUseCase = new ProcessChatMessageUseCase(chatConversationPort, chatAIPort);
     }
 
-    // ==================== Tests de Gestión de Contexto ====================
 
     @Test
     public void when_ExecuteWithChapterContent_ThenSaveChapterContext() {
-        // Given: Una conversación sin historial y con contenido de capítulo
         givenEmptyConversation();
         givenValidChapterContent();
 
-        // When: Se procesa un mensaje con contenido de capítulo
         whenExecuteWithChapterContent();
 
-        // Then: El contexto del capítulo debe guardarse
         thenChapterContextShouldBeSaved();
     }
 
     @Test
     public void when_ExecuteWithNullChapterContent_ThenDoNotSaveChapterContext() {
-        // Given: Una conversación sin historial
         givenEmptyConversation();
 
-        // When: Se procesa un mensaje sin contenido de capítulo
         whenExecuteWithoutChapterContent();
 
-        // Then: El contexto del capítulo no debe guardarse
         thenChapterContextShouldNotBeSaved();
     }
 
     @Test
     public void when_ExecuteWithEmptyChapterContent_ThenDoNotSaveChapterContext() {
-        // Given: Una conversación sin historial
         givenEmptyConversation();
 
-        // When: Se procesa un mensaje con contenido vacío
         whenExecuteWithEmptyChapterContent();
 
-        // Then: El contexto del capítulo no debe guardarse
         thenChapterContextShouldNotBeSaved();
     }
 
-    // ==================== Tests de Gestión de Mensajes ====================
 
     @Test
     public void when_Execute_ThenSaveUserMessage() {
-        // Given: Una conversación sin historial
         givenEmptyConversation();
         givenValidChapterContent();
 
-        // When: Se procesa un mensaje del usuario
         whenExecuteWithChapterContent();
 
-        // Then: El mensaje del usuario debe guardarse correctamente
         thenUserMessageShouldBeSaved();
     }
 
     @Test
     public void when_Execute_ThenSaveAssistantMessage() {
-        // Given: Una conversación sin historial
         givenEmptyConversation();
         givenValidChapterContent();
 
-        // When: Se procesa un mensaje y se genera una respuesta
         List<ChatMessage> result = whenExecuteWithChapterContent();
 
-        // Then: La respuesta del asistente debe guardarse
         thenAssistantMessageShouldBeSaved(result);
     }
 
     @Test
     public void when_Execute_ThenReturnAssistantMessage() {
-        // Given: Una conversación sin historial
         givenEmptyConversation();
         givenValidChapterContent();
 
-        // When: Se procesa un mensaje
         List<ChatMessage> result = whenExecuteWithChapterContent();
 
-        // Then: Debe retornar la lista de mensajes del asistente (al menos 1)
         assertNotNull(result);
         assertFalse(result.isEmpty());
         assertFalse(result.get(0).isUserMessage());
     }
 
-    // ==================== Tests de Gestión de Historial ====================
 
     @Test
     public void when_ConversationHistoryExists_ThenIncludeInPrompt() {
-        // Given: Una conversación con historial previo de 4 mensajes
         givenConversationWithHistory(4);
         givenValidChapterContent();
 
-        // When: Se procesa un nuevo mensaje
         whenExecuteWithChapterContent();
 
-        // Then: El historial debe incluirse en el prompt (3 mensajes, excluyendo el último)
         thenHistoryShouldBeIncludedInPrompt(3);
     }
 
     @Test
     public void when_NoConversationHistory_ThenGenerateWithEmptyHistory() {
-        // Given: Una conversación sin historial
         givenEmptyConversation();
         givenValidChapterContent();
 
-        // When: Se procesa un mensaje
         whenExecuteWithChapterContent();
 
-        // Then: El historial debe estar vacío
         thenHistoryShouldBeEmpty();
     }
 
     @Test
     public void when_HistoryExceedsMaxMessages_ThenLimitToLast5Messages() {
-        // Given: Una conversación con más de 5 mensajes en el historial
         givenConversationWithHistory(8);
 
-        // When: Se procesa un nuevo mensaje
         whenExecuteWithoutChapterContent();
 
-        // Then: El historial debe limitarse a máximo 5 mensajes
         thenHistoryShouldBeLimitedToMaxMessages(5);
     }
 
-    // ==================== Tests de Gestión de Contexto del Capítulo ====================
 
     @Test
     public void when_ContextExceedsMaxLength_ThenLimitContext() {
-        // Given: Un contexto que excede el límite máximo
         givenEmptyConversation();
         givenLongChapterContext(5000);
 
-        // When: Se procesa un mensaje
         whenExecuteWithoutChapterContent();
 
-        // Then: El contexto debe limitarse a 4000 caracteres
         thenContextShouldBeLimited(4000);
     }
 
     @Test
     public void when_ContextIsNull_ThenUseEmptyContext() {
-        // Given: Un contexto null
         givenEmptyConversation();
         givenNullChapterContext();
 
-        // When: Se procesa un mensaje
         whenExecuteWithoutChapterContent();
 
-        // Then: Debe usarse un contexto vacío
         thenContextShouldBeEmpty();
     }
 
-    // ==================== Tests de Generación de Prompts ====================
 
     @Test
     public void when_GenerateResponse_ThenPromptContainsAllElements() {
-        // Given: Una conversación configurada con contexto
         givenEmptyConversation();
         givenValidChapterContent();
 
-        // When: Se genera una respuesta
         whenExecuteWithChapterContent();
 
-        // Then: El prompt debe contener todos los elementos requeridos
         thenPromptShouldContainAllElements();
     }
 
-    // ==================== Tests de Interacción con Ports ====================
 
     @Test
     public void when_GetConversation_ThenRetrieveFromPort() {
-        // Given: Una conversación sin historial
         givenEmptyConversation();
 
-        // When: Se ejecuta el caso de uso
         whenExecuteWithoutChapterContent();
 
-        // Then: Debe recuperarse la conversación del port
         thenConversationShouldBeRetrieved();
     }
 
     @Test
     public void when_GetChapterContext_ThenRetrieveFromPort() {
-        // Given: Una conversación con contexto
         givenEmptyConversation();
         givenValidChapterContent();
 
-        // When: Se ejecuta el caso de uso
         whenExecuteWithoutChapterContent();
 
-        // Then: Debe recuperarse el contexto del port
         thenChapterContextShouldBeRetrieved();
     }
 
-    // ==================== Given Methods ====================
 
     private void givenEmptyConversation() {
         when(chatConversationPort.getConversation(USER_ID, CHAPTER_ID)).thenReturn(List.of());
@@ -270,7 +221,6 @@ public class ProcessChatMessageUseCaseTest {
         when(chatAIPort.generateResponse(anyString(), anyString(), anyList())).thenReturn(AI_RESPONSE);
     }
 
-    // ==================== When Methods ====================
 
     private List<ChatMessage> whenExecuteWithChapterContent() {
         return processChatMessageUseCase.execute(USER_ID, CHAPTER_ID, USER_MESSAGE, CHAPTER_CONTENT);
@@ -284,7 +234,6 @@ public class ProcessChatMessageUseCaseTest {
         return processChatMessageUseCase.execute(USER_ID, CHAPTER_ID, USER_MESSAGE, "   ");
     }
 
-    // ==================== Then Methods ====================
 
     private void thenChapterContextShouldBeSaved() {
         verify(chatConversationPort, times(1)).saveChapterContext(USER_ID, CHAPTER_ID, CHAPTER_CONTENT);
@@ -321,7 +270,6 @@ public class ProcessChatMessageUseCaseTest {
         assertEquals(assistantMsg.getContent(), result.get(0).getContent());
     }
 
-    // ==================== Historial checks ====================
 
     private void thenHistoryShouldBeIncludedInPrompt(int expectedSize) {
         @SuppressWarnings("unchecked")
@@ -354,7 +302,7 @@ public class ProcessChatMessageUseCaseTest {
         verify(chatAIPort).generateResponse(anyString(), contextCaptor.capture(), anyList());
 
         String capturedContext = contextCaptor.getValue();
-        assertTrue(capturedContext.length() <= maxLength + 3); // +3 por "..."
+        assertTrue(capturedContext.length() <= maxLength + 3);
         assertTrue(capturedContext.endsWith("..."));
     }
 
@@ -385,7 +333,6 @@ public class ProcessChatMessageUseCaseTest {
         verify(chatConversationPort, times(1)).getChapterContext(USER_ID, CHAPTER_ID);
     }
 
-    // ==================== Helper Methods ====================
 
     private ChatMessage createChatMessage(Long userId, Long chapterId, String content,
                                          boolean isUserMessage, LocalDateTime timestamp) {

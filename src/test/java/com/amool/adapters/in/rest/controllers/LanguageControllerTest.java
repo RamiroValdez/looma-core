@@ -28,17 +28,14 @@ public class LanguageControllerTest {
     @Test
     @DisplayName("GET /api/languages/obtain-all - Debe devolver lista de lenguajes cuando hay datos")
     void getAllLanguages_shouldReturnList_whenDataExists() {
-        // Given
         List<Language> languages = givenLanguages(
                 givenLanguage(1L, "es", "Español"),
                 givenLanguage(2L, "en", "English")
         );
         givenUseCaseWillReturn(languages);
 
-        // When
         ResponseEntity<List<Language>> response = whenGettingAllLanguages();
 
-        // Then
         thenShouldReturnOk(response);
         thenListSizeIs(response.getBody(), 2);
         thenFirstItemIs(response.getBody(), 1L, "es", "Español");
@@ -48,13 +45,10 @@ public class LanguageControllerTest {
     @Test
     @DisplayName("GET /api/languages/obtain-all - Debe devolver lista vacía cuando no hay datos")
     void getAllLanguages_shouldReturnEmpty_whenNoData() {
-        // Given
         givenUseCaseWillReturn(List.of());
 
-        // When
         ResponseEntity<List<Language>> response = whenGettingAllLanguages();
 
-        // Then
         thenShouldReturnOk(response);
         thenListIsEmpty(response.getBody());
         thenUseCaseWasCalledOnce();
@@ -63,19 +57,15 @@ public class LanguageControllerTest {
     @Test
     @DisplayName("GET /api/languages/obtain-all - Debe devolver 200 aunque el body sea null")
     void getAllLanguages_shouldReturnOk_whenNullBody() {
-        // Given
         givenUseCaseWillReturnNull();
 
-        // When
         ResponseEntity<List<Language>> response = whenGettingAllLanguages();
 
-        // Then
         thenShouldReturnOk(response);
         thenBodyIsNull(response);
         thenUseCaseWasCalledOnce();
     }
 
-    // ===== Given =====
     private Language givenLanguage(Long id, String code, String name) {
         Language l = new Language();
         l.setId(id);
@@ -96,12 +86,10 @@ public class LanguageControllerTest {
         when(getAllLanguagesUseCase.execute()).thenReturn(null);
     }
 
-    // ===== When =====
     private ResponseEntity<List<Language>> whenGettingAllLanguages() {
         return languageController.getAllLanguages();
     }
 
-    // ===== Then =====
     private void thenShouldReturnOk(ResponseEntity<?> response) {
         assertNotNull(response);
         assertEquals(HttpStatus.OK, response.getStatusCode());

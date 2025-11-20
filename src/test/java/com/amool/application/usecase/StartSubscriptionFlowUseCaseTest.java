@@ -170,7 +170,6 @@ public class StartSubscriptionFlowUseCaseTest {
         thenSubscribedTo(com.amool.domain.model.SubscriptionType.CHAPTER, 3L);
     }
 
-    // Helpers: Given
     private void givenWorkPrice(long workId, BigDecimal price) {
         Work work = new Work();
         work.setPrice(price);
@@ -191,7 +190,6 @@ public class StartSubscriptionFlowUseCaseTest {
         when(loadChapterPort.loadChapter(workId, chapterId)).thenReturn(Optional.empty());
     }
 
-    // Helpers: When
     private StartSubscriptionFlowUseCase.Result executeWork(StartSubscriptionFlowUseCase uc, long workId, String provider, String returnUrl) {
         return uc.execute(USER_ID, "work", workId, null, provider, returnUrl);
     }
@@ -204,7 +202,6 @@ public class StartSubscriptionFlowUseCaseTest {
         return uc.execute(USER_ID, "author", authorId, null, provider, returnUrl);
     }
 
-    // Helpers: Then / Assertions
     private void assertFree(StartSubscriptionFlowUseCase.Result result) {
         assertTrue(result.isFree());
         assertNull(result.getPaymentInit());

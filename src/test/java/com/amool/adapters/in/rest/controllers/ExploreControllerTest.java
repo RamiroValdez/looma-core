@@ -37,16 +37,13 @@ public class ExploreControllerTest {
     @Test
     @DisplayName("POST /api/explore - Should return page of works when use case returns results")
     public void explore_shouldReturnPage_whenUseCaseReturnsResults() {
-        // Given
         WorkSearchFilterDto filterDto = givenFilterWithCategory(1L);
         Pageable pageable = givenPageable(0, 10);
         Page<Work> page = givenPageOfWorks(givenWork(1L, "Title 1"), givenWork(2L, "Title 2"), pageable);
         givenSearchWillReturn(page);
 
-        // When
         ResponseEntity<Page<WorkResponseDto>> response = whenClientCallsExplore(filterDto, pageable);
 
-        // Then
         thenShouldReturnOk(response);
         thenResponseContainsTitles(response, "Title 1", "Title 2");
         thenSearchWasExecutedWith(pageable);
@@ -55,16 +52,13 @@ public class ExploreControllerTest {
     @Test
     @DisplayName("POST /api/explore - Should return empty page when use case returns no results")
     public void explore_shouldReturnEmptyPage_whenNoResults() {
-        // Given
         WorkSearchFilterDto filterDto = givenEmptyFilter();
         Pageable pageable = givenPageable(0, 10);
         Page<Work> emptyPage = givenEmptyPage(pageable);
         givenSearchWillReturn(emptyPage);
 
-        // When
         ResponseEntity<Page<WorkResponseDto>> response = whenClientCallsExplore(filterDto, pageable);
 
-        // Then
         thenShouldReturnOk(response);
         thenResponseIsEmpty(response);
         thenSearchWasExecutedWith(pageable);
@@ -73,21 +67,17 @@ public class ExploreControllerTest {
     @Test
     @DisplayName("POST /api/explore - Should handle null filter (pass null to use case)")
     public void explore_shouldHandleNullFilter() {
-        // Given
         Pageable pageable = givenPageable(0, 5);
         Page<Work> page = givenPageOfWorks(givenWork(5L, "Solo"), pageable);
         givenSearchWillReturnForNullFilter(page);
 
-        // When
         ResponseEntity<Page<WorkResponseDto>> response = whenClientCallsExplore(null, pageable);
 
-        // Then
         thenShouldReturnOk(response);
         thenResponseContainsTitles(response, "Solo");
         thenSearchWasExecutedWithNullFilter(pageable);
     }
 
-    // ===== Given =====
     private WorkSearchFilterDto givenFilterWithCategory(Long catId) {
         return new WorkSearchFilterDto(Set.of(catId), null, null, null, null, null, "text", null, null);
     }
@@ -132,12 +122,10 @@ public class ExploreControllerTest {
         when(searchAndFiltrateUseCase.execute(isNull(), any())).thenReturn(page);
     }
 
-    // ===== When =====
     private ResponseEntity<Page<WorkResponseDto>> whenClientCallsExplore(WorkSearchFilterDto filterDto, Pageable pageable) {
         return exploreController.explore(filterDto, pageable);
     }
 
-    // ===== Then =====
     private void thenShouldReturnOk(ResponseEntity<?> response) {
         assertNotNull(response);
         assertEquals(HttpStatus.OK, response.getStatusCode());

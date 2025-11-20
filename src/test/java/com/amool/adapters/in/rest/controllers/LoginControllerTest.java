@@ -44,18 +44,14 @@ public class LoginControllerTest {
         controller = new LoginController(loginUseCase, jwtService);
     }
 
-    // ========== Tests for /me ==========
 
     @Test
     @DisplayName("GET /api/auth/me - Should return user info when authenticated")
     void me_shouldReturnUser_whenAuthenticated() {
-        // Given
         JwtUserPrincipal principal = givenAuthenticatedPrincipal();
 
-        // When
         ResponseEntity<UserDto> response = whenCallingMe(principal);
 
-        // Then
         thenShouldReturnOk(response);
         thenBodyMatchesUserDto(response, USER_ID, EMAIL, NAME, SURNAME, USERNAME);
         thenNoTokenWasGenerated();
@@ -64,29 +60,23 @@ public class LoginControllerTest {
     @Test
     @DisplayName("GET /api/auth/me - Should return 401 when not authenticated")
     void me_shouldReturn401_whenNoPrincipal() {
-        // When
         ResponseEntity<UserDto> response = whenCallingMe(null);
 
-        // Then
         thenShouldReturnUnauthorized(response);
         thenNoTokenWasGenerated();
     }
 
-    // ========== Tests for /login ==========
 
     @Test
     @DisplayName("POST /api/auth/login - Should return token when credentials are valid")
     void login_shouldReturnToken_whenCredentialsValid() {
-        // Given
         LoginRequest request = givenLoginRequest(EMAIL, PASSWORD);
         User user = givenUser(USER_ID, EMAIL, NAME, SURNAME, USERNAME);
         givenLoginSucceedsWith(user);
         givenJwtWillReturnToken(TOKEN);
 
-        // When
         ResponseEntity<AuthResponse> response = whenLoggingIn(request);
 
-        // Then
         thenShouldReturnOk(response);
         thenBodyHasToken(response, TOKEN);
         thenLoginWasCalledWith(EMAIL, PASSWORD);
@@ -96,19 +86,15 @@ public class LoginControllerTest {
     @Test
     @DisplayName("POST /api/auth/login - Should return 401 when credentials are invalid")
     void login_shouldReturn401_whenCredentialsInvalid() {
-        // Given
         LoginRequest request = givenLoginRequest(EMAIL, PASSWORD);
         givenLoginFails();
 
-        // When
         ResponseEntity<AuthResponse> response = whenLoggingIn(request);
 
-        // Then
         thenShouldReturnUnauthorized(response);
         thenNoTokenWasGenerated();
     }
 
-    // ===== Given =====
     private JwtUserPrincipal givenAuthenticatedPrincipal() {
         return new JwtUserPrincipal(USER_ID, EMAIL, NAME, SURNAME, USERNAME);
     }
@@ -142,7 +128,6 @@ public class LoginControllerTest {
         when(jwtService.generateToken(anyMap())).thenReturn(token);
     }
 
-    // ===== When =====
     private ResponseEntity<UserDto> whenCallingMe(JwtUserPrincipal principal) {
         return controller.me(principal);
     }
@@ -151,7 +136,6 @@ public class LoginControllerTest {
         return controller.login(request);
     }
 
-    // ===== Then =====
     private void thenShouldReturnOk(ResponseEntity<?> response) {
         assertNotNull(response);
         assertEquals(HttpStatus.OK, response.getStatusCode());

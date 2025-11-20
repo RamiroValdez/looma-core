@@ -29,17 +29,14 @@ public class FormatControllerTest {
     @Test
     @DisplayName("GET /api/format/obtain-all - Should return list of formats when available")
     public void obtainAllFormats_shouldReturnList_whenFormatsExist() {
-        // Given
         List<Format> formats = givenFormats(
                 givenFormat(1L, "Audiobook"),
                 givenFormat(2L, "Comic")
         );
         givenUseCaseWillReturn(formats);
 
-        // When
         ResponseEntity<List<FormatDto>> response = whenClientRequestsAllFormats();
 
-        // Then
         thenShouldReturnOk(response);
         thenResponseContainsFormatsNamed(response, "Audiobook", "Comic");
         thenUseCaseWasCalledOnce();
@@ -48,13 +45,10 @@ public class FormatControllerTest {
     @Test
     @DisplayName("GET /api/format/obtain-all - Should return 404 when no formats found (empty list)")
     public void obtainAllFormats_shouldReturnNotFound_whenEmptyList() {
-        // Given
         givenUseCaseWillReturn(List.of());
 
-        // When
         ResponseEntity<List<FormatDto>> response = whenClientRequestsAllFormats();
 
-        // Then
         thenShouldReturnNotFound(response);
         thenUseCaseWasCalledOnce();
     }
@@ -62,18 +56,14 @@ public class FormatControllerTest {
     @Test
     @DisplayName("GET /api/format/obtain-all - Should return 404 when use case returns null")
     public void obtainAllFormats_shouldReturnNotFound_whenNull() {
-        // Given
         givenUseCaseWillReturnNull();
 
-        // When
         ResponseEntity<List<FormatDto>> response = whenClientRequestsAllFormats();
 
-        // Then
         thenShouldReturnNotFound(response);
         thenUseCaseWasCalledOnce();
     }
 
-    // ===== Given =====
     private Format givenFormat(Long id, String name) {
         Format f = new Format();
         f.setId(id);
@@ -93,12 +83,10 @@ public class FormatControllerTest {
         when(obtainAllFormatsUseCase.execute()).thenReturn(null);
     }
 
-    // ===== When =====
     private ResponseEntity<List<FormatDto>> whenClientRequestsAllFormats() {
         return formatController.obtainAllFormats();
     }
 
-    // ===== Then =====
     private void thenShouldReturnOk(ResponseEntity<?> response) {
         assertNotNull(response);
         assertEquals(HttpStatus.OK, response.getStatusCode());

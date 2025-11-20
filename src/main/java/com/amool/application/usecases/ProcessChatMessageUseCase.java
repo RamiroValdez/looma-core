@@ -23,29 +23,22 @@ public class ProcessChatMessageUseCase {
     }
 
     public List<ChatMessage> execute(Long userId, Long chapterId, String message, String chapterContent) {
-        // Guardar contexto del capítulo si se proporciona
         if (chapterContent != null && !chapterContent.trim().isEmpty()) {
             chatConversationPort.saveChapterContext(userId, chapterId, chapterContent);
         }
 
-        // Guardar mensaje del usuario
         ChatMessage userMessage = new ChatMessage(userId, chapterId, message, true);
         chatConversationPort.saveMessage(userMessage);
 
-        // Obtener historial de conversación
         List<ChatMessage> conversationHistory = chatConversationPort.getConversation(userId, chapterId);
 
-        // Obtener contexto del capítulo
         String context = chatConversationPort.getChapterContext(userId, chapterId);
         String limitedContext = limitContext(context);
 
-        // Preparar historial para el prompt (excluyendo el mensaje actual)
         List<String> historyForPrompt = buildConversationHistory(conversationHistory);
 
-        // Generar respuesta del asistente
         String assistantResponse = generateResponse(limitedContext, historyForPrompt, message);
 
-        // Dividir respuesta por segmentos con '---' y guardar cada uno
         String[] segments = assistantResponse.split("---");
         List<ChatMessage> responseMessages = new ArrayList<>();
         for (String segment : segments) {
@@ -74,7 +67,6 @@ public class ProcessChatMessageUseCase {
             return List.of();
         }
 
-        // Excluir el último mensaje (que es el mensaje actual del usuario)
         int endIndex = Math.max(0, conversation.size() - 1);
 
         return conversation.subList(0, endIndex).stream()

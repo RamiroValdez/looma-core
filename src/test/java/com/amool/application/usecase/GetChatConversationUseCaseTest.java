@@ -33,109 +33,83 @@ public class GetChatConversationUseCaseTest {
         getChatConversationUseCase = new GetChatConversationUseCase(chatConversationPort);
     }
 
-    // ==================== Tests de Recuperación de Conversación ====================
 
     @Test
     public void when_ConversationExists_ThenReturnConversation() {
-        // Given: Una conversación existente con mensajes
         givenConversationWithMessages(5);
 
-        // When: Se recupera la conversación
         List<ChatMessage> result = whenGetConversation();
 
-        // Then: Debe retornar todos los mensajes
         thenShouldReturnAllMessages(result, 5);
     }
 
     @Test
     public void when_NoConversationExists_ThenReturnEmptyList() {
-        // Given: No existe conversación previa
         givenEmptyConversation();
 
-        // When: Se intenta recuperar la conversación
         List<ChatMessage> result = whenGetConversation();
 
-        // Then: Debe retornar una lista vacía
         thenShouldReturnEmptyList(result);
     }
 
     @Test
     public void when_GetConversation_ThenMessagesAreInCorrectOrder() {
-        // Given: Una conversación con mensajes ordenados por tiempo
         givenConversationWithOrderedMessages();
 
-        // When: Se recupera la conversación
         List<ChatMessage> result = whenGetConversation();
 
-        // Then: Los mensajes deben mantener el orden
         thenMessagesShouldBeInOrder(result);
     }
 
     @Test
     public void when_GetConversation_ThenUserAndAssistantMessagesAreIncluded() {
-        // Given: Una conversación con mensajes de usuario y asistente
         givenConversationWithMixedMessages();
 
-        // When: Se recupera la conversación
         List<ChatMessage> result = whenGetConversation();
 
-        // Then: Debe incluir ambos tipos de mensajes
         thenShouldIncludeBothMessageTypes(result);
     }
 
     @Test
     public void when_GetConversation_ThenRetrieveFromPort() {
-        // Given: Una conversación existente
         givenConversationWithMessages(3);
 
-        // When: Se recupera la conversación
         whenGetConversation();
 
-        // Then: Debe llamar al port exactamente una vez
         thenPortShouldBeCalledOnce();
     }
 
     @Test
     public void when_GetConversation_ThenMessagesContainAllFields() {
-        // Given: Una conversación con mensajes completos
         givenConversationWithCompleteMessages();
 
-        // When: Se recupera la conversación
         List<ChatMessage> result = whenGetConversation();
 
-        // Then: Los mensajes deben contener todos los campos
         thenMessagesShouldContainAllFields(result);
     }
 
     @Test
     public void when_GetConversationForDifferentUsers_ThenReturnCorrectConversation() {
-        // Given: Conversaciones para diferentes usuarios
         Long otherUserId = 2L;
         givenConversationForUser(USER_ID, 3);
         givenConversationForUser(otherUserId, 5);
 
-        // When: Se recupera la conversación del primer usuario
         List<ChatMessage> result = whenGetConversation();
 
-        // Then: Debe retornar solo los mensajes del usuario correcto
         thenShouldReturnMessagesForUser(result, USER_ID);
     }
 
     @Test
     public void when_GetConversationForDifferentChapters_ThenReturnCorrectConversation() {
-        // Given: Conversaciones para diferentes capítulos
         Long otherChapterId = 200L;
         givenConversationForChapter(CHAPTER_ID, 4);
         givenConversationForChapter(otherChapterId, 6);
 
-        // When: Se recupera la conversación del primer capítulo
         List<ChatMessage> result = whenGetConversation();
 
-        // Then: Debe retornar solo los mensajes del capítulo correcto
         thenShouldReturnMessagesForChapter(result, CHAPTER_ID);
     }
 
-    // ==================== Given Methods ====================
 
     private void givenEmptyConversation() {
         when(chatConversationPort.getConversation(USER_ID, CHAPTER_ID))
@@ -207,13 +181,10 @@ public class GetChatConversationUseCaseTest {
             .thenReturn(messages);
     }
 
-    // ==================== When Methods ====================
 
     private List<ChatMessage> whenGetConversation() {
         return getChatConversationUseCase.execute(USER_ID, CHAPTER_ID);
     }
-
-    // ==================== Then Methods ====================
 
     private void thenShouldReturnAllMessages(List<ChatMessage> result, int expectedSize) {
         assertNotNull(result);
@@ -269,7 +240,6 @@ public class GetChatConversationUseCaseTest {
         assertTrue(result.stream().allMatch(msg -> msg.getChapterId().equals(expectedChapterId)));
     }
 
-    // ==================== Helper Methods ====================
 
     private List<ChatMessage> createMessages(int count) {
         List<ChatMessage> messages = new ArrayList<>();

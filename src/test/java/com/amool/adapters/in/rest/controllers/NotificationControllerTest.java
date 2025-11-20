@@ -35,22 +35,18 @@ public class NotificationControllerTest {
         controller = new NotificationController(obtainNotificationsUseCase, updateNotificationReadUseCase);
     }
 
-    // ========== GET /api/notification/{userId} ==========
 
     @Test
     @DisplayName("GET /api/notification/{userId} - Debe devolver lista mapeada de notificaciones")
     void getNotifications_shouldReturnMappedList() {
-        // Given
         List<Notification> notifications = givenNotifications(
                 givenNotification(1L, USER_ID, "Msg 1", false, NotificationType.WORK_UPDATED, 10L, 20L, 30L),
                 givenNotification(2L, USER_ID, "Msg 2", true, NotificationType.NEW_WORK_PUBLISHED, 11L, null, null)
         );
         givenUseCaseReturnsNotifications(notifications);
 
-        // When
         List<NotificationDto> response = whenGettingNotifications(USER_ID);
 
-        // Then
         thenListSizeIs(response, 2);
         thenDtoMatches(response.get(0), notifications.get(0));
         thenDtoMatches(response.get(1), notifications.get(1));
@@ -60,30 +56,23 @@ public class NotificationControllerTest {
     @Test
     @DisplayName("GET /api/notification/{userId} - Debe devolver lista vacía cuando no hay notificaciones")
     void getNotifications_shouldReturnEmpty_whenNoNotifications() {
-        // Given
         givenUseCaseReturnsNotifications(List.of());
 
-        // When
         List<NotificationDto> response = whenGettingNotifications(USER_ID);
 
-        // Then
         assertNotNull(response);
         assertTrue(response.isEmpty());
         thenObtainUseCaseWasCalled(USER_ID);
     }
 
-    // ========== PUT /api/notification/update-read/{notificationId} ==========
 
     @Test
     @DisplayName("PUT /api/notification/update-read/{notificationId} - Debe devolver true cuando se actualiza correctamente")
     void updateNotificationRead_shouldReturnTrue_onSuccess() {
-        // Given
         givenUpdateReadWillReturn(true);
 
-        // When
         ResponseEntity<Boolean> response = whenUpdatingRead(NOTIF_ID);
 
-        // Then
         thenShouldReturnOk(response);
         assertEquals(Boolean.TRUE, response.getBody());
         thenUpdateReadUseCaseWasCalled(NOTIF_ID);
@@ -92,13 +81,10 @@ public class NotificationControllerTest {
     @Test
     @DisplayName("PUT /api/notification/update-read/{notificationId} - Debe devolver false cuando el caso de uso retorna false")
     void updateNotificationRead_shouldReturnFalse_whenUseCaseReturnsFalse() {
-        // Given
         givenUpdateReadWillReturn(false);
 
-        // When
         ResponseEntity<Boolean> response = whenUpdatingRead(NOTIF_ID);
 
-        // Then
         thenShouldReturnOk(response);
         assertEquals(Boolean.FALSE, response.getBody());
         thenUpdateReadUseCaseWasCalled(NOTIF_ID);
@@ -107,17 +93,13 @@ public class NotificationControllerTest {
     @Test
     @DisplayName("PUT /api/notification/update-read/{notificationId} - Debe devolver 400 cuando el caso de uso lanza excepción")
     void updateNotificationRead_shouldReturnBadRequest_whenUseCaseThrows() {
-        // Given
         givenUpdateReadWillThrow(new RuntimeException("error"));
 
-        // When
         ResponseEntity<Boolean> response = whenUpdatingRead(NOTIF_ID);
 
-        // Then
         thenShouldReturnBadRequest(response);
     }
 
-    // ===== Given =====
     private Notification givenNotification(Long id, Long userId, String message, boolean read,
                                            NotificationType type, Long relatedWork, Long relatedChapter, Long relatedUser) {
         Notification n = new Notification();
@@ -149,7 +131,6 @@ public class NotificationControllerTest {
         when(updateNotificationReadUseCase.execute(eq(NOTIF_ID))).thenThrow(ex);
     }
 
-    // ===== When =====
     private List<NotificationDto> whenGettingNotifications(Long userId) {
         return controller.getNotifications(userId);
     }
@@ -158,7 +139,6 @@ public class NotificationControllerTest {
         return controller.updateNotificationRead(notificationId);
     }
 
-    // ===== Then =====
     private void thenListSizeIs(List<?> list, int expected) {
         assertNotNull(list);
         assertEquals(expected, list.size());
