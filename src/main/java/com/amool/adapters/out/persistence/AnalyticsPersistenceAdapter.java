@@ -4,13 +4,8 @@ import com.amool.adapters.out.persistence.mappers.AnalyticsLikeWorkMapper;
 import com.amool.adapters.out.persistence.mappers.AnalyticsLikeChapterMapper;
 import com.amool.adapters.out.persistence.mappers.AnalyticsSavedWorkMapper;
 import com.amool.application.port.out.AnalyticsPort;
-import com.amool.domain.model.AnalyticsLikeChapter;
-import com.amool.domain.model.AnalyticsLikeWork;
-import com.amool.domain.model.AnalyticsRatingWork;
-import com.amool.domain.model.AnalyticsRetentionTotal;
-import com.amool.domain.model.AnalyticsSuscribersPerAuthor;
-import com.amool.domain.model.AnalyticsSuscribersPerWork;
-import com.amool.domain.model.WorkSaved;
+import com.amool.domain.model.*;
+
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -119,32 +114,44 @@ public class AnalyticsPersistenceAdapter implements AnalyticsPort {
     }
 
     @Override
-    public List<AnalyticsRetentionTotal> getRetentionTotalsPerChapter(Long workId){
+    public List<AnalyticsRetention> getRetentionTotalsPerChapter(Long workId){
         
-        String sql = """
-            SELECT 
-                c.id AS chapterId,
-                COUNT(DISTINCT urp.user_id) AS readers
-            FROM user_reading_progress urp
-            JOIN chapter c ON urp.chapter_id = c.id
-            WHERE urp.work_id = :workId
-            GROUP BY c.id, c.published_at
-            ORDER BY c.published_at ASC
+        String jpql = """
+            SELECT rh.chapterId, COUNT(DISTINCT rh.userId)
+            FROM ReadingHistoryEntity rh
+            WHERE rh.workId = :workId
+            GROUP BY rh.chapterId
+            ORDER BY MIN(rh.readAt) ASC
         """;
+        List<Object[]> rows = entityManager.createQuery(jpql, Object[].class)
+                .setParameter("workId", workId)
+                .getResultList();
 
-        List<Object[]> rows = entityManager.createNativeQuery(sql)
-                            .setParameter("workId", workId)
-                            .getResultList();
+        return rows.stream()
+                .map(row -> {
+                    AnalyticsRetention dto = new AnalyticsRetention();
+                    dto.setChapter(((Number) row[0]).longValue());
+                    dto.setTotalReaders(((Number) row[1]).longValue());
+                    return dto;
+                })
+                .toList();
+    }
 
-        List<AnalyticsRetentionTotal> result = rows.stream()
-            .map(row -> {
-                AnalyticsRetentionTotal dto = new AnalyticsRetentionTotal();
-                dto.setChapter(((Number) row[0]).longValue());
-                dto.setTotalReaders(((Number) row[1]).longValue());
-                return dto;
-            })
-        .toList();
+    @Override
+    public List<ReadingHistory> getReadingHistory(Long chapterId) {
 
-        return result;
+        String jpql = "SELECT rh FROM ReadingHistoryEntity rh WHERE rh.chapterId = :chapterId";
+
+        List<ReadingHistoryEntity> result = entityManager.createQuery(jpql, ReadingHistoryEntity.class)
+                .setParameter("chapterId", chapterId)
+                .getResultList();
+
+        return result.stream().map(entity -> new ReadingHistory(
+                entity.getId(),
+                entity.getUserId(),
+                entity.getWorkId(),
+                entity.getChapterId(),
+                entity.getReadAt()
+        )).collect(Collectors.toList());
     }
 }

@@ -44,18 +44,35 @@ public class ReadingProgressPersistenceAdapter implements ReadingProgressPort {
         try {
         String insertQuery = """
         INSERT INTO user_reading_progress (user_id, work_id, chapter_id) 
-        VALUES (:userId, :workId, :chapterId)
+        VALUES (?1, ?2, ?3)
+        ON CONFLICT (user_id, work_id)
+        DO UPDATE SET chapter_id = EXCLUDED.chapter_id
         """;
         
         entityManager.createNativeQuery(insertQuery)
-        .setParameter("userId", userId)
-        .setParameter("workId", workId)
-        .setParameter("chapterId", chapterId)
+        .setParameter(1, userId)
+        .setParameter(2, workId)
+        .setParameter(3, chapterId)
         .executeUpdate();
+
         return true;
     } catch (Exception e) {
         return false;
     }
+    }
+
+    @Override
+    public void addToHistory(Long userId, Long workId, Long chapterId) {
+            String sql = """
+                    INSERT INTO user_reading_history (user_id, work_id, chapter_id, read_at) 
+                    VALUES (?1, ?2, ?3, NOW())
+                    """;
+
+            entityManager.createNativeQuery(sql)
+                .setParameter(1, userId)
+                .setParameter(2, workId)
+                .setParameter(3, chapterId)
+                .executeUpdate();
     }
 
     private boolean checkExists(Long userId, Long workId) {

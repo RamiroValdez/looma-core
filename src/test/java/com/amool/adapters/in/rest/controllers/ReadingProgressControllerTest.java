@@ -2,6 +2,8 @@ package com.amool.adapters.in.rest.controllers;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.Mockito.when;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.times;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -31,21 +33,23 @@ public class ReadingProgressControllerTest {
     }
 
     @Test
-    public void when_UpdateReadingProgress_ThenReturnOk() {
-        when(readingProgressPort.update(USER_ID, WORK_ID, CHAPTER_ID))
+    public void when_CreateReadingProgressSucceeds_ThenReturnOkAndAddToHistory() {
+        when(readingProgressPort.create(USER_ID, WORK_ID, CHAPTER_ID))
             .thenReturn(true);
         
         ResponseEntity<Void> response = readingProgressController.updateReadingProgress(new ReadingProgressDto(USER_ID, WORK_ID, CHAPTER_ID));
         assertEquals(HttpStatus.OK, response.getStatusCode());
+        verify(readingProgressPort, times(1)).addToHistory(USER_ID, WORK_ID, CHAPTER_ID);
     }
 
     @Test
-    public void when_UpdateProgressFails_ThenReturnFalse() {
-        when(readingProgressPort.update(USER_ID, WORK_ID, CHAPTER_ID))
+    public void when_CreateReadingProgressFails_ThenReturnBadRequestAndDoNotAddToHistory() {
+        when(readingProgressPort.create(USER_ID, WORK_ID, CHAPTER_ID))
             .thenReturn(false);
         
         ResponseEntity<Void> response = readingProgressController.updateReadingProgress(new ReadingProgressDto(USER_ID, WORK_ID, CHAPTER_ID));
         assertEquals(HttpStatus.BAD_REQUEST, response.getStatusCode());
+        verify(readingProgressPort, times(0)).addToHistory(USER_ID, WORK_ID, CHAPTER_ID);
     }
     
 }

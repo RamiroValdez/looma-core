@@ -550,5 +550,9 @@ public class UseCasesConfig {
     public GetTotalRetention getTotalRetention(){
         return new GetTotalRetention(analyticsPort);
     }
-    
+
+    @Bean
+    public ObtainReadingHistory obtainReadingHistory(){
+        return new ObtainReadingHistory(analyticsPort);
+    }
 }
