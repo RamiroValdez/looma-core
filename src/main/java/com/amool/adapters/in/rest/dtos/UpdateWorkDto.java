@@ -6,5 +6,6 @@ import java.util.Set;
 public record UpdateWorkDto(
     BigDecimal price,
     String state,
-    Set<String> tagIds
+    Set<String> tagIds,
+    Set<Long> categoryIds
 ) {}

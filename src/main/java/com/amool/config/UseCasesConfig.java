@@ -534,7 +534,8 @@ public class UseCasesConfig {
         return new UpdateWorkUseCase(
                 workPort,
                 obtainWorkByIdPort,
-                tagPort
+                tagPort,
+                categoryPort
         );
     }
 

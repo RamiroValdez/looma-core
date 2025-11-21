@@ -171,6 +171,13 @@ public class WorksPersistenceAdapter implements ObtainWorkByIdPort, WorkPort {
     private List<Predicate> buildPredicates(WorkSearchFilter filter, CriteriaBuilder cb, Root<WorkEntity> root) {
         List<Predicate> predicates = new ArrayList<>();
 
+        if (filter.getState() == null || filter.getState().isBlank()) {
+            predicates.add(cb.or(
+                cb.equal(root.get("state"), "InProgress"),
+                cb.equal(root.get("state"), "finished")
+            ));
+        }
+
         if (filter.getText() != null && !filter.getText().isBlank()) {
             String text = filter.getText().toLowerCase().trim();
             String phrasePattern = "%" + text + "%";
