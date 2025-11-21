@@ -43,6 +43,7 @@ public class LoginControllerTest {
     void setUp() {
         loginUseCase = Mockito.mock(LoginUseCase.class);
         jwtService = Mockito.mock(JwtService.class);
+        getUserPhoto = Mockito.mock(GetUserPhoto.class);
         controller = new LoginController(loginUseCase, jwtService, getUserPhoto );
     }
 
