@@ -16,6 +16,9 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.MockMvc;
 
+import java.math.BigDecimal;
+import java.util.Collections;
+
 import static org.mockito.ArgumentMatchers.*;
 import static org.mockito.Mockito.*;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put;
@@ -45,26 +48,42 @@ public class ManageWorkControllerPriceTest {
 
     @Test
     void updateWork_put_returns200True_whenUseCaseOk() throws Exception {
-        when(updateWorkUseCase.execute(eq(1L), any(), anySet(), anyString())).thenReturn(true);
+        // Ajustar stub para la nueva firma (incluye categoryIds)
+        when(updateWorkUseCase.execute(eq(1L), any(), anySet(), anySet(), anyString())).thenReturn(true);
 
         mockMvc.perform(
                 put("/api/manage-work/{workId}", 1L)
                         .contentType(MediaType.APPLICATION_JSON)
-                        .content("{\"price\": 9.99, \"state\": \"PUBLISHED\", \"tagIds\": [\"t1\", \"t2\"]}"))
+                        .content("{\"price\": 9.99, \"state\": \"PUBLISHED\", \"tagIds\": [\"t1\", \"t2\"], \"categoryIds\": []}"))
                 .andExpect(status().isOk())
                 .andExpect(content().string("true"));
 
-        verify(updateWorkUseCase, times(1)).execute(eq(1L), any(), anySet(), eq("PUBLISHED"));
+        verify(updateWorkUseCase, times(1)).execute(eq(1L), any(), anySet(), anySet(), eq("PUBLISHED"));
     }
 
     @Test
     void updateWork_put_returns400_whenUseCaseThrows() throws Exception {
-        when(updateWorkUseCase.execute(eq(1L), any(), anySet(), anyString())).thenThrow(new RuntimeException("boom"));
+        when(updateWorkUseCase.execute(eq(1L), any(), anySet(), anySet(), anyString())).thenThrow(new RuntimeException("boom"));
 
         mockMvc.perform(
                 put("/api/manage-work/{workId}", 1L)
                         .contentType(MediaType.APPLICATION_JSON)
-                        .content("{\"price\": 5.00, \"state\": \"DRAFT\", \"tagIds\": []}"))
+                        .content("{\"price\": 5.00, \"state\": \"DRAFT\", \"tagIds\": [], \"categoryIds\": []}"))
                 .andExpect(status().isBadRequest());
+    }
+
+    @Test
+    void updateWork_put_returns200True_withScaledPriceAndEmptySets() throws Exception {
+        when(updateWorkUseCase.execute(eq(2L), argThat(bd -> bd != null && bd.compareTo(new BigDecimal("9.99")) == 0), eq(Collections.emptySet()), eq(Collections.emptySet()), eq("PUBLISHED")))
+                .thenReturn(true);
+
+        mockMvc.perform(
+                put("/api/manage-work/{workId}", 2L)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content("{\"price\": 9.9900, \"state\": \"PUBLISHED\", \"tagIds\": [], \"categoryIds\": []}"))
+                .andExpect(status().isOk())
+                .andExpect(content().string("true"));
+
+        verify(updateWorkUseCase, times(1)).execute(eq(2L), argThat(bd -> bd != null && bd.compareTo(new BigDecimal("9.99")) == 0), eq(Collections.emptySet()), eq(Collections.emptySet()), eq("PUBLISHED"));
     }
 }
