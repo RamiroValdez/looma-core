@@ -581,4 +581,9 @@ public class UseCasesConfig {
     public ObtainReadingHistory obtainReadingHistory(){
         return new ObtainReadingHistory(analyticsPort);
     }
+
+    @Bean
+    public GetSubscriptions getSubscriptions() {
+        return new GetSubscriptions(subscriptionPersistencePort);
+    }
 }

@@ -1,9 +1,16 @@
 package com.amool.adapters.out.persistence;
 
+import com.amool.adapters.out.persistence.entity.WorkEntity;
+import com.amool.adapters.out.persistence.mappers.WorkMapper;
 import com.amool.application.port.out.SubscriptionPersistencePort;
+import com.amool.domain.model.Work;
+
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.PersistenceContext;
 import jakarta.transaction.Transactional;
+
+import java.util.List;
+
 import org.springframework.stereotype.Component;
 
 @Component
@@ -45,4 +52,25 @@ public class SubscriptionPersistenceAdapter implements SubscriptionPersistencePo
                 .setParameter("workId", workId)
                 .executeUpdate();
     }
+
+    @Override
+    @Transactional
+    public List<Work> getAllSubscribedWorks(Long userId) {
+        String jpql = "SELECT w FROM WorkEntity w " +
+                    "WHERE w.creator.id IN " +
+                    "(SELECT sa.autorId FROM SuscribeAutorEntity sa WHERE sa.userId = :userId) " +
+                    "OR w.id IN " +
+                    "(SELECT sw.workId FROM SuscribeWorkEntity sw WHERE sw.userId = :userId)";
+        
+        List<WorkEntity> entities = entityManager
+            .createQuery(jpql, WorkEntity.class)
+            .setParameter("userId", userId)
+            .getResultList();
+        
+        return entities.stream()
+                .map(WorkMapper::toDomain)
+                .toList();
+    }
+
+    
 }
