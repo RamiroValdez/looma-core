@@ -5,5 +5,6 @@ public interface ReadingProgressPort {
     boolean update(Long userId, Long workId, Long chapterId);
 
     boolean create(Long userId, Long workId, Long chapterId);
-    
+
+    void addToHistory(Long userId, Long workId, Long chapterId);
 }

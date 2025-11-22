@@ -66,7 +66,7 @@ public class UserAccountPersistenceAdapter implements UserAccountPort {
         user.setPassword(passwordHash);
         user.setVerificationCode(verificationCode);
         user.setVerificationExpiresAt(expiresAt);
-
+        user.setPhoto("none");
         if (user.getId() == null) {
             em.persist(user);
         } else {

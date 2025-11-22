@@ -11,10 +11,13 @@ public class UpdateReadingProgressUseCase {
     }
 
     public boolean execute(Long userId, Long workId, Long chapterId) {
-        boolean result = readingProgressPort.update(userId, workId, chapterId);
-        if(!result){
-            result = readingProgressPort.create(userId, workId, chapterId);
+        boolean result = readingProgressPort.create(userId, workId, chapterId);
+
+        if(result) {
+            readingProgressPort.addToHistory(userId, workId, chapterId);
+            return true;
+        } else {
+            return false;
         }
-        return result;
     }
 }

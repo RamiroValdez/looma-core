@@ -31,8 +31,10 @@ public class ObtainWorkListUseCase {
     
     private Map<String, List<Work>> createWorkListSections(Long userId) {
         Map<String, List<Work>> workList = new HashMap<>();
+        if(userId != 0){
+            workList.put("currentlyReading", getCurrentlyReading(userId));
+        }
         workList.put("topTen", getTopTen());
-        workList.put("currentlyReading", getCurrentlyReading(userId));
         workList.put("newReleases", getNewReleases());
         workList.put("recentlyUpdated", getRecentlyUpdated());
         return workList;
