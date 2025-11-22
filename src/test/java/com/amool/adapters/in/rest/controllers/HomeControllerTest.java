@@ -34,13 +34,13 @@ public class HomeControllerTest {
     }
 
     @Test
-    @DisplayName("GET /api/home/work-list/{userId} - Debe devolver 4 secciones")
+    @DisplayName("GET /api/home/work-list/{userId} - Debe devolver 5 secciones")
     public void getWorkList_shouldReturnFourSections() {
         givenNoWorksAvailable();
 
         Map<String, List<WorkListDto>> result = whenRequestingWorkList(TEST_USER_ID);
 
-        thenSectionsCountIs(result, 4);
+        thenSectionsCountIs(result, 5);
     }
 
     @Test

@@ -37,8 +37,10 @@ public class ObtainWorkListUseCase {
         workList.put("topTen", getTopTen());
         workList.put("newReleases", getNewReleases());
         workList.put("recentlyUpdated", getRecentlyUpdated());
+        workList.put("userPreferences", getUserPreferences(userId));
         return workList;
     }
+
 
     private Work modifyCoverAndBannerToUrl(Work work) {
         try {
@@ -95,4 +97,9 @@ public class ObtainWorkListUseCase {
                   .max(LocalDateTime::compareTo)
                   .orElse(LocalDateTime.MIN); 
     }
+
+    private List<Work> getUserPreferences(Long userId) {
+        return workPort.getUserPreferences(userId);
+    }
+    
 }
