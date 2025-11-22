@@ -7,6 +7,7 @@ import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.*;
 
+import com.amool.application.port.out.AwsS3Port;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
@@ -20,11 +21,12 @@ public class ObtainWorkListUseCaseTest {
 
     private ObtainWorkListUseCase obtainWorkListUseCase;
     private WorkPort workPort;
+    private AwsS3Port awsS3Port;
     
     @BeforeEach
     public void setUp() {
         workPort = Mockito.mock(WorkPort.class);
-        obtainWorkListUseCase = new ObtainWorkListUseCase(workPort);
+        obtainWorkListUseCase = new ObtainWorkListUseCase(workPort, awsS3Port);
     }
 
     @Test
@@ -34,7 +36,7 @@ public class ObtainWorkListUseCaseTest {
         
         Map<String, List<Work>> result = obtainWorkListUseCase.execute(1L);
 
-        int lists = 4;
+        int lists = 5;
 
         assertEquals(lists, result.size());
     }

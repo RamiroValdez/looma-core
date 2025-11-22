@@ -3,7 +3,7 @@ package com.amool.adapters.in.rest.controllers;
 import com.amool.application.usecases.CreateEmptyChapterUseCase;
 import com.amool.application.usecases.GetWorkPermissionsUseCase;
 import com.amool.application.usecases.ObtainWorkByIdUseCase;
-import com.amool.application.usecases.UpdateWorkPriceUseCase;
+import com.amool.application.usecases.UpdateWorkUseCase;
 import com.amool.security.JwtUserPrincipal;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -16,9 +16,13 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.MockMvc;
 
-import static org.mockito.Mockito.doThrow;
-import static org.mockito.Mockito.verify;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.patch;
+import java.math.BigDecimal;
+import java.util.Collections;
+
+import static org.mockito.ArgumentMatchers.*;
+import static org.mockito.Mockito.*;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 @WebMvcTest(controllers = ManageWorkController.class)
@@ -31,7 +35,7 @@ public class ManageWorkControllerPriceTest {
     @MockitoBean private ObtainWorkByIdUseCase obtainWorkByIdUseCase;
     @MockitoBean private CreateEmptyChapterUseCase createEmptyChapterUseCase;
     @MockitoBean private GetWorkPermissionsUseCase getWorkPermissionsUseCase;
-    @MockitoBean private UpdateWorkPriceUseCase updateWorkPriceUseCase;
+    @MockitoBean private UpdateWorkUseCase updateWorkUseCase;
 
     private static final Long USER_ID = 100L;
 
@@ -43,45 +47,43 @@ public class ManageWorkControllerPriceTest {
     }
 
     @Test
-    void updatePrice_returns204_onSuccess() throws Exception {
-        String body = "{\"price\": 19.99}";
-        mockMvc.perform(patch("/api/manage-work/{workId}/price", 1)
-                .contentType(MediaType.APPLICATION_JSON)
-                .content(body))
-                .andExpect(status().isNoContent());
-        verify(updateWorkPriceUseCase).execute(1L, new java.math.BigDecimal("19.99"), USER_ID);
+    void updateWork_put_returns200True_whenUseCaseOk() throws Exception {
+        // Ajustar stub para la nueva firma (incluye categoryIds)
+        when(updateWorkUseCase.execute(eq(1L), any(), anySet(), anySet(), anyString())).thenReturn(true);
+
+        mockMvc.perform(
+                put("/api/manage-work/{workId}", 1L)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content("{\"price\": 9.99, \"state\": \"PUBLISHED\", \"tagIds\": [\"t1\", \"t2\"], \"categoryIds\": []}"))
+                .andExpect(status().isOk())
+                .andExpect(content().string("true"));
+
+        verify(updateWorkUseCase, times(1)).execute(eq(1L), any(), anySet(), anySet(), eq("PUBLISHED"));
     }
 
     @Test
-    void updatePrice_returns403_onForbidden() throws Exception {
-        doThrow(new SecurityException("Forbidden")).when(updateWorkPriceUseCase)
-                .execute(1L, new java.math.BigDecimal("19.99"), USER_ID);
-        String body = "{\"price\": 19.99}";
-        mockMvc.perform(patch("/api/manage-work/{workId}/price", 1)
-                .contentType(MediaType.APPLICATION_JSON)
-                .content(body))
-                .andExpect(status().isForbidden());
-    }
+    void updateWork_put_returns400_whenUseCaseThrows() throws Exception {
+        when(updateWorkUseCase.execute(eq(1L), any(), anySet(), anySet(), anyString())).thenThrow(new RuntimeException("boom"));
 
-    @Test
-    void updatePrice_returns404_onNotFound() throws Exception {
-        doThrow(new java.util.NoSuchElementException("not found")).when(updateWorkPriceUseCase)
-                .execute(1L, new java.math.BigDecimal("19.99"), USER_ID);
-        String body = "{\"price\": 19.99}";
-        mockMvc.perform(patch("/api/manage-work/{workId}/price", 1)
-                .contentType(MediaType.APPLICATION_JSON)
-                .content(body))
-                .andExpect(status().isNotFound());
-    }
-
-    @Test
-    void updatePrice_returns400_onBadRequest() throws Exception {
-        doThrow(new IllegalArgumentException("bad price")).when(updateWorkPriceUseCase)
-                .execute(1L, new java.math.BigDecimal("-1"), USER_ID);
-        String body = "{\"price\": -1}";
-        mockMvc.perform(patch("/api/manage-work/{workId}/price", 1)
-                .contentType(MediaType.APPLICATION_JSON)
-                .content(body))
+        mockMvc.perform(
+                put("/api/manage-work/{workId}", 1L)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content("{\"price\": 5.00, \"state\": \"DRAFT\", \"tagIds\": [], \"categoryIds\": []}"))
                 .andExpect(status().isBadRequest());
+    }
+
+    @Test
+    void updateWork_put_returns200True_withScaledPriceAndEmptySets() throws Exception {
+        when(updateWorkUseCase.execute(eq(2L), argThat(bd -> bd != null && bd.compareTo(new BigDecimal("9.99")) == 0), eq(Collections.emptySet()), eq(Collections.emptySet()), eq("PUBLISHED")))
+                .thenReturn(true);
+
+        mockMvc.perform(
+                put("/api/manage-work/{workId}", 2L)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content("{\"price\": 9.9900, \"state\": \"PUBLISHED\", \"tagIds\": [], \"categoryIds\": []}"))
+                .andExpect(status().isOk())
+                .andExpect(content().string("true"));
+
+        verify(updateWorkUseCase, times(1)).execute(eq(2L), argThat(bd -> bd != null && bd.compareTo(new BigDecimal("9.99")) == 0), eq(Collections.emptySet()), eq(Collections.emptySet()), eq("PUBLISHED"));
     }
 }

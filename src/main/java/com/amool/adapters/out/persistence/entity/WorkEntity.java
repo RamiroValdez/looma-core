@@ -65,12 +65,14 @@ public class WorkEntity {
     @JoinColumn(name = "original_language_id", nullable = false)
     private LanguageEntity originalLanguageEntity;
 
+    @Column(name = "has_pdf", nullable = false)
+    private Boolean hasPdf = false;
+
+    @Column(name = "length_pdf")
+    private Integer lengthPdf;
 
     @OneToMany(mappedBy = "workEntity", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<ChapterEntity> chapters = new ArrayList<>();
-
-    @ManyToMany(mappedBy = "savedWorks")
-    private Set<UserEntity> usersWhoSaved = new HashSet<>();
 
     @ManyToMany
     @JoinTable(name = "work_category", joinColumns = @JoinColumn(name = "work_id"), inverseJoinColumns = @JoinColumn(name = "category_id"))
@@ -129,9 +131,6 @@ public class WorkEntity {
     public LanguageEntity getOriginalLanguageEntity() { return originalLanguageEntity; }
     public void setOriginalLanguageEntity(LanguageEntity originalLanguageEntity) { this.originalLanguageEntity = originalLanguageEntity; }
 
-    public Set<UserEntity> getUsersWhoSaved() { return usersWhoSaved; }
-    public void setUsersWhoSaved(Set<UserEntity> usersWhoSaved) { this.usersWhoSaved = usersWhoSaved; }
-
     public Set<CategoryEntity> getCategories() { return categories; }
     public void setCategories(Set<CategoryEntity> categories) { this.categories = categories; }
     public Set<UserEntity> getSubscribers() { return subscribers; }
@@ -148,5 +147,11 @@ public class WorkEntity {
 
     public Integer getLengthEpub() { return lengthEpub; }
     public void setLengthEpub(Integer lengthEpub) { this.lengthEpub = lengthEpub; }
+
+    public Boolean getHasPdf() { return hasPdf; }
+    public void setHasPdf(Boolean hasPdf) { this.hasPdf = hasPdf; }
+
+    public Integer getLengthPdf() { return lengthPdf; }
+    public void setLengthPdf(Integer lengthPdf) { this.lengthPdf = lengthPdf; }
 }
 

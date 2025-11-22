@@ -3,6 +3,7 @@ package com.amool.adapters.out.persistence;
 import com.amool.adapters.out.persistence.entity.CategoryEntity;
 import com.amool.adapters.out.persistence.entity.FormatEntity;
 import com.amool.adapters.out.persistence.entity.TagEntity;
+import com.amool.adapters.out.persistence.entity.UserEntity;
 import com.amool.adapters.out.persistence.entity.WorkEntity;
 import com.amool.adapters.out.persistence.mappers.WorkMapper;
 import com.amool.adapters.out.persistence.mappers.CategoryMapper;
@@ -90,6 +91,7 @@ public class WorksPersistenceAdapter implements ObtainWorkByIdPort, WorkPort {
 
 
     @Override
+    @Transactional
     public Long createWork(Work work) {
         WorkEntity workEntity = WorkMapper.toEntity(work);
         entityManager.persist(workEntity);
@@ -114,15 +116,14 @@ public class WorksPersistenceAdapter implements ObtainWorkByIdPort, WorkPort {
             if (work.getPrice() != null) existingEntity.setPrice(work.getPrice());
             if (work.getLikes() != null) existingEntity.setLikes(work.getLikes());
             if (work.getPublicationDate() != null) existingEntity.setPublicationDate(work.getPublicationDate());
-
             if (work.getCreator() != null) existingEntity.setCreator(UserMapper.toEntity(work.getCreator()));
             if (work.getFormat() != null) existingEntity.setFormatEntity(FormatMapper.toEntity(work.getFormat()));
             if (work.getOriginalLanguage() != null) existingEntity.setOriginalLanguageEntity(LanguageMapper.toEntity(work.getOriginalLanguage()));
-
             if (work.getCategories() != null) existingEntity.setCategories(CategoryMapper.toEntitySet(work.getCategories()));
             if (work.getTags() != null) existingEntity.setTags(TagMapper.toEntitySet(work.getTags()));
             if (work.getHasEpub() != null) existingEntity.setHasEpub(work.getHasEpub());
             if (work.getLengthEpub() != null) existingEntity.setLengthEpub(work.getLengthEpub());
+
             entityManager.merge(existingEntity);
             entityManager.flush();
             return Boolean.TRUE;
@@ -170,6 +171,13 @@ public class WorksPersistenceAdapter implements ObtainWorkByIdPort, WorkPort {
 
     private List<Predicate> buildPredicates(WorkSearchFilter filter, CriteriaBuilder cb, Root<WorkEntity> root) {
         List<Predicate> predicates = new ArrayList<>();
+
+        if (filter.getState() == null || filter.getState().isBlank()) {
+            predicates.add(cb.or(
+                cb.equal(root.get("state"), "InProgress"),
+                cb.equal(root.get("state"), "finished")
+            ));
+        }
 
         if (filter.getText() != null && !filter.getText().isBlank()) {
             String text = filter.getText().toLowerCase().trim();
@@ -308,8 +316,35 @@ public class WorksPersistenceAdapter implements ObtainWorkByIdPort, WorkPort {
         return entities.stream()
                 .map(WorkMapper::toDomain)
                 .collect(Collectors.toList());
-}
+    }
 
+    @Override
+    @Transactional
+    public List<Work> getUserPreferences(Long userId) {
+        try {
+            String sql =
+                        "SELECT w.* " +
+                        "FROM work w " +
+                        "JOIN work_category wc ON wc.work_id = w.id " +
+                        "WHERE EXISTS ( " +
+                        "    SELECT 1 " +
+                        "    FROM preferred_category pc " +
+                        "    WHERE pc.category_id = wc.category_id " +
+                        "      AND pc.user_id = :userId " +
+                        ") " +
+                        "LIMIT 20";
 
+            @SuppressWarnings("unchecked")
+            List<WorkEntity> works = entityManager.createNativeQuery(sql, WorkEntity.class)
+                    .setParameter("userId", userId)
+                    .getResultList();
 
+            return works.stream()
+                    .map(WorkMapper::toDomain)
+                    .toList();
+        } catch (Exception e) {
+            e.printStackTrace();
+            return List.of();
+        }
+    }
 }

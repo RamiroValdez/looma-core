@@ -15,6 +15,7 @@ public class CreatorMapper {
         dto.setSurname(user.getSurname());
         dto.setUsername(user.getUsername());
         dto.setPhoto(user.getPhoto());
+        dto.setMoney(user.getMoney());
         return dto;
     }
 }

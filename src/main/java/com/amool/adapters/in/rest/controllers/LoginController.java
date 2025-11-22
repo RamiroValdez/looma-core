@@ -3,6 +3,7 @@ package com.amool.adapters.in.rest.controllers;
 import com.amool.adapters.in.rest.dtos.LoginRequest;
 import com.amool.adapters.in.rest.dtos.UserDto;
 import com.amool.adapters.in.rest.dtos.AuthResponse;
+import com.amool.application.usecases.GetUserPhoto;
 import com.amool.application.usecases.LoginUseCase;
 import com.amool.security.JwtService;
 import com.amool.security.JwtUserPrincipal;
@@ -20,10 +21,12 @@ public class LoginController {
 
     private final LoginUseCase loginUseCase;
     private final JwtService jwtService;
+    private final GetUserPhoto getUserPhoto;
 
-    public LoginController(LoginUseCase loginUseCase, JwtService jwtService) {
+    public LoginController(LoginUseCase loginUseCase, JwtService jwtService, GetUserPhoto getUserPhoto) {
         this.loginUseCase = loginUseCase;
         this.jwtService = jwtService;
+        this.getUserPhoto = getUserPhoto;
     }
 
     @GetMapping("/me")
@@ -37,6 +40,7 @@ public class LoginController {
         dto.setName(principal.getName());
         dto.setSurname(principal.getSurname());
         dto.setUsername(principal.getUsername());
+        dto.setPhoto(getUserPhoto.execute(principal.getUserId()));
         return ResponseEntity.ok(dto);
     }
 
