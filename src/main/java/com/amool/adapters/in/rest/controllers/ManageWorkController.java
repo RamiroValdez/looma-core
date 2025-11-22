@@ -92,8 +92,9 @@ public class ManageWorkController {
             Boolean updatedWorkId = updateWorkUseCase.execute(workId, 
                                             request.price(),
                                             request.tagIds(), 
+                                            request.categoryIds(),
                                             request.state());
-                    return ResponseEntity.ok(updatedWorkId);
+            return ResponseEntity.ok(updatedWorkId);
         } catch (Exception e) {
             return ResponseEntity.badRequest().build();
         }

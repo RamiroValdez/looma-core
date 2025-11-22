@@ -111,23 +111,23 @@ public class ManageWorkControllerTest {
     @DisplayName("PUT /api/manage-work/{workId} - Debe devolver 200 (true) cuando el use case actualiza")
     void updateWork_shouldReturnTrue_onSuccess() {
         JwtUserPrincipal principal = givenAuthenticatedUser(USER_ID);
-        UpdateWorkDto request = new UpdateWorkDto(new BigDecimal("9.99"), "PUBLISHED", Set.of("t1","t2"));
-        when(updateWorkUseCase.execute(eq(WORK_ID), eq(new BigDecimal("9.99")), eq(Set.of("t1","t2")), eq("PUBLISHED")))
+        UpdateWorkDto request = new UpdateWorkDto(new BigDecimal("9.99"), "PUBLISHED", Set.of("t1","t2"), Set.of());
+        when(updateWorkUseCase.execute(eq(WORK_ID), eq(new BigDecimal("9.99")), eq(Set.of("t1","t2")), eq(Set.of()), eq("PUBLISHED")))
                 .thenReturn(true);
 
         ResponseEntity<Boolean> response = controller.updateWork(WORK_ID, request, principal);
 
         thenShouldReturnOk(response);
         assertTrue(Boolean.TRUE.equals(response.getBody()));
-        verify(updateWorkUseCase, times(1)).execute(eq(WORK_ID), eq(new BigDecimal("9.99")), eq(Set.of("t1","t2")), eq("PUBLISHED"));
+        verify(updateWorkUseCase, times(1)).execute(eq(WORK_ID), eq(new BigDecimal("9.99")), eq(Set.of("t1","t2")), eq(Set.of()), eq("PUBLISHED"));
     }
 
     @Test
     @DisplayName("PUT /api/manage-work/{workId} - Debe devolver 400 cuando el use case lanza excepción")
     void updateWork_shouldReturnBadRequest_onException() {
         JwtUserPrincipal principal = givenAuthenticatedUser(USER_ID);
-        UpdateWorkDto request = new UpdateWorkDto(new BigDecimal("5.00"), "DRAFT", Set.of());
-        when(updateWorkUseCase.execute(anyLong(), any(), anySet(), anyString())).thenThrow(new RuntimeException("error"));
+        UpdateWorkDto request = new UpdateWorkDto(new BigDecimal("5.00"), "DRAFT", Set.of(), Set.of());
+        when(updateWorkUseCase.execute(anyLong(), any(), anySet(), anySet(), anyString())).thenThrow(new RuntimeException("error"));
 
         ResponseEntity<Boolean> response = controller.updateWork(WORK_ID, request, principal);
 

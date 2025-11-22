@@ -70,18 +70,15 @@ public class SaveWorkPersistenceAdapter implements SaveWorkPort {
     
     @Override
     public List<Work> getSavedWorksByUser(Long userId) {
-        String jpql = "SELECT DISTINCT w FROM UserEntity u JOIN u.savedWorks w " +
-                     "LEFT JOIN FETCH w.creator " +
-                     "LEFT JOIN FETCH w.formatEntity " +
-                     "LEFT JOIN FETCH w.chapters " +
-                     "WHERE u.id = :userId";
-        
+        String jpql = "SELECT ws.work FROM WorkSavedEntity ws " +
+                    "WHERE ws.user.id = :userId";
         List<WorkEntity> workEntities = entityManager.createQuery(jpql, WorkEntity.class)
                 .setParameter("userId", userId)
                 .getResultList();
-                
+
         return workEntities.stream()
                 .map(WorkMapper::toDomain)
                 .collect(Collectors.toList());
     }
+
 }
