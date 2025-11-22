@@ -3,6 +3,7 @@ package com.amool.adapters.in.rest.controllers;
 import com.amool.adapters.in.rest.dtos.AuthResponse;
 import com.amool.adapters.in.rest.dtos.LoginRequest;
 import com.amool.adapters.in.rest.dtos.UserDto;
+import com.amool.application.usecases.GetUserPhoto;
 import com.amool.application.usecases.LoginUseCase;
 import com.amool.domain.model.User;
 import com.amool.security.JwtService;
@@ -28,6 +29,7 @@ public class LoginControllerTest {
     private LoginController controller;
     private LoginUseCase loginUseCase;
     private JwtService jwtService;
+    private GetUserPhoto getUserPhoto;
 
     private static final Long USER_ID = 42L;
     private static final String EMAIL = "user@example.com";
@@ -41,7 +43,8 @@ public class LoginControllerTest {
     void setUp() {
         loginUseCase = Mockito.mock(LoginUseCase.class);
         jwtService = Mockito.mock(JwtService.class);
-        controller = new LoginController(loginUseCase, jwtService);
+        getUserPhoto = Mockito.mock(GetUserPhoto.class);
+        controller = new LoginController(loginUseCase, jwtService, getUserPhoto );
     }
 
 

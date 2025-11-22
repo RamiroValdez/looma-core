@@ -568,6 +568,11 @@ public class UseCasesConfig {
     }
 
     @Bean
+    public GetUserPhoto getUserPhoto() {
+        return new GetUserPhoto(awsS3Port, loadUserPort);
+    }
+
+    @Bean
     public GetTotalRetention getTotalRetention(){
         return new GetTotalRetention(analyticsPort);
     }
