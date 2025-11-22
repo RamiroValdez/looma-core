@@ -36,7 +36,7 @@ public class ObtainWorkListUseCaseTest {
         
         Map<String, List<Work>> result = obtainWorkListUseCase.execute(1L);
 
-        int lists = 4;
+        int lists = 5;
 
         assertEquals(lists, result.size());
     }
