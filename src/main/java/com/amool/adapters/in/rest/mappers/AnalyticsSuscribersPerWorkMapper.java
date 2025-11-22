@@ -8,14 +8,14 @@ public class AnalyticsSuscribersPerWorkMapper {
     public static AnalyticsSuscribersPerWorkDto toDto(AnalyticsSuscribersPerWork analyticsSuscribersPerWork){
         return new AnalyticsSuscribersPerWorkDto(
             analyticsSuscribersPerWork.getUserId(), 
-            analyticsSuscribersPerWork.getAuthorId(), 
+            analyticsSuscribersPerWork.getWorkId(),
             analyticsSuscribersPerWork.getSuscribedAt());
     }
 
     public static AnalyticsSuscribersPerWork toDomain(AnalyticsSuscribersPerWorkDto analyticsSuscribersPerWorkDto){
         return new AnalyticsSuscribersPerWork(
             analyticsSuscribersPerWorkDto.userId(), 
-            analyticsSuscribersPerWorkDto.authorId(), 
+            analyticsSuscribersPerWorkDto.workId(),
             analyticsSuscribersPerWorkDto.suscribedAt());
     }
 }

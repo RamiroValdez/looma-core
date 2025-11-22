@@ -4,12 +4,12 @@ import java.time.LocalDateTime;
 
 public class AnalyticsSuscribersPerWork {
     private Long userId;
-    private Long authorId;
+    private Long workId;
     private LocalDateTime suscribedAt;
 
-    public AnalyticsSuscribersPerWork(Long userId, Long authorId, LocalDateTime suscribedAt) {
+    public AnalyticsSuscribersPerWork(Long userId, Long workId, LocalDateTime suscribedAt) {
         this.userId = userId;
-        this.authorId = authorId;
+        this.workId = workId;
         this.suscribedAt = suscribedAt;
     }
 
@@ -21,12 +21,12 @@ public class AnalyticsSuscribersPerWork {
         this.userId = userId;
     }
 
-    public Long getAuthorId() {
-        return authorId;
+    public Long getWorkId() {
+        return workId;
     }
 
-    public void setAuthorId(Long authorId) {
-        this.authorId = authorId;
+    public void setWorkId(Long workId) {
+        this.workId = workId;
     }
 
     public LocalDateTime getSuscribedAt() {
