@@ -33,6 +33,7 @@ public class FormatControllerTest {
                 givenFormat(1L, "Audiobook"),
                 givenFormat(2L, "Comic")
         );
+
         givenUseCaseWillReturn(formats);
 
         ResponseEntity<List<FormatDto>> response = whenClientRequestsAllFormats();

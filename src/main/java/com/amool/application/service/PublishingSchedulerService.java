@@ -2,7 +2,6 @@ package com.amool.application.service;
 
 import com.amool.application.port.out.FindChaptersDueForPublicationPort;
 import com.amool.application.port.out.UpdateChapterStatusPort;
-import org.springframework.stereotype.Service;
 
 import java.time.Instant;
 import java.time.LocalDateTime;
