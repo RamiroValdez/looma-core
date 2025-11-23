@@ -513,7 +513,8 @@ public class UseCasesConfig {
                 loadChapterContentPort,
                 awsS3Port,
                 httpDownloadPort,
-                workPort
+                workPort,
+                subscriptionQueryPort
         );
     }
 
@@ -525,7 +526,8 @@ public class UseCasesConfig {
                 loadChapterContentPort,
                 awsS3Port,
                 httpDownloadPort,
-                workPort
+                workPort,
+                subscriptionQueryPort
         );
     }
 
