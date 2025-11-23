@@ -114,6 +114,7 @@ public class ObtainWorkListUseCaseTest {
         Chapter chapter = new Chapter();
         chapter.setId(id);
         chapter.setPublishedAt(publishedAt);
+        chapter.setPublicationStatus("PUBLISHED");
         return chapter;
 }
     
