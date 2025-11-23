@@ -5,7 +5,12 @@ import com.amool.application.port.out.WorkPort;
 import com.amool.domain.model.Work;
 import com.amool.domain.model.WorkSearchFilter;
 import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
+
+import java.util.List;
+import java.util.Objects;
+import java.util.stream.Collectors;
 
 public class SearchAndFiltrateUseCase {
 
@@ -19,7 +24,14 @@ public class SearchAndFiltrateUseCase {
 
   public Page<Work> execute(WorkSearchFilter filter, Pageable pageable) {
       Page<Work> page = workPort.findByFilters(filter, pageable);
-      return page.map(this::modifyCoverAndBannerToUrl);
+
+      List<Work> filtered = page.getContent().stream()
+              .filter(Objects::nonNull)
+              .filter(this::hasPublishedChapter)
+              .map(this::modifyCoverAndBannerToUrl)
+              .collect(Collectors.toList());
+
+      return new PageImpl<>(filtered, pageable, filtered.size());
   }
 
   private Work modifyCoverAndBannerToUrl(Work work) {
@@ -39,6 +51,16 @@ public class SearchAndFiltrateUseCase {
           String publicUrl = awsS3Port.obtainPublicUrl(key);
           field.set(work, publicUrl);
       }
+  }
+
+  
+  private boolean hasPublishedChapter(Work work) {
+      if (work == null || work.getChapters() == null || work.getChapters().isEmpty()) return false;
+      return work.getChapters().stream()
+              .filter(Objects::nonNull)
+              .map(ch -> ch.getPublicationStatus())
+              .filter(Objects::nonNull)
+              .anyMatch(status -> "PUBLISHED".equalsIgnoreCase(status));
   }
 
 }

@@ -64,6 +64,7 @@ public class ObtainWorkListUseCase {
 
     private List<Work> getTopTen() {
         return workPort.getAllWorks().stream()
+        .filter(this::hasPublishedChapter)
         .sorted((w1, w2) -> Integer.compare(w2.getLikes(), w1.getLikes()))
         .limit(10)
         .collect(Collectors.toList());
@@ -71,6 +72,7 @@ public class ObtainWorkListUseCase {
 
     private List<Work> getNewReleases() {
         return workPort.getAllWorks().stream()
+        .filter(this::hasPublishedChapter)
         .sorted((w1, w2) -> w2.getPublicationDate().compareTo(w1.getPublicationDate()))
         .limit(20)
         .collect(Collectors.toList());
@@ -78,6 +80,7 @@ public class ObtainWorkListUseCase {
 
     private List<Work> getRecentlyUpdated() {
         return workPort.getAllWorks().stream()
+        .filter(this::hasPublishedChapter)
         .sorted((w1, w2) -> getLastUpdateDate(w2).compareTo(getLastUpdateDate(w1)))
         .limit(20)
         .collect(Collectors.toList());
@@ -87,6 +90,14 @@ public class ObtainWorkListUseCase {
         return workPort.getWorksCurrentlyReading(userId);
     }
 
+    private List<Work> getUserPreferences(Long userId) {
+            return workPort.getUserPreferences(userId).stream()
+                    .filter(this::hasPublishedChapter)
+                    .limit(20)
+                    .collect(Collectors.toList());
+        }
+
+        
     private LocalDateTime getLastUpdateDate(Work work) {
         if (work.getChapters() == null || work.getChapters().isEmpty()) {
             return LocalDateTime.MIN;
@@ -98,8 +109,15 @@ public class ObtainWorkListUseCase {
                   .orElse(LocalDateTime.MIN); 
     }
 
-    private List<Work> getUserPreferences(Long userId) {
-        return workPort.getUserPreferences(userId);
+    
+
+    private boolean hasPublishedChapter(Work work) {
+        if (work == null || work.getChapters() == null || work.getChapters().isEmpty()) return false;
+        return work.getChapters().stream()
+                .filter(Objects::nonNull)
+                .map(Chapter::getPublicationStatus)
+                .filter(Objects::nonNull)
+                .anyMatch(status -> "PUBLISHED".equalsIgnoreCase(status));
     }
     
 }

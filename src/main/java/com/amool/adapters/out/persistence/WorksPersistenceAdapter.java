@@ -3,7 +3,6 @@ package com.amool.adapters.out.persistence;
 import com.amool.adapters.out.persistence.entity.CategoryEntity;
 import com.amool.adapters.out.persistence.entity.FormatEntity;
 import com.amool.adapters.out.persistence.entity.TagEntity;
-import com.amool.adapters.out.persistence.entity.UserEntity;
 import com.amool.adapters.out.persistence.entity.WorkEntity;
 import com.amool.adapters.out.persistence.mappers.WorkMapper;
 import com.amool.adapters.out.persistence.mappers.CategoryMapper;
@@ -331,8 +330,7 @@ public class WorksPersistenceAdapter implements ObtainWorkByIdPort, WorkPort {
                         "    FROM preferred_category pc " +
                         "    WHERE pc.category_id = wc.category_id " +
                         "      AND pc.user_id = :userId " +
-                        ") " +
-                        "LIMIT 20";
+                        ") " ;
 
             @SuppressWarnings("unchecked")
             List<WorkEntity> works = entityManager.createNativeQuery(sql, WorkEntity.class)
