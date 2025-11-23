@@ -33,6 +33,21 @@ public class Work {
 
     public Work() {}
 
+    public static Work initialize(String title, String description, BigDecimal price) {
+        Work work = new Work();
+        work.setTitle(title);
+        work.setDescription(description);
+        work.setCover("none");
+        work.setBanner("none");
+        work.setState("InProgress");
+        work.setPrice(price == null ? BigDecimal.ZERO : price);
+        work.setLikes(0);
+        work.setHasEpub(false);
+        work.setHasPdf(false);
+        work.setPublicationDate(LocalDate.now());
+        return work;
+    }
+
     public Long getId() { return id; }
     public void setId(Long id) { this.id = id; }
     

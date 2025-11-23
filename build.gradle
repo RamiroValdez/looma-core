@@ -28,7 +28,8 @@ dependencies {
     implementation 'com.openhtmltopdf:openhtmltopdf-pdfbox:1.0.10'
     implementation 'org.apache.pdfbox:pdfbox:2.0.27'
     implementation 'org.jsoup:jsoup:1.16.2'
-  
+    implementation 'dev.langchain4j:langchain4j-open-ai:1.8.0'
+    implementation 'dev.langchain4j:langchain4j:1.8.0'
     implementation 'org.springframework.boot:spring-boot-starter-data-jpa'
     implementation 'org.springframework.boot:spring-boot-starter-data-mongodb'
     implementation 'org.springframework.boot:spring-boot-starter-oauth2-resource-server'

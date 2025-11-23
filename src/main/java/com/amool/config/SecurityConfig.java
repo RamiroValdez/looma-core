@@ -29,6 +29,7 @@ public class SecurityConfig {
                         .requestMatchers("/api/auth/**").permitAll()
                         .requestMatchers("/api/payments/webhook/**").permitAll()
                         .requestMatchers("/v3/api-docs/**", "/swagger-ui/**", "/swagger-ui.html").permitAll()
+                        .requestMatchers("/swagger/**", "/openapi.yaml").permitAll()
                         .requestMatchers("/api/languages/obtain-all").permitAll()
                         .requestMatchers("/api/category/obtain-all").permitAll()
                         .requestMatchers("/api/format/obtain-all").permitAll()

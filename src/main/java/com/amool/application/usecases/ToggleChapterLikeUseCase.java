@@ -27,4 +27,6 @@ public class ToggleChapterLikeUseCase {
         boolean newLikeStatus = !isCurrentlyLiked;
         return new LikeResponseDto(chapterId, likeCount, newLikeStatus);
     }
+
+    // Convencion de nombres para DTOs -
 }

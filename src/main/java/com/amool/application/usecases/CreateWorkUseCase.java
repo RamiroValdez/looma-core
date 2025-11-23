@@ -54,7 +54,7 @@ public class CreateWorkUseCase {
                         MultipartFile bannerFile,
                         Long userId) throws IOException, InterruptedException {
 
-        Work work = this.initializeWork(title, description, price);
+        Work work = Work.initialize(title, description, price);
 
         work.setCreator(this.loadUser(userId));
         work.setFormat(this.loadFormat(formatId));
@@ -72,21 +72,6 @@ public class CreateWorkUseCase {
         this.workPort.updateWork(createdWork);
 
         return workId;
-    }
-
-    private Work initializeWork(String title, String description, BigDecimal price) {
-        Work work = new Work();
-        work.setTitle(title);
-        work.setDescription(description);
-        work.setCover("none");
-        work.setBanner("none");
-        work.setState("InProgress");
-        work.setPrice(price == null ? BigDecimal.ZERO : price);
-        work.setLikes(0);
-        work.setHasEpub(false);
-        work.setHasPdf(false);
-        work.setPublicationDate(LocalDate.now());
-        return work;
     }
 
     private Set<Tag> getMatchTags(Set<String> tagNames) {
