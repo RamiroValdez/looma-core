@@ -1,0 +1,1269 @@
+openapi: 3.0.3
+info:
+  title: Looma Core API
+  version: 1.0.0
+  description: API documentation (static) for Looma Core
+servers:
+  - url: http://localhost:8080
+paths:
+  /api/payments/subscribe:
+    post:
+      summary: Start subscription flow
+      description: |
+        Inicia un flujo de suscripción. Si es gratuito retorna 201 sin body.
+        Si requiere pago, retorna 200 con datos para redirigir al proveedor.
+        Requiere usuario autenticado (JWT) en entornos protegidos; en esta doc pública, el endpoint puede responder 401.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/SubscribeRequest'
+      responses:
+        '201':
+          description: Suscripción gratuita creada
+        '200':
+          description: Pago requerido
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PaymentInitResponse'
+        '400': { description: Solicitud inválida }
+        '401': { description: No autenticado }
+        '412': { description: Proveedor no configurado }
+        '500': { description: Error interno }
+  /api/users/preferences:
+    post:
+      summary: Set user preferred categories
+      description: Guarda las categorías preferidas del usuario autenticado.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PreferencesRequest'
+      responses:
+        '202': { description: Aceptado }
+        '401': { description: No autenticado }
+  /api/works:
+    get:
+      summary: Get all works
+      responses:
+        '200':
+          description: Lista de obras
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/WorkDto'
+  /api/works/{workId}/like:
+    post:
+      summary: Toggle like on work
+      parameters:
+        - in: path
+          name: workId
+          required: true
+          schema: { type: integer, format: int64 }
+      responses:
+        '200':
+          description: Resultado del like
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/LikeResponse'
+        '401': { description: No autenticado }
+  /api/payments/session/{uuid}:
+    get:
+      summary: Get payment session status
+      parameters:
+        - in: path
+          name: uuid
+          required: true
+          schema: { type: string }
+      responses:
+        '200':
+          description: Estado de la sesión de pago
+          content:
+            application/json:
+              schema:
+                type: object
+                additionalProperties: true
+  /api/work/{workId}/chapter/{chapterId}:
+    get:
+      summary: Get chapter with content
+      parameters:
+        - in: path
+          name: workId
+          required: true
+          schema: { type: string }
+        - in: path
+          name: chapterId
+          required: true
+          schema: { type: string }
+        - in: query
+          name: language
+          required: false
+          schema: { type: string, example: es }
+      responses:
+        '200':
+          description: Capítulo con contenido
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ChapterWithContentDto'
+        '404': { description: No encontrado }
+  /api/work/{workId}/chapter/{chapterId}/content:
+    post:
+      summary: Update chapter content
+      parameters:
+        - in: path
+          name: workId
+          required: true
+          schema: { type: string }
+        - in: path
+          name: chapterId
+          required: true
+          schema: { type: string }
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UpdateChapterContentRequest'
+      responses:
+        '200': { description: Contenido actualizado, returns ChapterContent (opaque) }
+        '400': { description: workId/chapterId mismatch }
+        '403': { description: Prohibido }
+  /api/work/{workId}/chapter/{chapterId}/delete:
+    delete:
+      summary: Delete chapter
+      parameters:
+        - in: path
+          name: workId
+          required: true
+          schema: { type: string }
+        - in: path
+          name: chapterId
+          required: true
+          schema: { type: string }
+      responses:
+        '204': { description: Eliminado }
+        '404': { description: No encontrado }
+        '403': { description: Prohibido }
+        '409': { description: Estado ilegal }
+  /api/work/{workId}/chapter/{chapterId}/publish:
+    post:
+      summary: Publish chapter
+      parameters:
+        - in: path
+          name: workId
+          required: true
+          schema: { type: string }
+        - in: path
+          name: chapterId
+          required: true
+          schema: { type: string }
+      responses:
+        '204': { description: Publicado }
+        '401': { description: No autenticado }
+        '403': { description: Prohibido }
+        '404': { description: No encontrado }
+        '409': { description: Ya publicado }
+  /api/work/{workId}/chapter/{chapterId}/schedule:
+    post:
+      summary: Schedule chapter publication
+      parameters:
+        - in: path
+          name: workId
+          required: true
+          schema: { type: string }
+        - in: path
+          name: chapterId
+          required: true
+          schema: { type: string }
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/SchedulePublicationRequest'
+      responses:
+        '204': { description: Programado }
+        '400': { description: Fecha inválida }
+        '401': { description: No autenticado }
+        '403': { description: Prohibido }
+        '404': { description: No encontrado }
+        '409': { description: Estado ilegal }
+  /api/work/{workId}/chapter/{chapterId}/schedules:
+    delete:
+      summary: Cancel scheduled publication
+      parameters:
+        - in: path
+          name: workId
+          required: true
+          schema: { type: string }
+        - in: path
+          name: chapterId
+          required: true
+          schema: { type: string }
+      responses:
+        '204': { description: Cancelado }
+        '401': { description: No autenticado }
+        '403': { description: Prohibido }
+        '404': { description: No encontrado }
+        '409': { description: Estado ilegal }
+  /api/work/{workId}/chapter/{chapterId}/like:
+    post:
+      summary: Toggle like on chapter
+      parameters:
+        - in: path
+          name: workId
+          required: true
+          schema: { type: integer, format: int64 }
+        - in: path
+          name: chapterId
+          required: true
+          schema: { type: integer, format: int64 }
+      responses:
+        '200':
+          description: Resultado del like
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/LikeResponse' }
+        '401': { description: No autenticado }
+  /api/chat/message:
+    post:
+      summary: Send chat message
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: '#/components/schemas/ChatRequest' }
+      responses:
+        '200':
+          description: Mensajes del asistente
+          content:
+            application/json:
+              schema:
+                type: array
+                items: { $ref: '#/components/schemas/ChatMessage' }
+  /api/chat/conversation/{chapterId}:
+    get:
+      summary: Get conversation history for chapter
+      parameters:
+        - in: path
+          name: chapterId
+          required: true
+          schema: { type: integer, format: int64 }
+      responses:
+        '200':
+          description: Historial
+          content:
+            application/json:
+              schema:
+                type: array
+                items: { $ref: '#/components/schemas/ChatMessage' }
+  /api/create-work/save:
+    post:
+      summary: Create work (multipart)
+      requestBody:
+        required: true
+        content:
+          multipart/form-data:
+            schema:
+              type: object
+              properties:
+                work: { $ref: '#/components/schemas/CreateWork' }
+                cover: { type: string, format: binary, nullable: true }
+                banner: { type: string, format: binary }
+      responses:
+        '200': { description: ID de la obra creada, integer }
+        '400': { description: Solicitud inválida }
+  /api/create-work/suggest-tags:
+    post:
+      summary: Suggest tags for a work
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: '#/components/schemas/TagSuggestionRequest' }
+      responses:
+        '200':
+          description: Lista de tags sugeridos
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/TagSuggestionResponse' }
+        '400': { description: Solicitud inválida }
+  /api/edit-chapter/{chapterId}:
+    get:
+      summary: Get chapter for edit
+      parameters:
+        - in: path
+          name: chapterId
+          required: true
+          schema: { type: integer, format: int64 }
+        - in: query
+          name: language
+          required: false
+          schema: { type: string }
+      responses:
+        '200': { description: Capítulo, content opaque }
+        '403': { description: Prohibido }
+        '404': { description: No encontrado }
+  /api/edit-chapter/update/{chapterId}:
+    put:
+      summary: Update chapter fields
+      parameters:
+        - in: path
+          name: chapterId
+          required: true
+          schema: { type: integer, format: int64 }
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: '#/components/schemas/UpdateChapter' }
+      responses:
+        '200': { description: Capítulo actualizado }
+        '403': { description: Prohibido }
+        '404': { description: No encontrado }
+  /api/edit-chapter/price/{chapterId}:
+    patch:
+      summary: Update chapter price
+      parameters:
+        - in: path
+          name: chapterId
+          required: true
+          schema: { type: integer, format: int64 }
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: '#/components/schemas/UpdatePrice' }
+      responses:
+        '204': { description: Actualizado }
+        '400': { description: Precio inválido }
+        '403': { description: Prohibido }
+        '404': { description: No encontrado }
+  /api/edit-chapter/import-text:
+    post:
+      summary: Extract text from file
+      requestBody:
+        required: true
+        content:
+          multipart/form-data:
+            schema:
+              type: object
+              properties:
+                file: { type: string, format: binary }
+      responses:
+        '200': { description: Texto extraído, returns FileTextResponse }
+        '400': { description: Archivo inválido }
+        '415': { description: Tipo no soportado }
+  /api/explore:
+    post:
+      summary: Search and filter works
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: '#/components/schemas/WorkSearchFilter' }
+      responses:
+        '200':
+          description: Página de resultados
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/PageWorkResponse' }
+  /api/export/epub/{workId}:
+    get:
+      summary: Export work to EPUB
+      parameters:
+        - in: path
+          name: workId
+          required: true
+          schema: { type: integer, format: int64 }
+      responses:
+        '200':
+          description: URL de descarga
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/ExportEpubResponse' }
+  /api/format/obtain-all:
+    get:
+      summary: Get all formats
+      responses:
+        '200':
+          description: Lista de formatos
+          content:
+            application/json:
+              schema:
+                type: array
+                items: { $ref: '#/components/schemas/FormatDto' }
+        '404': { description: No encontrado }
+  /api/languages/obtain-all:
+    get:
+      summary: Get all languages
+      responses:
+        '200':
+          description: Lista de idiomas
+          content:
+            application/json:
+              schema:
+                type: array
+                items: { $ref: '#/components/schemas/Language' }
+  /api/home/work-list/{userId}:
+    get:
+      summary: Get home work list by user
+      parameters:
+        - in: path
+          name: userId
+          required: true
+          schema: { type: integer, format: int64 }
+      responses:
+        '200':
+          description: Map category -> works
+          content:
+            application/json:
+              schema:
+                type: object
+                additionalProperties:
+                  type: array
+                  items: { $ref: '#/components/schemas/WorkListDto' }
+  /api/images/generate:
+    post:
+      summary: Generate image URL
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: '#/components/schemas/ImagePrompt' }
+      responses:
+        '200': { description: URL generada, content application/json, schema ImageUrlResponse }
+  /api/images/color-palettes/obtain-all:
+    get:
+      summary: Get color palettes
+      responses:
+        '200':
+          description: Paletas
+          content:
+            application/json:
+              schema:
+                type: array
+                items: { $ref: '#/components/schemas/ColorPaletteDto' }
+  /api/images/compositions/obtain-all:
+    get:
+      summary: Get compositions
+      responses:
+        '200':
+          description: Composiciones
+          content:
+            application/json:
+              schema:
+                type: array
+                items: { $ref: '#/components/schemas/CompositionDto' }
+  /api/images/artistic-styles/obtain-all:
+    get:
+      summary: Get artistic styles
+      responses:
+        '200':
+          description: Estilos
+          content:
+            application/json:
+              schema:
+                type: array
+                items: { $ref: '#/components/schemas/ArtisticStyleDto' }
+  /api/auth/me:
+    get:
+      summary: Get current user
+      responses:
+        '200': { description: Usuario actual, schema UserDto }
+        '401': { description: No autenticado }
+  /api/auth/login:
+    post:
+      summary: Login
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: '#/components/schemas/LoginRequest' }
+      responses:
+        '200': { description: Token JWT, content application/json, schema AuthResponse }
+        '401': { description: Credenciales inválidas }
+  /api/manage-work/{workId}:
+    get:
+      summary: Get work by id (with permissions)
+      parameters:
+        - in: path
+          name: workId
+          required: true
+          schema: { type: integer, format: int64 }
+      responses:
+        '200': { description: Obra, schema WorkResponseDto }
+        '404': { description: No encontrado }
+  /api/manage-work/create-chapter:
+    post:
+      summary: Create empty chapter
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: '#/components/schemas/CreateEmptyChapterRequest' }
+      responses:
+        '200': { description: Capítulo creado, schema CreateEmptyChapterResponse }
+        '400': { description: Solicitud inválida }
+  /api/manage-work/s{workId}:
+    put:
+      summary: Update work
+      parameters:
+        - in: path
+          name: workId
+          required: true
+          schema: { type: integer, format: int64 }
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: '#/components/schemas/UpdateWork' }
+      responses:
+        '200': { description: Actualizado, boolean }
+        '400': { description: Solicitud inválida }
+  /api/payments/webhook/mercadopago:
+    post:
+      summary: MercadoPago webhook (POST)
+      parameters:
+        - in: query
+          name: type
+          required: false
+          schema: { type: string }
+        - in: query
+          name: topic
+          required: false
+          schema: { type: string }
+        - in: query
+          name: id
+          required: false
+          schema: { type: string }
+      requestBody:
+        required: false
+        content:
+          application/json:
+            schema:
+              type: object
+              additionalProperties: true
+      responses:
+        '204': { description: Procesado/ignorado }
+        '400': { description: Error en datos }
+        '500': { description: Error interno }
+    get:
+      summary: MercadoPago webhook (GET)
+      parameters:
+        - in: query
+          name: type
+          required: false
+          schema: { type: string }
+        - in: query
+          name: topic
+          required: false
+          schema: { type: string }
+        - in: query
+          name: id
+          required: false
+          schema: { type: string }
+      responses:
+        '204': { description: Procesado/ignorado }
+        '400': { description: Error en datos }
+        '500': { description: Error interno }
+  /api/saved-works/{workId}/toggle:
+    post:
+      summary: Toggle save work
+      parameters:
+        - in: path
+          name: workId
+          required: true
+          schema: { type: integer, format: int64 }
+      responses:
+        '200': { description: Estado, schema SaveWorkResponse }
+  /api/saved-works/{workId}/status:
+    get:
+      summary: Get save status
+      parameters:
+        - in: path
+          name: workId
+          required: true
+          schema: { type: integer, format: int64 }
+      responses:
+        '200': { description: Estado, schema SaveWorkResponse }
+  /api/saved-works:
+    get:
+      summary: Get saved works for current user
+      responses:
+        '200':
+          description: Obras guardadas
+          content:
+            application/json:
+              schema:
+                type: array
+                items: { $ref: '#/components/schemas/WorkDto' }
+  /api/my-works/{userId}:
+    get:
+      summary: Get authenticated user works
+      parameters:
+        - in: path
+          name: userId
+          required: true
+          schema: { type: integer, format: int64 }
+      responses:
+        '200':
+          description: Obras
+          content:
+            application/json:
+              schema:
+                type: array
+                items: { $ref: '#/components/schemas/WorkResponseDto' }
+  /api/my-works/{workId}/cover:
+    patch:
+      summary: Update work cover (multipart)
+      parameters:
+        - in: path
+          name: workId
+          required: true
+          schema: { type: integer, format: int64 }
+      requestBody:
+        required: false
+        content:
+          multipart/form-data:
+            schema:
+              type: object
+              properties:
+                coverIaUrl: { type: string, nullable: true }
+                cover: { type: string, format: binary, nullable: true }
+      responses:
+        '204': { description: Actualizado }
+        '400': { description: Petición inválida }
+        '403': { description: Prohibido }
+        '404': { description: No encontrado }
+  /api/my-works/{workId}/banner:
+    patch:
+      summary: Update work banner (multipart)
+      parameters:
+        - in: path
+          name: workId
+          required: true
+          schema: { type: integer, format: int64 }
+      requestBody:
+        required: true
+        content:
+          multipart/form-data:
+            schema:
+              type: object
+              properties:
+                banner: { type: string, format: binary }
+      responses:
+        '204': { description: Actualizado }
+        '400': { description: Petición inválida }
+        '403': { description: Prohibido }
+        '404': { description: No encontrado }
+  /api/notification/{userId}:
+    get:
+      summary: List notifications for user
+      parameters:
+        - in: path
+          name: userId
+          required: true
+          schema: { type: integer, format: int64 }
+      responses:
+        '200':
+          description: Notificaciones
+          content:
+            application/json:
+              schema:
+                type: array
+                items: { $ref: '#/components/schemas/NotificationDto' }
+  /api/notification/update-read/{notificationId}:
+    put:
+      summary: Mark notification as read
+      parameters:
+        - in: path
+          name: notificationId
+          required: true
+          schema: { type: integer, format: int64 }
+      responses:
+        '200': { description: OK, boolean }
+        '400': { description: Petición inválida }
+  /api/works/{workId}/ratings:
+    post:
+      summary: Rate a work
+      parameters:
+        - in: path
+          name: workId
+          required: true
+          schema: { type: integer, format: int64 }
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: '#/components/schemas/RateWorkRequest' }
+      responses:
+        '200': { description: RatingResponse, schema RatingResponse }
+        '400': { description: Rating inválido }
+        '404': { description: Obra no encontrada }
+    get:
+      summary: Get work ratings (count)
+      parameters:
+        - in: path
+          name: workId
+          required: true
+          schema: { type: integer, format: int64 }
+      responses:
+        '200': { description: Cantidad de ratings, integer }
+  /api/works/{workId}/ratings/me:
+    get:
+      summary: Get my rating for a work
+      parameters:
+        - in: path
+          name: workId
+          required: true
+          schema: { type: integer, format: int64 }
+      responses:
+        '200': { description: Valor o null, number }
+  /api/reading-progress/update:
+    post:
+      summary: Update reading progress
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: '#/components/schemas/ReadingProgress' }
+      responses:
+        '200': { description: OK }
+        '400': { description: Petición inválida }
+  /api/auth/register:
+    post:
+      summary: Start registration
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: '#/components/schemas/RegisterRequest' }
+      responses:
+        '202': { description: Aceptado }
+  /api/auth/register/verify:
+    post:
+      summary: Verify registration code
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: '#/components/schemas/VerifyCodeRequest' }
+      responses:
+        '201': { description: Token emitido, schema AuthResponse }
+  /api/translation/create-version:
+    post:
+      summary: Create translation version
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: '#/components/schemas/Translation' }
+      responses:
+        '200':
+          description: Texto traducido
+          content:
+            text/plain:
+              schema: { type: string }
+  /api/users/{id}:
+    get:
+      summary: Get user by id
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema: { type: integer, format: int64 }
+      responses:
+        '200': { description: Usuario, schema UserDto }
+        '404': { description: No encontrado }
+  /api/users/update:
+    post:
+      summary: Update user (multipart)
+      requestBody:
+        required: true
+        content:
+          multipart/form-data:
+            schema: { $ref: '#/components/schemas/UpdateUser' }
+      responses:
+        '200': { description: Usuario actualizado, schema UserDto }
+        '400': { description: Petición inválida }
+  /api/category/obtain-all:
+    get:
+      summary: Get all categories
+      responses:
+        '200':
+          description: Lista de categorías
+          content:
+            application/json:
+              schema:
+                type: array
+                items: { $ref: '#/components/schemas/CategoryDto' }
+        '404': { description: No encontrado }
+  /api/analytics/likesPerWork/{workId}:
+    get:
+      summary: Likes per work
+      parameters:
+        - in: path
+          name: workId
+          required: true
+          schema: { type: integer, format: int64 }
+      responses:
+        '200':
+          description: Lista de likes
+          content:
+            application/json:
+              schema:
+                type: array
+                items: { $ref: '#/components/schemas/AnalyticsLikeWorkDto' }
+  /api/analytics/likesPerChapter/{chapterId}:
+    get:
+      summary: Likes per chapter
+      parameters:
+        - in: path
+          name: chapterId
+          required: true
+          schema: { type: integer, format: int64 }
+      responses:
+        '200':
+          description: Lista de likes por capítulo
+          content:
+            application/json:
+              schema:
+                type: array
+                items: { $ref: '#/components/schemas/AnalyticsLikeChapterDto' }
+  /api/analytics/ratingPerWork/{workId}:
+    get:
+      summary: Ratings per work
+      parameters:
+        - in: path
+          name: workId
+          required: true
+          schema: { type: integer, format: int64 }
+      responses:
+        '200':
+          description: Lista de calificaciones por obra
+          content:
+            application/json:
+              schema:
+                type: array
+                items: { $ref: '#/components/schemas/AnalyticsRatingWorkDto' }
+  /api/analytics/savesPerWork/{workId}:
+    get:
+      summary: Saves per work
+      parameters:
+        - in: path
+          name: workId
+          required: true
+          schema: { type: integer, format: int64 }
+      responses:
+        '200':
+          description: Lista de guardados por obra
+          content:
+            application/json:
+              schema:
+                type: array
+                items: { $ref: '#/components/schemas/AnalyticsSavedWorkDto' }
+  /api/analytics/totalSuscribers/{authorId}:
+    get:
+      summary: Total subscribers (author)
+      parameters:
+        - in: path
+          name: authorId
+          required: true
+          schema: { type: integer, format: int64 }
+      responses:
+        '200':
+          description: Total de suscriptores
+          content:
+            application/json:
+              schema: { type: integer, format: int64 }
+  /api/analytics/totalSuscribersPerAuthor/{authorId}:
+    get:
+      summary: Total subscriptions for author
+      parameters:
+        - in: path
+          name: authorId
+          required: true
+          schema: { type: integer, format: int64 }
+      responses:
+        '200':
+          description: Total de suscripciones al autor
+          content:
+            application/json:
+              schema: { type: integer, format: int64 }
+  /api/analytics/totalSuscribersPerWork/{workId}:
+    get:
+      summary: Total subscriptions for work
+      parameters:
+        - in: path
+          name: workId
+          required: true
+          schema: { type: integer, format: int64 }
+      responses:
+        '200':
+          description: Total de suscripciones a la obra
+          content:
+            application/json:
+              schema: { type: integer, format: int64 }
+  /api/analytics/listSuscribersPerWork/{workId}:
+    get:
+      summary: List subscribers per work
+      parameters:
+        - in: path
+          name: workId
+          required: true
+          schema: { type: integer, format: int64 }
+      responses:
+        '200':
+          description: Lista de suscriptores por obra
+          content:
+            application/json:
+              schema:
+                type: array
+                items: { $ref: '#/components/schemas/AnalyticsSuscribersPerWorkDto' }
+  /api/analytics/listSuscribersPerAuthor/{authorId}:
+    get:
+      summary: List subscribers per author
+      parameters:
+        - in: path
+          name: authorId
+          required: true
+          schema: { type: integer, format: int64 }
+      responses:
+        '200':
+          description: Lista de suscriptores por autor
+          content:
+            application/json:
+              schema:
+                type: array
+                items: { $ref: '#/components/schemas/AnalyticsSuscribersPerAuthorDto' }
+components:
+  schemas:
+    CategoryDto:
+      type: object
+      properties:
+        id: { type: integer, format: int64 }
+        name: { type: string }
+    FormatDto:
+      type: object
+      properties:
+        id: { type: integer, format: int64 }
+        name: { type: string }
+    Language:
+      type: object
+      properties:
+        id: { type: integer, format: int64 }
+        name: { type: string }
+    SubscribeRequest:
+      type: object
+      properties:
+        subscriptionType: { type: string, example: work }
+        targetId: { type: integer, format: int64 }
+        workId: { type: integer, format: int64, nullable: true }
+        provider: { type: string, example: mercadopago, nullable: true }
+        returnUrl: { type: string, example: https://return.example }
+      required: [subscriptionType, targetId]
+    PaymentInitResponse:
+      type: object
+      properties:
+        provider: { type: string }
+        redirectUrl: { type: string }
+        externalReference: { type: string }
+      required: [provider, redirectUrl, externalReference]
+    PreferencesRequest:
+      type: object
+      properties:
+        genres:
+          type: array
+          items: { type: integer, format: int64 }
+      required: [genres]
+    WorkDto:
+      type: object
+      properties:
+        id: { type: integer, format: int64 }
+        title: { type: string }
+        description: { type: string }
+        price: { type: number, format: double }
+        likes: { type: integer }
+        averageRating: { type: number, format: double }
+        likedByUser: { type: boolean }
+    LikeResponse:
+      type: object
+      properties:
+        workId: { type: integer, format: int64 }
+        likeCount: { type: integer, format: int64 }
+        likedByUser: { type: boolean }
+    ChapterWithContentDto:
+      type: object
+      properties:
+        id: { type: integer, format: int64 }
+        title: { type: string }
+        content: { type: string }
+        languages:
+          type: array
+          items: { type: string }
+    UpdateChapterContentRequest:
+      type: object
+      properties:
+        workId: { type: string }
+        chapterId: { type: string }
+        language: { type: string }
+        content: { type: string }
+      required: [workId, chapterId, language, content]
+    SchedulePublicationRequest:
+      type: object
+      properties:
+        when: { type: string, example: '2025-12-31T10:00:00-03:00' }
+      required: [when]
+    ChatRequest:
+      type: object
+      properties:
+        chapterId: { type: integer, format: int64 }
+        message: { type: string }
+        chapterContent: { type: string, nullable: true }
+      required: [chapterId, message]
+    ChatMessage:
+      type: object
+      properties:
+        userId: { type: integer, format: int64 }
+        chapterId: { type: integer, format: int64 }
+        content: { type: string }
+        userMessage: { type: boolean }
+        timestamp: { type: string, format: date-time }
+    CreateWork:
+      type: object
+      properties:
+        title: { type: string }
+        description: { type: string }
+        categoryIds:
+          type: array
+          items: { type: integer, format: int64 }
+        formatId: { type: integer, format: int64 }
+        originalLanguageId: { type: integer, format: int64 }
+        price: { type: number, format: double }
+        tagIds:
+          type: array
+          items: { type: integer, format: int64 }
+        coverIaUrl: { type: string, nullable: true }
+    TagSuggestionRequest:
+      type: object
+      properties:
+        description: { type: string }
+        title: { type: string, nullable: true }
+        existingTags:
+          type: array
+          items: { type: string }
+    TagSuggestionResponse:
+      type: object
+      properties:
+        suggestions:
+          type: array
+          items: { type: string }
+    UpdateChapter:
+      type: object
+      properties:
+        title: { type: string, nullable: true }
+        description: { type: string, nullable: true }
+        price: { type: number, format: double, nullable: true }
+    UpdatePrice:
+      type: object
+      properties:
+        price: { type: number, format: double }
+      required: [price]
+    FileTextResponse:
+      type: object
+      properties:
+        text: { type: string }
+    WorkSearchFilter:
+      type: object
+      additionalProperties: true
+    PageWorkResponse:
+      type: object
+      properties:
+        content:
+          type: array
+          items: { $ref: '#/components/schemas/WorkResponseDto' }
+        totalElements: { type: integer, format: int64 }
+        totalPages: { type: integer }
+        size: { type: integer }
+        number: { type: integer }
+    ExportEpubResponse:
+      type: object
+      properties:
+        url: { type: string }
+    ColorPaletteDto:
+      type: object
+      properties:
+        id: { type: integer, format: int64 }
+        name: { type: string }
+        description: { type: string }
+    CompositionDto:
+      type: object
+      properties:
+        id: { type: integer, format: int64 }
+        name: { type: string }
+        description: { type: string }
+    ArtisticStyleDto:
+      type: object
+      properties:
+        id: { type: integer, format: int64 }
+        name: { type: string }
+        description: { type: string }
+    ImagePrompt:
+      type: object
+      properties:
+        artisticStyleId: { type: integer, format: int64 }
+        colorPaletteId: { type: integer, format: int64 }
+        compositionId: { type: integer, format: int64 }
+        description: { type: string }
+    ImageUrlResponse:
+      type: object
+      properties:
+        url: { type: string }
+    LoginRequest:
+      type: object
+      properties:
+        email: { type: string }
+        password: { type: string }
+    AuthResponse:
+      type: object
+      properties:
+        token: { type: string }
+    CreateEmptyChapterRequest:
+      type: object
+      properties:
+        workId: { type: integer, format: int64 }
+        languageId: { type: integer, format: int64 }
+        contentType: { type: string }
+    CreateEmptyChapterResponse:
+      type: object
+      properties:
+        chapterId: { type: integer, format: int64 }
+    UpdateWork:
+      type: object
+      properties:
+        price: { type: number, format: double, nullable: true }
+        tagIds:
+          type: array
+          items: { type: integer, format: int64 }
+        state: { type: string, nullable: true }
+    SaveWorkResponse:
+      type: object
+      properties:
+        workId: { type: integer, format: int64 }
+        saved: { type: boolean }
+    NotificationDto:
+      type: object
+      additionalProperties: true
+    WorkResponseDto:
+      type: object
+      additionalProperties: true
+    WorkListDto:
+      type: object
+      additionalProperties: true
+    RegisterRequest:
+      type: object
+      properties:
+        name: { type: string }
+        surname: { type: string }
+        username: { type: string }
+        email: { type: string }
+        password: { type: string }
+        confirmPassword: { type: string }
+    VerifyCodeRequest:
+      type: object
+      properties:
+        email: { type: string }
+        code: { type: string }
+    Translation:
+      type: object
+      properties:
+        sourceLanguage: { type: string }
+        targetLanguage: { type: string }
+        originalText: { type: string }
+    UserDto:
+      type: object
+      properties:
+        id: { type: integer, format: int64 }
+        email: { type: string }
+        name: { type: string }
+        surname: { type: string }
+        username: { type: string }
+    UpdateUser:
+      type: object
+      properties:
+        id: { type: integer, format: int64 }
+        name: { type: string }
+        surname: { type: string }
+        username: { type: string }
+        email: { type: string }
+        money: { type: number, format: double }
+        newPassword: { type: string }
+        photo: { type: string }
+        file: { type: string, format: binary }
+    RateWorkRequest:
+      type: object
+      properties:
+        rating: { type: number, format: double, minimum: 0.5, maximum: 5.0 }
+      required: [rating]
+    RatingResponse:
+      type: object
+      properties:
+        workId: { type: integer, format: int64 }
+        userId: { type: integer, format: int64 }
+        rating: { type: number, format: double }
+        averageRating: { type: number, format: double }
+    ReadingProgress:
+      type: object
+      properties:
+        userId: { type: integer, format: int64 }
+        workId: { type: integer, format: int64 }
+        chapterId: { type: integer, format: int64 }
+    AnalyticsLikeWorkDto:
+      type: object
+      properties:
+        likeId: { type: integer, format: int64 }
+        workId: { type: integer, format: int64 }
+        userId: { type: integer, format: int64 }
+        likedAt: { type: string, format: date-time }
+    AnalyticsLikeChapterDto:
+      type: object
+      properties:
+        likeId: { type: integer, format: int64 }
+        chapterId: { type: integer, format: int64 }
+        userId: { type: integer, format: int64 }
+        likedAt: { type: string, format: date-time }
+    AnalyticsRatingWorkDto:
+      type: object
+      properties:
+        ratingId: { type: integer, format: int64 }
+        rating: { type: number, format: double }
+        userId: { type: integer, format: int64 }
+        workId: { type: integer, format: int64 }
+        ratedAt: { type: string, format: date-time }
+    AnalyticsSavedWorkDto:
+      type: object
+      properties:
+        savedId: { type: integer, format: int64 }
+        userId: { type: integer, format: int64 }
+        workId: { type: integer, format: int64 }
+        savedAt: { type: string, format: date-time }
+    AnalyticsSuscribersPerWorkDto:
+      type: object
+      properties:
+        userId: { type: integer, format: int64 }
+        authorId: { type: integer, format: int64 }
+        suscribedAt: { type: string, format: date-time }
+    AnalyticsSuscribersPerAuthorDto:
+      type: object
+      properties:
+        userId: { type: integer, format: int64 }
+        authorId: { type: integer, format: int64 }
+        suscribedAt: { type: string, format: date-time }
