@@ -16,9 +16,9 @@ import java.util.Map;
 @Primary
 public class ResendEmailAdapter implements EmailPort {
 
-    @Value("${RESEND.API.KEY}")
+    @Value("${RESEND_API_KEY}")
     private String apiKey;
-    @Value("${LOOMA.DEFAULT.EMAIL:looma.tpi@gmail.com}")
+    @Value("${LOOMA_DEFAULT_EMAIL:looma.tpi@gmail.com}")
     private String replyToEmail;
 
     private final RestTemplate restTemplate = new RestTemplate();
