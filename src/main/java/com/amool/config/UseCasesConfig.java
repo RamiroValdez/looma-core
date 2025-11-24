@@ -587,6 +587,6 @@ public class UseCasesConfig {
 
     @Bean
     public GetSubscriptions getSubscriptions() {
-        return new GetSubscriptions(subscriptionPersistencePort);
+        return new GetSubscriptions(subscriptionPersistencePort, awsS3Port);
     }
 }
