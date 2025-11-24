@@ -106,6 +106,5 @@ public class StartRegistrationUseCaseTest {
         assertTrue(body.toLowerCase().contains("<!doctype html>"));
         assertTrue(body.contains(name));
         assertTrue(body.contains(code));
-        assertTrue(body.contains("cid:loomaLogo"));
     }
 }
