@@ -51,7 +51,7 @@ public class StartRegistrationUseCase {
                           <table role=\"presentation\" width=\"100%\" cellspacing=\"0\" cellpadding=\"0\" style=\"max-width:560px;background:#ffffff;border-radius:12px;overflow:hidden;box-shadow:0 6px 20px rgba(0,0,0,0.08);\">
                             <tr>
                               <td align=\"center\" style=\"background:#E6E0F8;padding:16px 24px;\">
-                                <img src=\"cid:loomaLogo\" alt=\"Looma\" style=\"display:block;height:32px;max-width:160px;width:auto;\" />
+
                               </td>
                             </tr>
                             <tr>

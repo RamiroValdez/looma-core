@@ -50,8 +50,9 @@ public class SecurityConfig {
         CorsConfiguration configuration = new CorsConfiguration();
         configuration.setAllowedOrigins(List.of(
                 "http://localhost:5173",
+                "https://looma-front-production-a406.up.railway.app",
                 "https://looma-front-production-0b1e.up.railway.app",
-                "https://looma-front-production-0b1e.up.railway.app"
+                "https://looma-app.lat"
         ));
         configuration.setAllowedMethods(List.of("GET", "POST", "PUT", "DELETE", "OPTIONS", "PATCH"));
         configuration.setAllowedHeaders(List.of("*"));
