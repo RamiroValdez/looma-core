@@ -35,7 +35,7 @@ public class ResendEmailAdapter implements EmailPort {
 
         // TRUCO: El 'from' DEBE ser el de Resend si no has verificado dominio propio.
         // Pero le ponemos "Looma" antes para que se vea profesional.
-        body.put("from", "Looma App <info@send.looma-app.lat>");
+        body.put("from", "Looma App <info@looma-app.lat>");
 
         body.put("to", to);
         body.put("subject", subject);
