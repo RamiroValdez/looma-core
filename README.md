@@ -4,7 +4,9 @@
 
 Este es el proyecto backend de Looma, para funcionar por completo debe de usarse en conjunto con `Looma-Front`.
 
+### Arquitectura
 
+Diseñado con Arquitectura Hexagonal separada entre aplicación, dominio, adaptadores de entrada y de salida.
 
 # Configurarcion de entorno
 
@@ -12,6 +14,8 @@ Este es el proyecto backend de Looma, para funcionar por completo debe de usarse
 
 - Java 21
 - PostgreSQL
+- MongoDB
+- Docker
 
 ## Configuracion de PostgreSQL
 
@@ -22,7 +26,7 @@ Este es el proyecto backend de Looma, para funcionar por completo debe de usarse
 
 ### Acerca de la base de datos
 
-- Necesita ser inicializada la base de datos para levantar el proyecto.
+- Necesita ser inicializada ambas basea de datos para levantar el proyecto.
 
 ## Detalles acerca de los perfiles
 
@@ -30,3 +34,10 @@ Este es el proyecto backend de Looma, para funcionar por completo debe de usarse
 - `production`: Usado para despliegue en produccion.
 
 Deben usar siempre el perfil `development` para desarrollo local.
+
+## Acerca de la estructura de ramas
+- Main -> Producción
+- Development -> Nodo central de cualquier desarrollo.
+- Feature/xxx -> Ramas centradas en desarrollos nuevos.
+- Fix/xxx -> Ramas de solución de errores.
+
