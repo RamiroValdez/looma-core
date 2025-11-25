@@ -79,9 +79,7 @@ class ToggleWorkLikeTest {
     void execute_ShouldUseProvidedUserId() {
         Long differentUserId = 999L;
         givenSpecificUserHasNotLikedWork(differentUserId);
-
         LikeResponseDto response = whenToggleLikeIsExecutedForSpecificUser(differentUserId);
-
         thenLikeShouldBeAddedForSpecificUser(response);
         thenLikeOperationShouldBeVerifiedForSpecificUser(differentUserId);
     }
@@ -89,10 +87,8 @@ class ToggleWorkLikeTest {
     @Test
     void execute_WhenToggleMultipleTimes_ShouldWorkCorrectly() {
         givenMultipleToggleScenario();
-
         LikeResponseDto firstResponse = whenToggleLikeIsExecuted();
         LikeResponseDto secondResponse = whenToggleLikeIsExecuted();
-
         thenFirstToggleShouldAddLike(firstResponse);
         thenSecondToggleShouldRemoveLike(secondResponse);
         thenMultipleToggleOperationsShouldBeVerified();
@@ -102,41 +98,28 @@ class ToggleWorkLikeTest {
     void execute_WithNullWorkId_ShouldThrowException() {
 
         Long nullWorkId = givenNullWorkId();
-
-
         IllegalArgumentException exception = whenToggleLikeIsExecutedWithNullWorkId(nullWorkId);
-
         thenExceptionMessageShouldBe(exception, "Work ID cannot be null");
     }
 
     @Test
     void execute_WithNullUserId_ShouldThrowException() {
-
         Long nullUserId = givenNullUserId();
-
-
         IllegalArgumentException exception = whenToggleLikeIsExecutedWithNullUserId(nullUserId);
-
         thenExceptionMessageShouldBe(exception, "User ID cannot be null");
     }
 
     @Test
     void execute_WhenPortThrowsException_ShouldPropagateException() {
-
         givenPortThrowsException();
-
         RuntimeException exception = whenToggleLikeIsExecutedAndPortFails();
-
         thenExceptionMessageShouldBe(exception, "Database error");
     }
 
     @Test
     void execute_WhenLikeOperationThrowsException_ShouldPropagateException() {
-
         givenLikeOperationThrowsException();
-
         RuntimeException exception = whenToggleLikeIsExecutedAndLikeOperationFails();
-
         thenExceptionMessageShouldBe(exception, "Like operation failed");
         thenLikeOperationAttemptShouldBeVerified();
     }
