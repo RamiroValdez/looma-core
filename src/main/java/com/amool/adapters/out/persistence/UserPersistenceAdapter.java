@@ -71,8 +71,8 @@ public class UserPersistenceAdapter implements LoadUserPort {
                 }
             }
 
-            if(user.getMoney() != null) {
-                existingEntity.setMoney(user.getMoney());
+            if(user.getPrice() != null) {
+                existingEntity.setPrice(user.getPrice());
             }
 
             if (newPassword != null && !newPassword.isBlank()) {

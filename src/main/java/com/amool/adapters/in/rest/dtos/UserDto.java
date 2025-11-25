@@ -1,5 +1,7 @@
 package com.amool.adapters.in.rest.dtos;
 
+import java.math.BigDecimal;
+
 public class UserDto {
     private Long id;
     private String name;
@@ -8,6 +10,10 @@ public class UserDto {
     private String email;
     private String photo;
     private String money;
+    private BigDecimal price;
+
+    public BigDecimal getPrice() { return price; }
+    public void setPrice(BigDecimal price) { this.price = price; }
 
     public Long getId() { return id; }
     public void setId(Long id) { this.id = id; }
