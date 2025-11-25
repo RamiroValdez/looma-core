@@ -1,13 +1,10 @@
 package com.amool.application.usecases;
 
 import com.amool.application.port.out.LoadChapterPort;
+import com.amool.application.port.out.LoadUserPort;
 import com.amool.application.port.out.ObtainWorkByIdPort;
 import com.amool.application.port.out.PaymentProviderPort;
-import com.amool.domain.model.Chapter;
-import com.amool.domain.model.PaymentInitResult;
-import com.amool.domain.model.PaymentProviderType;
-import com.amool.domain.model.SubscriptionType;
-import com.amool.domain.model.Work;
+import com.amool.domain.model.*;
 
 import java.math.BigDecimal;
 import java.util.EnumMap;
@@ -19,15 +16,15 @@ public class StartSubscriptionFlowUseCase {
     private final ObtainWorkByIdPort obtainWorkByIdPort;
     private final LoadChapterPort loadChapterPort;
     private final SubscribeUserUseCase subscribeUserUseCase;
-    private final Map<PaymentProviderType, PaymentProviderPort> providers = new EnumMap<>(PaymentProviderType.class);
-    private final BigDecimal authorPrice;
+    private final Map<PaymentProviderType, PaymentProviderPort> providers = new EnumMap<>(PaymentProviderType.class);;
+    private final LoadUserPort loadUserPort;
 
     public StartSubscriptionFlowUseCase(
             ObtainWorkByIdPort obtainWorkByIdPort,
             LoadChapterPort loadChapterPort,
             SubscribeUserUseCase subscribeUserUseCase,
             List<PaymentProviderPort> providerAdapters,
-            BigDecimal authorPrice
+            LoadUserPort loadUserPort
     ) {
         this.obtainWorkByIdPort = obtainWorkByIdPort;
         this.loadChapterPort = loadChapterPort;
@@ -37,7 +34,7 @@ public class StartSubscriptionFlowUseCase {
                 this.providers.put(p.supportedProvider(), p);
             }
         }
-        this.authorPrice = authorPrice;
+        this.loadUserPort = loadUserPort;
     }
 
     public Result execute(Long userId,
@@ -86,10 +83,12 @@ public class StartSubscriptionFlowUseCase {
 
     private BigDecimal resolvePrice(SubscriptionType type, Long targetId, Long workId) {
         if (type == SubscriptionType.AUTHOR) {
-            if (authorPrice == null) {
-                throw new IllegalArgumentException("Author subscription disabled");
+            var authorOpt = loadUserPort.getById(targetId);
+            if (authorOpt.isEmpty()) {
+                throw new IllegalArgumentException("Author not found");
             }
-            return authorPrice;
+            User author = authorOpt.get();
+            return author.getPrice() == null ? BigDecimal.ZERO : author.getPrice();
         }
         if (type == SubscriptionType.WORK) {
             var workOpt = obtainWorkByIdPort.obtainWorkById(targetId);
