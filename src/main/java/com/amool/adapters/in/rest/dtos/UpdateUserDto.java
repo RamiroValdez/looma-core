@@ -14,11 +14,14 @@ public class UpdateUserDto {
     private String newPassword;
     private String photo;
     private MultipartFile file;
+    private BigDecimal price;
 
     public boolean hasNewPassword() {
         return newPassword != null && !newPassword.isBlank();
     }
 
+    public BigDecimal getPrice() { return price; }
+    public void setPrice(BigDecimal price) { this.price = price; }
     public Long getId() { return id; }
     public void setId(Long id) { this.id = id; }
     public String getName() { return name; }

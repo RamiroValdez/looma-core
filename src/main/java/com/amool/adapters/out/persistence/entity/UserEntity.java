@@ -38,6 +38,9 @@ public class UserEntity {
     @Column(name = "money", nullable = false)
     private BigDecimal money = BigDecimal.ZERO;
 
+    @Column(name= "price")
+    private BigDecimal price = BigDecimal.ZERO;
+
     @Column(name = "enabled", nullable = false, columnDefinition = "boolean not null default false")
     private Boolean enabled = Boolean.FALSE;
 
@@ -130,4 +133,12 @@ public class UserEntity {
 
     public Set<CategoryEntity> getPreferredCategories() { return preferredCategories; }
     public void setPreferredCategories(Set<CategoryEntity> preferredCategories) { this.preferredCategories = preferredCategories; }
+
+    public BigDecimal getPrice() {
+        return price;
+    }
+
+    public void setPrice(BigDecimal price) {
+        this.price = price;
+    }
 }

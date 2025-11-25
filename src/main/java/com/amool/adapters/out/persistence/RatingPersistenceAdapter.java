@@ -45,7 +45,7 @@ public class RatingPersistenceAdapter implements RatingPort {
         
         updateWorkAverageRating(workId);
         
-        return rating;
+        return getAverageRating(workId);
     }
 
     @Override
