@@ -15,9 +15,12 @@ import org.springframework.security.authentication.UsernamePasswordAuthenticatio
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.MockMvc;
+import org.springframework.test.web.servlet.ResultActions;
 
 import java.math.BigDecimal;
+import java.util.Arrays;
 import java.util.Collections;
+import java.util.stream.Collectors;
 
 import static org.mockito.ArgumentMatchers.*;
 import static org.mockito.Mockito.*;
@@ -46,44 +49,102 @@ public class ManageWorkControllerPriceTest {
         SecurityContextHolder.getContext().setAuthentication(auth);
     }
 
+    private void givenUpdateWorkSucceeds(Long workId) {
+        when(updateWorkUseCase.execute(eq(workId), any(), anySet(), anySet(), anyString())).thenReturn(true);
+    }
+
+    private void givenUpdateWorkThrows(Long workId) {
+        when(updateWorkUseCase.execute(eq(workId), any(), anySet(), anySet(), anyString()))
+                .thenThrow(new RuntimeException("boom"));
+    }
+
+    private void givenUpdateWorkSucceedsWithScaledPriceAndEmptySets(Long workId, BigDecimal expectedPrice, String expectedState) {
+        when(updateWorkUseCase.execute(eq(workId),
+                argThat(bd -> bd != null && bd.compareTo(expectedPrice) == 0),
+                eq(Collections.emptySet()),
+                eq(Collections.emptySet()),
+                eq(expectedState)))
+                .thenReturn(true);
+    }
+
+    private ResultActions whenUpdateWorkIsPut(Long workId, String jsonBody) throws Exception {
+        return mockMvc.perform(
+                put("/api/manage-work/{workId}", workId)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(jsonBody)
+        );
+    }
+
+    private void thenOkWithTrue(ResultActions result) throws Exception {
+        result.andExpect(status().isOk())
+              .andExpect(content().string("true"));
+    }
+
+    private void thenBadRequest(ResultActions result) throws Exception {
+        result.andExpect(status().isBadRequest());
+    }
+
+    private void thenUseCaseCalledWithState(Long workId, String state) {
+        verify(updateWorkUseCase, times(1))
+                .execute(eq(workId), any(), anySet(), anySet(), eq(state));
+    }
+
+    private void thenUseCaseCalledWithScaledPriceAndEmptySets(Long workId, BigDecimal expectedPrice, String state) {
+        verify(updateWorkUseCase, times(1)).execute(eq(workId),
+                argThat(bd -> bd != null && bd.compareTo(expectedPrice) == 0),
+                eq(Collections.emptySet()),
+                eq(Collections.emptySet()),
+                eq(state));
+    }
+
+    private String requestBody(BigDecimal price, String state, String[] tagIds, String[] categoryIds) {
+        String tags = Arrays.stream(tagIds)
+                .map(s -> "\"" + s + "\"")
+                .collect(Collectors.joining(","));
+        String categories = Arrays.stream(categoryIds)
+                .map(s -> "\"" + s + "\"")
+                .collect(Collectors.joining(","));
+        return "{" +
+                "\"price\": " + price + ", " +
+                "\"state\": \"" + state + "\", " +
+                "\"tagIds\": [" + tags + "], " +
+                "\"categoryIds\": [" + categories + "]" +
+                "}";
+    }
+
     @Test
     void updateWork_put_returns200True_whenUseCaseOk() throws Exception {
-        // Ajustar stub para la nueva firma (incluye categoryIds)
-        when(updateWorkUseCase.execute(eq(1L), any(), anySet(), anySet(), anyString())).thenReturn(true);
+        Long workId = 1L;
+        givenUpdateWorkSucceeds(workId);
+        String body = requestBody(new BigDecimal("9.99"), "PUBLISHED", new String[]{"t1", "t2"}, new String[]{});
 
-        mockMvc.perform(
-                put("/api/manage-work/{workId}", 1L)
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content("{\"price\": 9.99, \"state\": \"PUBLISHED\", \"tagIds\": [\"t1\", \"t2\"], \"categoryIds\": []}"))
-                .andExpect(status().isOk())
-                .andExpect(content().string("true"));
+        ResultActions result = whenUpdateWorkIsPut(workId, body);
 
-        verify(updateWorkUseCase, times(1)).execute(eq(1L), any(), anySet(), anySet(), eq("PUBLISHED"));
+        thenOkWithTrue(result);
+        thenUseCaseCalledWithState(workId, "PUBLISHED");
     }
 
     @Test
     void updateWork_put_returns400_whenUseCaseThrows() throws Exception {
-        when(updateWorkUseCase.execute(eq(1L), any(), anySet(), anySet(), anyString())).thenThrow(new RuntimeException("boom"));
+        Long workId = 1L;
+        givenUpdateWorkThrows(workId);
+        String body = requestBody(new BigDecimal("5.00"), "DRAFT", new String[]{}, new String[]{});
 
-        mockMvc.perform(
-                put("/api/manage-work/{workId}", 1L)
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content("{\"price\": 5.00, \"state\": \"DRAFT\", \"tagIds\": [], \"categoryIds\": []}"))
-                .andExpect(status().isBadRequest());
+        ResultActions result = whenUpdateWorkIsPut(workId, body);
+
+        thenBadRequest(result);
     }
 
     @Test
     void updateWork_put_returns200True_withScaledPriceAndEmptySets() throws Exception {
-        when(updateWorkUseCase.execute(eq(2L), argThat(bd -> bd != null && bd.compareTo(new BigDecimal("9.99")) == 0), eq(Collections.emptySet()), eq(Collections.emptySet()), eq("PUBLISHED")))
-                .thenReturn(true);
+        Long workId = 2L;
+        BigDecimal expected = new BigDecimal("9.99");
+        givenUpdateWorkSucceedsWithScaledPriceAndEmptySets(workId, expected, "PUBLISHED");
+        String body = requestBody(new BigDecimal("9.9900"), "PUBLISHED", new String[]{}, new String[]{});
 
-        mockMvc.perform(
-                put("/api/manage-work/{workId}", 2L)
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content("{\"price\": 9.9900, \"state\": \"PUBLISHED\", \"tagIds\": [], \"categoryIds\": []}"))
-                .andExpect(status().isOk())
-                .andExpect(content().string("true"));
+        ResultActions result = whenUpdateWorkIsPut(workId, body);
 
-        verify(updateWorkUseCase, times(1)).execute(eq(2L), argThat(bd -> bd != null && bd.compareTo(new BigDecimal("9.99")) == 0), eq(Collections.emptySet()), eq(Collections.emptySet()), eq("PUBLISHED"));
+        thenOkWithTrue(result);
+        thenUseCaseCalledWithScaledPriceAndEmptySets(workId, expected, "PUBLISHED");
     }
 }

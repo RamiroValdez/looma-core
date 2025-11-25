@@ -57,7 +57,8 @@ public class EditChapterControllerAuthTest {
         }
     }
 
-    private void setAuthPrincipal(Long userId) {
+    // ------------------- given -------------------
+    private void givenAuthenticatedUser(Long userId) {
         Authentication auth = mock(Authentication.class);
         when(auth.getPrincipal()).thenReturn(new JwtUserPrincipal(userId, "e@x", "n", "s", "u"));
         SecurityContext ctx = mock(SecurityContext.class);
@@ -65,83 +66,140 @@ public class EditChapterControllerAuthTest {
         SecurityContextHolder.setContext(ctx);
     }
 
+    private void givenNoAuthentication() {
+        SecurityContextHolder.clearContext();
+    }
+
+    private void givenAccessGrantedForOwner(Long chapterId, Long workId, Long ownerUserId) {
+        Chapter chapter = createChapter(chapterId, workId);
+        ValidateChapterAccessUseCase.ChapterAccessResult accessResult =
+                ValidateChapterAccessUseCase.ChapterAccessResult.accessGranted(chapter, workId, ownerUserId, true);
+        when(validateChapterAccessUseCase.validateAccess(chapterId, ownerUserId)).thenReturn(accessResult);
+    }
+
+    private void givenAccessGrantedForSubscriber(Long chapterId, Long workId, Long subscriberUserId) {
+        Chapter chapter = createChapter(chapterId, workId);
+        ValidateChapterAccessUseCase.ChapterAccessResult accessResult =
+                ValidateChapterAccessUseCase.ChapterAccessResult.accessGranted(chapter, workId, 3L, false);
+        when(validateChapterAccessUseCase.validateAccess(chapterId, subscriberUserId)).thenReturn(accessResult);
+    }
+
+    private void givenAccessDenied(Long chapterId, Long userId) {
+        ValidateChapterAccessUseCase.ChapterAccessResult accessResult =
+                ValidateChapterAccessUseCase.ChapterAccessResult.accessDenied();
+        when(validateChapterAccessUseCase.validateAccess(chapterId, userId)).thenReturn(accessResult);
+    }
+
+    private void givenChapterNotFound(Long chapterId, Long userId) {
+        ValidateChapterAccessUseCase.ChapterAccessResult accessResult =
+                ValidateChapterAccessUseCase.ChapterAccessResult.chapterNotFound();
+        when(validateChapterAccessUseCase.validateAccess(chapterId, userId)).thenReturn(accessResult);
+    }
+
+    private void givenGetChapterForEditWillReturnDto(Long chapterId) {
+        when(getChapterForEditUseCase.execute(eq(chapterId), any())).thenReturn(Optional.of(new ChapterResponseDto()));
+    }
+
+    // ------------------- when -------------------
+    private ResponseEntity<ChapterResponseDto> whenGetChapterForEdit(Long chapterId) {
+        return controller.getChapterForEdit(chapterId, null);
+    }
+
+    // ------------------- then -------------------
+    private void thenResponseIs2xx(ResponseEntity<?> response) {
+        assertThat(response.getStatusCode().is2xxSuccessful()).isTrue();
+    }
+
+    private void thenResponseStatusIs(ResponseEntity<?> response, int expectedStatus) {
+        assertThat(response.getStatusCode().value()).isEqualTo(expectedStatus);
+    }
+
+    private void thenValidateAccessCalledWith(Long chapterId, Long userId) {
+        verify(validateChapterAccessUseCase).validateAccess(chapterId, userId);
+    }
+
+    private void thenGetChapterForEditCalledWith(Long chapterId) {
+        verify(getChapterForEditUseCase).execute(chapterId, null);
+    }
+
+    private void thenNoInteractionsWithGetChapterForEdit() {
+        verifyNoInteractions(getChapterForEditUseCase);
+    }
+
+    private void thenNoInteractionsWithValidateAccess() {
+        verifyNoInteractions(validateChapterAccessUseCase);
+    }
+
+
     @Test
     void owner_canAccess() {
-        setAuthPrincipal(5L);
-        Chapter chapter = createChapter(7L, 10L);
+        Long userId = 5L;
+        Long chapterId = 7L;
+        Long workId = 10L;
+        givenAuthenticatedUser(userId);
+        givenAccessGrantedForOwner(chapterId, workId, userId);
+        givenGetChapterForEditWillReturnDto(chapterId);
 
-        ValidateChapterAccessUseCase.ChapterAccessResult accessResult =
-                ValidateChapterAccessUseCase.ChapterAccessResult.accessGranted(chapter, 10L, 5L, true);
+        ResponseEntity<ChapterResponseDto> response = whenGetChapterForEdit(chapterId);
 
-        when(validateChapterAccessUseCase.validateAccess(7L, 5L)).thenReturn(accessResult);
-        when(getChapterForEditUseCase.execute(eq(7L), any())).thenReturn(Optional.of(new ChapterResponseDto()));
-
-        ResponseEntity<ChapterResponseDto> response = controller.getChapterForEdit(7L, null);
-
-        assertThat(response.getStatusCode().is2xxSuccessful()).isTrue();
-        verify(validateChapterAccessUseCase).validateAccess(7L, 5L);
-        verify(getChapterForEditUseCase).execute(7L, null);
+        thenResponseIs2xx(response);
+        thenValidateAccessCalledWith(chapterId, userId);
+        thenGetChapterForEditCalledWith(chapterId);
     }
 
     @Test
     void subscribedUser_canAccess() {
-        setAuthPrincipal(9L);
-        Chapter chapter = createChapter(7L, 10L);
+        Long userId = 9L;
+        Long chapterId = 7L;
+        Long workId = 10L;
+        givenAuthenticatedUser(userId);
+        givenAccessGrantedForSubscriber(chapterId, workId, userId);
+        givenGetChapterForEditWillReturnDto(chapterId);
 
-        ValidateChapterAccessUseCase.ChapterAccessResult accessResult =
-                ValidateChapterAccessUseCase.ChapterAccessResult.accessGranted(chapter, 10L, 3L, false);
+        ResponseEntity<ChapterResponseDto> response = whenGetChapterForEdit(chapterId);
 
-        when(validateChapterAccessUseCase.validateAccess(7L, 9L)).thenReturn(accessResult);
-        when(getChapterForEditUseCase.execute(eq(7L), any())).thenReturn(Optional.of(new ChapterResponseDto()));
-
-        ResponseEntity<ChapterResponseDto> response = controller.getChapterForEdit(7L, null);
-
-        assertThat(response.getStatusCode().is2xxSuccessful()).isTrue();
-        verify(validateChapterAccessUseCase).validateAccess(7L, 9L);
-        verify(getChapterForEditUseCase).execute(7L, null);
+        thenResponseIs2xx(response);
+        thenValidateAccessCalledWith(chapterId, userId);
+        thenGetChapterForEditCalledWith(chapterId);
     }
 
     @Test
     void notSubscribedAndNotOwner_isForbidden() {
-        setAuthPrincipal(9L);
+        Long userId = 9L;
+        Long chapterId = 7L;
+        givenAuthenticatedUser(userId);
+        givenAccessDenied(chapterId, userId);
 
-        ValidateChapterAccessUseCase.ChapterAccessResult accessResult =
-                ValidateChapterAccessUseCase.ChapterAccessResult.accessDenied();
+        ResponseEntity<ChapterResponseDto> response = whenGetChapterForEdit(chapterId);
 
-        when(validateChapterAccessUseCase.validateAccess(7L, 9L)).thenReturn(accessResult);
-
-        ResponseEntity<ChapterResponseDto> response = controller.getChapterForEdit(7L, null);
-
-        assertThat(response.getStatusCode().value()).isEqualTo(403);
-        verify(validateChapterAccessUseCase).validateAccess(7L, 9L);
-        verifyNoInteractions(getChapterForEditUseCase);
+        thenResponseStatusIs(response, 403);
+        thenValidateAccessCalledWith(chapterId, userId);
+        thenNoInteractionsWithGetChapterForEdit();
     }
 
     @Test
     void chapterNotFound_returnsNotFound() {
-        setAuthPrincipal(5L);
+        Long userId = 5L;
+        Long chapterId = 999L;
+        givenAuthenticatedUser(userId);
+        givenChapterNotFound(chapterId, userId);
 
-        ValidateChapterAccessUseCase.ChapterAccessResult accessResult =
-                ValidateChapterAccessUseCase.ChapterAccessResult.chapterNotFound();
+        ResponseEntity<ChapterResponseDto> response = whenGetChapterForEdit(chapterId);
 
-        when(validateChapterAccessUseCase.validateAccess(999L, 5L)).thenReturn(accessResult);
-
-        ResponseEntity<ChapterResponseDto> response = controller.getChapterForEdit(999L, null);
-
-        assertThat(response.getStatusCode().value()).isEqualTo(404);
-        verify(validateChapterAccessUseCase).validateAccess(999L, 5L);
-        verifyNoInteractions(getChapterForEditUseCase);
+        thenResponseStatusIs(response, 404);
+        thenValidateAccessCalledWith(chapterId, userId);
+        thenNoInteractionsWithGetChapterForEdit();
     }
 
     @Test
     void unauthenticatedUser_isForbidden() {
-        SecurityContextHolder.clearContext();
+        givenNoAuthentication();
 
-        ResponseEntity<ChapterResponseDto> response = controller.getChapterForEdit(7L, null);
+        ResponseEntity<ChapterResponseDto> response = whenGetChapterForEdit(7L);
 
-        assertThat(response.getStatusCode().value()).isEqualTo(403);
-        verifyNoInteractions(validateChapterAccessUseCase);
-        verifyNoInteractions(getChapterForEditUseCase);
+        thenResponseStatusIs(response, 403);
+        thenNoInteractionsWithValidateAccess();
+        thenNoInteractionsWithGetChapterForEdit();
     }
 
     private Chapter createChapter(Long chapterId, Long workId) {

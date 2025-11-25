@@ -35,74 +35,79 @@ public class PaymentControllerTest {
         SecurityContextHolder.clearContext();
     }
 
-    @Test
-    @DisplayName("POST /api/payments/subscribe - 401 cuando no hay autenticación")
-    void subscribe_shouldReturn401_whenNoAuth() {
+    private void givenNoAuthentication() {
         SecurityContextHolder.clearContext();
-        SubscribeRequest request = anyValidRequest();
-
-        ResponseEntity<?> response = controller.subscribe(request);
-
-        assertStatus(response, HttpStatus.UNAUTHORIZED);
-        verify(startSubscriptionFlowUseCase, never()).execute(any(), any(), any(), any(), any(), any());
     }
 
-    @Test
-    @DisplayName("POST /api/payments/subscribe - 401 cuando el principal no es JwtUserPrincipal")
-    void subscribe_shouldReturn401_whenPrincipalNotJwt() {
+    private void givenPrincipalNotJwt() {
         setAuthentication(new UsernamePasswordAuthenticationToken("someone", null));
-        SubscribeRequest request = anyValidRequest();
-
-        ResponseEntity<?> response = controller.subscribe(request);
-
-        assertStatus(response, HttpStatus.UNAUTHORIZED);
-        verify(startSubscriptionFlowUseCase, never()).execute(any(), any(), any(), any(), any(), any());
     }
 
+    private void givenAuthenticatedUser() {
+        JwtUserPrincipal principal = new JwtUserPrincipal(
+                USER_ID,
+                "user@example.com",
+                "John",
+                "Doe",
+                "johndoe"
+        );
+        setAuthentication(new UsernamePasswordAuthenticationToken(principal, null));
+    }
 
-    @Test
-    @DisplayName("POST /api/payments/subscribe - 201 cuando la suscripción es gratuita")
-    void subscribe_shouldReturn201_whenFree() {
-        setAuthenticatedUser();
-        SubscribeRequest request = new SubscribeRequest("work", 10L, null, null, "https://return");
-        when(startSubscriptionFlowUseCase.execute(eq(USER_ID), eq("work"), eq(10L), isNull(), isNull(), eq("https://return")))
+    private void givenUseCaseReturnsFree(SubscribeRequest request) {
+        when(startSubscriptionFlowUseCase.execute(eq(USER_ID), eq(request.subscriptionType()), eq(request.targetId()),
+                eq(request.workId()), eq(request.provider()), eq(request.returnUrl())))
                 .thenReturn(StartSubscriptionFlowUseCase.Result.free());
+    }
 
-        ResponseEntity<?> response = controller.subscribe(request);
+    private void givenUseCaseReturnsPayment(SubscribeRequest request, PaymentInitResult init) {
+        when(startSubscriptionFlowUseCase.execute(eq(USER_ID), eq(request.subscriptionType()), eq(request.targetId()),
+                eq(request.workId()), eq(request.provider()), eq(request.returnUrl())))
+                .thenReturn(StartSubscriptionFlowUseCase.Result.payment(init));
+    }
 
-        assertEquals(HttpStatus.CREATED, response.getStatusCode());
+    private void givenUseCaseThrowsIllegalArgument(String message) {
+        when(startSubscriptionFlowUseCase.execute(anyLong(), anyString(), anyLong(), any(), anyString(), anyString()))
+                .thenThrow(new IllegalArgumentException(message));
+    }
+
+    private void givenUseCaseReturnsFreeForAnyArgs() {
+        when(startSubscriptionFlowUseCase.execute(anyLong(), anyString(), anyLong(), any(), anyString(), anyString()))
+                .thenReturn(StartSubscriptionFlowUseCase.Result.free());
+    }
+
+    // ------------------- when -------------------
+    private ResponseEntity<?> whenSubscribe(SubscribeRequest request) {
+        return controller.subscribe(request);
+    }
+
+    // ------------------- then -------------------
+    private void thenStatusIs(ResponseEntity<?> response, HttpStatus status) {
+        assertNotNull(response);
+        assertEquals(status, response.getStatusCode());
+    }
+
+    private void thenBodyIsNull(ResponseEntity<?> response) {
         assertNull(response.getBody());
     }
 
-    @Test
-    @DisplayName("POST /api/payments/subscribe - 200 y body cuando requiere pago")
-    void subscribe_shouldReturn200_withPaymentInit_whenPaymentRequired() {
-        setAuthenticatedUser();
-        SubscribeRequest request = new SubscribeRequest("author", 55L, null, "mercadopago", "https://return-url");
-        PaymentInitResult init = PaymentInitResult.of(PaymentProviderType.MERCADOPAGO, "https://pay.example/abc", "pref-123");
-        when(startSubscriptionFlowUseCase.execute(eq(USER_ID), eq("author"), eq(55L), isNull(), eq("mercadopago"), eq("https://return-url")))
-                .thenReturn(StartSubscriptionFlowUseCase.Result.payment(init));
-
-        ResponseEntity<?> response = controller.subscribe(request);
-
-        assertStatus(response, HttpStatus.OK);
-        assertNotNull(response.getBody());
-        PaymentInitResponse body = assertInstanceOf(PaymentInitResponse.class, response.getBody());
-        assertEquals("mercadopago", body.provider());
-        assertEquals("https://pay.example/abc", body.redirectUrl());
-        assertEquals("pref-123", body.externalReference());
+    private void thenBodyEquals(ResponseEntity<?> response, Object expected) {
+        assertEquals(expected, response.getBody());
     }
 
-    @Test
-    @DisplayName("POST /api/payments/subscribe - llama al use case con los parámetros correctos")
-    void subscribe_shouldCallUseCase_withCorrectArgs() {
-        setAuthenticatedUser();
-        SubscribeRequest request = new SubscribeRequest("chapter", 77L, 999L, "mp", "http://back");
-        when(startSubscriptionFlowUseCase.execute(anyLong(), anyString(), anyLong(), any(), anyString(), anyString()))
-                .thenReturn(StartSubscriptionFlowUseCase.Result.free());
+    private void thenBodyIsPaymentInit(ResponseEntity<?> response, String provider, String redirectUrl, String externalReference) {
+        assertNotNull(response.getBody());
+        PaymentInitResponse body = assertInstanceOf(PaymentInitResponse.class, response.getBody());
+        assertEquals(provider, body.provider());
+        assertEquals(redirectUrl, body.redirectUrl());
+        assertEquals(externalReference, body.externalReference());
+    }
 
-        controller.subscribe(request);
+    private void thenUseCaseNotCalled() {
+        verify(startSubscriptionFlowUseCase, never()).execute(any(), any(), any(), any(), any(), any());
+    }
 
+    private void thenUseCaseCalledWithArgs(SubscribeRequest request) {
         ArgumentCaptor<Long> userId = ArgumentCaptor.forClass(Long.class);
         ArgumentCaptor<String> type = ArgumentCaptor.forClass(String.class);
         ArgumentCaptor<Long> target = ArgumentCaptor.forClass(Long.class);
@@ -115,126 +120,139 @@ public class PaymentControllerTest {
         );
 
         assertEquals(USER_ID, userId.getValue());
-        assertEquals("chapter", type.getValue());
-        assertEquals(77L, target.getValue());
-        assertEquals(999L, workId.getValue());
-        assertEquals("mp", provider.getValue());
-        assertEquals("http://back", returnUrl.getValue());
+        assertEquals(request.subscriptionType(), type.getValue());
+        assertEquals(request.targetId(), target.getValue());
+        assertEquals(request.workId(), workId.getValue());
+        assertEquals(request.provider(), provider.getValue());
+        assertEquals(request.returnUrl(), returnUrl.getValue());
     }
 
-
-    @Test
-    @DisplayName("subscribe - 400 Invalid subscriptionType")
-    void subscribe_shouldReturn400_invalidSubscriptionType() {
-        assertMapsToBadRequest("Invalid subscriptionType");
+    private SubscribeRequest request(String subscriptionType, Long targetId, Long workId, String provider, String returnUrl) {
+        return new SubscribeRequest(subscriptionType, targetId, workId, provider, returnUrl);
     }
 
-    @Test
-    @DisplayName("subscribe - 400 Cannot subscribe to yourself")
-    void subscribe_shouldReturn400_cannotSubscribeToYourself() {
-        assertMapsToBadRequest("Cannot subscribe to yourself");
-    }
-
-    @Test
-    @DisplayName("subscribe - 400 Author subscription disabled")
-    void subscribe_shouldReturn400_authorSubscriptionDisabled() {
-        assertMapsToBadRequest("Author subscription disabled");
-    }
-
-    @Test
-    @DisplayName("subscribe - 400 Work not found")
-    void subscribe_shouldReturn400_workNotFound() {
-        assertMapsToBadRequest("Work not found");
-    }
-
-    @Test
-    @DisplayName("subscribe - 400 workId is required for chapter subscription")
-    void subscribe_shouldReturn400_workIdRequiredForChapter() {
-        assertMapsToBadRequest("workId is required for chapter subscription");
-    }
-
-    @Test
-    @DisplayName("subscribe - 400 Chapter does not belong to the specified work")
-    void subscribe_shouldReturn400_chapterNotBelongToWork() {
-        assertMapsToBadRequest("Chapter does not belong to the specified work");
-    }
-
-    @Test
-    @DisplayName("subscribe - 400 Provider required")
-    void subscribe_shouldReturn400_providerRequired() {
-        assertMapsToBadRequest("Provider required");
-    }
-
-    @Test
-    @DisplayName("subscribe - 400 Invalid provider")
-    void subscribe_shouldReturn400_invalidProvider() {
-        assertMapsToBadRequest("Invalid provider");
-    }
-
-
-    @Test
-    @DisplayName("subscribe - 412 Payment provider not configured")
-    void subscribe_shouldReturn412_providerNotConfigured() {
-        setAuthenticatedUser();
-        SubscribeRequest request = anyValidRequest();
-        when(startSubscriptionFlowUseCase.execute(anyLong(), anyString(), anyLong(), any(), anyString(), anyString()))
-                .thenThrow(new IllegalArgumentException("Payment provider not configured: MERCADOPAGO"));
-
-        ResponseEntity<?> response = controller.subscribe(request);
-
-        assertStatus(response, HttpStatus.PRECONDITION_FAILED);
-        assertEquals("Payment provider not configured: MERCADOPAGO", response.getBody());
-    }
-
-
-    @Test
-    @DisplayName("subscribe - 500 en IllegalArgumentException desconocido")
-    void subscribe_shouldReturn500_onUnknownIllegalArgument() {
-        setAuthenticatedUser();
-        SubscribeRequest request = anyValidRequest();
-        when(startSubscriptionFlowUseCase.execute(anyLong(), anyString(), anyLong(), any(), anyString(), anyString()))
-                .thenThrow(new IllegalArgumentException("Some other error"));
-
-        ResponseEntity<?> response = controller.subscribe(request);
-
-        assertStatus(response, HttpStatus.INTERNAL_SERVER_ERROR);
-        assertNull(response.getBody());
-    }
-
-        
     private SubscribeRequest anyValidRequest() {
-        return new SubscribeRequest("work", 1L, null, "mp", "http://return");
-    }
-
-    private void setAuthenticatedUser() {
-        JwtUserPrincipal principal = new JwtUserPrincipal(
-                USER_ID,
-                "user@example.com",
-                "John",
-                "Doe",
-                "johndoe"
-        );
-        setAuthentication(new UsernamePasswordAuthenticationToken(principal, null));
+        return request("work", 1L, null, "mp", "http://return");
     }
 
     private void setAuthentication(Authentication auth) {
         SecurityContextHolder.getContext().setAuthentication(auth);
     }
 
-    private void assertStatus(ResponseEntity<?> response, HttpStatus status) {
-        assertNotNull(response);
-        assertEquals(status, response.getStatusCode());
+    @Test
+    @DisplayName("POST /api/payments/subscribe - 401 cuando no hay autenticación")
+    void subscribe_shouldReturn401_whenNoAuth() {
+        givenNoAuthentication();
+        SubscribeRequest request = anyValidRequest();
+
+        ResponseEntity<?> response = whenSubscribe(request);
+
+        thenStatusIs(response, HttpStatus.UNAUTHORIZED);
+        thenUseCaseNotCalled();
+    }
+
+    @Test
+    @DisplayName("POST /api/payments/subscribe - 401 cuando el principal no es JwtUserPrincipal")
+    void subscribe_shouldReturn401_whenPrincipalNotJwt() {
+        givenPrincipalNotJwt();
+        SubscribeRequest request = anyValidRequest();
+
+        ResponseEntity<?> response = whenSubscribe(request);
+
+        thenStatusIs(response, HttpStatus.UNAUTHORIZED);
+        thenUseCaseNotCalled();
+    }
+
+    @Test
+    @DisplayName("POST /api/payments/subscribe - 201 cuando la suscripción es gratuita")
+    void subscribe_shouldReturn201_whenFree() {
+        givenAuthenticatedUser();
+        SubscribeRequest request = request("work", 10L, null, null, "https://return");
+        givenUseCaseReturnsFree(request);
+
+        ResponseEntity<?> response = whenSubscribe(request);
+
+        thenStatusIs(response, HttpStatus.CREATED);
+        thenBodyIsNull(response);
+    }
+
+    @Test
+    @DisplayName("POST /api/payments/subscribe - 200 y body cuando requiere pago")
+    void subscribe_shouldReturn200_withPaymentInit_whenPaymentRequired() {
+        givenAuthenticatedUser();
+        SubscribeRequest request = request("author", 55L, null, "mercadopago", "https://return-url");
+        PaymentInitResult init = PaymentInitResult.of(PaymentProviderType.MERCADOPAGO, "https://pay.example/abc", "pref-123");
+        givenUseCaseReturnsPayment(request, init);
+
+        ResponseEntity<?> response = whenSubscribe(request);
+
+        thenStatusIs(response, HttpStatus.OK);
+        thenBodyIsPaymentInit(response, "mercadopago", "https://pay.example/abc", "pref-123");
+    }
+
+    @Test
+    @DisplayName("POST /api/payments/subscribe - llama al use case con los parámetros correctos")
+    void subscribe_shouldCallUseCase_withCorrectArgs() {
+        givenAuthenticatedUser();
+        SubscribeRequest request = request("chapter", 77L, 999L, "mp", "http://back");
+        givenUseCaseReturnsFreeForAnyArgs();
+
+        whenSubscribe(request);
+
+        thenUseCaseCalledWithArgs(request);
+    }
+
+    @Test @DisplayName("subscribe - 400 Invalid subscriptionType")
+    void subscribe_shouldReturn400_invalidSubscriptionType() { assertMapsToBadRequest("Invalid subscriptionType"); }
+    @Test @DisplayName("subscribe - 400 Cannot subscribe to yourself")
+    void subscribe_shouldReturn400_cannotSubscribeToYourself() { assertMapsToBadRequest("Cannot subscribe to yourself"); }
+    @Test @DisplayName("subscribe - 400 Author subscription disabled")
+    void subscribe_shouldReturn400_authorSubscriptionDisabled() { assertMapsToBadRequest("Author subscription disabled"); }
+    @Test @DisplayName("subscribe - 400 Work not found")
+    void subscribe_shouldReturn400_workNotFound() { assertMapsToBadRequest("Work not found"); }
+    @Test @DisplayName("subscribe - 400 workId is required for chapter subscription")
+    void subscribe_shouldReturn400_workIdRequiredForChapter() { assertMapsToBadRequest("workId is required for chapter subscription"); }
+    @Test @DisplayName("subscribe - 400 Chapter does not belong to the specified work")
+    void subscribe_shouldReturn400_chapterNotBelongToWork() { assertMapsToBadRequest("Chapter does not belong to the specified work"); }
+    @Test @DisplayName("subscribe - 400 Provider required")
+    void subscribe_shouldReturn400_providerRequired() { assertMapsToBadRequest("Provider required"); }
+    @Test @DisplayName("subscribe - 400 Invalid provider")
+    void subscribe_shouldReturn400_invalidProvider() { assertMapsToBadRequest("Invalid provider"); }
+
+    @Test
+    @DisplayName("subscribe - 412 Payment provider not configured")
+    void subscribe_shouldReturn412_providerNotConfigured() {
+        givenAuthenticatedUser();
+        SubscribeRequest request = anyValidRequest();
+        givenUseCaseThrowsIllegalArgument("Payment provider not configured: MERCADOPAGO");
+
+        ResponseEntity<?> response = whenSubscribe(request);
+
+        thenStatusIs(response, HttpStatus.PRECONDITION_FAILED);
+        thenBodyEquals(response, "Payment provider not configured: MERCADOPAGO");
+    }
+
+    @Test
+    @DisplayName("subscribe - 500 en IllegalArgumentException desconocido")
+    void subscribe_shouldReturn500_onUnknownIllegalArgument() {
+        givenAuthenticatedUser();
+        SubscribeRequest request = anyValidRequest();
+        givenUseCaseThrowsIllegalArgument("Some other error");
+
+        ResponseEntity<?> response = whenSubscribe(request);
+
+        thenStatusIs(response, HttpStatus.INTERNAL_SERVER_ERROR);
+        thenBodyIsNull(response);
     }
 
     private void assertMapsToBadRequest(String message) {
-        setAuthenticatedUser();
+        givenAuthenticatedUser();
         SubscribeRequest request = anyValidRequest();
-        when(startSubscriptionFlowUseCase.execute(anyLong(), anyString(), anyLong(), any(), anyString(), anyString()))
-                .thenThrow(new IllegalArgumentException(message));
+        givenUseCaseThrowsIllegalArgument(message);
 
-        ResponseEntity<?> response = controller.subscribe(request);
+        ResponseEntity<?> response = whenSubscribe(request);
 
-        assertStatus(response, HttpStatus.BAD_REQUEST);
-        assertEquals(message, response.getBody());
+        thenStatusIs(response, HttpStatus.BAD_REQUEST);
+        thenBodyEquals(response, message);
     }
 }
