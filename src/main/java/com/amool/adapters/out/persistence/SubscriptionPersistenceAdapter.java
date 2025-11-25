@@ -34,7 +34,7 @@ public class SubscriptionPersistenceAdapter implements SubscriptionPersistencePo
     @Override
     public void subscribeAuthor(Long userId, Long authorId) {
         entityManager.createNativeQuery(
-                "INSERT INTO suscribe_autor (user_id, autor_id, subscribed_at, notified) " +
+                "INSERT INTO suscribe_autor (user_id, autor_id, created_at, notified) " +
                 "VALUES (:userId, :authorId, CURRENT_TIMESTAMP, false) " +
                 "ON CONFLICT (user_id, autor_id) DO UPDATE SET created_at = CURRENT_TIMESTAMP")
                 .setParameter("userId", userId)
@@ -45,7 +45,7 @@ public class SubscriptionPersistenceAdapter implements SubscriptionPersistencePo
     @Override
     public void subscribeWork(Long userId, Long workId) {
         entityManager.createNativeQuery(
-                "INSERT INTO suscribe_work (user_id, work_id, subscribed_at, notified) " +
+                "INSERT INTO suscribe_work (user_id, work_id, created_at, notified) " +
                 "VALUES (:userId, :workId, CURRENT_TIMESTAMP, false) " +
                 "ON CONFLICT (user_id, work_id) DO UPDATE SET created_at = CURRENT_TIMESTAMP")
                 .setParameter("userId", userId)
