@@ -1,6 +1,7 @@
 package com.amool.application.usecase;
 
 import com.amool.application.port.out.LoadChapterPort;
+import com.amool.application.port.out.LoadUserPort;
 import com.amool.application.port.out.ObtainWorkByIdPort;
 import com.amool.application.port.out.PaymentProviderPort;
 import com.amool.application.usecases.StartSubscriptionFlowUseCase;
@@ -9,6 +10,7 @@ import com.amool.domain.model.Chapter;
 import com.amool.domain.model.PaymentInitResult;
 import com.amool.domain.model.PaymentProviderType;
 import com.amool.domain.model.Work;
+import com.amool.domain.model.User;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -38,6 +40,9 @@ public class StartSubscriptionFlowUseCaseTest {
     private SubscribeUserUseCase subscribeUserUseCase;
 
     @Mock
+    private LoadUserPort loadUserPort;
+
+    @Mock
     private PaymentProviderPort paymentProvider;
 
     private StartSubscriptionFlowUseCase useCaseWithAuthorPrice(BigDecimal authorPrice, List<PaymentProviderPort> providers) {
@@ -46,7 +51,7 @@ public class StartSubscriptionFlowUseCaseTest {
                 loadChapterPort,
                 subscribeUserUseCase,
                 providers,
-                authorPrice
+                loadUserPort
         );
     }
 
@@ -68,9 +73,17 @@ public class StartSubscriptionFlowUseCaseTest {
     }
 
     @Test
-    void authorSubscriptionDisabled_whenAuthorPriceNull_shouldThrow() {
+    void authorWithNullPrice_shouldSubscribeFree() {
+        User author = new User();
+        author.setId(99L);
+        author.setPrice(null);
+        when(loadUserPort.getById(99L)).thenReturn(Optional.of(author));
+
         StartSubscriptionFlowUseCase uc = useCaseWithAuthorPrice(null, List.of());
-        expectIAE("Author subscription disabled", () -> executeAuthor(uc, 99L, null, null));
+        StartSubscriptionFlowUseCase.Result result = executeAuthor(uc, 99L, null, null);
+
+        assertFree(result);
+        thenSubscribedTo(com.amool.domain.model.SubscriptionType.AUTHOR, 99L);
     }
 
     @Test

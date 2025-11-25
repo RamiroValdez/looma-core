@@ -7,8 +7,10 @@ import com.amool.domain.model.SubscriptionType;
 import com.amool.application.port.out.ObtainWorkByIdPort;
 import com.amool.application.port.out.LoadChapterPort;
 import com.amool.application.port.out.UserQueryPort;
+import com.amool.application.port.out.LoadUserPort;
 import com.amool.domain.model.Work;
 import com.amool.domain.model.Chapter;
+import com.amool.domain.model.User;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
@@ -52,8 +54,9 @@ public class MercadoPagoProviderAdapter implements PaymentProviderPort {
     @Value("${payments.pricing.chapter:1.0}")
     private BigDecimal chapterPrice;
 
-    @Value("${payments.pricing.author:1.0}")
-    private BigDecimal authorPrice;
+    // Eliminamos el uso del property de autor para evitar defaults globales
+    // @Value("${payments.pricing.author:1.0}")
+    // private BigDecimal authorPrice;
 
     @Value("${payments.pricing.work.fallback:1.0}")
     private BigDecimal workFallbackPrice;
@@ -62,17 +65,20 @@ public class MercadoPagoProviderAdapter implements PaymentProviderPort {
     private final ObtainWorkByIdPort obtainWorkByIdPort;
     private final LoadChapterPort loadChapterPort;
     private final UserQueryPort userQueryPort;
+    private final LoadUserPort loadUserPort;
     private final PaymentSessionLinkPort paymentSessionLinkPort;
 
     public MercadoPagoProviderAdapter(RestTemplate restTemplate,
                                       ObtainWorkByIdPort obtainWorkByIdPort,
                                       LoadChapterPort loadChapterPort,
                                       UserQueryPort userQueryPort,
+                                      LoadUserPort loadUserPort,
                                       PaymentSessionLinkPort paymentSessionLinkPort) {
         this.restTemplate = restTemplate;
         this.obtainWorkByIdPort = obtainWorkByIdPort;
         this.loadChapterPort = loadChapterPort;
         this.userQueryPort = userQueryPort;
+        this.loadUserPort = loadUserPort;
         this.paymentSessionLinkPort = paymentSessionLinkPort;
     }
 
@@ -157,10 +163,13 @@ public class MercadoPagoProviderAdapter implements PaymentProviderPort {
                 if (!userQueryPort.existsById(targetId)) {
                     throw new IllegalArgumentException("Author not found");
                 }
-                if (authorPrice == null || authorPrice.compareTo(BigDecimal.ONE) < 0) {
-                    throw new IllegalArgumentException("Author subscription disabled");
+                // Tomamos el precio real del autor sin defaults
+                User author = loadUserPort.getById(targetId)
+                        .orElseThrow(() -> new IllegalArgumentException("Author not found"));
+                if (author.getPrice() == null || author.getPrice().compareTo(BigDecimal.ZERO) <= 0) {
+                    throw new IllegalArgumentException("Invalid author price");
                 }
-                amount = authorPrice;
+                amount = author.getPrice();
                 String authorName = userQueryPort.findNameById(targetId);
                 title = "Suscripción a autor" + (authorName == null || authorName.isBlank() ? (" " + targetId) : (" " + authorName));
             }

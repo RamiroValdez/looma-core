@@ -3,12 +3,10 @@ package com.amool.config;
 import com.amool.application.port.out.*;
 import com.amool.application.service.ImagesService;
 import com.amool.application.usecases.*;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.web.client.RestTemplate;
-import java.math.BigDecimal;
 
 @Configuration
 public class UseCasesConfig {
@@ -56,9 +54,6 @@ public class UseCasesConfig {
     private final PaymentSessionLinkPort paymentSessionLinkPort;
     private final ChatConversationPort chatConversationPort;
     private final ChatAIPort chatAIPort;
-
-    @Value("${payments.pricing.author:#{null}}")
-    private BigDecimal authorPrice;
 
     public UseCasesConfig(
             AwsS3Port awsS3Port,
@@ -499,7 +494,13 @@ public class UseCasesConfig {
 
     @Bean
     public StartSubscriptionFlowUseCase startSubscriptionFlowUseCase(java.util.List<PaymentProviderPort> paymentProviders) {
-        return new StartSubscriptionFlowUseCase(obtainWorkByIdPort, loadChapterPort, subscribeUserUseCase(), paymentProviders, authorPrice);
+        return new StartSubscriptionFlowUseCase(
+                obtainWorkByIdPort,
+                loadChapterPort,
+                subscribeUserUseCase(),
+                paymentProviders,
+                loadUserPort
+        );
     }
 
 

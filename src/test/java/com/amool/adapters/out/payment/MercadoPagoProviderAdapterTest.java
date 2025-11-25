@@ -1,6 +1,5 @@
 package com.amool.adapters.out.payment;
 
-import com.amool.adapters.out.payment.MercadoPagoProviderAdapter;
 import com.amool.application.port.out.LoadChapterPort;
 import com.amool.application.port.out.ObtainWorkByIdPort;
 import com.amool.application.port.out.PaymentSessionLinkPort;
@@ -19,6 +18,7 @@ import org.springframework.test.web.client.MockRestServiceServer;
 import org.springframework.web.client.RestTemplate;
 
 import java.math.BigDecimal;
+import java.util.Optional;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.springframework.test.web.client.ExpectedCount.once;
@@ -26,6 +26,7 @@ import static org.springframework.test.web.client.match.MockRestRequestMatchers.
 import static org.springframework.test.web.client.match.MockRestRequestMatchers.requestTo;
 import static org.springframework.test.web.client.response.MockRestResponseCreators.withSuccess;
 import static org.springframework.http.HttpMethod.POST;
+import com.amool.application.port.out.LoadUserPort;
 
 public class MercadoPagoProviderAdapterTest {
 
@@ -35,6 +36,7 @@ public class MercadoPagoProviderAdapterTest {
     private ObtainWorkByIdPort obtainWorkByIdPort;
     private LoadChapterPort loadChapterPort;
     private UserQueryPort userQueryPort;
+    private LoadUserPort loadUserPort;
     private PaymentSessionLinkPort paymentSessionLinkPort;
 
     private MercadoPagoProviderAdapter adapter;
@@ -46,20 +48,24 @@ public class MercadoPagoProviderAdapterTest {
         obtainWorkByIdPort = Mockito.mock(ObtainWorkByIdPort.class);
         loadChapterPort = Mockito.mock(LoadChapterPort.class);
         userQueryPort = Mockito.mock(UserQueryPort.class);
+        loadUserPort = Mockito.mock(LoadUserPort.class);
         paymentSessionLinkPort = Mockito.mock(PaymentSessionLinkPort.class);
-        adapter = new MercadoPagoProviderAdapter(restTemplate, obtainWorkByIdPort, loadChapterPort, userQueryPort, paymentSessionLinkPort);
+        adapter = new MercadoPagoProviderAdapter(restTemplate, obtainWorkByIdPort, loadChapterPort, userQueryPort, loadUserPort, paymentSessionLinkPort);
         ReflectionTestUtils.setField(adapter, "accessToken", "test_access_token");
         ReflectionTestUtils.setField(adapter, "apiBase", "https://api.mercadopago.com");
         ReflectionTestUtils.setField(adapter, "successUrl", "http://localhost:5173/return");
         ReflectionTestUtils.setField(adapter, "cancelUrl", "http://localhost:5173/cancel");
         ReflectionTestUtils.setField(adapter, "currency", "ARS");
-        ReflectionTestUtils.setField(adapter, "authorPrice", new BigDecimal("1000"));
     }
 
     @Test
     void startCheckout_withHttpReturnUrl_buildsBackUrlsWithoutAutoReturn() {
         Mockito.when(userQueryPort.existsById(2L)).thenReturn(true);
         Mockito.when(userQueryPort.findNameById(2L)).thenReturn("Autor X");
+        User u = new User();
+        u.setId(2L);
+        u.setPrice(new BigDecimal("1000"));
+        Mockito.when(loadUserPort.getById(2L)).thenReturn(Optional.of(u));
 
         server.expect(once(), requestTo("https://api.mercadopago.com/checkout/preferences"))
                 .andExpect(method(POST))
@@ -75,6 +81,10 @@ public class MercadoPagoProviderAdapterTest {
     void startCheckout_withHttpsReturnUrl_setsAutoReturn() {
         Mockito.when(userQueryPort.existsById(2L)).thenReturn(true);
         Mockito.when(userQueryPort.findNameById(2L)).thenReturn("Autor X");
+        User u = new User();
+        u.setId(2L);
+        u.setPrice(new BigDecimal("1200"));
+        Mockito.when(loadUserPort.getById(2L)).thenReturn(Optional.of(u));
 
         server.expect(once(), requestTo("https://api.mercadopago.com/checkout/preferences"))
                 .andExpect(method(POST))
