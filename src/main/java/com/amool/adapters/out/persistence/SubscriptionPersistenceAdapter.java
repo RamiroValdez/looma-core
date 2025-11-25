@@ -36,7 +36,7 @@ public class SubscriptionPersistenceAdapter implements SubscriptionPersistencePo
         entityManager.createNativeQuery(
                 "INSERT INTO suscribe_autor (user_id, autor_id, subscribed_at, notified) " +
                 "VALUES (:userId, :authorId, CURRENT_TIMESTAMP, false) " +
-                "ON CONFLICT (user_id, autor_id) DO UPDATE SET subscribed_at = CURRENT_TIMESTAMP")
+                "ON CONFLICT (user_id, autor_id) DO UPDATE SET created_at = CURRENT_TIMESTAMP")
                 .setParameter("userId", userId)
                 .setParameter("authorId", authorId)
                 .executeUpdate();
@@ -47,7 +47,7 @@ public class SubscriptionPersistenceAdapter implements SubscriptionPersistencePo
         entityManager.createNativeQuery(
                 "INSERT INTO suscribe_work (user_id, work_id, subscribed_at, notified) " +
                 "VALUES (:userId, :workId, CURRENT_TIMESTAMP, false) " +
-                "ON CONFLICT (user_id, work_id) DO UPDATE SET subscribed_at = CURRENT_TIMESTAMP")
+                "ON CONFLICT (user_id, work_id) DO UPDATE SET created_at = CURRENT_TIMESTAMP")
                 .setParameter("userId", userId)
                 .setParameter("workId", workId)
                 .executeUpdate();

@@ -19,6 +19,7 @@ public class UserRestMapper {
         dto.setEmail(user.getEmail());
         dto.setPhoto(user.getPhoto());
         dto.setMoney(user.getMoney().toString());
+        dto.setPrice(user.getPrice());
         return dto;
         }
 
@@ -31,6 +32,7 @@ public class UserRestMapper {
         user.setUsername(userDto.getUsername());
         user.setEmail(userDto.getEmail());
         user.setPhoto(userDto.getPhoto());
+        user.setPrice(userDto.getPrice());
         if(userDto.getMoney() != null) {
             user.setMoney(userDto.getMoney());
         }
