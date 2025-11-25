@@ -1,15 +1,7 @@
 package com.amool.application.usecases;
 
-import com.amool.application.port.out.PaymentAuditPort;
-import com.amool.application.port.out.UserBalancePort;
-import com.amool.application.port.out.PaymentRecordPort;
-import com.amool.application.port.out.ObtainWorkByIdPort;
-import com.amool.application.port.out.LoadChapterPort;
-import com.amool.application.port.out.PaymentSessionLinkPort;
-import com.amool.domain.model.Work;
-import com.amool.domain.model.Chapter;
-import com.amool.domain.model.PaymentRecord;
-import com.amool.domain.model.SubscriptionType;
+import com.amool.application.port.out.*;
+import com.amool.domain.model.*;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
@@ -31,15 +23,13 @@ public class ProcessMercadoPagoWebhookUseCase {
     private final LoadChapterPort loadChapterPort;
     private final SubscribeUserUseCase subscribeUserUseCase;
     private final PaymentSessionLinkPort paymentSessionLinkPort;
+    private final LoadUserPort loadUserPort;
 
     @Value("${payments.mercadopago.accessToken}")
     private String accessToken;
 
     @Value("${payments.mercadopago.apiBase:https://api.mercadopago.com}")
     private String apiBase;
-
-    @Value("${payments.pricing.author:0}")
-    private BigDecimal authorPrice;
 
     public ProcessMercadoPagoWebhookUseCase(RestTemplate restTemplate,
                                             PaymentAuditPort paymentAuditPort,
@@ -48,7 +38,8 @@ public class ProcessMercadoPagoWebhookUseCase {
                                             ObtainWorkByIdPort obtainWorkByIdPort,
                                             LoadChapterPort loadChapterPort,
                                             SubscribeUserUseCase subscribeUserUseCase,
-                                            PaymentSessionLinkPort paymentSessionLinkPort) {
+                                            PaymentSessionLinkPort paymentSessionLinkPort,
+                                            LoadUserPort loadUserPort) {
         this.restTemplate = restTemplate;
         this.paymentAuditPort = paymentAuditPort;
         this.userBalancePort = userBalancePort;
@@ -57,6 +48,7 @@ public class ProcessMercadoPagoWebhookUseCase {
         this.loadChapterPort = loadChapterPort;
         this.subscribeUserUseCase = subscribeUserUseCase;
         this.paymentSessionLinkPort = paymentSessionLinkPort;
+        this.loadUserPort = loadUserPort;
     }
 
     public ProcessMercadoPagoWebhookResult execute(String paymentId, String externalReference, Map<?, ?> paymentData) {
@@ -229,8 +221,10 @@ public class ProcessMercadoPagoWebhookUseCase {
                 return c.getPrice();
             }
             case AUTHOR -> {
-                if (authorPrice == null) return BigDecimal.ZERO;
-                return authorPrice;
+                User u = loadUserPort.getById(ref.targetId)
+                        .orElseThrow(() -> new IllegalArgumentException("author not found"));
+                if (u.getPrice() == null) return BigDecimal.ZERO;
+                return u.getPrice();
             }
             default -> {
                 return BigDecimal.ZERO;

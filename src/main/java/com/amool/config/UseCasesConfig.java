@@ -417,7 +417,8 @@ public class UseCasesConfig {
                 obtainWorkByIdPort,
                 loadChapterPort,
                 subscribeUserUseCase(),
-                paymentSessionLinkPort
+                paymentSessionLinkPort,
+                loadUserPort
         );
     }
 
