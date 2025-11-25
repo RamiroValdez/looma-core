@@ -1,10 +1,10 @@
 package com.amool.adapters.in.rest.controllers;
 
 import com.amool.adapters.in.rest.dtos.ChapterResponseDto;
-import com.amool.application.usecases.ExtractTextFromFileUseCase;
-import com.amool.application.usecases.GetChapterForEditUseCase;
-import com.amool.application.usecases.UpdateChapterUseCase;
-import com.amool.application.usecases.ValidateChapterAccessUseCase;
+import com.amool.application.usecases.ExtractTextFromFile;
+import com.amool.application.usecases.GetChapterForEdit;
+import com.amool.application.usecases.UpdateChapter;
+import com.amool.application.usecases.ValidateChapterAccess;
 import com.amool.domain.model.Chapter;
 import com.amool.security.JwtUserPrincipal;
 import org.junit.jupiter.api.AfterEach;
@@ -24,10 +24,10 @@ import static org.mockito.Mockito.*;
 
 public class EditChapterControllerAuthTest {
 
-    private GetChapterForEditUseCase getChapterForEditUseCase;
-    private UpdateChapterUseCase updateChapterUseCase;
-    private ExtractTextFromFileUseCase extractTextFromFileUseCase;
-    private ValidateChapterAccessUseCase validateChapterAccessUseCase;
+    private GetChapterForEdit getChapterForEdit;
+    private UpdateChapter updateChapter;
+    private ExtractTextFromFile extractTextFromFile;
+    private ValidateChapterAccess validateChapterAccess;
 
     private EditChapterController controller;
 
@@ -35,16 +35,16 @@ public class EditChapterControllerAuthTest {
 
     @BeforeEach
     void setup() {
-        getChapterForEditUseCase = mock(GetChapterForEditUseCase.class);
-        updateChapterUseCase = mock(UpdateChapterUseCase.class);
-        extractTextFromFileUseCase = mock(ExtractTextFromFileUseCase.class);
-        validateChapterAccessUseCase = mock(ValidateChapterAccessUseCase.class);
+        getChapterForEdit = mock(GetChapterForEdit.class);
+        updateChapter = mock(UpdateChapter.class);
+        extractTextFromFile = mock(ExtractTextFromFile.class);
+        validateChapterAccess = mock(ValidateChapterAccess.class);
 
         controller = new EditChapterController(
-                getChapterForEditUseCase,
-                updateChapterUseCase,
-                extractTextFromFileUseCase,
-                validateChapterAccessUseCase
+                getChapterForEdit,
+                updateChapter,
+                extractTextFromFile,
+                validateChapterAccess
         );
         originalContext = SecurityContextHolder.getContext();
     }
@@ -72,32 +72,32 @@ public class EditChapterControllerAuthTest {
 
     private void givenAccessGrantedForOwner(Long chapterId, Long workId, Long ownerUserId) {
         Chapter chapter = createChapter(chapterId, workId);
-        ValidateChapterAccessUseCase.ChapterAccessResult accessResult =
-                ValidateChapterAccessUseCase.ChapterAccessResult.accessGranted(chapter, workId, ownerUserId, true);
-        when(validateChapterAccessUseCase.validateAccess(chapterId, ownerUserId)).thenReturn(accessResult);
+        ValidateChapterAccess.ChapterAccessResult accessResult =
+                ValidateChapterAccess.ChapterAccessResult.accessGranted(chapter, workId, ownerUserId, true);
+        when(validateChapterAccess.validateAccess(chapterId, ownerUserId)).thenReturn(accessResult);
     }
 
     private void givenAccessGrantedForSubscriber(Long chapterId, Long workId, Long subscriberUserId) {
         Chapter chapter = createChapter(chapterId, workId);
-        ValidateChapterAccessUseCase.ChapterAccessResult accessResult =
-                ValidateChapterAccessUseCase.ChapterAccessResult.accessGranted(chapter, workId, 3L, false);
-        when(validateChapterAccessUseCase.validateAccess(chapterId, subscriberUserId)).thenReturn(accessResult);
+        ValidateChapterAccess.ChapterAccessResult accessResult =
+                ValidateChapterAccess.ChapterAccessResult.accessGranted(chapter, workId, 3L, false);
+        when(validateChapterAccess.validateAccess(chapterId, subscriberUserId)).thenReturn(accessResult);
     }
 
     private void givenAccessDenied(Long chapterId, Long userId) {
-        ValidateChapterAccessUseCase.ChapterAccessResult accessResult =
-                ValidateChapterAccessUseCase.ChapterAccessResult.accessDenied();
-        when(validateChapterAccessUseCase.validateAccess(chapterId, userId)).thenReturn(accessResult);
+        ValidateChapterAccess.ChapterAccessResult accessResult =
+                ValidateChapterAccess.ChapterAccessResult.accessDenied();
+        when(validateChapterAccess.validateAccess(chapterId, userId)).thenReturn(accessResult);
     }
 
     private void givenChapterNotFound(Long chapterId, Long userId) {
-        ValidateChapterAccessUseCase.ChapterAccessResult accessResult =
-                ValidateChapterAccessUseCase.ChapterAccessResult.chapterNotFound();
-        when(validateChapterAccessUseCase.validateAccess(chapterId, userId)).thenReturn(accessResult);
+        ValidateChapterAccess.ChapterAccessResult accessResult =
+                ValidateChapterAccess.ChapterAccessResult.chapterNotFound();
+        when(validateChapterAccess.validateAccess(chapterId, userId)).thenReturn(accessResult);
     }
 
     private void givenGetChapterForEditWillReturnDto(Long chapterId) {
-        when(getChapterForEditUseCase.execute(eq(chapterId), any())).thenReturn(Optional.of(new ChapterResponseDto()));
+        when(getChapterForEdit.execute(eq(chapterId), any())).thenReturn(Optional.of(new ChapterResponseDto()));
     }
 
     // ------------------- when -------------------
@@ -115,19 +115,19 @@ public class EditChapterControllerAuthTest {
     }
 
     private void thenValidateAccessCalledWith(Long chapterId, Long userId) {
-        verify(validateChapterAccessUseCase).validateAccess(chapterId, userId);
+        verify(validateChapterAccess).validateAccess(chapterId, userId);
     }
 
     private void thenGetChapterForEditCalledWith(Long chapterId) {
-        verify(getChapterForEditUseCase).execute(chapterId, null);
+        verify(getChapterForEdit).execute(chapterId, null);
     }
 
     private void thenNoInteractionsWithGetChapterForEdit() {
-        verifyNoInteractions(getChapterForEditUseCase);
+        verifyNoInteractions(getChapterForEdit);
     }
 
     private void thenNoInteractionsWithValidateAccess() {
-        verifyNoInteractions(validateChapterAccessUseCase);
+        verifyNoInteractions(validateChapterAccess);
     }
 
 

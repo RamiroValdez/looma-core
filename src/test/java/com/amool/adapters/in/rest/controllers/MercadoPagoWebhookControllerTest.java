@@ -1,7 +1,7 @@
 package com.amool.adapters.in.rest.controllers;
 
-import com.amool.application.usecases.ExtractPaymentIdFromWebhookUseCase;
-import com.amool.application.usecases.ProcessMercadoPagoWebhookUseCase;
+import com.amool.application.usecases.ExtractPaymentIdFromWebhook;
+import com.amool.application.usecases.ProcessMercadoPagoWebhook;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.http.ResponseEntity;
@@ -15,50 +15,50 @@ import static org.mockito.Mockito.*;
 
 public class MercadoPagoWebhookControllerTest {
 
-    private ExtractPaymentIdFromWebhookUseCase extractPaymentIdUseCase;
-    private ProcessMercadoPagoWebhookUseCase processMercadoPagoWebhookUseCase;
+    private ExtractPaymentIdFromWebhook extractPaymentIdUseCase;
+    private ProcessMercadoPagoWebhook processMercadoPagoWebhook;
 
     private MercadoPagoWebhookController controller;
 
     @BeforeEach
     void setup() {
-        extractPaymentIdUseCase = mock(ExtractPaymentIdFromWebhookUseCase.class);
-        processMercadoPagoWebhookUseCase = mock(ProcessMercadoPagoWebhookUseCase.class);
+        extractPaymentIdUseCase = mock(ExtractPaymentIdFromWebhook.class);
+        processMercadoPagoWebhook = mock(ProcessMercadoPagoWebhook.class);
 
         controller = new MercadoPagoWebhookController(
                 extractPaymentIdUseCase,
-                processMercadoPagoWebhookUseCase
+                processMercadoPagoWebhook
         );
     }
 
     private void givenPaymentIdExtractedFromParam(String idParam, String extractedId) {
-        ExtractPaymentIdFromWebhookUseCase.ExtractPaymentIdResult extractResult =
-                ExtractPaymentIdFromWebhookUseCase.ExtractPaymentIdResult.success(extractedId);
+        ExtractPaymentIdFromWebhook.ExtractPaymentIdResult extractResult =
+                ExtractPaymentIdFromWebhook.ExtractPaymentIdResult.success(extractedId);
         when(extractPaymentIdUseCase.execute(eq(idParam), isNull())).thenReturn(extractResult);
     }
 
     private void givenPaymentIdExtractedFromBody(Map<String, Object> body, String extractedId) {
-        ExtractPaymentIdFromWebhookUseCase.ExtractPaymentIdResult extractResult =
-                ExtractPaymentIdFromWebhookUseCase.ExtractPaymentIdResult.success(extractedId);
+        ExtractPaymentIdFromWebhook.ExtractPaymentIdResult extractResult =
+                ExtractPaymentIdFromWebhook.ExtractPaymentIdResult.success(extractedId);
         when(extractPaymentIdUseCase.execute(isNull(), eq(body))).thenReturn(extractResult);
     }
 
     private void givenPaymentIdExtractionError(String message) {
-        ExtractPaymentIdFromWebhookUseCase.ExtractPaymentIdResult extractResult =
-                ExtractPaymentIdFromWebhookUseCase.ExtractPaymentIdResult.error(message);
+        ExtractPaymentIdFromWebhook.ExtractPaymentIdResult extractResult =
+                ExtractPaymentIdFromWebhook.ExtractPaymentIdResult.error(message);
         when(extractPaymentIdUseCase.execute(isNull(), isNull())).thenReturn(extractResult);
     }
 
     private void givenProcessWebhookSucceeds(String paymentId) {
-        ProcessMercadoPagoWebhookUseCase.ProcessMercadoPagoWebhookResult processResult =
-                ProcessMercadoPagoWebhookUseCase.ProcessMercadoPagoWebhookResult.success();
-        when(processMercadoPagoWebhookUseCase.execute(eq(paymentId), isNull(), isNull())).thenReturn(processResult);
+        ProcessMercadoPagoWebhook.ProcessMercadoPagoWebhookResult processResult =
+                ProcessMercadoPagoWebhook.ProcessMercadoPagoWebhookResult.success();
+        when(processMercadoPagoWebhook.execute(eq(paymentId), isNull(), isNull())).thenReturn(processResult);
     }
 
     private void givenProcessWebhookIgnored(String paymentId, String reason) {
-        ProcessMercadoPagoWebhookUseCase.ProcessMercadoPagoWebhookResult processResult =
-                ProcessMercadoPagoWebhookUseCase.ProcessMercadoPagoWebhookResult.ignored(reason);
-        when(processMercadoPagoWebhookUseCase.execute(eq(paymentId), isNull(), isNull())).thenReturn(processResult);
+        ProcessMercadoPagoWebhook.ProcessMercadoPagoWebhookResult processResult =
+                ProcessMercadoPagoWebhook.ProcessMercadoPagoWebhookResult.ignored(reason);
+        when(processMercadoPagoWebhook.execute(eq(paymentId), isNull(), isNull())).thenReturn(processResult);
     }
 
     private ResponseEntity<?> whenHandleGetPayment(String idParam) {
@@ -86,11 +86,11 @@ public class MercadoPagoWebhookControllerTest {
     }
 
     private void thenProcessCalledWith(String paymentId) {
-        verify(processMercadoPagoWebhookUseCase).execute(eq(paymentId), isNull(), isNull());
+        verify(processMercadoPagoWebhook).execute(eq(paymentId), isNull(), isNull());
     }
 
     private void thenNoProcessInteractions() {
-        verifyNoInteractions(processMercadoPagoWebhookUseCase);
+        verifyNoInteractions(processMercadoPagoWebhook);
     }
 
     private Map<String, Object> bodyWithDataId(String id) {

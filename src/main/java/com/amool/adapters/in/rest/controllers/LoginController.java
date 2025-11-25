@@ -4,7 +4,7 @@ import com.amool.adapters.in.rest.dtos.LoginRequest;
 import com.amool.adapters.in.rest.dtos.UserDto;
 import com.amool.adapters.in.rest.dtos.AuthResponse;
 import com.amool.application.usecases.GetUserPhoto;
-import com.amool.application.usecases.LoginUseCase;
+import com.amool.application.usecases.Login;
 import com.amool.security.JwtService;
 import com.amool.security.JwtUserPrincipal;
 import org.springframework.http.ResponseEntity;
@@ -19,12 +19,12 @@ import org.springframework.web.bind.annotation.RestController;
 @RequestMapping("/api/auth")
 public class LoginController {
 
-    private final LoginUseCase loginUseCase;
+    private final Login login;
     private final JwtService jwtService;
     private final GetUserPhoto getUserPhoto;
 
-    public LoginController(LoginUseCase loginUseCase, JwtService jwtService, GetUserPhoto getUserPhoto) {
-        this.loginUseCase = loginUseCase;
+    public LoginController(Login login, JwtService jwtService, GetUserPhoto getUserPhoto) {
+        this.login = login;
         this.jwtService = jwtService;
         this.getUserPhoto = getUserPhoto;
     }
@@ -46,7 +46,7 @@ public class LoginController {
 
     @PostMapping("/login")
     public ResponseEntity<AuthResponse> login(@RequestBody LoginRequest request) {
-        return loginUseCase.execute(request.getEmail(), request.getPassword())
+        return login.execute(request.getEmail(), request.getPassword())
                 .map(user -> {
                     var claims = new java.util.HashMap<String, Object>();
                     claims.put("userId", user.getId());

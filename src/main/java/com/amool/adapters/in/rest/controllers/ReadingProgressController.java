@@ -3,7 +3,7 @@ package com.amool.adapters.in.rest.controllers;
 import org.springframework.web.bind.annotation.*;
 
 import com.amool.adapters.in.rest.dtos.ReadingProgressDto;
-import com.amool.application.usecases.UpdateReadingProgressUseCase;
+import com.amool.application.usecases.UpdateReadingProgress;
 import org.springframework.http.ResponseEntity;
 
 
@@ -11,15 +11,15 @@ import org.springframework.http.ResponseEntity;
 @RequestMapping("/api/reading-progress")
 public class ReadingProgressController {
 
-    private final UpdateReadingProgressUseCase updateReadingProgressUseCase;
+    private final UpdateReadingProgress updateReadingProgress;
     
-    public ReadingProgressController(UpdateReadingProgressUseCase updateReadingProgressUseCase) {
-        this.updateReadingProgressUseCase = updateReadingProgressUseCase;
+    public ReadingProgressController(UpdateReadingProgress updateReadingProgress) {
+        this.updateReadingProgress = updateReadingProgress;
     }
     
     @PostMapping("/update")
     public ResponseEntity<Void> updateReadingProgress(@RequestBody ReadingProgressDto readingProgressDto) {
-        boolean result = updateReadingProgressUseCase.execute(readingProgressDto.getUserId(), readingProgressDto.getWorkId(), readingProgressDto.getChapterId());
+        boolean result = updateReadingProgress.execute(readingProgressDto.getUserId(), readingProgressDto.getWorkId(), readingProgressDto.getChapterId());
         if (!result) {
             return ResponseEntity.badRequest().build();
         }

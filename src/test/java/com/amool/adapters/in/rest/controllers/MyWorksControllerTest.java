@@ -1,9 +1,9 @@
 package com.amool.adapters.in.rest.controllers;
 
 import com.amool.adapters.in.rest.dtos.WorkResponseDto;
-import com.amool.application.usecases.GetAuthenticatedUserWorksUseCase;
-import com.amool.application.usecases.UpdateBannerUseCase;
-import com.amool.application.usecases.UpdateCoverUseCase;
+import com.amool.application.usecases.GetAuthenticatedUserWorks;
+import com.amool.application.usecases.UpdateBanner;
+import com.amool.application.usecases.UpdateCover;
 import com.amool.domain.exception.UnauthorizedAccessException;
 import com.amool.domain.model.Work;
 import com.amool.security.JwtUserPrincipal;
@@ -26,18 +26,18 @@ import static org.mockito.Mockito.*;
 public class MyWorksControllerTest {
 
     private MyWorksController controller;
-    private GetAuthenticatedUserWorksUseCase getAuthenticatedUserWorksUseCase;
-    private UpdateCoverUseCase updateCoverUseCase;
-    private UpdateBannerUseCase updateBannerUseCase;
+    private GetAuthenticatedUserWorks getAuthenticatedUserWorks;
+    private UpdateCover updateCover;
+    private UpdateBanner updateBanner;
 
     private static final Long USER_ID = 77L;
 
     @BeforeEach
     void setUp() {
-        getAuthenticatedUserWorksUseCase = Mockito.mock(GetAuthenticatedUserWorksUseCase.class);
-        updateCoverUseCase = Mockito.mock(UpdateCoverUseCase.class);
-        updateBannerUseCase = Mockito.mock(UpdateBannerUseCase.class);
-        controller = new MyWorksController(getAuthenticatedUserWorksUseCase, updateCoverUseCase, updateBannerUseCase);
+        getAuthenticatedUserWorks = Mockito.mock(GetAuthenticatedUserWorks.class);
+        updateCover = Mockito.mock(UpdateCover.class);
+        updateBanner = Mockito.mock(UpdateBanner.class);
+        controller = new MyWorksController(getAuthenticatedUserWorks, updateCover, updateBanner);
     }
 
 
@@ -88,7 +88,7 @@ public class MyWorksControllerTest {
     void updateCover_shouldReturnNotFound_onIllegalArgument() throws Exception {
         JwtUserPrincipal principal = givenPrincipal(USER_ID);
         MultipartFile file = givenCoverFile();
-        doThrow(new IllegalArgumentException("not found")).when(updateCoverUseCase)
+        doThrow(new IllegalArgumentException("not found")).when(updateCover)
                 .execute(eq(10L), any(), eq(USER_ID), any());
 
         ResponseEntity<Void> response = whenUpdatingCover(10L, null, file, principal);
@@ -101,7 +101,7 @@ public class MyWorksControllerTest {
     void updateCover_shouldReturnForbidden_onSecurityException() throws Exception {
         JwtUserPrincipal principal = givenPrincipal(USER_ID);
         MultipartFile file = givenCoverFile();
-        doThrow(new SecurityException("forbidden")).when(updateCoverUseCase)
+        doThrow(new SecurityException("forbidden")).when(updateCover)
                 .execute(eq(10L), any(), eq(USER_ID), any());
 
         ResponseEntity<Void> response = whenUpdatingCover(10L, null, file, principal);
@@ -114,7 +114,7 @@ public class MyWorksControllerTest {
     void updateCover_shouldReturnBadRequest_onIOException() throws Exception {
         JwtUserPrincipal principal = givenPrincipal(USER_ID);
         MultipartFile file = givenCoverFile();
-        doThrow(new IOException("io error")).when(updateCoverUseCase)
+        doThrow(new IOException("io error")).when(updateCover)
                 .execute(eq(10L), any(), eq(USER_ID), any());
 
         ResponseEntity<Void> response = whenUpdatingCover(10L, null, file, principal);
@@ -127,7 +127,7 @@ public class MyWorksControllerTest {
     void updateCover_shouldReturn500_onInterruptedException() throws Exception {
         JwtUserPrincipal principal = givenPrincipal(USER_ID);
         MultipartFile file = givenCoverFile();
-        doThrow(new InterruptedException("interrupted")).when(updateCoverUseCase)
+        doThrow(new InterruptedException("interrupted")).when(updateCover)
                 .execute(eq(10L), any(), eq(USER_ID), any());
 
         boolean wasInterruptedBefore = Thread.currentThread().isInterrupted();
@@ -160,7 +160,7 @@ public class MyWorksControllerTest {
     void updateBanner_shouldReturnNotFound_onIllegalArgument() throws Exception {
         JwtUserPrincipal principal = givenPrincipal(USER_ID);
         MultipartFile file = givenBannerFile();
-        doThrow(new IllegalArgumentException("not found")).when(updateBannerUseCase)
+        doThrow(new IllegalArgumentException("not found")).when(updateBanner)
                 .execute(eq(10L), any(), eq(USER_ID));
 
         ResponseEntity<Void> response = whenUpdatingBanner(10L, file, principal);
@@ -173,7 +173,7 @@ public class MyWorksControllerTest {
     void updateBanner_shouldReturnForbidden_onSecurityException() throws Exception {
         JwtUserPrincipal principal = givenPrincipal(USER_ID);
         MultipartFile file = givenBannerFile();
-        doThrow(new SecurityException("forbidden")).when(updateBannerUseCase)
+        doThrow(new SecurityException("forbidden")).when(updateBanner)
                 .execute(eq(10L), any(), eq(USER_ID));
 
         ResponseEntity<Void> response = whenUpdatingBanner(10L, file, principal);
@@ -186,7 +186,7 @@ public class MyWorksControllerTest {
     void updateBanner_shouldReturnBadRequest_onIOException() throws Exception {
         JwtUserPrincipal principal = givenPrincipal(USER_ID);
         MultipartFile file = givenBannerFile();
-        doThrow(new IOException("io error")).when(updateBannerUseCase)
+        doThrow(new IOException("io error")).when(updateBanner)
                 .execute(eq(10L), any(), eq(USER_ID));
 
         ResponseEntity<Void> response = whenUpdatingBanner(10L, file, principal);
@@ -210,11 +210,11 @@ public class MyWorksControllerTest {
     }
 
     private void givenUseCaseReturnsWorks(List<Work> works) {
-        when(getAuthenticatedUserWorksUseCase.execute(eq(USER_ID))).thenReturn(works);
+        when(getAuthenticatedUserWorks.execute(eq(USER_ID))).thenReturn(works);
     }
 
     private void givenUseCaseThrows(RuntimeException ex) {
-        when(getAuthenticatedUserWorksUseCase.execute(eq(USER_ID))).thenThrow(ex);
+        when(getAuthenticatedUserWorks.execute(eq(USER_ID))).thenThrow(ex);
     }
 
     private MultipartFile givenCoverFile() {
@@ -251,7 +251,7 @@ public class MyWorksControllerTest {
     }
 
     private void thenGetWorksUseCaseWasCalledWith(Long userId) {
-        verify(getAuthenticatedUserWorksUseCase, times(1)).execute(eq(userId));
+        verify(getAuthenticatedUserWorks, times(1)).execute(eq(userId));
     }
 
     private void thenShouldReturnNoContent(ResponseEntity<Void> response) {
@@ -280,10 +280,10 @@ public class MyWorksControllerTest {
     }
 
     private void thenUpdateCoverWasCalled(Long workId, MultipartFile file, Long userId, String iaUrl) throws Exception {
-        verify(updateCoverUseCase, times(1)).execute(eq(workId), eq(file), eq(userId), eq(iaUrl));
+        verify(updateCover, times(1)).execute(eq(workId), eq(file), eq(userId), eq(iaUrl));
     }
 
     private void thenUpdateBannerWasCalled(Long workId, MultipartFile file, Long userId) throws Exception {
-        verify(updateBannerUseCase, times(1)).execute(eq(workId), eq(file), eq(userId));
+        verify(updateBanner, times(1)).execute(eq(workId), eq(file), eq(userId));
     }
 }

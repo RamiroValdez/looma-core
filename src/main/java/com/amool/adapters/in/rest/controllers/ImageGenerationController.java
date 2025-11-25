@@ -1,8 +1,7 @@
 package com.amool.adapters.in.rest.controllers;
 
 import com.amool.adapters.in.rest.dtos.*;
-import com.amool.adapters.in.rest.dtos.*;
-import com.amool.application.usecases.GenerateImageUrlUseCase;
+import com.amool.application.usecases.GenerateImageUrl;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -12,15 +11,15 @@ import java.util.List;
 @RequestMapping("/api/images")
 public class ImageGenerationController {
 
-    private final GenerateImageUrlUseCase generateImageUrlUseCase;
+    private final GenerateImageUrl generateImageUrl;
 
-    public ImageGenerationController(GenerateImageUrlUseCase generateImageUrlUseCase) {
-        this.generateImageUrlUseCase = generateImageUrlUseCase;
+    public ImageGenerationController(GenerateImageUrl generateImageUrl) {
+        this.generateImageUrl = generateImageUrl;
     }
 
     @PostMapping("/generate")
     public ResponseEntity<ImageUrlResponseDto> generate(@RequestBody ImagePromptDto request) {
-        String url = generateImageUrlUseCase.execute(
+        String url = generateImageUrl.execute(
                 request.artisticStyleId(),
                 request.colorPaletteId(),
                 request.compositionId(),

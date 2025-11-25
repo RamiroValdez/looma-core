@@ -2,7 +2,7 @@ package com.amool.application.usecase;
 
 import com.amool.adapters.in.rest.dtos.LikeResponseDto;
 import com.amool.application.port.out.LikePort;
-import com.amool.application.usecases.ToggleWorkLikeUseCase;
+import com.amool.application.usecases.ToggleWorkLike;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
@@ -21,7 +21,7 @@ class ToggleWorkLikeTest {
     private LikePort likePort;
 
     @InjectMocks
-    private ToggleWorkLikeUseCase toggleWorkLikeUseCase;
+    private ToggleWorkLike toggleWorkLike;
 
     private static final Long WORK_ID = 1L;
     private static final Long USER_ID = 1L;
@@ -199,40 +199,40 @@ class ToggleWorkLikeTest {
     }
 
     private LikeResponseDto whenToggleLikeIsExecuted() {
-        return toggleWorkLikeUseCase.execute(WORK_ID, USER_ID);
+        return toggleWorkLike.execute(WORK_ID, USER_ID);
     }
 
     private LikeResponseDto whenToggleLikeIsExecutedForSpecificWork(Long workId) {
-        return toggleWorkLikeUseCase.execute(workId, USER_ID);
+        return toggleWorkLike.execute(workId, USER_ID);
     }
 
     private LikeResponseDto whenToggleLikeIsExecutedForSpecificUser(Long userId) {
-        return toggleWorkLikeUseCase.execute(WORK_ID, userId);
+        return toggleWorkLike.execute(WORK_ID, userId);
     }
 
     private IllegalArgumentException whenToggleLikeIsExecutedWithNullWorkId(Long nullWorkId) {
         return assertThrows(IllegalArgumentException.class,
-            () -> toggleWorkLikeUseCase.execute(nullWorkId, USER_ID));
+            () -> toggleWorkLike.execute(nullWorkId, USER_ID));
     }
 
     private IllegalArgumentException whenToggleLikeIsExecutedWithNullUserId(Long nullUserId) {
         return assertThrows(IllegalArgumentException.class,
-            () -> toggleWorkLikeUseCase.execute(WORK_ID, nullUserId));
+            () -> toggleWorkLike.execute(WORK_ID, nullUserId));
     }
 
     private RuntimeException whenToggleLikeIsExecutedAndPortFails() {
         return assertThrows(RuntimeException.class,
-            () -> toggleWorkLikeUseCase.execute(WORK_ID, USER_ID));
+            () -> toggleWorkLike.execute(WORK_ID, USER_ID));
     }
 
     private RuntimeException whenToggleLikeIsExecutedAndLikeOperationFails() {
         return assertThrows(RuntimeException.class,
-            () -> toggleWorkLikeUseCase.execute(WORK_ID, USER_ID));
+            () -> toggleWorkLike.execute(WORK_ID, USER_ID));
     }
 
     private RuntimeException whenToggleLikeIsExecutedAndUnlikeOperationFails() {
         return assertThrows(RuntimeException.class,
-            () -> toggleWorkLikeUseCase.execute(WORK_ID, USER_ID));
+            () -> toggleWorkLike.execute(WORK_ID, USER_ID));
     }
 
     private void thenLikeShouldBeAdded(LikeResponseDto response) {

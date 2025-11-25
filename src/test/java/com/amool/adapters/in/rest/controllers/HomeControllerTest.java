@@ -14,12 +14,12 @@ import org.junit.jupiter.api.Test;
 
 import com.amool.adapters.in.rest.dtos.WorkListDto;
 import com.amool.application.port.out.WorkPort;
-import com.amool.application.usecases.ObtainWorkListUseCase;
+import com.amool.application.usecases.ObtainWorkList;
 
 public class HomeControllerTest {
 
     private HomeController homeController;
-    private ObtainWorkListUseCase obtainWorkListUseCase;
+    private ObtainWorkList obtainWorkList;
     private WorkPort workPort;
 
     private static final Long TEST_USER_ID = 1L;
@@ -29,8 +29,8 @@ public class HomeControllerTest {
     @BeforeEach
     public void setUp() {
         workPort = Mockito.mock(WorkPort.class);
-        obtainWorkListUseCase = new ObtainWorkListUseCase(workPort, awsS3Port);
-        homeController = new HomeController(obtainWorkListUseCase);
+        obtainWorkList = new ObtainWorkList(workPort, awsS3Port);
+        homeController = new HomeController(obtainWorkList);
     }
 
     @Test

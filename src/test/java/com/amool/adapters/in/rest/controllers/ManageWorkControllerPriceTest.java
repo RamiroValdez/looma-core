@@ -1,9 +1,9 @@
 package com.amool.adapters.in.rest.controllers;
 
-import com.amool.application.usecases.CreateEmptyChapterUseCase;
-import com.amool.application.usecases.GetWorkPermissionsUseCase;
-import com.amool.application.usecases.ObtainWorkByIdUseCase;
-import com.amool.application.usecases.UpdateWorkUseCase;
+import com.amool.application.usecases.CreateEmptyChapter;
+import com.amool.application.usecases.GetWorkPermissions;
+import com.amool.application.usecases.ObtainWorkById;
+import com.amool.application.usecases.UpdateWork;
 import com.amool.security.JwtUserPrincipal;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -35,10 +35,10 @@ public class ManageWorkControllerPriceTest {
     @Autowired
     private MockMvc mockMvc;
 
-    @MockitoBean private ObtainWorkByIdUseCase obtainWorkByIdUseCase;
-    @MockitoBean private CreateEmptyChapterUseCase createEmptyChapterUseCase;
-    @MockitoBean private GetWorkPermissionsUseCase getWorkPermissionsUseCase;
-    @MockitoBean private UpdateWorkUseCase updateWorkUseCase;
+    @MockitoBean private ObtainWorkById obtainWorkById;
+    @MockitoBean private CreateEmptyChapter createEmptyChapter;
+    @MockitoBean private GetWorkPermissions getWorkPermissions;
+    @MockitoBean private UpdateWork updateWork;
 
     private static final Long USER_ID = 100L;
 
@@ -50,16 +50,16 @@ public class ManageWorkControllerPriceTest {
     }
 
     private void givenUpdateWorkSucceeds(Long workId) {
-        when(updateWorkUseCase.execute(eq(workId), any(), anySet(), anySet(), anyString())).thenReturn(true);
+        when(updateWork.execute(eq(workId), any(), anySet(), anySet(), anyString())).thenReturn(true);
     }
 
     private void givenUpdateWorkThrows(Long workId) {
-        when(updateWorkUseCase.execute(eq(workId), any(), anySet(), anySet(), anyString()))
+        when(updateWork.execute(eq(workId), any(), anySet(), anySet(), anyString()))
                 .thenThrow(new RuntimeException("boom"));
     }
 
     private void givenUpdateWorkSucceedsWithScaledPriceAndEmptySets(Long workId, BigDecimal expectedPrice, String expectedState) {
-        when(updateWorkUseCase.execute(eq(workId),
+        when(updateWork.execute(eq(workId),
                 argThat(bd -> bd != null && bd.compareTo(expectedPrice) == 0),
                 eq(Collections.emptySet()),
                 eq(Collections.emptySet()),
@@ -85,12 +85,12 @@ public class ManageWorkControllerPriceTest {
     }
 
     private void thenUseCaseCalledWithState(Long workId, String state) {
-        verify(updateWorkUseCase, times(1))
+        verify(updateWork, times(1))
                 .execute(eq(workId), any(), anySet(), anySet(), eq(state));
     }
 
     private void thenUseCaseCalledWithScaledPriceAndEmptySets(Long workId, BigDecimal expectedPrice, String state) {
-        verify(updateWorkUseCase, times(1)).execute(eq(workId),
+        verify(updateWork, times(1)).execute(eq(workId),
                 argThat(bd -> bd != null && bd.compareTo(expectedPrice) == 0),
                 eq(Collections.emptySet()),
                 eq(Collections.emptySet()),

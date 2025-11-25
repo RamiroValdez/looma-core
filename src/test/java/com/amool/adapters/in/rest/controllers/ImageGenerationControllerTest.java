@@ -1,7 +1,7 @@
 package com.amool.adapters.in.rest.controllers;
 
 import com.amool.adapters.in.rest.dtos.*;
-import com.amool.application.usecases.GenerateImageUrlUseCase;
+import com.amool.application.usecases.GenerateImageUrl;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -18,12 +18,12 @@ import static org.mockito.Mockito.*;
 public class ImageGenerationControllerTest {
 
     private ImageGenerationController controller;
-    private GenerateImageUrlUseCase generateImageUrlUseCase;
+    private GenerateImageUrl generateImageUrl;
 
     @BeforeEach
     void setUp() {
-        generateImageUrlUseCase = Mockito.mock(GenerateImageUrlUseCase.class);
-        controller = new ImageGenerationController(generateImageUrlUseCase);
+        generateImageUrl = Mockito.mock(GenerateImageUrl.class);
+        controller = new ImageGenerationController(generateImageUrl);
     }
 
     @Test
@@ -80,7 +80,7 @@ public class ImageGenerationControllerTest {
     }
 
     private void givenGenerationWillReturn(String url) {
-        when(generateImageUrlUseCase.execute(anyString(), anyString(), anyString(), anyString()))
+        when(generateImageUrl.execute(anyString(), anyString(), anyString(), anyString()))
                 .thenReturn(url);
     }
 
@@ -111,7 +111,7 @@ public class ImageGenerationControllerTest {
     }
 
     private void thenUseCaseWasCalledWith(String styleId, String paletteId, String compositionId, String description) {
-        verify(generateImageUrlUseCase, times(1))
+        verify(generateImageUrl, times(1))
                 .execute(eq(styleId), eq(paletteId), eq(compositionId), eq(description));
     }
 

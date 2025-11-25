@@ -2,7 +2,7 @@ package com.amool.adapters.in.rest.controllers;
 
 import com.amool.adapters.in.rest.dtos.WorkResponseDto;
 import com.amool.adapters.in.rest.dtos.WorkSearchFilterDto;
-import com.amool.application.usecases.SearchAndFiltrateUseCase;
+import com.amool.application.usecases.SearchAndFiltrate;
 import com.amool.domain.model.Work;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
@@ -26,12 +26,12 @@ import static org.mockito.Mockito.*;
 public class ExploreControllerTest {
 
     private ExploreController exploreController;
-    private SearchAndFiltrateUseCase searchAndFiltrateUseCase;
+    private SearchAndFiltrate searchAndFiltrate;
 
     @BeforeEach
     public void setUp() {
-        searchAndFiltrateUseCase = Mockito.mock(SearchAndFiltrateUseCase.class);
-        exploreController = new ExploreController(searchAndFiltrateUseCase);
+        searchAndFiltrate = Mockito.mock(SearchAndFiltrate.class);
+        exploreController = new ExploreController(searchAndFiltrate);
     }
 
     @Test
@@ -115,11 +115,11 @@ public class ExploreControllerTest {
     }
 
     private void givenSearchWillReturn(Page<Work> page) {
-        when(searchAndFiltrateUseCase.execute(any(), any())).thenReturn(page);
+        when(searchAndFiltrate.execute(any(), any())).thenReturn(page);
     }
 
     private void givenSearchWillReturnForNullFilter(Page<Work> page) {
-        when(searchAndFiltrateUseCase.execute(isNull(), any())).thenReturn(page);
+        when(searchAndFiltrate.execute(isNull(), any())).thenReturn(page);
     }
 
     private ResponseEntity<Page<WorkResponseDto>> whenClientCallsExplore(WorkSearchFilterDto filterDto, Pageable pageable) {
@@ -146,11 +146,11 @@ public class ExploreControllerTest {
     }
 
     private void thenSearchWasExecutedWith(Pageable pageable) {
-        verify(searchAndFiltrateUseCase, times(1)).execute(any(), eq(pageable));
+        verify(searchAndFiltrate, times(1)).execute(any(), eq(pageable));
     }
 
     private void thenSearchWasExecutedWithNullFilter(Pageable pageable) {
-        verify(searchAndFiltrateUseCase, times(1)).execute(isNull(), eq(pageable));
+        verify(searchAndFiltrate, times(1)).execute(isNull(), eq(pageable));
     }
 
 }

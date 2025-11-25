@@ -2,7 +2,7 @@ package com.amool.adapters.in.rest.controllers;
 
 import com.amool.adapters.in.rest.dtos.PaymentInitResponse;
 import com.amool.adapters.in.rest.dtos.SubscribeRequest;
-import com.amool.application.usecases.StartSubscriptionFlowUseCase;
+import com.amool.application.usecases.StartSubscriptionFlow;
 import com.amool.domain.model.PaymentInitResult;
 import com.amool.domain.model.PaymentProviderType;
 import com.amool.security.JwtUserPrincipal;
@@ -24,14 +24,14 @@ import static org.mockito.Mockito.*;
 public class PaymentControllerTest {
 
     private PaymentController controller;
-    private StartSubscriptionFlowUseCase startSubscriptionFlowUseCase;
+    private StartSubscriptionFlow startSubscriptionFlow;
 
     private static final Long USER_ID = 777L;
 
     @BeforeEach
     void setUp() {
-        startSubscriptionFlowUseCase = Mockito.mock(StartSubscriptionFlowUseCase.class);
-        controller = new PaymentController(startSubscriptionFlowUseCase);
+        startSubscriptionFlow = Mockito.mock(StartSubscriptionFlow.class);
+        controller = new PaymentController(startSubscriptionFlow);
         SecurityContextHolder.clearContext();
     }
 
@@ -55,25 +55,25 @@ public class PaymentControllerTest {
     }
 
     private void givenUseCaseReturnsFree(SubscribeRequest request) {
-        when(startSubscriptionFlowUseCase.execute(eq(USER_ID), eq(request.subscriptionType()), eq(request.targetId()),
+        when(startSubscriptionFlow.execute(eq(USER_ID), eq(request.subscriptionType()), eq(request.targetId()),
                 eq(request.workId()), eq(request.provider()), eq(request.returnUrl())))
-                .thenReturn(StartSubscriptionFlowUseCase.Result.free());
+                .thenReturn(StartSubscriptionFlow.Result.free());
     }
 
     private void givenUseCaseReturnsPayment(SubscribeRequest request, PaymentInitResult init) {
-        when(startSubscriptionFlowUseCase.execute(eq(USER_ID), eq(request.subscriptionType()), eq(request.targetId()),
+        when(startSubscriptionFlow.execute(eq(USER_ID), eq(request.subscriptionType()), eq(request.targetId()),
                 eq(request.workId()), eq(request.provider()), eq(request.returnUrl())))
-                .thenReturn(StartSubscriptionFlowUseCase.Result.payment(init));
+                .thenReturn(StartSubscriptionFlow.Result.payment(init));
     }
 
     private void givenUseCaseThrowsIllegalArgument(String message) {
-        when(startSubscriptionFlowUseCase.execute(anyLong(), anyString(), anyLong(), any(), anyString(), anyString()))
+        when(startSubscriptionFlow.execute(anyLong(), anyString(), anyLong(), any(), anyString(), anyString()))
                 .thenThrow(new IllegalArgumentException(message));
     }
 
     private void givenUseCaseReturnsFreeForAnyArgs() {
-        when(startSubscriptionFlowUseCase.execute(anyLong(), anyString(), anyLong(), any(), anyString(), anyString()))
-                .thenReturn(StartSubscriptionFlowUseCase.Result.free());
+        when(startSubscriptionFlow.execute(anyLong(), anyString(), anyLong(), any(), anyString(), anyString()))
+                .thenReturn(StartSubscriptionFlow.Result.free());
     }
 
     // ------------------- when -------------------
@@ -104,7 +104,7 @@ public class PaymentControllerTest {
     }
 
     private void thenUseCaseNotCalled() {
-        verify(startSubscriptionFlowUseCase, never()).execute(any(), any(), any(), any(), any(), any());
+        verify(startSubscriptionFlow, never()).execute(any(), any(), any(), any(), any(), any());
     }
 
     private void thenUseCaseCalledWithArgs(SubscribeRequest request) {
@@ -115,7 +115,7 @@ public class PaymentControllerTest {
         ArgumentCaptor<String> provider = ArgumentCaptor.forClass(String.class);
         ArgumentCaptor<String> returnUrl = ArgumentCaptor.forClass(String.class);
 
-        verify(startSubscriptionFlowUseCase).execute(
+        verify(startSubscriptionFlow).execute(
                 userId.capture(), type.capture(), target.capture(), workId.capture(), provider.capture(), returnUrl.capture()
         );
 

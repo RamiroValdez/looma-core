@@ -1,8 +1,8 @@
 package com.amool.adapters.in.rest.controllers;
 
-import com.amool.application.usecases.GetUserByIdUseCase;
-import com.amool.application.usecases.UpdateUserUseCase;
-import com.amool.application.usecases.SetUserPreferencesUseCase;
+import com.amool.application.usecases.GetUserById;
+import com.amool.application.usecases.UpdateUser;
+import com.amool.application.usecases.SetUserPreferences;
 import com.amool.domain.model.User;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -32,13 +32,13 @@ public class UserControllerTest {
     private MockMvc mockMvc;
 
     @MockitoBean
-    private GetUserByIdUseCase getUserByIdUseCase;
+    private GetUserById getUserById;
 
     @MockitoBean
-    private UpdateUserUseCase updateUserUseCase;
+    private UpdateUser updateUser;
 
     @MockitoBean
-    private SetUserPreferencesUseCase setUserPreferencesUseCase;
+    private SetUserPreferences setUserPreferences;
 
     private static final Long USER_ID = 5L;
 
@@ -73,11 +73,11 @@ public class UserControllerTest {
         u.setEmail(email);
         u.setPhoto(photo);
         u.setMoney(BigDecimal.ZERO);
-        when(getUserByIdUseCase.execute(eq(id))).thenReturn(Optional.of(u));
+        when(getUserById.execute(eq(id))).thenReturn(Optional.of(u));
     }
 
     private void givenUserDoesNotExist(Long id) {
-        when(getUserByIdUseCase.execute(eq(id))).thenReturn(Optional.empty());
+        when(getUserById.execute(eq(id))).thenReturn(Optional.empty());
     }
 
     private ResultActions whenClientRequestsUser(Long id) throws Exception {
@@ -99,6 +99,6 @@ public class UserControllerTest {
     }
 
     private void thenUseCaseWasCalledWith(Long id) {
-        verify(getUserByIdUseCase).execute(eq(id));
+        verify(getUserById).execute(eq(id));
     }
 }

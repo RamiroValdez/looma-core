@@ -13,12 +13,12 @@ import org.springframework.http.ResponseEntity;
 
 import com.amool.adapters.in.rest.dtos.ReadingProgressDto;
 import com.amool.application.port.out.ReadingProgressPort;
-import com.amool.application.usecases.UpdateReadingProgressUseCase;
+import com.amool.application.usecases.UpdateReadingProgress;
 
 public class ReadingProgressControllerTest {
 
     private ReadingProgressController readingProgressController;
-    private UpdateReadingProgressUseCase updateReadingProgressUseCase;
+    private UpdateReadingProgress updateReadingProgress;
     private ReadingProgressPort readingProgressPort;
     
     private static final Long USER_ID = 1L;
@@ -28,8 +28,8 @@ public class ReadingProgressControllerTest {
     @BeforeEach
     public void setUp() {
         readingProgressPort = Mockito.mock(ReadingProgressPort.class);
-        updateReadingProgressUseCase = new UpdateReadingProgressUseCase(readingProgressPort);
-        readingProgressController = new ReadingProgressController(updateReadingProgressUseCase);
+        updateReadingProgress = new UpdateReadingProgress(readingProgressPort);
+        readingProgressController = new ReadingProgressController(updateReadingProgress);
     }
 
     @Test

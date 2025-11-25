@@ -1,9 +1,9 @@
 package com.amool.adapters.in.rest.controllers;
 
 import com.amool.adapters.in.rest.dtos.RegisterRequest;
-import com.amool.application.usecases.GetUserByIdUseCase;
-import com.amool.application.usecases.StartRegistrationUseCase;
-import com.amool.application.usecases.VerifyRegistrationUseCase;
+import com.amool.application.usecases.GetUserById;
+import com.amool.application.usecases.StartRegistration;
+import com.amool.application.usecases.VerifyRegistration;
 import com.amool.domain.model.User;
 import com.amool.security.JwtService;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -28,21 +28,21 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 
 public class RegistrationControllerTest {
 
-    private StartRegistrationUseCase startRegistrationUseCase;
-    private VerifyRegistrationUseCase verifyRegistrationUseCase;
-    private GetUserByIdUseCase getUserByIdUseCase;
+    private StartRegistration startRegistration;
+    private VerifyRegistration verifyRegistration;
+    private GetUserById getUserById;
     private JwtService jwtService;
     private MockMvc mockMvc;
     private ObjectMapper objectMapper;
 
     @BeforeEach
     void setUp() {
-        startRegistrationUseCase = mock(StartRegistrationUseCase.class);
-        verifyRegistrationUseCase = mock(VerifyRegistrationUseCase.class);
-        getUserByIdUseCase = mock(GetUserByIdUseCase.class);
+        startRegistration = mock(StartRegistration.class);
+        verifyRegistration = mock(VerifyRegistration.class);
+        getUserById = mock(GetUserById.class);
         jwtService = mock(JwtService.class);
         mockMvc = MockMvcBuilders.standaloneSetup(
-                new RegistrationController(startRegistrationUseCase, verifyRegistrationUseCase, getUserByIdUseCase, jwtService)
+                new RegistrationController(startRegistration, verifyRegistration, getUserById, jwtService)
         ).build();
         objectMapper = new ObjectMapper();
     }
@@ -52,7 +52,7 @@ public class RegistrationControllerTest {
     }
 
     private void givenVerifyReturnsUserId(String email, String code, Long userId) {
-        when(verifyRegistrationUseCase.execute(email, code)).thenReturn(userId);
+        when(verifyRegistration.execute(email, code)).thenReturn(userId);
     }
 
     private void givenUserFound(Long userId, String email, String name, String surname, String username) {
@@ -62,11 +62,11 @@ public class RegistrationControllerTest {
         u.setName(name);
         u.setSurname(surname);
         u.setUsername(username);
-        when(getUserByIdUseCase.execute(userId)).thenReturn(Optional.of(u));
+        when(getUserById.execute(userId)).thenReturn(Optional.of(u));
     }
 
     private void givenUserNotFound(Long userId) {
-        when(getUserByIdUseCase.execute(userId)).thenReturn(Optional.empty());
+        when(getUserById.execute(userId)).thenReturn(Optional.empty());
     }
 
     private void givenJwtWillBeGenerated(String token) {
@@ -103,12 +103,12 @@ public class RegistrationControllerTest {
 
     private void thenStartRegistrationCalledWithName(String expectedName) {
         ArgumentCaptor<String> nameCap = ArgumentCaptor.forClass(String.class);
-        verify(startRegistrationUseCase).execute(nameCap.capture(), anyString(), anyString(), anyString(), anyString(), anyString());
+        verify(startRegistration).execute(nameCap.capture(), anyString(), anyString(), anyString(), anyString(), anyString());
         assertEquals(expectedName, nameCap.getValue());
     }
 
     private void thenVerifyCalled(String email, String code) {
-        verify(verifyRegistrationUseCase).execute(eq(email), eq(code));
+        verify(verifyRegistration).execute(eq(email), eq(code));
     }
 
     private void thenJwtGenerated() {
@@ -116,7 +116,7 @@ public class RegistrationControllerTest {
     }
 
     private void thenGetUserByIdCalled(Long userId) {
-        verify(getUserByIdUseCase).execute(userId);
+        verify(getUserById).execute(userId);
     }
 
     private void thenNoTokenInResponse(ResultActions actions) {

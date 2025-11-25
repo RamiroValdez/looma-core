@@ -3,8 +3,8 @@ package com.amool.adapters.in.rest.controllers;
 import com.amool.adapters.in.rest.dtos.LikeResponseDto;
 import com.amool.adapters.in.rest.dtos.WorkResponseDto;
 import com.amool.adapters.in.rest.mappers.WorkMapper;
-import com.amool.application.usecases.GetAllWorksUseCase;
-import com.amool.application.usecases.ToggleWorkLikeUseCase;
+import com.amool.application.usecases.GetAllWorks;
+import com.amool.application.usecases.ToggleWorkLike;
 import com.amool.domain.model.Work;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -21,18 +21,18 @@ import java.util.stream.Collectors;
 @PreAuthorize("isAuthenticated()")
 public class WorkController {
 
-    private final GetAllWorksUseCase getAllWorksUseCase;
-    private final ToggleWorkLikeUseCase toggleWorkLikeUseCase;
+    private final GetAllWorks getAllWorks;
+    private final ToggleWorkLike toggleWorkLike;
 
-    public WorkController(GetAllWorksUseCase getAllWorksUseCase,
-                          ToggleWorkLikeUseCase toggleWorkLikeUseCase) {
-        this.getAllWorksUseCase = getAllWorksUseCase;
-        this.toggleWorkLikeUseCase = toggleWorkLikeUseCase;
+    public WorkController(GetAllWorks getAllWorks,
+                          ToggleWorkLike toggleWorkLike) {
+        this.getAllWorks = getAllWorks;
+        this.toggleWorkLike = toggleWorkLike;
     }
 
     @GetMapping
     public ResponseEntity<List<WorkResponseDto>> getAllWorks() {
-        List<Work> works = getAllWorksUseCase.execute();
+        List<Work> works = getAllWorks.execute();
         List<WorkResponseDto> response = works.stream()
                 .map(WorkMapper::toDto)
                 .collect(Collectors.toList());
@@ -45,7 +45,7 @@ public class WorkController {
             @AuthenticationPrincipal JwtUserPrincipal userPrincipal) {
 
         Long userId = userPrincipal.getUserId();
-        LikeResponseDto response = toggleWorkLikeUseCase.execute(workId, userId);
+        LikeResponseDto response = toggleWorkLike.execute(workId, userId);
         return ResponseEntity.ok(response);
     }
 

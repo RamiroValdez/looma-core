@@ -2,9 +2,9 @@ package com.amool.adapters.in.rest.controllers;
 
 import com.amool.adapters.in.rest.dtos.RegisterRequest;
 import com.amool.adapters.in.rest.dtos.VerifyCodeRequest;
-import com.amool.application.usecases.StartRegistrationUseCase;
-import com.amool.application.usecases.VerifyRegistrationUseCase;
-import com.amool.application.usecases.GetUserByIdUseCase;
+import com.amool.application.usecases.StartRegistration;
+import com.amool.application.usecases.VerifyRegistration;
+import com.amool.application.usecases.GetUserById;
 import com.amool.adapters.in.rest.dtos.AuthResponse;
 import com.amool.security.JwtService;
 import jakarta.validation.Valid;
@@ -16,31 +16,31 @@ import org.springframework.web.bind.annotation.*;
 @RequestMapping("/api/auth")
 public class RegistrationController {
 
-    private final StartRegistrationUseCase startRegistrationUseCase;
-    private final VerifyRegistrationUseCase verifyRegistrationUseCase;
-    private final GetUserByIdUseCase getUserByIdUseCase;
+    private final StartRegistration startRegistration;
+    private final VerifyRegistration verifyRegistration;
+    private final GetUserById getUserById;
     private final JwtService jwtService;
 
-    public RegistrationController(StartRegistrationUseCase startRegistrationUseCase,
-                                  VerifyRegistrationUseCase verifyRegistrationUseCase,
-                                  GetUserByIdUseCase getUserByIdUseCase,
+    public RegistrationController(StartRegistration startRegistration,
+                                  VerifyRegistration verifyRegistration,
+                                  GetUserById getUserById,
                                   JwtService jwtService) {
-        this.startRegistrationUseCase = startRegistrationUseCase;
-        this.verifyRegistrationUseCase = verifyRegistrationUseCase;
-        this.getUserByIdUseCase = getUserByIdUseCase;
+        this.startRegistration = startRegistration;
+        this.verifyRegistration = verifyRegistration;
+        this.getUserById = getUserById;
         this.jwtService = jwtService;
     }
 
     @PostMapping("/register")
     public ResponseEntity<?> register(@Valid @RequestBody RegisterRequest req) {
-        startRegistrationUseCase.execute(req.name(), req.surname(), req.username(), req.email(), req.password(), req.confirmPassword());
+        startRegistration.execute(req.name(), req.surname(), req.username(), req.email(), req.password(), req.confirmPassword());
         return ResponseEntity.status(HttpStatus.ACCEPTED).build();
     }
 
     @PostMapping("/register/verify")
     public ResponseEntity<AuthResponse> verify(@Valid @RequestBody VerifyCodeRequest req) {
-        Long userId = verifyRegistrationUseCase.execute(req.email(), req.code());
-        var userOpt = getUserByIdUseCase.execute(userId);
+        Long userId = verifyRegistration.execute(req.email(), req.code());
+        var userOpt = getUserById.execute(userId);
         if (userOpt.isEmpty()) {
             return ResponseEntity.status(HttpStatus.CREATED).build();
         }

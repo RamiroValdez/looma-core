@@ -2,7 +2,7 @@ package com.amool.adapters.in.rest.controllers;
 
 import com.amool.adapters.in.rest.dtos.FormatDto;
 import com.amool.adapters.in.rest.mappers.FormatMapper;
-import com.amool.application.usecases.ObtainAllFormatsUseCase;
+import com.amool.application.usecases.ObtainAllFormats;
 import com.amool.domain.model.Format;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -15,15 +15,15 @@ import java.util.List;
 @RequestMapping("/api/format")
 public class FormatController {
 
-    private final ObtainAllFormatsUseCase obtainAllFormatsUseCase;
+    private final ObtainAllFormats obtainAllFormats;
 
-    public FormatController(ObtainAllFormatsUseCase obtainAllFormatsUseCase) {
-        this.obtainAllFormatsUseCase = obtainAllFormatsUseCase;
+    public FormatController(ObtainAllFormats obtainAllFormats) {
+        this.obtainAllFormats = obtainAllFormats;
     }
 
     @GetMapping("/obtain-all")
     public ResponseEntity<List<FormatDto>> obtainAllFormats() {
-        List<Format> formats = obtainAllFormatsUseCase.execute();
+        List<Format> formats = obtainAllFormats.execute();
         if (formats == null || formats.isEmpty()) {
             return ResponseEntity.notFound().build();
         }
