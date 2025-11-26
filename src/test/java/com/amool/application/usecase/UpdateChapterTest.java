@@ -21,12 +21,14 @@ import static org.mockito.Mockito.*;
 
 public class UpdateChapterTest {
 
+    private static final Long CHAPTER_ID = 1L;
+    private static final Long WORK_ID = 100L;
+
     private LoadChapterPort loadChapterPort;
     private UpdateChapterPort updateChapterPort;
     private SaveChapterContentPort saveChapterContentPort;
     private UpdateChapter useCase;
 
-    private final Long chapterId = 1L;
     private Chapter existingChapter;
     private UpdateChapterRequest updateRequest;
 
@@ -43,8 +45,8 @@ public class UpdateChapterTest {
         );
 
         existingChapter = new Chapter();
-        existingChapter.setId(chapterId);
-        existingChapter.setWorkId(100L);
+        existingChapter.setId(CHAPTER_ID);
+        existingChapter.setWorkId(WORK_ID);
         existingChapter.setTitle("Original Title");
         existingChapter.setPrice(BigDecimal.valueOf(0.0));
         existingChapter.setPublicationStatus("DRAFT");
@@ -54,103 +56,153 @@ public class UpdateChapterTest {
     }
 
     @Test
-    public void when_UpdateTitle_ThenUpdateSuccessfully() {
+    public void shouldUpdateTitleWhenRequestIncludesIt() {
+        givenChapterLoaded();
+        givenUpdateWillSucceed();
         updateRequest.setTitle("Updated Title");
-        when(loadChapterPort.loadChapterForEdit(chapterId)).thenReturn(Optional.of(existingChapter));
-        when(updateChapterPort.updateChapter(any(Chapter.class))).thenReturn(Optional.of(existingChapter));
 
-        boolean result = useCase.execute(chapterId, updateRequest);
+        boolean result = whenUpdatingChapter();
 
-        assertTrue(result);
-        verify(updateChapterPort).updateChapter(argThat(chapter -> 
-            "Updated Title".equals(chapter.getTitle())
-        ));
+        thenUpdateSucceeded(result);
+        thenChapterUpdated(chapter -> assertEquals("Updated Title", chapter.getTitle()));
+        thenNoContentSaved();
     }
 
     @Test
-    public void when_UpdateStatus_ThenUpdateSuccessfully() {
+    public void shouldUpdateStatusWhenRequestIncludesIt() {
+        givenChapterLoaded();
+        givenUpdateWillSucceed();
         updateRequest.setStatus("PUBLISHED");
-        when(loadChapterPort.loadChapterForEdit(chapterId)).thenReturn(Optional.of(existingChapter));
-        when(updateChapterPort.updateChapter(any(Chapter.class))).thenReturn(Optional.of(existingChapter));
 
-        boolean result = useCase.execute(chapterId, updateRequest);
+        boolean result = whenUpdatingChapter();
 
-        assertTrue(result);
-        verify(updateChapterPort).updateChapter(argThat(chapter -> 
-            "PUBLISHED".equals(chapter.getPublicationStatus())
-        ));
+        thenUpdateSucceeded(result);
+        thenChapterUpdated(chapter -> assertEquals("PUBLISHED", chapter.getPublicationStatus()));
+        thenNoContentSaved();
     }
 
     @Test
-    public void when_UpdatePrice_ThenUpdateSuccessfully() {
+    public void shouldUpdatePriceWhenRequestIncludesIt() {
+        givenChapterLoaded();
+        givenUpdateWillSucceed();
         updateRequest.setPrice(BigDecimal.valueOf(2.99));
-        when(loadChapterPort.loadChapterForEdit(chapterId)).thenReturn(Optional.of(existingChapter));
-        when(updateChapterPort.updateChapter(any(Chapter.class))).thenReturn(Optional.of(existingChapter));
 
-        boolean result = useCase.execute(chapterId, updateRequest);
+        boolean result = whenUpdatingChapter();
 
-        assertTrue(result);
-        verify(updateChapterPort).updateChapter(argThat(chapter ->
-                BigDecimal.valueOf(2.99).equals(chapter.getPrice())
-        ));
+        thenUpdateSucceeded(result);
+        thenChapterUpdated(chapter -> assertEquals(BigDecimal.valueOf(2.99), chapter.getPrice()));
+        thenNoContentSaved();
     }
 
     @Test
-    public void when_UpdateAiTranslation_ThenUpdateSuccessfully() {
+    public void shouldUpdateAiTranslationFlag() {
+        givenChapterLoaded();
+        givenUpdateWillSucceed();
         updateRequest.setAllow_ai_translation(true);
-        when(loadChapterPort.loadChapterForEdit(chapterId)).thenReturn(Optional.of(existingChapter));
-        when(updateChapterPort.updateChapter(any(Chapter.class))).thenReturn(Optional.of(existingChapter));
 
-        boolean result = useCase.execute(chapterId, updateRequest);
+        boolean result = whenUpdatingChapter();
 
-        assertTrue(result);
-        verify(updateChapterPort).updateChapter(argThat(chapter -> 
-            Boolean.TRUE.equals(chapter.getAllowAiTranslation())
-        ));
+        thenUpdateSucceeded(result);
+        thenChapterUpdated(chapter -> assertTrue(chapter.getAllowAiTranslation()));
+        thenNoContentSaved();
     }
 
     @Test
-    public void when_UpdateVersions_ThenSaveContentForEachVersion() {
-        updateRequest.setVersions(Map.of(
+    public void shouldSaveContentForEachVersionProvided() {
+        givenChapterLoaded();
+        givenUpdateWillSucceed();
+        Map<String, String> versions = Map.of(
             "en", "English content",
             "es", "Contenido en español"
-        ));
-        when(loadChapterPort.loadChapterForEdit(chapterId)).thenReturn(Optional.of(existingChapter));
-        when(updateChapterPort.updateChapter(any(Chapter.class))).thenReturn(Optional.of(existingChapter));
-
-        boolean result = useCase.execute(chapterId, updateRequest);
-
-        assertTrue(result);
-        verify(saveChapterContentPort).saveContent(
-            eq("100"), eq("1"), eq("en"), eq("English content")
         );
-        verify(saveChapterContentPort).saveContent(
-            eq("100"), eq("1"), eq("es"), eq("Contenido en español")
-        );
+        updateRequest.setVersions(versions);
+
+        boolean result = whenUpdatingChapter();
+
+        thenUpdateSucceeded(result);
+        thenChapterUpdated(chapter -> assertEquals(versions, updateRequest.getVersions()));
+        thenContentSavedForVersions(versions);
     }
 
     @Test
-    public void when_ChapterNotFound_ThenReturnFalse() {
-        when(loadChapterPort.loadChapterForEdit(chapterId)).thenReturn(Optional.empty());
+    public void shouldReturnFalseWhenChapterNotFound() {
+        givenChapterNotFound();
 
-        boolean result = useCase.execute(chapterId, updateRequest);
+        boolean result = whenUpdatingChapter();
 
-        assertFalse(result);
-        verify(updateChapterPort, never()).updateChapter(any());
-        verify(saveChapterContentPort, never()).saveContent(any(), any(), any(), any());
+        thenUpdateFailed(result);
+        thenChapterNotUpdated();
+        thenNoContentSaved();
     }
 
     @Test
-    public void when_UpdateFails_ThenReturnFalse() {
+    public void shouldReturnFalseWhenUpdateFails() {
+        givenChapterLoaded();
+        givenUpdateWillFail();
         updateRequest.setTitle("New Title");
-        when(loadChapterPort.loadChapterForEdit(chapterId)).thenReturn(Optional.of(existingChapter));
+
+        boolean result = whenUpdatingChapter();
+
+        thenUpdateFailed(result);
+        thenChapterUpdatedAttempted();
+        thenNoContentSaved();
+    }
+
+    private void givenChapterLoaded() {
+        when(loadChapterPort.loadChapterForEdit(CHAPTER_ID)).thenReturn(Optional.of(existingChapter));
+    }
+
+    private void givenChapterNotFound() {
+        when(loadChapterPort.loadChapterForEdit(CHAPTER_ID)).thenReturn(Optional.empty());
+    }
+
+    private void givenUpdateWillSucceed() {
+        when(updateChapterPort.updateChapter(any(Chapter.class))).thenReturn(Optional.of(existingChapter));
+    }
+
+    private void givenUpdateWillFail() {
         when(updateChapterPort.updateChapter(any(Chapter.class))).thenReturn(Optional.empty());
+    }
 
-        boolean result = useCase.execute(chapterId, updateRequest);
+    private boolean whenUpdatingChapter() {
+        return useCase.execute(CHAPTER_ID, updateRequest);
+    }
 
+    private void thenUpdateSucceeded(boolean result) {
+        assertTrue(result);
+    }
+
+    private void thenUpdateFailed(boolean result) {
         assertFalse(result);
-        verify(updateChapterPort).updateChapter(any());
+    }
+
+    private void thenChapterUpdated(java.util.function.Consumer<Chapter> assertions) {
+        verify(updateChapterPort).updateChapter(argThat(chapter -> {
+            assertions.accept(chapter);
+            return true;
+        }));
+    }
+
+    private void thenChapterUpdatedAttempted() {
+        verify(updateChapterPort).updateChapter(any(Chapter.class));
+    }
+
+    private void thenChapterNotUpdated() {
+        verify(updateChapterPort, never()).updateChapter(any());
+    }
+
+    private void thenNoContentSaved() {
         verify(saveChapterContentPort, never()).saveContent(any(), any(), any(), any());
     }
 
+    private void thenContentSavedForVersions(Map<String, String> versions) {
+        versions.forEach((language, content) ->
+            verify(saveChapterContentPort).saveContent(
+                eq(WORK_ID.toString()),
+                eq(CHAPTER_ID.toString()),
+                eq(language),
+                eq(content)
+            )
+        );
+    }
 }

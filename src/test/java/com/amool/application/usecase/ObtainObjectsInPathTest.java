@@ -22,6 +22,7 @@ public class ObtainObjectsInPathTest {
     private static final String TEST_PATH = "test/path/";
     private static final String KEY_1 = "test/path/file1.txt";
     private static final String KEY_2 = "test/path/file2.jpg";
+    private static final String EMPTY_PATH = "";
 
     @BeforeEach
     public void setUp() {
@@ -30,37 +31,58 @@ public class ObtainObjectsInPathTest {
     }
 
     @Test
-    public void when_PathContainsObjects_ThenReturnObjectsList() {
-        S3Object object1 = S3Object.builder().key(KEY_1).size(1024L).build();
-        S3Object object2 = S3Object.builder().key(KEY_2).size(2048L).build();
-        List<S3Object> expectedObjects = Arrays.asList(object1, object2);
-        
-        when(awsS3Port.obtainObjectsInPath(TEST_PATH)).thenReturn(expectedObjects);
+    public void shouldReturnObjectsWhenPathContainsFiles() {
+        List<S3Object> expectedObjects = givenObjectsInPath(TEST_PATH,
+            createS3Object(KEY_1, 1024L),
+            createS3Object(KEY_2, 2048L)
+        );
 
-        List<S3Object> result = useCase.execute(TEST_PATH);
+        List<S3Object> result = whenObtainingObjects(TEST_PATH);
 
-        assertEquals(2, result.size());
-        assertEquals(KEY_1, result.get(0).key());
-        assertEquals(1024L, result.get(0).size());
-        assertEquals(KEY_2, result.get(1).key());
-        assertEquals(2048L, result.get(1).size());
+        thenObjectsMatch(result, expectedObjects);
     }
 
     @Test
-    public void when_PathIsEmpty_ThenReturnEmptyList() {
-        when(awsS3Port.obtainObjectsInPath("")).thenReturn(Collections.emptyList());
+    public void shouldReturnEmptyListWhenPathIsBlank() {
+        givenEmptyPath(EMPTY_PATH);
 
-        List<S3Object> result = useCase.execute("");
+        List<S3Object> result = whenObtainingObjects(EMPTY_PATH);
 
         assertTrue(result.isEmpty());
     }
 
     @Test
-    public void when_NoObjectsInPath_ThenReturnEmptyList() {
-        when(awsS3Port.obtainObjectsInPath(TEST_PATH)).thenReturn(Collections.emptyList());
+    public void shouldReturnEmptyListWhenPathHasNoObjects() {
+        givenEmptyPath(TEST_PATH);
 
-        List<S3Object> result = useCase.execute(TEST_PATH);
+        List<S3Object> result = whenObtainingObjects(TEST_PATH);
 
         assertTrue(result.isEmpty());
+    }
+
+    private List<S3Object> givenObjectsInPath(String path, S3Object... objects) {
+        List<S3Object> objectList = Arrays.asList(objects);
+        when(awsS3Port.obtainObjectsInPath(path)).thenReturn(objectList);
+        return objectList;
+    }
+
+    private void givenEmptyPath(String path) {
+        when(awsS3Port.obtainObjectsInPath(path)).thenReturn(Collections.emptyList());
+    }
+
+    private List<S3Object> whenObtainingObjects(String path) {
+        return useCase.execute(path);
+    }
+
+    private void thenObjectsMatch(List<S3Object> actual, List<S3Object> expected) {
+        assertEquals(expected.size(), actual.size());
+        for (int i = 0; i < expected.size(); i++) {
+            assertEquals(expected.get(i).key(), actual.get(i).key());
+            assertEquals(expected.get(i).size(), actual.get(i).size());
+        }
+    }
+
+    private S3Object createS3Object(String key, long size) {
+        return S3Object.builder().key(key).size(size).build();
     }
 }

@@ -24,39 +24,62 @@ class GetAllWorksTest {
     @InjectMocks
     private GetAllWorks getAllWorks;
 
-    @Test
-    void execute_shouldReturnListOfWorks() {
-        Work work1 = new Work();
-        work1.setId(1L);
-        work1.setTitle("Work 1");
-        
-        Work work2 = new Work();
-        work2.setId(2L);
-        work2.setTitle("Work 2");
-        
-        List<Work> expectedWorks = Arrays.asList(work1, work2);
-        
-        when(workPort.getAllWorks()).thenReturn(expectedWorks);
+    private Work createWork(Long id, String title) {
+        Work w = new Work();
+        w.setId(id);
+        w.setTitle(title);
+        return w;
+    }
 
-        List<Work> result = getAllWorks.execute();
+    private void givenWorks(List<Work> works) {
+        when(workPort.getAllWorks()).thenReturn(works);
+    }
 
+    private void givenNoWorks() {
+        when(workPort.getAllWorks()).thenReturn(List.of());
+    }
+
+    private List<Work> whenExecute() {
+        return getAllWorks.execute();
+    }
+
+    private void thenSizeIs(List<Work> result, int expected) {
         assertNotNull(result, "Result should not be null");
-        assertEquals(2, result.size(), "Should return 2 works");
-        assertEquals("Work 1", result.get(0).getTitle(), "First work title should match");
-        assertEquals("Work 2", result.get(1).getTitle(), "Second work title should match");
-        
+        assertEquals(expected, result.size(), "Should return " + expected + " works");
+    }
+
+    private void thenTitleIs(List<Work> result, int index, String expectedTitle) {
+        assertEquals(expectedTitle, result.get(index).getTitle(), "Work title should match");
+    }
+
+    private void thenGetAllCalledOnce() {
         verify(workPort, times(1)).getAllWorks();
     }
 
     @Test
+    void execute_shouldReturnListOfWorks() {
+        List<Work> expectedWorks = Arrays.asList(
+                createWork(1L, "Work 1"),
+                createWork(2L, "Work 2")
+        );
+        givenWorks(expectedWorks);
+
+        List<Work> result = whenExecute();
+
+        thenSizeIs(result, 2);
+        thenTitleIs(result, 0, "Work 1");
+        thenTitleIs(result, 1, "Work 2");
+        thenGetAllCalledOnce();
+    }
+
+    @Test
     void execute_whenNoWorksExist_shouldReturnEmptyList() {
-        when(workPort.getAllWorks()).thenReturn(List.of());
+        givenNoWorks();
 
-        List<Work> result = getAllWorks.execute();
+        List<Work> result = whenExecute();
 
-        assertNotNull(result, "Result should not be null");
+        thenSizeIs(result, 0);
         assertTrue(result.isEmpty(), "Result should be an empty list");
-        
-        verify(workPort, times(1)).getAllWorks();
+        thenGetAllCalledOnce();
     }
 }

@@ -25,31 +25,44 @@ public class GetWorkRatingsTest {
         getWorkRatings = new GetWorkRatings(ratingPort);
     }
 
+    private void givenTotalRatingsCount(Long workId, int total) {
+        when(ratingPort.getTotalRatingsCount(workId)).thenReturn(total);
+    }
+
+    private Integer whenGetWorkRatings(Long workId, Pageable pageable) {
+        return getWorkRatings.execute(workId, pageable);
+    }
+
+    private void thenTotalIs(Integer result, int expected) {
+        assertEquals(expected, result);
+    }
+
+    private void thenPortCalledWith(Long workId) {
+        verify(ratingPort).getTotalRatingsCount(workId);
+    }
+
     @Test
     void getWorkRatings_WithRatings_ShouldReturnTotalCount() {
         Long workId = 1L;
         Pageable pageable = PageRequest.of(0, 10, Sort.by("rating").descending());
-        Integer expectedTotalRatings = 2;
+        givenTotalRatingsCount(workId, 2);
 
-        when(ratingPort.getTotalRatingsCount(workId)).thenReturn(expectedTotalRatings);
+        Integer result = whenGetWorkRatings(workId, pageable);
 
-        Integer result = getWorkRatings.execute(workId, pageable);
-
-        assertEquals(expectedTotalRatings, result);
-        verify(ratingPort).getTotalRatingsCount(workId);
+        thenTotalIs(result, 2);
+        thenPortCalledWith(workId);
     }
 
     @Test
     void getWorkRatings_WithNoRatings_ShouldReturnZero() {
         Long workId = 1L;
         Pageable pageable = PageRequest.of(0, 10);
+        givenTotalRatingsCount(workId, 0);
 
-        when(ratingPort.getTotalRatingsCount(workId)).thenReturn(0);
+        Integer result = whenGetWorkRatings(workId, pageable);
 
-        Integer result = getWorkRatings.execute(workId, pageable);
-
-        assertEquals(0, result);
-        verify(ratingPort).getTotalRatingsCount(workId);
+        thenTotalIs(result, 0);
+        thenPortCalledWith(workId);
     }
 
     @Test
@@ -57,19 +70,17 @@ public class GetWorkRatingsTest {
         Long workId1 = 1L;
         Long workId2 = 2L;
         Pageable pageable = PageRequest.of(0, 10);
+        givenTotalRatingsCount(workId1, 5);
+        givenTotalRatingsCount(workId2, 3);
 
-        when(ratingPort.getTotalRatingsCount(workId1)).thenReturn(5);
-        when(ratingPort.getTotalRatingsCount(workId2)).thenReturn(3);
-
-        Integer result1 = getWorkRatings.execute(workId1, pageable);
-        Integer result2 = getWorkRatings.execute(workId2, pageable);
+        Integer result1 = whenGetWorkRatings(workId1, pageable);
+        Integer result2 = whenGetWorkRatings(workId2, pageable);
 
         assertAll(
-            () -> assertEquals(5, result1),
-            () -> assertEquals(3, result2)
+            () -> thenTotalIs(result1, 5),
+            () -> thenTotalIs(result2, 3)
         );
-
-        verify(ratingPort).getTotalRatingsCount(workId1);
-        verify(ratingPort).getTotalRatingsCount(workId2);
+        thenPortCalledWith(workId1);
+        thenPortCalledWith(workId2);
     }
 }

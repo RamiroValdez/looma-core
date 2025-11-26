@@ -16,6 +16,13 @@ import static org.mockito.Mockito.*;
 @ExtendWith(MockitoExtension.class)
 public class RateWorkTest {
 
+    private static final Long WORK_ID = 1L;
+    private static final Long USER_ID = 1L;
+    private static final double VALID_RATING = 4.5;
+    private static final double MIN_RATING = 0.5;
+    private static final double MAX_RATING = 5.0;
+    private static final double INVALID_RATING = 6.0;
+
     @Mock
     private RatingPort ratingPort;
 
@@ -26,63 +33,67 @@ public class RateWorkTest {
     }
 
     @Test
-    void rateWork_WithValidRating_ShouldReturnRating() {
-        Long workId = 1L;
-        Long userId = 1L;
-        double ratingValue = 4.5;
-        double expectedRating = 4.5;
+    void shouldReturnRatingWhenInputIsValid() {
+        givenRatingPortReturns(VALID_RATING);
 
-        when(ratingPort.rateWork(eq(workId), eq(userId), eq(ratingValue), any(LocalDateTime.class))).thenReturn(expectedRating);
+        double result = whenRatingWork(VALID_RATING);
 
-        double result = rateWork.execute(workId, userId, ratingValue);
-
-        assertEquals(expectedRating, result);
-        verify(ratingPort).rateWork(eq(workId), eq(userId), eq(ratingValue), any(LocalDateTime.class));
+        thenRatingReturned(result, VALID_RATING);
+        thenPortInvokedWith(VALID_RATING);
     }
 
     @Test
-    void rateWork_WithInvalidRating_ShouldThrowException() {
-        Long workId = 1L;
-        Long userId = 1L;
-        double invalidRating = 6.0;
+    void shouldFailWhenRatingIsOutOfRange() {
+        thenRatingFailsDueToInvalidValue(INVALID_RATING);
+        thenPortNotInvoked();
+    }
+
+    @Test
+    void shouldSucceedWithMinimumValidRating() {
+        givenRatingPortReturns(MIN_RATING);
+
+        double result = whenRatingWork(MIN_RATING);
+
+        thenRatingReturned(result, MIN_RATING);
+        thenPortInvokedWith(MIN_RATING);
+    }
+
+    @Test
+    void shouldSucceedWithMaximumValidRating() {
+        givenRatingPortReturns(MAX_RATING);
+
+        double result = whenRatingWork(MAX_RATING);
+
+        thenRatingReturned(result, MAX_RATING);
+        thenPortInvokedWith(MAX_RATING);
+    }
+
+    private void givenRatingPortReturns(double rating) {
+        when(ratingPort.rateWork(eq(WORK_ID), eq(USER_ID), eq(rating), any(LocalDateTime.class)))
+            .thenReturn(rating);
+    }
+
+    private double whenRatingWork(double ratingValue) {
+        return rateWork.execute(WORK_ID, USER_ID, ratingValue);
+    }
+
+    private void thenRatingReturned(double actual, double expected) {
+        assertEquals(expected, actual);
+    }
+
+    private void thenPortInvokedWith(double ratingValue) {
+        verify(ratingPort).rateWork(eq(WORK_ID), eq(USER_ID), eq(ratingValue), any(LocalDateTime.class));
+    }
+
+    private void thenRatingFailsDueToInvalidValue(double ratingValue) {
         IllegalArgumentException exception = assertThrows(
             IllegalArgumentException.class,
-            () -> rateWork.execute(workId, userId, invalidRating)
+            () -> rateWork.execute(WORK_ID, USER_ID, ratingValue)
         );
-        
         assertEquals("El rating debe estar entre 0.5 y 5.0 en incrementos de 0.5", exception.getMessage());
+    }
+
+    private void thenPortNotInvoked() {
         verifyNoInteractions(ratingPort);
-    }
-
-    @Test
-    void rateWork_WithMinimumValidRating_ShouldSucceed() {
-        Long workId = 1L;
-        Long userId = 1L;
-        double minRating = 0.5;
-        double expectedRating = 0.5;
-
-
-        when(ratingPort.rateWork(eq(workId), eq(userId), eq(minRating), any(LocalDateTime.class)))
-                .thenReturn(expectedRating);
-
-        double result = rateWork.execute(workId, userId, minRating);
-
-        assertEquals(expectedRating, result);
-        verify(ratingPort).rateWork(eq(workId), eq(userId), eq(minRating), any(LocalDateTime.class));
-    }
-
-    @Test
-    void rateWork_WithMaximumValidRating_ShouldSucceed() {
-        Long workId = 1L;
-        Long userId = 1L;
-        double maxRating = 5.0;
-        double expectedRating = 5.0;
-
-        when(ratingPort.rateWork(eq(workId), eq(userId), eq(maxRating), any(LocalDateTime.class))).thenReturn(expectedRating);
-
-        double result = rateWork.execute(workId, userId, maxRating);
-
-        assertEquals(expectedRating, result);
-        verify(ratingPort).rateWork(eq(workId), eq(userId), eq(maxRating), any(LocalDateTime.class));
     }
 }

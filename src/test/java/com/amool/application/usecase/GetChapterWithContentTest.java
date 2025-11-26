@@ -5,15 +5,16 @@ import com.amool.application.port.out.LoadChapterPort;
 import com.amool.application.usecases.GetChapterWithContent;
 import com.amool.domain.model.Chapter;
 import com.amool.domain.model.ChapterContent;
+import com.amool.domain.model.ChapterWithContentResult;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
 
+import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.*;
-import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.when;
 
 public class GetChapterWithContentTest {
@@ -35,81 +36,94 @@ public class GetChapterWithContentTest {
         useCase = new GetChapterWithContent(loadChapterPort, loadChapterContentPort);
     }
 
+    private void givenChapterExists(Long workId, Long chapterId, String title) {
+        Chapter chapter = new Chapter();
+        chapter.setId(chapterId);
+        chapter.setTitle(title);
+        chapter.setWorkId(workId);
+        when(loadChapterPort.loadChapter(workId, chapterId)).thenReturn(Optional.of(chapter));
+    }
+
+    private void givenChapterDoesNotExist(Long workId, Long chapterId) {
+        when(loadChapterPort.loadChapter(workId, chapterId)).thenReturn(Optional.empty());
+    }
+
+    private void givenContentExists(Long workId, Long chapterId, String language, String content) {
+        ChapterContent chapterContent = new ChapterContent(
+                workId.toString(),
+                chapterId.toString(),
+                Map.of(language, content),
+                language
+        );
+        when(loadChapterContentPort.loadContent(workId.toString(), chapterId.toString(), language))
+                .thenReturn(Optional.of(chapterContent));
+    }
+
+    private void givenContentMissing(Long workId, Long chapterId, String language) {
+        when(loadChapterContentPort.loadContent(workId.toString(), chapterId.toString(), language))
+                .thenReturn(Optional.empty());
+    }
+
+    private void givenAvailableLanguages(Long workId, Long chapterId, List<String> languages) {
+        when(loadChapterContentPort.getAvailableLanguages(workId.toString(), chapterId.toString()))
+                .thenReturn(languages);
+    }
+
+    private Optional<ChapterWithContentResult> whenGetChapterWithContent(Long workId, Long chapterId, String language) {
+        return useCase.execute(workId, chapterId, language);
+    }
+
+    private void thenResultPresent(Optional<?> result) {
+        assertTrue(result.isPresent());
+    }
+
+    private void thenResultEmpty(Optional<?> result) {
+        assertTrue(result.isEmpty());
+    }
+
+    private void thenChapterDataMatches(ChapterWithContentResult result, Long expectedChapterId, String expectedTitle) {
+        assertEquals(expectedChapterId, result.getChapterWithContent().chapter().getId());
+        assertEquals(expectedTitle, result.getChapterWithContent().chapter().getTitle());
+    }
+
+    private void thenContentEquals(ChapterWithContentResult result, String expectedContent) {
+        assertEquals(expectedContent, result.getContent());
+    }
+
     @Test
     public void when_ChapterAndContentExist_ThenReturnChapterWithContent() {
-        Chapter chapter = new Chapter();
-        chapter.setId(CHAPTER_ID);
-        chapter.setTitle(CHAPTER_TITLE);
-        chapter.setWorkId(WORK_ID);
+        givenChapterExists(WORK_ID, CHAPTER_ID, CHAPTER_TITLE);
+        givenContentExists(WORK_ID, CHAPTER_ID, LANGUAGE, CHAPTER_CONTENT);
+        givenAvailableLanguages(WORK_ID, CHAPTER_ID, List.of(LANGUAGE));
 
-        ChapterContent content = new ChapterContent(
-            WORK_ID.toString(), 
-            CHAPTER_ID.toString(), 
-            Map.of(LANGUAGE, CHAPTER_CONTENT), 
-            LANGUAGE
-        );
+        Optional<ChapterWithContentResult> result = whenGetChapterWithContent(WORK_ID, CHAPTER_ID, LANGUAGE);
 
-        when(loadChapterPort.loadChapter(WORK_ID, CHAPTER_ID))
-            .thenReturn(Optional.of(chapter));
-            
-        when(loadChapterContentPort.loadContent(
-            WORK_ID.toString(), 
-            CHAPTER_ID.toString(), 
-            LANGUAGE
-        )).thenReturn(Optional.of(content));
-
-        when(loadChapterContentPort.getAvailableLanguages(
-            WORK_ID.toString(),
-            CHAPTER_ID.toString()
-        )).thenReturn(java.util.List.of(LANGUAGE));
-
-        Optional<com.amool.domain.model.ChapterWithContentResult> result = useCase.execute(WORK_ID, CHAPTER_ID, LANGUAGE);
-
-        assertTrue(result.isPresent());
-        com.amool.domain.model.ChapterWithContentResult chapterWithContent = result.get();
-        assertEquals(CHAPTER_ID, chapterWithContent.getChapterWithContent().chapter().getId());
-        assertEquals(CHAPTER_TITLE, chapterWithContent.getChapterWithContent().chapter().getTitle());
-        assertEquals(CHAPTER_CONTENT, chapterWithContent.getContent());
+        thenResultPresent(result);
+        ChapterWithContentResult chapterWithContent = result.orElseThrow();
+        thenChapterDataMatches(chapterWithContent, CHAPTER_ID, CHAPTER_TITLE);
+        thenContentEquals(chapterWithContent, CHAPTER_CONTENT);
     }
 
     @Test
     public void when_ChapterDoesNotExist_ThenReturnEmpty() {
-        when(loadChapterPort.loadChapter(WORK_ID, CHAPTER_ID))
-            .thenReturn(Optional.empty());
+        givenChapterDoesNotExist(WORK_ID, CHAPTER_ID);
 
-        Optional<com.amool.domain.model.ChapterWithContentResult> result = useCase.execute(WORK_ID, CHAPTER_ID, LANGUAGE);
+        Optional<ChapterWithContentResult> result = whenGetChapterWithContent(WORK_ID, CHAPTER_ID, LANGUAGE);
 
-        assertTrue(result.isEmpty());
+        thenResultEmpty(result);
     }
 
     @Test
     public void when_ContentDoesNotExist_ThenReturnChapterWithEmptyContent() {
-        Chapter chapter = new Chapter();
-        chapter.setId(CHAPTER_ID);
-        chapter.setTitle(CHAPTER_TITLE);
-        chapter.setWorkId(WORK_ID);
+        givenChapterExists(WORK_ID, CHAPTER_ID, CHAPTER_TITLE);
+        givenContentMissing(WORK_ID, CHAPTER_ID, LANGUAGE);
+        givenAvailableLanguages(WORK_ID, CHAPTER_ID, List.of());
 
-        when(loadChapterPort.loadChapter(WORK_ID, CHAPTER_ID))
-            .thenReturn(Optional.of(chapter));
-            
-        when(loadChapterContentPort.loadContent(
-            anyString(), 
-            anyString(), 
-            anyString()
-        )).thenReturn(Optional.empty());
+        Optional<ChapterWithContentResult> result = whenGetChapterWithContent(WORK_ID, CHAPTER_ID, LANGUAGE);
 
-        when(loadChapterContentPort.getAvailableLanguages(
-            anyString(),
-            anyString()
-        )).thenReturn(java.util.List.of());
-
-        Optional<com.amool.domain.model.ChapterWithContentResult> result = useCase.execute(WORK_ID, CHAPTER_ID, LANGUAGE);
-
-        assertTrue(result.isPresent());
-        com.amool.domain.model.ChapterWithContentResult chapterWithContent = result.get();
-        assertEquals(CHAPTER_ID, chapterWithContent.getChapterWithContent().chapter().getId());
-        assertEquals(CHAPTER_TITLE, chapterWithContent.getChapterWithContent().chapter().getTitle());
-        assertEquals("", chapterWithContent.getContent());
+        thenResultPresent(result);
+        ChapterWithContentResult chapterWithContent = result.orElseThrow();
+        thenChapterDataMatches(chapterWithContent, CHAPTER_ID, CHAPTER_TITLE);
+        thenContentEquals(chapterWithContent, "");
     }
-
 }

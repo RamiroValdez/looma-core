@@ -14,6 +14,11 @@ public class ObtainPresignedUrlTest {
     private AwsS3Port awsS3Port;
     private ObtainPresignedUrl useCase;
 
+    private static final String VALID_FILE_NAME = "test-file.txt";
+    private static final String EMPTY_FILE_NAME = "";
+    private static final String PRESIGNED_URL = "https://example.com/presigned-url";
+    private static final String EMPTY_URL = "";
+
     @BeforeEach
     public void setUp() {
         awsS3Port = Mockito.mock(AwsS3Port.class);
@@ -21,43 +26,48 @@ public class ObtainPresignedUrlTest {
     }
 
     @Test
-    public void when_ValidFileName_ThenReturnPresignedUrl() {
-        String fileName = "test-file.txt";
-        String expectedUrl = "https://example.com/presigned-url";
-        
-        Mockito.when(awsS3Port.obtainFilePresignedUrl(anyString()))
-               .thenReturn(expectedUrl);
+    public void shouldReturnPresignedUrlForValidFileName() {
+        givenPresignedUrlResponse(VALID_FILE_NAME, PRESIGNED_URL);
 
-        String result = useCase.execute(fileName);
+        String result = whenObtainingPresignedUrl(VALID_FILE_NAME);
 
-        assertEquals(expectedUrl, result);
-        Mockito.verify(awsS3Port, Mockito.times(1)).obtainFilePresignedUrl(fileName);
+        thenPresignedUrlEquals(result, PRESIGNED_URL);
+        thenPortRequestedUrlFor(VALID_FILE_NAME);
     }
 
     @Test
-    public void when_EmptyFileName_ThenReturnEmptyUrl() {
-        String fileName = "";
-        String expectedUrl = "";
-        
-        Mockito.when(awsS3Port.obtainFilePresignedUrl(anyString()))
-               .thenReturn(expectedUrl);
+    public void shouldReturnEmptyUrlForEmptyFileName() {
+        givenPresignedUrlResponse(EMPTY_FILE_NAME, EMPTY_URL);
 
-        String result = useCase.execute(fileName);
+        String result = whenObtainingPresignedUrl(EMPTY_FILE_NAME);
 
-        assertEquals(expectedUrl, result);
-        Mockito.verify(awsS3Port, Mockito.times(1)).obtainFilePresignedUrl(fileName);
+        thenPresignedUrlEquals(result, EMPTY_URL);
+        thenPortRequestedUrlFor(EMPTY_FILE_NAME);
     }
 
     @Test
-    public void when_NullFileName_ThenReturnEmptyUrl() {
-        String expectedUrl = "";
-        
-        Mockito.when(awsS3Port.obtainFilePresignedUrl(null))
-               .thenReturn(expectedUrl);
+    public void shouldReturnEmptyUrlForNullFileName() {
+        givenPresignedUrlResponse(null, EMPTY_URL);
 
-        String result = useCase.execute(null);
+        String result = whenObtainingPresignedUrl(null);
 
-        assertEquals(expectedUrl, result);
-        Mockito.verify(awsS3Port, Mockito.times(1)).obtainFilePresignedUrl(null);
+        thenPresignedUrlEquals(result, EMPTY_URL);
+        thenPortRequestedUrlFor(null);
+    }
+
+    private void givenPresignedUrlResponse(String fileName, String url) {
+        Mockito.when(awsS3Port.obtainFilePresignedUrl(fileName)).thenReturn(url);
+    }
+
+    private String whenObtainingPresignedUrl(String fileName) {
+        return useCase.execute(fileName);
+    }
+
+    private void thenPresignedUrlEquals(String actual, String expected) {
+        assertEquals(expected, actual);
+    }
+
+    private void thenPortRequestedUrlFor(String fileName) {
+        Mockito.verify(awsS3Port, Mockito.times(1)).obtainFilePresignedUrl(fileName);
     }
 }

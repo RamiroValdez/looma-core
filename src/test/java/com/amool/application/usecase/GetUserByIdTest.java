@@ -29,30 +29,49 @@ public class GetUserByIdTest {
         useCase = new GetUserById(loadUserPort, awsS3Port);
     }
 
+    private User givenUserExists(Long id, String username, String email) {
+        User user = new User();
+        user.setId(id);
+        user.setUsername(username);
+        user.setEmail(email);
+        when(loadUserPort.getById(id)).thenReturn(Optional.of(user));
+        return user;
+    }
+
+    private void givenUserDoesNotExist(Long id) {
+        when(loadUserPort.getById(id)).thenReturn(Optional.empty());
+    }
+
+    private Optional<User> whenGetUserById(Long id) {
+        return useCase.execute(id);
+    }
+
+    private void thenUserFound(Optional<User> result, Long expectedId, String expectedUsername, String expectedEmail) {
+        assertTrue(result.isPresent(), "Se esperaba usuario presente");
+        assertEquals(expectedId, result.get().getId());
+        assertEquals(expectedUsername, result.get().getUsername());
+        assertEquals(expectedEmail, result.get().getEmail());
+    }
+
+    private void thenUserEmpty(Optional<User> result) {
+        assertTrue(result.isEmpty(), "Se esperaba Optional vacío");
+    }
+
     @Test
     public void when_UserExists_ThenReturnUser() {
-        User expectedUser = new User();
-        expectedUser.setId(USER_ID);
-        expectedUser.setUsername(USER_NAME);
-        expectedUser.setEmail(USER_EMAIL);
-        
-        when(loadUserPort.getById(USER_ID)).thenReturn(Optional.of(expectedUser));
+        givenUserExists(USER_ID, USER_NAME, USER_EMAIL);
 
-        Optional<User> result = useCase.execute(USER_ID);
+        Optional<User> result = whenGetUserById(USER_ID);
 
-        assertTrue(result.isPresent());
-        assertEquals(USER_ID, result.get().getId());
-        assertEquals(USER_NAME, result.get().getUsername());
-        assertEquals(USER_EMAIL, result.get().getEmail());
+        thenUserFound(result, USER_ID, USER_NAME, USER_EMAIL);
     }
 
     @Test
     public void when_UserDoesNotExist_ThenReturnEmpty() {
-        when(loadUserPort.getById(USER_ID)).thenReturn(Optional.empty());
+        givenUserDoesNotExist(USER_ID);
 
-        Optional<User> result = useCase.execute(USER_ID);
+        Optional<User> result = whenGetUserById(USER_ID);
 
-        assertTrue(result.isEmpty());
+        thenUserEmpty(result);
     }
-
 }

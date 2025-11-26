@@ -11,12 +11,12 @@ import com.amool.domain.model.Work;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
+
 import java.util.NoSuchElementException;
 import java.util.Optional;
 
-import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
-import static org.junit.jupiter.api.Assertions.assertThrows;
-
+import static org.junit.jupiter.api.Assertions.*;
+import static org.mockito.Mockito.*;
 
 public class CancelScheduledPublicationTest {
 
@@ -37,96 +37,107 @@ public class CancelScheduledPublicationTest {
         );
     }
 
-    @Test
-    public void when_authenticatedUserIsNull_then_throwSecurityException() {
-
-        assertThrows(SecurityException.class, () -> useCase.execute(1L,1L, null));
-
+    private void givenWorkNotFound(Long workId) {
+        when(obtainWorkByIdPort.obtainWorkById(workId)).thenReturn(Optional.empty());
     }
 
-    @Test
-    public void when_workIdNotExistsInDatabase_then_throwNoSuchElementException(){
-
-        assertThrows(NoSuchElementException.class, () -> useCase.execute(1L,1L, 1L));
-
-    }
-
-    @Test
-    public void when_workCreatorIsNull_then_throwSecurityException(){
-
+    private void givenWorkWithNullCreator(Long workId) {
         Work work = new Work();
         work.setCreator(null);
-
-        Mockito.when(obtainWorkByIdPort.obtainWorkById(1L)).thenReturn(Optional.of(work));
-
-
-        assertThrows(SecurityException.class, () -> useCase.execute(1L,1L, 1L));
-
+        when(obtainWorkByIdPort.obtainWorkById(workId)).thenReturn(Optional.of(work));
     }
 
-    @Test
-    public void when_workCreatorIsDifferentFromAuthenticated_then_throwSecurityException(){
-
-        User authenticationUser = new User();
+    private void givenWorkWithCreator(Long workId, Long creatorId) {
         Work work = new Work();
-        Long creatorWorkId = 2L;
-
-        authenticationUser.setId(1L);
-        work.setCreator(authenticationUser);
-
-        Mockito.when(obtainWorkByIdPort.obtainWorkById(1L)).thenReturn(Optional.of(work));
-
-
-        assertThrows(SecurityException.class, () -> useCase.execute(1L,1L, creatorWorkId));
-
+        User creator = new User();
+        creator.setId(creatorId);
+        work.setCreator(creator);
+        when(obtainWorkByIdPort.obtainWorkById(workId)).thenReturn(Optional.of(work));
     }
 
-    @Test
-    public void when_chapterIdNotExistsForWork_then_throwNoSuchElementException(){
-
-        User authenticationUser = new User();
-        Work work = new Work();
-
-        authenticationUser.setId(1L);
-        work.setCreator(authenticationUser);
-
-        Mockito.when(obtainWorkByIdPort.obtainWorkById(1L)).thenReturn(Optional.of(work));
-        Mockito.when(loadChapterPort.loadChapter(1L,1L)).thenReturn(Optional.empty());
-
-        assertThrows(NoSuchElementException.class, () -> useCase.execute(1L,1L, 1L));
+    private void givenChapterNotFound(Long workId, Long chapterId) {
+        when(loadChapterPort.loadChapter(workId, chapterId)).thenReturn(Optional.empty());
     }
 
-    @Test
-    public void when_chapterIsNotInSCHEDULEDState_then_throwIllegalStateException(){
-        User authenticationUser = new User();
-        Work work = new Work();
+    private void givenChapterWithStatus(Long workId, Long chapterId, String status) {
         Chapter chapter = new Chapter();
+        chapter.setPublicationStatus(status);
+        when(loadChapterPort.loadChapter(workId, chapterId)).thenReturn(Optional.of(chapter));
+    }
 
-        authenticationUser.setId(1L);
-        work.setCreator(authenticationUser);
-        chapter.setPublicationStatus("?");
+    private void whenCancel(Long workId, Long chapterId, Long authenticatedUserId) {
+        useCase.execute(workId, chapterId, authenticatedUserId);
+    }
 
-        Mockito.when(obtainWorkByIdPort.obtainWorkById(1L)).thenReturn(Optional.of(work));
-        Mockito.when(loadChapterPort.loadChapter(1L,1L)).thenReturn(Optional.of(chapter));
+    private void thenThrowsSecurity(Runnable action) {
+        assertThrows(SecurityException.class, action::run);
+    }
 
-        assertThrows(IllegalStateException.class, () -> useCase.execute(1L,1L, 1L));
+    private void thenThrowsNoSuchElement(Runnable action) {
+        assertThrows(NoSuchElementException.class, action::run);
+    }
+
+    private void thenThrowsIllegalState(Runnable action) {
+        assertThrows(IllegalStateException.class, action::run);
+    }
+
+    private void thenDoesNotThrow(Runnable action) {
+        assertDoesNotThrow(action::run);
+    }
+
+    private void thenScheduleCleared(Long workId, Long chapterId) {
+        verify(updateChapterStatusPort, times(1)).clearSchedule(workId, chapterId);
+    }
+
+    private Runnable cancelAction(Long workId, Long chapterId, Long authenticatedUserId) {
+        return () -> whenCancel(workId, chapterId, authenticatedUserId);
     }
 
     @Test
-    public void when_allParametersAreValid_then_executeSuccessfully(){
-        User authenticationUser = new User();
-        Work work = new Work();
-        Chapter chapter = new Chapter();
+    public void when_authenticatedUserIsNull_then_throwSecurityException() {
+        thenThrowsSecurity(cancelAction(1L, 1L, null));
+    }
 
-        authenticationUser.setId(1L);
-        work.setCreator(authenticationUser);
-        chapter.setPublicationStatus("SCHEDULED");
+    @Test
+    public void when_workIdNotExistsInDatabase_then_throwNoSuchElementException() {
+        givenWorkNotFound(1L);
+        thenThrowsNoSuchElement(cancelAction(1L, 1L, 1L));
+    }
 
-        Mockito.when(obtainWorkByIdPort.obtainWorkById(1L)).thenReturn(Optional.of(work));
-        Mockito.when(loadChapterPort.loadChapter(1L,1L)).thenReturn(Optional.of(chapter));
+    @Test
+    public void when_workCreatorIsNull_then_throwSecurityException() {
+        givenWorkWithNullCreator(1L);
+        thenThrowsSecurity(cancelAction(1L, 1L, 1L));
+    }
 
-        assertDoesNotThrow(() -> useCase.execute(1L,1L, 1L));
+    @Test
+    public void when_workCreatorIsDifferentFromAuthenticated_then_throwSecurityException() {
+        givenWorkWithCreator(1L, 2L);
+        thenThrowsSecurity(cancelAction(1L, 1L, 1L));
+    }
 
-        Mockito.verify(updateChapterStatusPort, Mockito.times(1)).clearSchedule(1L,1L);
+    @Test
+    public void when_chapterIdNotExistsForWork_then_throwNoSuchElementException() {
+        givenWorkWithCreator(1L, 1L);
+        givenChapterNotFound(1L, 1L);
+
+        thenThrowsNoSuchElement(cancelAction(1L, 1L, 1L));
+    }
+
+    @Test
+    public void when_chapterIsNotInSCHEDULEDState_then_throwIllegalStateException() {
+        givenWorkWithCreator(1L, 1L);
+        givenChapterWithStatus(1L, 1L, "?");
+
+        thenThrowsIllegalState(cancelAction(1L, 1L, 1L));
+    }
+
+    @Test
+    public void when_allParametersAreValid_then_executeSuccessfully() {
+        givenWorkWithCreator(1L, 1L);
+        givenChapterWithStatus(1L, 1L, "SCHEDULED");
+
+        thenDoesNotThrow(cancelAction(1L, 1L, 1L));
+        thenScheduleCleared(1L, 1L);
     }
 }

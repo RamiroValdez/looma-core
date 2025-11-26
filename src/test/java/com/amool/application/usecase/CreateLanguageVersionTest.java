@@ -5,9 +5,12 @@ import com.amool.application.port.out.OpenAIPort;
 import com.amool.application.usecases.CreateLanguageVersion;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.mockito.Mockito;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.mockito.ArgumentMatchers.anyDouble;
+import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.when;
 
 public class CreateLanguageVersionTest {
 
@@ -17,11 +20,31 @@ public class CreateLanguageVersionTest {
 
     @BeforeEach
     void setUp() {
-        openAIPort = Mockito.mock(OpenAIPort.class);
-        googleTranslatePort = Mockito.mock(GoogleTranslatePort.class);
-
+        openAIPort = mock(OpenAIPort.class);
+        googleTranslatePort = mock(GoogleTranslatePort.class);
         useCase = new CreateLanguageVersion(openAIPort, googleTranslatePort);
+    }
 
+    private void givenGoogleTranslateReturns(String originalText, String targetLanguage, String translated) {
+        when(googleTranslatePort.translateText(originalText, targetLanguage)).thenReturn(translated);
+    }
+
+    private void givenOpenAIRespondsWithFinalText(String finalText) {
+        String json = "{\"text_message\":\"message\",\"final_text\":\"" + finalText + "\"}";
+        when(openAIPort.getOpenAIResponse(anyString(), anyString(), anyString(), anyDouble())).thenReturn(json);
+    }
+
+    private void givenOpenAIRespondsInvalidMissingFinalText() {
+        String json = "{\"text_message\":\"message\",\"mid_textual\":\"¡Hola, mundo!\"}"; // falta final_text
+        when(openAIPort.getOpenAIResponse(anyString(), anyString(), anyString(), anyDouble())).thenReturn(json);
+    }
+
+    private String whenCreateLanguageVersion(String sourceLang, String targetLang, String originalText) {
+        return useCase.execute(sourceLang, targetLang, originalText);
+    }
+
+    private void thenResultIs(String result, String expected) {
+        assertEquals(expected, result);
     }
 
     @Test
@@ -29,16 +52,12 @@ public class CreateLanguageVersionTest {
         String sourceLanguage = "English";
         String targetLanguage = "Spanish";
         String originalText = "Hello, world!";
+        givenGoogleTranslateReturns(originalText, targetLanguage, "¡Hola, mundo!");
+        givenOpenAIRespondsWithFinalText("¡Hola, mundo!");
 
-        Mockito.when(googleTranslatePort.translateText(originalText, targetLanguage))
-                .thenReturn("¡Hola, mundo!");
+        String result = whenCreateLanguageVersion(sourceLanguage, targetLanguage, originalText);
 
-        Mockito.when(openAIPort.getOpenAIResponse(Mockito.anyString(), Mockito.anyString(), Mockito.anyString(), Mockito.anyDouble()))
-                .thenReturn("{\"text_message\":\"message\",\"final_text\":\"¡Hola, mundo!\"}");
-
-        String result = useCase.execute(sourceLanguage, targetLanguage, originalText);
-
-        assertEquals("¡Hola, mundo!", result);
+        thenResultIs(result, "¡Hola, mundo!");
     }
 
     @Test
@@ -46,16 +65,11 @@ public class CreateLanguageVersionTest {
         String sourceLanguage = "English";
         String targetLanguage = "Spanish";
         String originalText = "Hello, world!";
+        givenGoogleTranslateReturns(originalText, targetLanguage, "¡Hola, mundo!");
+        givenOpenAIRespondsInvalidMissingFinalText();
 
-        Mockito.when(googleTranslatePort.translateText(originalText, targetLanguage))
-                .thenReturn("¡Hola, mundo!");
+        String result = whenCreateLanguageVersion(sourceLanguage, targetLanguage, originalText);
 
-        Mockito.when(openAIPort.getOpenAIResponse(Mockito.anyString(), Mockito.anyString(), Mockito.anyString(), Mockito.anyDouble()))
-                .thenReturn("{\"text_message\":\"message\",\"mid_textual\":\"¡Hola, mundo!\"}");
-
-        String result = useCase.execute(sourceLanguage, targetLanguage, originalText);
-
-        assertEquals("Error parsing OpenAI response: Campo 'final_text' no encontrado en respuesta de OpenAI", result);
-
+        thenResultIs(result, "Error parsing OpenAI response: Campo 'final_text' no encontrado en respuesta de OpenAI");
     }
 }

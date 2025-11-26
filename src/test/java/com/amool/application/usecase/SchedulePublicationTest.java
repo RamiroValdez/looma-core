@@ -10,6 +10,7 @@ import com.amool.domain.model.Work;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
+import org.junit.jupiter.api.function.Executable;
 
 import java.time.Instant;
 import java.time.temporal.ChronoUnit;
@@ -33,7 +34,7 @@ public class SchedulePublicationTest {
     private final Long authenticatedUserId = 100L;
     private Work work;
     private Chapter chapter;
-    private Instant futureDate;
+    private Instant scheduleDate;
 
     @BeforeEach
     public void setUp() {
@@ -59,124 +60,140 @@ public class SchedulePublicationTest {
         chapter.setWorkId(workId);
         chapter.setPublicationStatus("DRAFT");
         
-        futureDate = Instant.now().plus(1, ChronoUnit.DAYS);
+        scheduleDate = Instant.now().plus(1, ChronoUnit.DAYS);
     }
 
     @Test
-    public void when_ValidRequest_ThenSchedulePublication() {
-        Mockito.when(obtainWorkByIdPort.obtainWorkById(workId))
-                .thenReturn(Optional.of(work));
-                
-        Mockito.when(loadChapterPort.loadChapter(workId, chapterId))
-                .thenReturn(Optional.of(chapter));
+    public void shouldSchedulePublicationWhenRequestIsValid() {
+        givenWorkOwnedBy(authenticatedUserId);
+        givenChapterWithStatus("DRAFT");
 
-        useCase.execute(workId, chapterId, futureDate, authenticatedUserId);
+        whenSchedulingPublication(authenticatedUserId, scheduleDate);
 
-        verify(updateChapterStatusPort).schedulePublication(workId, chapterId, futureDate);
+        thenPublicationIsScheduled(scheduleDate);
     }
 
     @Test
-    public void when_UserNotAuthenticated_ThenThrowSecurityException() {
-        assertThrows(SecurityException.class, () -> 
-            useCase.execute(workId, chapterId, futureDate, null)
-        );
-        
-        verifyNoInteractions();
+    public void shouldThrowSecurityExceptionWhenUserNotAuthenticated() {
+        thenThrows(SecurityException.class, schedulingPublication(null, scheduleDate));
+        thenNoPortsInvoked();
     }
 
     @Test
-    public void when_InvalidDate_ThenThrowIllegalArgumentException() {
-        Instant pastDate = Instant.now().minus(1, ChronoUnit.HOURS);
-        
-        assertThrows(IllegalArgumentException.class, () -> 
-            useCase.execute(workId, chapterId, pastDate, authenticatedUserId)
-        );
-        
-        verifyNoInteractions();
+    public void shouldThrowIllegalArgumentWhenDateIsInThePast() {
+        Instant invalidDate = pastInstant();
+
+        thenThrows(IllegalArgumentException.class, schedulingPublication(authenticatedUserId, invalidDate));
+        thenNoPortsInvoked();
     }
 
     @Test
-    public void when_WorkNotFound_ThenThrowNoSuchElementException() {
-        Mockito.when(obtainWorkByIdPort.obtainWorkById(workId))
-                .thenReturn(Optional.empty());
+    public void shouldThrowNoSuchElementWhenWorkNotFound() {
+        givenWorkDoesNotExist();
 
-        assertThrows(NoSuchElementException.class, () -> 
-            useCase.execute(workId, chapterId, futureDate, authenticatedUserId)
-        );
-        
-        verify(obtainWorkByIdPort).obtainWorkById(workId);
-        verifyNoOtherInteractions();
+        thenThrows(NoSuchElementException.class, schedulingPublication(authenticatedUserId, scheduleDate));
+        thenWorkLookupOccurs();
+        thenChapterLookupDoesNotOccur();
+        thenNoScheduleTriggered();
     }
 
     @Test
-    public void when_UserNotAuthorized_ThenThrowSecurityException() {
-        User otherUser = new User();
-        otherUser.setId(999L);
-        work.setCreator(otherUser);
-        
-        Mockito.when(obtainWorkByIdPort.obtainWorkById(workId))
-                .thenReturn(Optional.of(work));
+    public void shouldThrowSecurityExceptionWhenUserNotAuthorized() {
+        givenWorkOwnedBy(999L);
 
-        assertThrows(SecurityException.class, () -> 
-            useCase.execute(workId, chapterId, futureDate, authenticatedUserId)
-        );
-        
-        verify(obtainWorkByIdPort).obtainWorkById(workId);
-        verifyNoOtherInteractions();
+        thenThrows(SecurityException.class, schedulingPublication(authenticatedUserId, scheduleDate));
+        thenWorkLookupOccurs();
+        thenChapterLookupDoesNotOccur();
+        thenNoScheduleTriggered();
     }
 
     @Test
-    public void when_ChapterNotInDraft_ThenThrowIllegalStateException() {
-        chapter.setPublicationStatus("PUBLISHED");
-        
-        Mockito.when(obtainWorkByIdPort.obtainWorkById(workId))
-                .thenReturn(Optional.of(work));
-                
-        Mockito.when(loadChapterPort.loadChapter(workId, chapterId))
-                .thenReturn(Optional.of(chapter));
+    public void shouldThrowIllegalStateWhenChapterNotInDraft() {
+        givenWorkOwnedBy(authenticatedUserId);
+        givenChapterWithStatus("PUBLISHED");
 
-        assertThrows(IllegalStateException.class, () -> 
-            useCase.execute(workId, chapterId, futureDate, authenticatedUserId)
-        );
-        
-        verify(obtainWorkByIdPort).obtainWorkById(workId);
-        verify(loadChapterPort).loadChapter(workId, chapterId);
-        verifyNoOtherInteractions();
+        thenThrows(IllegalStateException.class, schedulingPublication(authenticatedUserId, scheduleDate));
+        thenWorkLookupOccurs();
+        thenChapterLookupOccurs();
+        thenNoScheduleTriggered();
     }
 
     @Test
-    public void when_ChapterNotFound_ThenThrowNoSuchElementException() {
-        Mockito.when(obtainWorkByIdPort.obtainWorkById(workId))
-                .thenReturn(Optional.of(work));
-                
-        Mockito.when(loadChapterPort.loadChapter(workId, chapterId))
-                .thenReturn(Optional.empty());
+    public void shouldThrowNoSuchElementWhenChapterNotFound() {
+        givenWorkOwnedBy(authenticatedUserId);
+        givenChapterDoesNotExist();
 
-        assertThrows(NoSuchElementException.class, () -> 
-            useCase.execute(workId, chapterId, futureDate, authenticatedUserId)
-        );
-        
-        verify(obtainWorkByIdPort).obtainWorkById(workId);
-        verify(loadChapterPort).loadChapter(workId, chapterId);
-        verifyNoOtherInteractions();
+        thenThrows(NoSuchElementException.class, schedulingPublication(authenticatedUserId, scheduleDate));
+        thenWorkLookupOccurs();
+        thenChapterLookupOccurs();
+        thenNoScheduleTriggered();
     }
 
     @Test
-    public void when_NullDate_ThenThrowIllegalArgumentException() {
-        assertThrows(IllegalArgumentException.class, () -> 
-            useCase.execute(workId, chapterId, null, authenticatedUserId)
-        );
-        
-        verifyNoInteractions();
+    public void shouldThrowIllegalArgumentWhenDateIsNull() {
+        thenThrows(IllegalArgumentException.class, schedulingPublication(authenticatedUserId, null));
+        thenNoPortsInvoked();
     }
 
-    private void verifyNoInteractions() {
+    private void givenWorkOwnedBy(Long ownerId) {
+        User creator = new User();
+        creator.setId(ownerId);
+        work.setCreator(creator);
+        Mockito.when(obtainWorkByIdPort.obtainWorkById(workId)).thenReturn(Optional.of(work));
+    }
+
+    private void givenWorkDoesNotExist() {
+        Mockito.when(obtainWorkByIdPort.obtainWorkById(workId)).thenReturn(Optional.empty());
+    }
+
+    private void givenChapterWithStatus(String status) {
+        chapter.setPublicationStatus(status);
+        Mockito.when(loadChapterPort.loadChapter(workId, chapterId)).thenReturn(Optional.of(chapter));
+    }
+
+    private void givenChapterDoesNotExist() {
+        Mockito.when(loadChapterPort.loadChapter(workId, chapterId)).thenReturn(Optional.empty());
+    }
+
+    private void whenSchedulingPublication(Long userId, Instant publicationDate) {
+        useCase.execute(workId, chapterId, publicationDate, userId);
+    }
+
+    private Executable schedulingPublication(Long userId, Instant publicationDate) {
+        return () -> useCase.execute(workId, chapterId, publicationDate, userId);
+    }
+
+    private void thenPublicationIsScheduled(Instant expectedDate) {
+        verify(updateChapterStatusPort).schedulePublication(workId, chapterId, expectedDate);
+    }
+
+    private void thenThrows(Class<? extends Throwable> expectedException, Executable action) {
+        assertThrows(expectedException, action);
+    }
+
+    private void thenNoPortsInvoked() {
         verify(obtainWorkByIdPort, never()).obtainWorkById(any());
         verify(loadChapterPort, never()).loadChapter(any(), any());
+        thenNoScheduleTriggered();
+    }
+
+    private void thenWorkLookupOccurs() {
+        verify(obtainWorkByIdPort).obtainWorkById(workId);
+    }
+
+    private void thenChapterLookupOccurs() {
+        verify(loadChapterPort).loadChapter(workId, chapterId);
+    }
+
+    private void thenChapterLookupDoesNotOccur() {
+        verify(loadChapterPort, never()).loadChapter(any(), any());
+    }
+
+    private void thenNoScheduleTriggered() {
         verify(updateChapterStatusPort, never()).schedulePublication(any(), any(), any());
     }
-    
-    private void verifyNoOtherInteractions() {
-        verify(updateChapterStatusPort, never()).schedulePublication(any(), any(), any());
+
+    private Instant pastInstant() {
+        return Instant.now().minus(1, ChronoUnit.HOURS);
     }
 }

@@ -8,12 +8,13 @@ import com.amool.domain.model.Chapter;
 import com.amool.domain.model.ChapterContent;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.mockito.Mockito;
 
 import java.util.Map;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.Mockito.*;
 
 public class CreateEmptyChapterTest {
 
@@ -22,11 +23,15 @@ public class CreateEmptyChapterTest {
     private SaveChapterContentPort saveChapterContentPort;
     private CreateEmptyChapter useCase;
 
+    private static final Long WORK_ID = 1L;
+    private static final Long LANGUAGE_ID = 1L;
+    private static final String LANG_CODE = "es";
+
     @BeforeEach
     public void setUp() {
-        loadLanguagePort = Mockito.mock(LoadLanguagePort.class);
-        saveChapterPort = Mockito.mock(SaveChapterPort.class);
-        saveChapterContentPort = Mockito.mock(SaveChapterContentPort.class);
+        loadLanguagePort = mock(LoadLanguagePort.class);
+        saveChapterPort = mock(SaveChapterPort.class);
+        saveChapterContentPort = mock(SaveChapterContentPort.class);
         useCase = new CreateEmptyChapter(
                 loadLanguagePort,
                 saveChapterPort,
@@ -34,59 +39,66 @@ public class CreateEmptyChapterTest {
         );
     }
 
+    private Chapter givenChapterPersistWillReturn(Long chapterId) {
+        Chapter chapter = new Chapter();
+        chapter.setId(chapterId);
+        chapter.setWorkId(WORK_ID);
+        chapter.setLanguageId(LANGUAGE_ID);
+        when(saveChapterPort.saveChapter(any(Chapter.class))).thenReturn(chapter);
+        return chapter;
+    }
+
+    private ChapterContent givenChapterContentPersistWillReturn(Long chapterId) {
+        ChapterContent content = new ChapterContent(WORK_ID.toString(), chapterId.toString(), Map.of(LANG_CODE, ""), LANG_CODE);
+        when(saveChapterContentPort.saveContent(anyString(), anyString(), anyString(), anyString())).thenReturn(content);
+        return content;
+    }
+
+    private Chapter whenCreateEmptyChapter(String contentType) {
+        return useCase.execute(WORK_ID, LANGUAGE_ID, contentType);
+    }
+
+    private void thenChapterIdMatches(Chapter created, Long expectedId) {
+        assertEquals(expectedId, created.getId());
+    }
+
+    private void thenLanguageLoaded(Long languageId) {
+        verify(loadLanguagePort, times(1)).loadLanguageById(languageId);
+    }
+
+    private void thenLanguageNotLoaded(Long languageId) {
+        verify(loadLanguagePort, never()).loadLanguageById(languageId);
+    }
+
+    private void thenContentSaved(Long workId, Long chapterId, String langCode) {
+        verify(saveChapterContentPort, times(1))
+                .saveContent(workId.toString(), chapterId.toString(), langCode, "");
+    }
+
+    private void thenContentNotSaved() {
+        verify(saveChapterContentPort, never()).saveContent(anyString(), anyString(), anyString(), anyString());
+    }
+
     @Test
     public void when_contentTypeIsTEXT_ThenCreateChapterWithContent() {
+        Chapter persistedChapter = givenChapterPersistWillReturn(10L);
+        givenChapterContentPersistWillReturn(persistedChapter.getId());
 
-        Long workId = 1L;
-        Long languageId = 1L;
-        String contentType = "TEXT";
+        Chapter result = whenCreateEmptyChapter("TEXT");
 
-        Chapter chapter = new Chapter();
-
-        chapter.setId(10L);
-        chapter.setWorkId(workId);
-        chapter.setLanguageId(languageId);
-
-        ChapterContent chapterContent = new ChapterContent(workId.toString(), chapter.getId().toString(), Map.of("es", ""), "es");
-
-        Mockito.when(saveChapterPort.saveChapter(Mockito.any(Chapter.class)))
-                .thenReturn(chapter);
-
-        Mockito.when(saveChapterContentPort.saveContent(anyString(),anyString(),anyString(),anyString()))
-                .thenReturn(chapterContent);
-
-        Chapter result = useCase.execute(workId, languageId, contentType);
-
-        assertEquals(chapter.getId(), result.getId());
-
-        Mockito.verify(loadLanguagePort, Mockito.times(1)).loadLanguageById(languageId);
-        Mockito.verify(saveChapterContentPort, Mockito.times(1)).saveContent(
-                workId.toString(),
-                chapter.getId().toString(),
-                "es",
-                ""
-        );
+        thenChapterIdMatches(result, persistedChapter.getId());
+        thenLanguageLoaded(LANGUAGE_ID);
+        thenContentSaved(WORK_ID, persistedChapter.getId(), LANG_CODE);
     }
 
     @Test
     public void when_contentTypeIsNotTEXT_ThenCreateChapterWithoutContent() {
-        Long workId = 1L;
-        Long languageId = 1L;
+        Chapter persistedChapter = givenChapterPersistWillReturn(10L);
 
-        Chapter chapter = new Chapter();
+        Chapter result = whenCreateEmptyChapter("JSON");
 
-        chapter.setId(10L);
-        chapter.setWorkId(workId);
-        chapter.setLanguageId(languageId);
-
-        Mockito.when(saveChapterPort.saveChapter(Mockito.any(Chapter.class)))
-                .thenReturn(chapter);
-
-        assertEquals(chapter.getId(), useCase.execute(workId, languageId, "JSON").getId());
-
-        Mockito.verify(loadLanguagePort, Mockito.never()).loadLanguageById(languageId);
-        Mockito.verify(saveChapterContentPort, Mockito.never())
-                .saveContent(Mockito.anyString(), Mockito.anyString(), Mockito.anyString(), Mockito.anyString());
+        thenChapterIdMatches(result, persistedChapter.getId());
+        thenLanguageNotLoaded(LANGUAGE_ID);
+        thenContentNotSaved();
     }
-
 }

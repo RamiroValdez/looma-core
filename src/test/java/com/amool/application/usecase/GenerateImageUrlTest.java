@@ -9,6 +9,9 @@ import org.mockito.Mockito;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.Mockito.when;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.times;
 
 public class GenerateImageUrlTest {
 
@@ -21,39 +24,49 @@ public class GenerateImageUrlTest {
         useCase = new GenerateImageUrl(openAIImagePort);
     }
 
+    private void givenImageGenerationWillReturn(String expectedUrl) {
+        when(openAIImagePort.generateImageUrl(anyString())).thenReturn(expectedUrl);
+    }
+
+    private void givenImageGenerationWillFail(String message) {
+        when(openAIImagePort.generateImageUrl(anyString())).thenThrow(new RuntimeException(message));
+    }
+
+    private String whenGenerate(String style, String colors, String composition, String description) {
+        return useCase.execute(style, colors, composition, description);
+    }
+
+    private void thenResultIs(String result, String expected) {
+        assertNotNull(result);
+        assertEquals(expected, result);
+    }
+
+    private void thenOpenAIGenerateCalledOnce() {
+        verify(openAIImagePort, times(1)).generateImageUrl(anyString());
+    }
+
+    private void thenThrowsRuntimeWithMessage(Runnable action, String expectedMessage) {
+        RuntimeException ex = assertThrows(RuntimeException.class, action::run);
+        assertEquals(expectedMessage, ex.getMessage());
+        thenOpenAIGenerateCalledOnce();
+    }
+
     @Test
     public void when_GenerateImageWithValidParameters_ThenReturnImageUrl() {
         String expectedUrl = "https://example.com/generated-image.jpg";
-        
-        Mockito.when(openAIImagePort.generateImageUrl(anyString()))
-               .thenReturn(expectedUrl);
+        givenImageGenerationWillReturn(expectedUrl);
 
-        String result = useCase.execute(
-            "style", 
-            "colors", 
-            "composition", 
-            "description"
-        );
+        String result = whenGenerate("style", "colors", "composition", "description");
 
-        assertNotNull(result);
-        assertEquals(expectedUrl, result);
-        
-        Mockito.verify(openAIImagePort, Mockito.times(1))
-               .generateImageUrl(anyString());
+        thenResultIs(result, expectedUrl);
+        thenOpenAIGenerateCalledOnce();
     }
-
 
     @Test
     public void when_OpenAIServiceFails_ThenThrowException() {
-        Mockito.when(openAIImagePort.generateImageUrl(anyString()))
-               .thenThrow(new RuntimeException("OpenAI service unavailable"));
+        String errorMessage = "OpenAI service unavailable";
+        givenImageGenerationWillFail(errorMessage);
 
-        assertThrows(
-            RuntimeException.class,
-            () -> useCase.execute("style", "colors", "composition", "description")
-        );
-        
-        Mockito.verify(openAIImagePort, Mockito.times(1))
-               .generateImageUrl(anyString());
+        thenThrowsRuntimeWithMessage(() -> whenGenerate("style", "colors", "composition", "description"), errorMessage);
     }
 }

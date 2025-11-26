@@ -20,28 +20,52 @@ class ToggleSaveWorkTest {
     @InjectMocks
     private ToggleSaveWork toggleSaveWork;
 
-    private final Long TEST_USER_ID = 1L;
-    private final Long TEST_WORK_ID = 100L;
+    private static final Long TEST_USER_ID = 1L;
+    private static final Long TEST_WORK_ID = 100L;
 
     @Test
-    void execute_WhenWorkNotSaved_ShouldSaveWork() {
-        when(saveWorkPort.isWorkSavedByUser(TEST_USER_ID, TEST_WORK_ID)).thenReturn(false);
+    void shouldSaveWorkWhenNotPreviouslySaved() {
+        givenWorkSavedState(false);
 
-        toggleSaveWork.execute(TEST_USER_ID, TEST_WORK_ID);
+        whenTogglingSave();
 
-        verify(saveWorkPort, times(1)).isWorkSavedByUser(TEST_USER_ID, TEST_WORK_ID);
-        verify(saveWorkPort, times(1)).saveWorkForUser(TEST_USER_ID, TEST_WORK_ID);
-        verify(saveWorkPort, never()).removeSavedWorkForUser(any(), any());
+        thenSaveWorkTriggered();
+        thenRemoveWorkNotTriggered();
     }
 
     @Test
-    void execute_WhenWorkAlreadySaved_ShouldRemoveSavedWork() {
-        when(saveWorkPort.isWorkSavedByUser(TEST_USER_ID, TEST_WORK_ID)).thenReturn(true);
+    void shouldRemoveWorkWhenAlreadySaved() {
+        givenWorkSavedState(true);
 
+        whenTogglingSave();
+
+        thenRemoveWorkTriggered();
+        thenSaveWorkNotTriggered();
+    }
+
+    private void givenWorkSavedState(boolean isSaved) {
+        when(saveWorkPort.isWorkSavedByUser(TEST_USER_ID, TEST_WORK_ID)).thenReturn(isSaved);
+    }
+
+    private void whenTogglingSave() {
         toggleSaveWork.execute(TEST_USER_ID, TEST_WORK_ID);
+    }
 
-        verify(saveWorkPort, times(1)).isWorkSavedByUser(TEST_USER_ID, TEST_WORK_ID);
-        verify(saveWorkPort, times(1)).removeSavedWorkForUser(TEST_USER_ID, TEST_WORK_ID);
+    private void thenSaveWorkTriggered() {
+        verify(saveWorkPort).isWorkSavedByUser(TEST_USER_ID, TEST_WORK_ID);
+        verify(saveWorkPort).saveWorkForUser(TEST_USER_ID, TEST_WORK_ID);
+    }
+
+    private void thenRemoveWorkTriggered() {
+        verify(saveWorkPort).isWorkSavedByUser(TEST_USER_ID, TEST_WORK_ID);
+        verify(saveWorkPort).removeSavedWorkForUser(TEST_USER_ID, TEST_WORK_ID);
+    }
+
+    private void thenSaveWorkNotTriggered() {
         verify(saveWorkPort, never()).saveWorkForUser(any(), any());
+    }
+
+    private void thenRemoveWorkNotTriggered() {
+        verify(saveWorkPort, never()).removeSavedWorkForUser(any(), any());
     }
 }

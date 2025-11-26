@@ -23,23 +23,39 @@ class IsWorkSavedTest {
     private final Long TEST_USER_ID = 1L;
     private final Long TEST_WORK_ID = 100L;
 
+    private void givenWorkIsSaved(Long userId, Long workId) {
+        when(saveWorkPort.isWorkSavedByUser(userId, workId)).thenReturn(true);
+    }
+
+    private void givenWorkIsNotSaved(Long userId, Long workId) {
+        when(saveWorkPort.isWorkSavedByUser(userId, workId)).thenReturn(false);
+    }
+
+    private boolean whenCheckIsWorkSaved(Long userId, Long workId) {
+        return isWorkSaved.execute(userId, workId);
+    }
+
+    private void thenResultIsTrue(boolean result) { assertTrue(result); }
+    private void thenResultIsFalse(boolean result) { assertFalse(result); }
+    private void thenPortCalledOnce(Long userId, Long workId) { verify(saveWorkPort, times(1)).isWorkSavedByUser(userId, workId); }
+
     @Test
     void execute_WhenWorkIsSaved_ShouldReturnTrue() {
-        when(saveWorkPort.isWorkSavedByUser(TEST_USER_ID, TEST_WORK_ID)).thenReturn(true);
-        
-        boolean result = isWorkSaved.execute(TEST_USER_ID, TEST_WORK_ID);
-        
-        assertTrue(result);
-        verify(saveWorkPort, times(1)).isWorkSavedByUser(TEST_USER_ID, TEST_WORK_ID);
+        givenWorkIsSaved(TEST_USER_ID, TEST_WORK_ID);
+
+        boolean result = whenCheckIsWorkSaved(TEST_USER_ID, TEST_WORK_ID);
+
+        thenResultIsTrue(result);
+        thenPortCalledOnce(TEST_USER_ID, TEST_WORK_ID);
     }
 
     @Test
     void execute_WhenWorkIsNotSaved_ShouldReturnFalse() {
-        when(saveWorkPort.isWorkSavedByUser(TEST_USER_ID, TEST_WORK_ID)).thenReturn(false);
-        
-        boolean result = isWorkSaved.execute(TEST_USER_ID, TEST_WORK_ID);
-        
-        assertFalse(result);
-        verify(saveWorkPort, times(1)).isWorkSavedByUser(TEST_USER_ID, TEST_WORK_ID);
+        givenWorkIsNotSaved(TEST_USER_ID, TEST_WORK_ID);
+
+        boolean result = whenCheckIsWorkSaved(TEST_USER_ID, TEST_WORK_ID);
+
+        thenResultIsFalse(result);
+        thenPortCalledOnce(TEST_USER_ID, TEST_WORK_ID);
     }
 }

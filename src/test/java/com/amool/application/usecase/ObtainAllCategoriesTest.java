@@ -26,29 +26,48 @@ public class ObtainAllCategoriesTest {
         useCase = new ObtainAllCategories(categoryPort);
     }
 
+    private void givenCategoriesExist(List<Category> categories) {
+        when(categoryPort.findAllCategories()).thenReturn(categories);
+    }
+
+    private void givenNoCategories() {
+        when(categoryPort.findAllCategories()).thenReturn(Collections.emptyList());
+    }
+
+    private Optional<List<Category>> whenObtainAllCategories() {
+        return useCase.execute();
+    }
+
+    private void thenResultHasCategories(Optional<List<Category>> result, int expectedSize, List<String> expectedNames) {
+        assertTrue(result.isPresent(), "Se esperaba lista de categorías presente");
+        assertEquals(expectedSize, result.get().size(), "Tamaño inesperado de categorías");
+        for (int i = 0; i < expectedNames.size(); i++) {
+            assertEquals(expectedNames.get(i), result.get().get(i).getName(), "Nombre de categoría inesperado en índice " + i);
+        }
+    }
+
+    private void thenResultEmpty(Optional<List<Category>> result) {
+        assertTrue(result.isEmpty(), "Se esperaba Optional vacío");
+    }
+
     @Test
     public void when_CategoriesExist_ThenReturnCategoriesList() {
         Category category1 = createCategory(1L, "Fiction");
         Category category2 = createCategory(2L, "Science");
-        List<Category> expectedCategories = Arrays.asList(category1, category2);
-        
-        when(categoryPort.findAllCategories()).thenReturn(expectedCategories);
+        givenCategoriesExist(Arrays.asList(category1, category2));
 
-        Optional<List<Category>> result = useCase.execute();
+        Optional<List<Category>> result = whenObtainAllCategories();
 
-        assertTrue(result.isPresent());
-        assertEquals(2, result.get().size());
-        assertEquals("Fiction", result.get().get(0).getName());
-        assertEquals("Science", result.get().get(1).getName());
+        thenResultHasCategories(result, 2, List.of("Fiction", "Science"));
     }
 
     @Test
     public void when_NoCategoriesExist_ThenReturnEmpty() {
-        when(categoryPort.findAllCategories()).thenReturn(Collections.emptyList());
+        givenNoCategories();
 
-        Optional<List<Category>> result = useCase.execute();
+        Optional<List<Category>> result = whenObtainAllCategories();
 
-        assertTrue(result.isEmpty());
+        thenResultEmpty(result);
     }
 
     private Category createCategory(Long id, String name) {

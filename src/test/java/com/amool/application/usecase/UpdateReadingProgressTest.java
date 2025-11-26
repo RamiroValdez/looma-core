@@ -29,25 +29,46 @@ public class UpdateReadingProgressTest {
     }
 
     @Test
-    public void when_CreateProgressSucceeds_ThenReturnTrueAndAddToHistory() {
-        when(readingProgressPort.create(USER_ID, WORK_ID, CHAPTER_ID))
-            .thenReturn(true);
+    public void shouldAddToHistoryWhenCreateSucceeds() {
+        givenCreateProgressResult(true);
 
-        boolean result = updateReadingProgress.execute(USER_ID, WORK_ID, CHAPTER_ID);
+        boolean result = whenUpdatingProgress();
 
-        assertTrue(result);
-        verify(readingProgressPort, times(1)).addToHistory(USER_ID, WORK_ID, CHAPTER_ID);
+        thenUpdateSucceeded(result);
+        thenHistoryUpdated();
     }
 
-
     @Test
-    public void when_CreateProgressFails_ThenReturnFalseAndDoNotAddToHistory() {
-        when(readingProgressPort.create(USER_ID, WORK_ID, CHAPTER_ID))
-            .thenReturn(false);
+    public void shouldNotAddToHistoryWhenCreateFails() {
+        givenCreateProgressResult(false);
 
-        boolean result = updateReadingProgress.execute(USER_ID, WORK_ID, CHAPTER_ID);
+        boolean result = whenUpdatingProgress();
 
+        thenUpdateFailed(result);
+        thenHistoryNotUpdated();
+    }
+
+    private void givenCreateProgressResult(boolean created) {
+        when(readingProgressPort.create(USER_ID, WORK_ID, CHAPTER_ID)).thenReturn(created);
+    }
+
+    private boolean whenUpdatingProgress() {
+        return updateReadingProgress.execute(USER_ID, WORK_ID, CHAPTER_ID);
+    }
+
+    private void thenUpdateSucceeded(boolean result) {
+        assertTrue(result);
+    }
+
+    private void thenUpdateFailed(boolean result) {
         assertFalse(result);
+    }
+
+    private void thenHistoryUpdated() {
+        verify(readingProgressPort).addToHistory(USER_ID, WORK_ID, CHAPTER_ID);
+    }
+
+    private void thenHistoryNotUpdated() {
         verify(readingProgressPort, times(0)).addToHistory(USER_ID, WORK_ID, CHAPTER_ID);
     }
 }

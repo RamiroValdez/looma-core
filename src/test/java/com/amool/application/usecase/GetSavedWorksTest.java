@@ -26,35 +26,60 @@ class GetSavedWorksTest {
 
     private final Long TEST_USER_ID = 1L;
 
+    private Work work(Long id, String title) {
+        Work w = new Work();
+        w.setId(id);
+        w.setTitle(title);
+        return w;
+    }
+
+    private void givenUserHasSavedWorks(Long userId, List<Work> works) {
+        when(saveWorkPort.getSavedWorksByUser(userId)).thenReturn(works);
+    }
+
+    private void givenUserHasNoSavedWorks(Long userId) {
+        when(saveWorkPort.getSavedWorksByUser(userId)).thenReturn(List.of());
+    }
+
+    private List<Work> whenGetSavedWorks(Long userId) {
+        return getSavedWorks.execute(userId);
+    }
+
+    private void thenResultHasWorks(List<Work> result, int expectedSize, List<Work> expectedWorks) {
+        assertNotNull(result);
+        assertEquals(expectedSize, result.size());
+        assertEquals(expectedWorks, result);
+    }
+
+    private void thenResultEmpty(List<Work> result) {
+        assertNotNull(result);
+        assertTrue(result.isEmpty());
+    }
+
+    private void thenRepositoryCalledOnce(Long userId) {
+        verify(saveWorkPort, times(1)).getSavedWorksByUser(userId);
+    }
+
     @Test
     void execute_ShouldReturnListOfSavedWorks() {
-        Work work1 = new Work();
-        work1.setId(1L);
-        work1.setTitle("Work 1");
-        
-        Work work2 = new Work();
-        work2.setId(2L);
-        work2.setTitle("Work 2");
-        
+        Work work1 = work(1L, "Work 1");
+        Work work2 = work(2L, "Work 2");
         List<Work> expectedWorks = Arrays.asList(work1, work2);
-        when(saveWorkPort.getSavedWorksByUser(TEST_USER_ID)).thenReturn(expectedWorks);
-        
-        List<Work> result = getSavedWorks.execute(TEST_USER_ID);
-        
-        assertNotNull(result);
-        assertEquals(2, result.size());
-        assertEquals(expectedWorks, result);
-        verify(saveWorkPort, times(1)).getSavedWorksByUser(TEST_USER_ID);
+        givenUserHasSavedWorks(TEST_USER_ID, expectedWorks);
+
+        List<Work> result = whenGetSavedWorks(TEST_USER_ID);
+
+        thenResultHasWorks(result, 2, expectedWorks);
+        thenRepositoryCalledOnce(TEST_USER_ID);
     }
 
     @Test
     void execute_WhenNoSavedWorks_ShouldReturnEmptyList() {
-        when(saveWorkPort.getSavedWorksByUser(TEST_USER_ID)).thenReturn(List.of());
-        
-        List<Work> result = getSavedWorks.execute(TEST_USER_ID);
-        
-        assertNotNull(result);
-        assertTrue(result.isEmpty());
-        verify(saveWorkPort, times(1)).getSavedWorksByUser(TEST_USER_ID);
+        givenUserHasNoSavedWorks(TEST_USER_ID);
+
+        List<Work> result = whenGetSavedWorks(TEST_USER_ID);
+
+        thenResultEmpty(result);
+        thenRepositoryCalledOnce(TEST_USER_ID);
     }
 }

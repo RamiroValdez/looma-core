@@ -16,6 +16,8 @@ import com.amool.domain.model.User;
 
 public class UpdateUserTest {
 
+    private static final String TEST_PASSWORD = "testPassword";
+
     private UpdateUser updateUser;
     private LoadUserPort loadUserPort;
     private ImagesService imagesService;
@@ -28,28 +30,42 @@ public class UpdateUserTest {
     }
     
     @Test
-    public void when_UpdateUser_ThenReturnTrue() {
-        User testUser = Mockito.mock(User.class);
-        String testPassword = "testPassword";
-        
-        when(loadUserPort.updateUser(any(User.class), any(String.class)))
-            .thenReturn(true);
-        
-        boolean result = updateUser.execute(testUser, testPassword);
-        
-        assertTrue(result);
+    public void shouldReturnTrueWhenUpdateSucceeds() {
+        User user = givenUser();
+        givenUpdateResult(user, TEST_PASSWORD, true);
+
+        boolean result = whenUpdatingUser(user, TEST_PASSWORD);
+
+        thenUpdateSucceeds(result);
     }
 
     @Test
-    public void when_UpdateUserFails_ThenReturnFalse() {
-        User testUser = Mockito.mock(User.class);
-        String testPassword = "testPassword";
-        
-        when(loadUserPort.updateUser(any(User.class), any(String.class)))
-            .thenReturn(false);
-        
-        boolean result = updateUser.execute(testUser, testPassword);
-        
+    public void shouldReturnFalseWhenUpdateFails() {
+        User user = givenUser();
+        givenUpdateResult(user, TEST_PASSWORD, false);
+
+        boolean result = whenUpdatingUser(user, TEST_PASSWORD);
+
+        thenUpdateFails(result);
+    }
+
+    private User givenUser() {
+        return Mockito.mock(User.class);
+    }
+
+    private void givenUpdateResult(User user, String password, boolean expectedResult) {
+        when(loadUserPort.updateUser(user, password)).thenReturn(expectedResult);
+    }
+
+    private boolean whenUpdatingUser(User user, String password) {
+        return updateUser.execute(user, password);
+    }
+
+    private void thenUpdateSucceeds(boolean result) {
+        assertTrue(result);
+    }
+
+    private void thenUpdateFails(boolean result) {
         assertFalse(result);
     }
 }

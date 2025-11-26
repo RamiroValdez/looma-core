@@ -1,6 +1,7 @@
-package com.amool.application.usecases;
+package com.amool.application.usecase;
 
 import com.amool.application.port.out.UserPreferencesPort;
+import com.amool.application.usecases.SetUserPreferences;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 

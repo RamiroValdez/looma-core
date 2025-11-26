@@ -32,38 +32,55 @@ public class GetAllLanguagesTest {
         return language;
     }
 
+    private void givenLanguages(List<Language> languages) {
+        when(loadLanguagePort.loadAllLanguages()).thenReturn(languages);
+    }
+
+    private void givenNoLanguages() {
+        when(loadLanguagePort.loadAllLanguages()).thenReturn(List.of());
+    }
+
+    private List<Language> whenGetAllLanguages() {
+        return useCase.execute();
+    }
+
+    private void thenResultSizeIs(List<Language> result, int expectedSize) {
+        assertNotNull(result);
+        assertEquals(expectedSize, result.size());
+    }
+
+    private void thenLanguageNameIs(List<Language> result, int index, String expectedName) {
+        assertEquals(expectedName, result.get(index).getName());
+    }
+
+    private void thenLoadAllCalledOnce() {
+        Mockito.verify(loadLanguagePort, Mockito.times(1)).loadAllLanguages();
+    }
+
     @Test
     public void when_GetAllLanguages_ThenReturnListOfLanguages() {
         List<Language> expectedLanguages = Arrays.asList(
             createLanguage(1L, "Spanish", "es"),
             createLanguage(2L, "English", "en")
         );
-        
-        when(loadLanguagePort.loadAllLanguages())
-            .thenReturn(expectedLanguages);
+        givenLanguages(expectedLanguages);
 
-            List<Language> result = useCase.execute();
+        List<Language> result = whenGetAllLanguages();
 
-        assertNotNull(result);
-        assertEquals(2, result.size());
-        assertEquals("Spanish", result.get(0).getName());
-        assertEquals("English", result.get(1).getName());
-        
-        Mockito.verify(loadLanguagePort, Mockito.times(1))
-               .loadAllLanguages();
+        thenResultSizeIs(result, 2);
+        thenLanguageNameIs(result, 0, "Spanish");
+        thenLanguageNameIs(result, 1, "English");
+        thenLoadAllCalledOnce();
     }
 
     @Test
     public void when_NoLanguagesExist_ThenReturnEmptyList() {
-        when(loadLanguagePort.loadAllLanguages())
-            .thenReturn(List.of());
+        givenNoLanguages();
 
-        List<Language> result = useCase.execute();
+        List<Language> result = whenGetAllLanguages();
 
-        assertNotNull(result);
+        thenResultSizeIs(result, 0);
         assertTrue(result.isEmpty());
-        
-        Mockito.verify(loadLanguagePort, Mockito.times(1))
-               .loadAllLanguages();
+        thenLoadAllCalledOnce();
     }
 }

@@ -16,7 +16,7 @@ public class LoginTest {
 
     private AuthenticateUserPort authPort;
     private Login useCase;
-    
+
     private static final String VALID_EMAIL = "test@example.com";
     private static final String VALID_PASSWORD = "securePassword123";
     private static final String INVALID_EMAIL = "nonexistent@example.com";
@@ -30,44 +30,76 @@ public class LoginTest {
         useCase = new Login(authPort);
     }
 
-    @Test
-    public void when_ValidCredentials_ThenReturnUser() {
+    private User givenValidCredentialsAuthenticate() {
         User expectedUser = createUser(USER_ID, USER_NAME, VALID_EMAIL);
         when(authPort.authenticate(VALID_EMAIL, VALID_PASSWORD))
             .thenReturn(Optional.of(expectedUser));
+        return expectedUser;
+    }
 
-        Optional<User> result = useCase.execute(VALID_EMAIL, VALID_PASSWORD);
+    private void givenInvalidEmailWillNotAuthenticate() {
+        when(authPort.authenticate(INVALID_EMAIL, VALID_PASSWORD))
+            .thenReturn(Optional.empty());
+    }
 
+    private void givenInvalidPasswordWillNotAuthenticate() {
+        when(authPort.authenticate(VALID_EMAIL, INVALID_PASSWORD))
+            .thenReturn(Optional.empty());
+    }
+
+    private void givenNullCredentialsWillNotAuthenticate() {
+        when(authPort.authenticate(null, null)).thenReturn(Optional.empty());
+    }
+
+    private Optional<User> whenLogin(String email, String password) {
+        return useCase.execute(email, password);
+    }
+
+    private void thenUserReturned(Optional<User> result, Long expectedId, String expectedUsername, String expectedEmail) {
         assertTrue(result.isPresent());
-        assertEquals(USER_ID, result.get().getId());
-        assertEquals(USER_NAME, result.get().getUsername());
-        assertEquals(VALID_EMAIL, result.get().getEmail());
+        assertEquals(expectedId, result.get().getId());
+        assertEquals(expectedUsername, result.get().getUsername());
+        assertEquals(expectedEmail, result.get().getEmail());
+    }
+
+    private void thenEmpty(Optional<User> result) {
+        assertTrue(result.isEmpty());
+    }
+
+    @Test
+    public void when_ValidCredentials_ThenReturnUser() {
+        givenValidCredentialsAuthenticate();
+
+        Optional<User> result = whenLogin(VALID_EMAIL, VALID_PASSWORD);
+
+        thenUserReturned(result, USER_ID, USER_NAME, VALID_EMAIL);
     }
 
     @Test
     public void when_InvalidEmail_ThenReturnEmpty() {
-        when(authPort.authenticate(INVALID_EMAIL, VALID_PASSWORD))
-            .thenReturn(Optional.empty());
+        givenInvalidEmailWillNotAuthenticate();
 
-        Optional<User> result = useCase.execute(INVALID_EMAIL, VALID_PASSWORD);
+        Optional<User> result = whenLogin(INVALID_EMAIL, VALID_PASSWORD);
 
-        assertTrue(result.isEmpty());
+        thenEmpty(result);
     }
 
     @Test
     public void when_InvalidPassword_ThenReturnEmpty() {
-        when(authPort.authenticate(VALID_EMAIL, INVALID_PASSWORD))
-            .thenReturn(Optional.empty());
+        givenInvalidPasswordWillNotAuthenticate();
 
-        Optional<User> result = useCase.execute(VALID_EMAIL, INVALID_PASSWORD);
+        Optional<User> result = whenLogin(VALID_EMAIL, INVALID_PASSWORD);
 
-        assertTrue(result.isEmpty());
+        thenEmpty(result);
     }
 
     @Test
     public void when_NullCredentials_ThenReturnEmpty() {
-        Optional<User> result = useCase.execute(null, null);
-        assertTrue(result.isEmpty());
+        givenNullCredentialsWillNotAuthenticate();
+
+        Optional<User> result = whenLogin(null, null);
+
+        thenEmpty(result);
     }
 
     private User createUser(Long id, String username, String email) {

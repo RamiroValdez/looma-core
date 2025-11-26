@@ -6,11 +6,7 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
 
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
+import java.util.*;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.*;
@@ -18,6 +14,10 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 public class SuggestTagsTest {
+
+    private static final String DESCRIPTION = "A beautiful landscape with mountains and rivers";
+    private static final String TITLE = "Mountain View";
+    private static final List<String> EXPECTED_TAGS = Arrays.asList("landscape", "mountains", "rivers");
 
     private TagSuggestionPort tagSuggestionPort;
     private SuggestTags useCase;
@@ -29,74 +29,69 @@ public class SuggestTagsTest {
     }
 
     @Test
-    public void when_ValidInput_ThenReturnSuggestedTags() {
-        String description = "A beautiful landscape with mountains and rivers";
-        String title = "Mountain View";
-        Set<String> existingTags = new HashSet<>(Arrays.asList("nature"));
-        List<String> expectedTags = Arrays.asList("landscape", "mountains", "rivers");
+    public void shouldReturnSuggestedTagsWhenInputIsValid() {
+        Set<String> existingTags = new HashSet<>(Collections.singleton("nature"));
+        givenSuggestedTagsResponse(DESCRIPTION, TITLE, existingTags, EXPECTED_TAGS);
 
-        when(tagSuggestionPort.getSuggestedTags(
-            eq(description.trim()),
-            eq(title.trim()),
-            anySet()
-        )).thenReturn(expectedTags);
+        List<String> result = whenSuggestingTags(DESCRIPTION, TITLE, existingTags);
 
-        List<String> result = useCase.execute(description, title, existingTags);
-
-        assertEquals(expectedTags, result);
-        verify(tagSuggestionPort).getSuggestedTags(
-            description.trim(),
-            title.trim(),
-            Collections.singleton("nature")
-        );
+        thenSuggestedTagsAre(result, EXPECTED_TAGS);
+        thenSuggestionRequestedWith(DESCRIPTION.trim(), TITLE.trim(), Collections.singleton("nature"));
     }
 
     @Test
-    public void when_NullDescription_ThenReturnEmptyList() {
-        List<String> result = useCase.execute(null, "Title", Collections.emptySet());
-        assertTrue(result.isEmpty());
-        verify(tagSuggestionPort, Mockito.never()).getSuggestedTags(any(), any(), any());
+    public void shouldReturnEmptyListWhenDescriptionIsMissing() {
+        List<String> result = whenSuggestingTags(null, TITLE, Collections.emptySet());
+
+        thenSuggestedTagsAre(result, Collections.emptyList());
+        thenNoSuggestionIsRequested();
     }
 
     @Test
-    public void when_NullTitleButValidDescription_ThenReturnSuggestedTags() {
-        String description = "A beautiful landscape with mountains and rivers";
-        List<String> expectedTags = Arrays.asList("landscape", "mountains", "rivers");
+    public void shouldReturnSuggestedTagsWhenTitleIsNullAndDescriptionExists() {
+        givenSuggestedTagsResponse(DESCRIPTION, null, Collections.emptySet(), EXPECTED_TAGS);
 
-        when(tagSuggestionPort.getSuggestedTags(
-            eq(description.trim()),
-            isNull(),
-            eq(Collections.emptySet())
-        )).thenReturn(expectedTags);
+        List<String> result = whenSuggestingTags(DESCRIPTION, null, Collections.emptySet());
 
-        List<String> result = useCase.execute(description, null, Collections.emptySet());
-
-        assertEquals(expectedTags, result);
-        verify(tagSuggestionPort).getSuggestedTags(
-            description.trim(),
-            null,
-            Collections.emptySet()
-        );
+        thenSuggestedTagsAre(result, EXPECTED_TAGS);
+        thenSuggestionRequestedWith(DESCRIPTION.trim(), null, Collections.emptySet());
     }
 
     @Test
-    public void when_NullTitleAndNoExistingTags_ThenReturnSuggestedTags() {
-        String description = "A beautiful landscape with mountains and rivers";
-        List<String> expectedTags = Arrays.asList("landscape", "mountains", "rivers");
+    public void shouldHandleNullExistingTagsWhenTitleIsNull() {
+        givenSuggestedTagsResponse(DESCRIPTION, null, Collections.emptySet(), EXPECTED_TAGS);
 
+        List<String> result = whenSuggestingTags(DESCRIPTION, null, null);
+
+        thenSuggestedTagsAre(result, EXPECTED_TAGS);
+        thenSuggestionRequestedWith(DESCRIPTION.trim(), null, Collections.emptySet());
+    }
+
+    private void givenSuggestedTagsResponse(String description, String title, Set<String> existingTags, List<String> response) {
         when(tagSuggestionPort.getSuggestedTags(
-            eq(description.trim()),
-            isNull(),
-            eq(Collections.emptySet())
-        )).thenReturn(expectedTags);
+            eq(trimOrNull(description)),
+            eq(trimOrNull(title)),
+            eq(existingTags == null ? Collections.emptySet() : existingTags)
+        )).thenReturn(response);
+    }
 
-        List<String> result = useCase.execute(description, null, null);
+    private List<String> whenSuggestingTags(String description, String title, Set<String> existingTags) {
+        return useCase.execute(description, title, existingTags);
+    }
 
-        assertEquals(expectedTags, result);
-        verify(tagSuggestionPort).getSuggestedTags(
-            description.trim(),
-            null,
-            Collections.emptySet()
-        );
+    private void thenSuggestedTagsAre(List<String> result, List<String> expected) {
+        assertEquals(expected, result);
+    }
+
+    private void thenSuggestionRequestedWith(String description, String title, Set<String> existingTags) {
+        verify(tagSuggestionPort).getSuggestedTags(description, title, existingTags);
+    }
+
+    private void thenNoSuggestionIsRequested() {
+        Mockito.verify(tagSuggestionPort, Mockito.never()).getSuggestedTags(any(), any(), any());
+    }
+
+    private String trimOrNull(String value) {
+        return value == null ? null : value.trim();
     }
 }

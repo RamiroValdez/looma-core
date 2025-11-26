@@ -1,13 +1,11 @@
 package com.amool.application.usecase;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertNotNull;
-import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
+import static org.mockito.Mockito.*;
 
 import java.util.List;
+import java.util.Optional;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -24,87 +22,131 @@ import com.amool.domain.model.User;
 
 public class CreateSubscriptionNotificationTest {
 
-    private CreateSubscriptionNotification createSubscriptionNotification;
+    private CreateSubscriptionNotification useCase;
     private NotificationPort notificationPort;
     private ObtainWorkByIdPort obtainWorkByIdPort;
     private ObtainChapterByIdPort obtainChapterByIdPort;
     private LoadUserPort loadUserPort;
-    
+
     @BeforeEach
     public void setUp() {
         notificationPort = Mockito.mock(NotificationPort.class);
         obtainWorkByIdPort = Mockito.mock(ObtainWorkByIdPort.class);
         obtainChapterByIdPort = Mockito.mock(ObtainChapterByIdPort.class);
         loadUserPort = Mockito.mock(LoadUserPort.class);
-        createSubscriptionNotification = new CreateSubscriptionNotification(notificationPort, obtainWorkByIdPort, obtainChapterByIdPort, loadUserPort);
+        useCase = new CreateSubscriptionNotification(notificationPort, obtainWorkByIdPort, obtainChapterByIdPort, loadUserPort);
     }
 
-    @Test
-    public void when_ExecuteWithValidBatchSize_ThenProcessNotifications() {
-        int batchSize = 10;
-        List<Notification> mockNotifications = createMockNotifications();
-        when(notificationPort.getPendingNotifications(batchSize)).thenReturn(mockNotifications);
-        
-        int processed = createSubscriptionNotification.execute(batchSize);
-        
-        assertEquals(mockNotifications.size(), processed);
+    private void givenPendingNotifications(int batchSize, List<Notification> notifications) {
+        when(notificationPort.getPendingNotifications(batchSize)).thenReturn(notifications);
+    }
+
+    private void givenNoPendingNotifications(int batchSize) {
+        when(notificationPort.getPendingNotifications(batchSize)).thenReturn(List.of());
+    }
+
+    private void givenUserExists(Long userId, String username) {
+        User mockUser = mock(User.class);
+        when(mockUser.getUsername()).thenReturn(username);
+        when(loadUserPort.getById(userId)).thenReturn(Optional.of(mockUser));
+    }
+
+    private void givenUserNotFound(Long userId) {
+        when(loadUserPort.getById(userId)).thenReturn(Optional.empty());
+    }
+
+    private void givenAuthorNotificationWillSave() {
+        when(notificationPort.saveAuthorNotification(any(Notification.class))).thenReturn(true);
+    }
+
+    private int whenExecute(int batchSize) {
+        return useCase.execute(batchSize);
+    }
+
+    private boolean whenCreateNotification(Notification notification) {
+        return useCase.createNotification(notification);
+    }
+
+    private void thenProcessedCountEquals(int processed, int expected) {
+        assertEquals(expected, processed);
+    }
+
+    private void thenGetPendingCalled(int batchSize) {
         verify(notificationPort).getPendingNotifications(batchSize);
     }
-    
-    @Test
-    public void when_NoPendingNotifications_ThenReturnZero() {
-        int batchSize = 10;
-        when(notificationPort.getPendingNotifications(batchSize)).thenReturn(List.of());
-        
-        int processed = createSubscriptionNotification.execute(batchSize);
-        
-        assertEquals(0, processed);
+
+    private void thenMessageContains(Notification notification, String fragment) {
+        assertNotNull(notification.getMessage());
+        assertTrue(notification.getMessage().contains(fragment));
     }
-    
-    @Test
-    public void when_CreateAuthorNotification_ThenSetCorrectMessage() {
-        Notification notification = new Notification();
-        notification.setType(NotificationType.NEW_AUTHOR_SUBSCRIBER);
-        notification.setRelatedUser(1L);
-        
-        User mockUser = Mockito.mock(User.class);
-        when(mockUser.getUsername()).thenReturn("testuser");
-        when(loadUserPort.getById(1L)).thenReturn(java.util.Optional.of(mockUser));
-        when(notificationPort.saveAuthorNotification(any(Notification.class))).thenReturn(true);
-        
-        boolean result = createSubscriptionNotification.createNotification(notification);
-        
-        assertTrue(result);
-        assertTrue(notification.getMessage().contains("testuser se ha suscrito a tu contenido"));
+
+    private void thenMessageEquals(Notification notification, String expected) {
+        assertEquals(expected, notification.getMessage());
+    }
+
+    private void thenCreatedAtSet(Notification notification) {
         assertNotNull(notification.getCreatedAt());
     }
 
-    @Test
-    public void when_UserNotFound_ThenSetDefaultMessage() {
-        Notification notification = new Notification();
-        notification.setType(NotificationType.NEW_AUTHOR_SUBSCRIBER);
-        notification.setRelatedUser(1L);
-        
-        when(loadUserPort.getById(1L)).thenReturn(java.util.Optional.empty());
-        when(notificationPort.saveAuthorNotification(any(Notification.class))).thenReturn(true);
-        
-        boolean result = createSubscriptionNotification.createNotification(notification);
-        
-        assertTrue(result);
-        assertEquals("Un usuario se ha suscrito a tu contenido", notification.getMessage());
+    private Notification newNotification(NotificationType type, Long relatedUser, Long relatedWork) {
+        Notification n = new Notification();
+        n.setType(type);
+        n.setRelatedUser(relatedUser);
+        n.setRelatedWork(relatedWork);
+        return n;
     }
-    
-    private List<Notification> createMockNotifications() {
-        Notification n1 = new Notification();
-        n1.setType(NotificationType.NEW_AUTHOR_SUBSCRIBER);
-        n1.setRelatedUser(1L);
-        
-        Notification n2 = new Notification();
-        n2.setType(NotificationType.NEW_WORK_SUBSCRIBER);
-        n2.setRelatedUser(2L);
-        n2.setRelatedWork(100L);
-        
+
+    private List<Notification> sampleNotifications() {
+        Notification n1 = newNotification(NotificationType.NEW_AUTHOR_SUBSCRIBER, 1L, null);
+        Notification n2 = newNotification(NotificationType.NEW_WORK_SUBSCRIBER, 2L, 100L);
         return List.of(n1, n2);
     }
-    
+
+    @Test
+    public void when_executeWithValidBatchSize_then_processNotifications() {
+        int batchSize = 10;
+        List<Notification> notifications = sampleNotifications();
+        givenPendingNotifications(batchSize, notifications);
+
+        int processed = whenExecute(batchSize);
+
+        thenProcessedCountEquals(processed, notifications.size());
+        thenGetPendingCalled(batchSize);
+    }
+
+    @Test
+    public void when_noPendingNotifications_then_returnZero() {
+        int batchSize = 10;
+        givenNoPendingNotifications(batchSize);
+
+        int processed = whenExecute(batchSize);
+
+        thenProcessedCountEquals(processed, 0);
+        thenGetPendingCalled(batchSize);
+    }
+
+    @Test
+    public void when_createAuthorNotification_then_setCorrectMessage() {
+        Notification notification = newNotification(NotificationType.NEW_AUTHOR_SUBSCRIBER, 1L, null);
+        givenUserExists(1L, "testuser");
+        givenAuthorNotificationWillSave();
+
+        boolean result = whenCreateNotification(notification);
+
+        assertTrue(result);
+        thenMessageContains(notification, "testuser se ha suscrito a tu contenido");
+        thenCreatedAtSet(notification);
+    }
+
+    @Test
+    public void when_userNotFound_then_setDefaultMessage() {
+        Notification notification = newNotification(NotificationType.NEW_AUTHOR_SUBSCRIBER, 1L, null);
+        givenUserNotFound(1L);
+        givenAuthorNotificationWillSave();
+
+        boolean result = whenCreateNotification(notification);
+
+        assertTrue(result);
+        thenMessageEquals(notification, "Un usuario se ha suscrito a tu contenido");
+    }
 }

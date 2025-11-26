@@ -1,6 +1,7 @@
-package com.amool.application.usecases;
+package com.amool.application.usecase;
 
 import com.amool.application.port.out.UserAccountPort;
+import com.amool.application.usecases.VerifyRegistration;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 

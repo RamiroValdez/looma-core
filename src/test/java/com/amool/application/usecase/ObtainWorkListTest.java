@@ -19,6 +19,13 @@ import com.amool.domain.model.Work;
 
 public class ObtainWorkListTest {
 
+    private static final long DEFAULT_USER_ID = 1L;
+    private static final int EXPECTED_SECTION_COUNT = 5;
+    private static final String TOP_TEN = "topTen";
+    private static final String CURRENTLY_READING = "currentlyReading";
+    private static final String NEW_RELEASES = "newReleases";
+    private static final String RECENTLY_UPDATED = "recentlyUpdated";
+
     private ObtainWorkList obtainWorkList;
     private WorkPort workPort;
     private AwsS3Port awsS3Port;
@@ -26,77 +33,96 @@ public class ObtainWorkListTest {
     @BeforeEach
     public void setUp() {
         workPort = Mockito.mock(WorkPort.class);
+        awsS3Port = Mockito.mock(AwsS3Port.class);
         obtainWorkList = new ObtainWorkList(workPort, awsS3Port);
     }
 
     @Test
-    public void when_ExecuteObtainWorkList_ThenReturnAllSections() {
-        List<Work> works = mockWorks();
-        Mockito.when(workPort.getAllWorks()).thenReturn(works);
-        
-        Map<String, List<Work>> result = obtainWorkList.execute(1L);
+    public void shouldReturnAllSectionsWhenWorksExist() {
+        givenExistingWorks(defaultWorks());
 
-        int lists = 5;
+        Map<String, List<Work>> result = whenObtainingWorkList();
 
-        assertEquals(lists, result.size());
+        thenSectionCountIs(result, EXPECTED_SECTION_COUNT);
     }
 
     @Test 
-    public void when_NoWorksExist_ThenReturnEmptyMap() {
-        Mockito.when(workPort.getAllWorks()).thenReturn(new ArrayList<>());
-        
-        Map<String, List<Work>> result = obtainWorkList.execute(1L);
+    public void shouldReturnEmptySectionsWhenNoWorksExist() {
+        givenNoWorks();
 
-        assertTrue(result.get("topTen").isEmpty());
-        assertTrue(result.get("currentlyReading").isEmpty());
-        assertTrue(result.get("newReleases").isEmpty());
-        assertTrue(result.get("recentlyUpdated").isEmpty());
+        Map<String, List<Work>> result = whenObtainingWorkList();
+
+        thenSectionsAreEmpty(result, TOP_TEN, CURRENTLY_READING, NEW_RELEASES, RECENTLY_UPDATED);
     }
 
     @Test
-    public void when_TopTenWorksExist_ThenReturnTopTen() {
-        List<Work> works = mockWorks();
-        Mockito.when(workPort.getAllWorks()).thenReturn(works);
-        
-        Map<String, List<Work>> result = obtainWorkList.execute(1L);
+    public void shouldReturnTopTenOrderedByLikes() {
+        givenExistingWorks(defaultWorks());
 
-        int likesOfTheTopWork = 20; 
+        Map<String, List<Work>> result = whenObtainingWorkList();
 
-        assertEquals(likesOfTheTopWork, result.get("topTen").get(0).getLikes());
+        thenTopTenFirstPlaceHasLikes(result, 20);
     }
 
     @Test
-    public void when_NewReleasesWorksExist_ThenReturnNewReleases() {
-        List<Work> works = mockWorks();
-        Mockito.when(workPort.getAllWorks()).thenReturn(works);
-        
-        Map<String, List<Work>> result = obtainWorkList.execute(1L);
+    public void shouldReturnLatestWorkInNewReleases() {
+        givenExistingWorks(defaultWorks());
 
-        LocalDate DateOfTheLastestWork = java.time.LocalDate.now();
+        Map<String, List<Work>> result = whenObtainingWorkList();
 
-        assertEquals(DateOfTheLastestWork, result.get("newReleases").get(0).getPublicationDate());
+        thenNewReleasesLatestPublicationDateIsToday(result);
     }
 
     @Test
-    public void when_RecentlyUpdatedWorksExist_ThenReturnRecentlyUpdated() {
-        List<Work> works = mockWorks();
+    public void shouldReturnRecentlyUpdatedOrderedByChapterDate() {
+        givenExistingWorks(defaultWorks());
+
+        Map<String, List<Work>> result = whenObtainingWorkList();
+
+        thenRecentlyUpdatedMatchesDate(result, LocalDate.now().minusDays(2));
+    }
+
+    private void givenExistingWorks(List<Work> works) {
         Mockito.when(workPort.getAllWorks()).thenReturn(works);
-        
-        Map<String, List<Work>> result = obtainWorkList.execute(1L);
+    }
 
-        LocalDate expectedDate = LocalDate.now().minusDays(2);
-        LocalDateTime actualDateTime = result.get("recentlyUpdated").get(0).getChapters().get(0).getPublishedAt();
+    private void givenNoWorks() {
+        Mockito.when(workPort.getAllWorks()).thenReturn(Collections.emptyList());
+    }
 
+    private Map<String, List<Work>> whenObtainingWorkList() {
+        return obtainWorkList.execute(DEFAULT_USER_ID);
+    }
+
+    private void thenSectionCountIs(Map<String, List<Work>> result, int expectedSections) {
+        assertEquals(expectedSections, result.size());
+    }
+
+    private void thenSectionsAreEmpty(Map<String, List<Work>> result, String... sectionNames) {
+        for (String section : sectionNames) {
+            assertTrue(result.get(section).isEmpty());
+        }
+    }
+
+    private void thenTopTenFirstPlaceHasLikes(Map<String, List<Work>> result, int expectedLikes) {
+        assertEquals(expectedLikes, result.get(TOP_TEN).get(0).getLikes());
+    }
+
+    private void thenNewReleasesLatestPublicationDateIsToday(Map<String, List<Work>> result) {
+        assertEquals(LocalDate.now(), result.get(NEW_RELEASES).get(0).getPublicationDate());
+    }
+
+    private void thenRecentlyUpdatedMatchesDate(Map<String, List<Work>> result, LocalDate expectedDate) {
+        LocalDateTime actualDateTime = result.get(RECENTLY_UPDATED).get(0).getChapters().get(0).getPublishedAt();
         assertEquals(expectedDate, actualDateTime.toLocalDate());
     }
 
-
-    private List<Work> mockWorks() {
+    private List<Work> defaultWorks() {
         return List.of(
-        createWork(1L, LocalDate.now().minusDays(1), 10, 7),
-        createWork(2L, LocalDate.now(), 20, 2),
-        createWork(3L, LocalDate.now().minusDays(2), 5, 6)
-    );
+            createWork(1L, LocalDate.now().minusDays(1), 10, 7),
+            createWork(2L, LocalDate.now(), 20, 2),
+            createWork(3L, LocalDate.now().minusDays(2), 5, 6)
+        );
     }
 
     private Work createWork(Long id, LocalDate publicationDate, int likes, int daysSinceLastUpdate) {

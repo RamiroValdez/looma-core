@@ -13,6 +13,7 @@ import java.util.Arrays;
 import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.*;
+import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.*;
 
@@ -38,46 +39,81 @@ public class GetAuthenticatedUserWorksTest {
             .thenAnswer(invocation -> "https://s3.url/" + invocation.getArgument(0));
     }
 
+    private void givenAuthenticatedUserHasWorks(Long userId, List<Work> works) {
+        when(obtainWorkByIdPort.getWorksByUserId(userId)).thenReturn(works);
+    }
+
+    private void givenAuthenticatedUserHasNoWorks(Long userId) {
+        when(obtainWorkByIdPort.getWorksByUserId(userId)).thenReturn(List.of());
+    }
+
+    private List<Work> whenGetWorks(Long userId) {
+        return useCase.execute(userId);
+    }
+
+    private void whenGetWorksExpectException(Long userId, Class<? extends Throwable> expected) {
+        assertThrows(expected, () -> useCase.execute(userId));
+    }
+
+    private void thenWorksReturned(List<Work> result, int expectedSize, List<String> expectedTitles) {
+        assertNotNull(result);
+        assertEquals(expectedSize, result.size());
+        for (int i = 0; i < expectedTitles.size(); i++) {
+            assertEquals(expectedTitles.get(i), result.get(i).getTitle());
+        }
+    }
+
+    private void thenEmptyWorks(List<Work> result) {
+        assertNotNull(result);
+        assertTrue(result.isEmpty());
+    }
+
+    private void thenRepositoryCalled(Long userId) {
+        verify(obtainWorkByIdPort).getWorksByUserId(userId);
+    }
+
+    private void thenS3UrlsResolved(int timesExpected) {
+        verify(awsS3Port, times(timesExpected)).obtainPublicUrl(anyString());
+    }
+
+    private void thenNoS3Interactions() {
+        verify(awsS3Port, never()).obtainPublicUrl(anyString());
+    }
+
+    private void thenNoRepositoryInteractions() {
+        verify(obtainWorkByIdPort, never()).getWorksByUserId(anyLong());
+    }
+
     @Test
     public void when_GetWorksWithAuthenticatedUser_ThenReturnUserWorks() {
         Work work1 = createWork(1L, "Work 1", "cover1.jpg", "banner1.jpg");
         Work work2 = createWork(2L, "Work 2", "cover2.jpg", "banner2.jpg");
-        List<Work> expectedWorks = Arrays.asList(work1, work2);
+        givenAuthenticatedUserHasWorks(AUTHENTICATED_USER_ID, Arrays.asList(work1, work2));
 
-        when(obtainWorkByIdPort.getWorksByUserId(AUTHENTICATED_USER_ID))
-            .thenReturn(expectedWorks);
+        List<Work> result = whenGetWorks(AUTHENTICATED_USER_ID);
 
-        List<Work> result = useCase.execute(AUTHENTICATED_USER_ID);
-
-        assertNotNull(result);
-        assertEquals(2, result.size());
-        assertEquals("Work 1", result.get(0).getTitle());
-        assertEquals("Work 2", result.get(1).getTitle());
-        
-        verify(obtainWorkByIdPort).getWorksByUserId(AUTHENTICATED_USER_ID);
-        verify(awsS3Port, times(4)).obtainPublicUrl(anyString());
+        thenWorksReturned(result, 2, List.of("Work 1", "Work 2"));
+        thenRepositoryCalled(AUTHENTICATED_USER_ID);
+        thenS3UrlsResolved(4); // 2 covers + 2 banners
     }
 
     @Test
     public void when_UserHasNoWorks_ThenReturnEmptyList() {
-        when(obtainWorkByIdPort.getWorksByUserId(AUTHENTICATED_USER_ID))
-            .thenReturn(List.of());
+        givenAuthenticatedUserHasNoWorks(AUTHENTICATED_USER_ID);
 
-        List<Work> result = useCase.execute(AUTHENTICATED_USER_ID);
+        List<Work> result = whenGetWorks(AUTHENTICATED_USER_ID);
 
-        assertNotNull(result);
-        assertTrue(result.isEmpty());
-        verify(obtainWorkByIdPort).getWorksByUserId(AUTHENTICATED_USER_ID);
-        verify(awsS3Port, never()).obtainPublicUrl(anyString());
+        thenEmptyWorks(result);
+        thenRepositoryCalled(AUTHENTICATED_USER_ID);
+        thenNoS3Interactions();
     }
 
     @Test
     public void when_UserIsNotAuthenticated_ThenThrowSecurityException() {
-        assertThrows(SecurityException.class, () -> useCase.execute(null));
-        verify(obtainWorkByIdPort, never()).getWorksByUserId(anyLong());
-        verify(awsS3Port, never()).obtainPublicUrl(anyString());
+        whenGetWorksExpectException(null, SecurityException.class);
+        thenNoRepositoryInteractions();
+        thenNoS3Interactions();
     }
-
 
     private Work createWork(Long id, String title, String cover, String banner) {
         Work work = new Work();

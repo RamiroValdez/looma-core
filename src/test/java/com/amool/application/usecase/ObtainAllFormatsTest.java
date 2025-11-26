@@ -25,31 +25,48 @@ public class ObtainAllFormatsTest {
         useCase = new ObtainAllFormats(formatPort);
     }
 
+    private void givenFormatsExist(List<Format> formats) {
+        when(formatPort.getAll()).thenReturn(formats);
+    }
+
+    private void givenNoFormatsExist() {
+        when(formatPort.getAll()).thenReturn(Collections.emptyList());
+    }
+
+    private List<Format> whenObtainAllFormats() {
+        return useCase.execute();
+    }
+
+    private void thenFormatsOrdered(List<Format> result, int expectedSize, List<String> expectedNamesInOrder) {
+        assertEquals(expectedSize, result.size(), "Cantidad de formatos inesperada");
+        for (int i = 0; i < expectedNamesInOrder.size(); i++) {
+            assertEquals(expectedNamesInOrder.get(i), result.get(i).getName(), "Orden inesperado en índice " + i);
+        }
+    }
+
+    private void thenFormatsEmpty(List<Format> result) {
+        assertTrue(result.isEmpty(), "Se esperaba lista vacía");
+    }
+
     @Test
     public void when_FormatsExist_ThenReturnSortedFormatsList() {
         Format format1 = createFormat(1L, "Novel");
         Format format2 = createFormat(2L, "Short Story");
         Format format3 = createFormat(3L, "Poetry");
-        
-        List<Format> mockFormats = Arrays.asList(format1, format2, format3);
-        
-        when(formatPort.getAll()).thenReturn(mockFormats);
+        givenFormatsExist(Arrays.asList(format1, format2, format3));
 
-        List<Format> result = useCase.execute();
+        List<Format> result = whenObtainAllFormats();
 
-        assertEquals(3, result.size());
-        assertEquals("Novel", result.get(0).getName());
-        assertEquals("Poetry", result.get(1).getName());
-        assertEquals("Short Story", result.get(2).getName());
+        thenFormatsOrdered(result, 3, List.of("Novel", "Poetry", "Short Story"));
     }
 
     @Test
     public void when_NoFormatsExist_ThenReturnEmptyList() {
-        when(formatPort.getAll()).thenReturn(Collections.emptyList());
+        givenNoFormatsExist();
 
-        List<Format> result = useCase.execute();
+        List<Format> result = whenObtainAllFormats();
 
-        assertTrue(result.isEmpty());
+        thenFormatsEmpty(result);
     }
 
     private Format createFormat(Long id, String name) {

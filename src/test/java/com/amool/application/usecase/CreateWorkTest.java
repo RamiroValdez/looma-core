@@ -7,6 +7,7 @@ import com.amool.domain.model.*;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
+import org.springframework.web.multipart.MultipartFile;
 
 import java.math.BigDecimal;
 import java.util.List;
@@ -15,7 +16,6 @@ import java.util.Set;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.Mockito.*;
 
 public class CreateWorkTest {
@@ -53,62 +53,122 @@ public class CreateWorkTest {
         );
     }
 
+    private Work givenWorkWillBeCreated(Long newWorkId) {
+        Work work = new Work();
+        work.setId(newWorkId);
+        when(workPort.createWork(any(Work.class))).thenReturn(newWorkId);
+        when(obtainWorkByIdPort.obtainWorkById(newWorkId)).thenReturn(Optional.of(work));
+        return work;
+    }
+
+    private void givenUserExists(Long userId) {
+        User user = new User();
+        user.setId(userId);
+        when(loadUserPort.getById(userId)).thenReturn(Optional.of(user));
+    }
+
+    private void givenUserNotFound(Long userId) {
+        when(loadUserPort.getById(userId)).thenReturn(Optional.empty());
+    }
+
+    private void givenFormatExists(Long formatId) {
+        Format format = new Format();
+        format.setId(formatId);
+        when(formatPort.getById(formatId)).thenReturn(Optional.of(format));
+    }
+
+    private void givenLanguageExists(Long languageId) {
+        Language language = new Language();
+        language.setId(languageId);
+        when(loadLanguagePort.loadLanguageById(languageId)).thenReturn(Optional.of(language));
+    }
+
+    private void givenCategoryExists(Long categoryId) {
+        Category category = new Category();
+        category.setId(categoryId);
+        when(categoryPort.getCategoryById(categoryId)).thenReturn(Optional.of(category));
+    }
+
+    private void givenImagesUploadSucceeds(String coverUrl, String bannerUrl) throws Exception {
+        when(imagesService.uploadCoverImage(any(), anyString())).thenReturn(coverUrl);
+        when(imagesService.uploadBannerImage(any(), anyString())).thenReturn(bannerUrl);
+    }
+
+    private void givenTagIds(Set<String> tagIds) {
+        for (String tag : tagIds) {
+            when(tagPort.searchTag(tag)).thenReturn(Optional.empty());
+            when(tagPort.createTag(tag)).thenReturn(100L); // id ficticio
+        }
+    }
+
+    private Long whenCreateWork(String title, String description, List<Long> categoryIds, Long formatId, Long languageId,
+                                BigDecimal price, Set<String> tagIds, String coverIaUrl, MultipartFile coverFile, MultipartFile bannerFile,
+                                Long userId) throws Exception {
+        return useCase.execute(title, description, categoryIds, formatId, languageId, price, tagIds, coverIaUrl, coverFile, bannerFile, userId);
+    }
+
+    private void thenWorkIdEquals(Long actual, Long expected) {
+        assertNotNull(actual);
+        assertEquals(expected, actual);
+    }
+
+    private void thenWorkPersisted() {
+        verify(workPort).createWork(any(Work.class));
+    }
+
+    private void thenThrowsIllegalArgument(ThrowingRunnable action) {
+        assertThrows(IllegalArgumentException.class, () -> action.run());
+    }
+
     @Test
     public void when_CreateWorkWithValidData_ThenReturnWorkId() throws Exception {
-        Work work = new Work();
-        work.setId(1L);
-        
-        User user = new User();
-        Format format = new Format();
-        Language language = new Language();
-        Category category = new Category();
-        
-        when(workPort.createWork(any(Work.class))).thenReturn(1L);
-        when(obtainWorkByIdPort.obtainWorkById(1L)).thenReturn(Optional.of(work));
-        when(loadUserPort.getById(anyLong())).thenReturn(Optional.of(user));
-        when(formatPort.getById(anyLong())).thenReturn(Optional.of(format));
-        when(loadLanguagePort.loadLanguageById(anyLong())).thenReturn(Optional.of(language));
-        when(categoryPort.getCategoryById(anyLong())).thenReturn(Optional.of(category));
-        when(imagesService.uploadCoverImage(any(), anyString())).thenReturn("cover-url");
-        when(imagesService.uploadBannerImage(any(), anyString())).thenReturn("banner-url");
+        Long userId = 1L; Long workId = 1L; Long formatId = 1L; Long languageId = 1L; Long categoryId = 1L;
+        givenWorkWillBeCreated(workId);
+        givenUserExists(userId);
+        givenFormatExists(formatId);
+        givenLanguageExists(languageId);
+        givenCategoryExists(categoryId);
+        givenImagesUploadSucceeds("cover-url", "banner-url");
+        givenTagIds(Set.of("tag1"));
 
-        Long result = useCase.execute(
+        Long result = whenCreateWork(
             "Test Work",
             "Test Description",
-            List.of(1L),
-            1L,
-            1L,
-                BigDecimal.valueOf(19.99),
+            List.of(categoryId),
+            formatId,
+            languageId,
+            BigDecimal.valueOf(19.99),
             Set.of("tag1"),
-            "cover-url",
-            null,
-            null,
-            1L
+            "cover-url", // coverIaUrl
+            null,          // coverFile
+            null,          // bannerFile
+            userId
         );
 
-        assertNotNull(result);
-        assertEquals(1L, result);
-        verify(workPort).createWork(any(Work.class));
+        thenWorkIdEquals(result, workId);
+        thenWorkPersisted();
     }
 
     @Test
     public void when_UserNotFound_ThenThrowException() {
-        when(loadUserPort.getById(anyLong())).thenReturn(Optional.empty());
+        Long missingUserId = 1L;
+        givenUserNotFound(missingUserId);
 
-        assertThrows(IllegalArgumentException.class, () ->
-            useCase.execute(
+        thenThrowsIllegalArgument(() -> whenCreateWork(
                 "Test Work",
                 "Test Description",
                 List.of(1L),
                 1L,
                 1L,
-                    BigDecimal.valueOf(0.0),
+                BigDecimal.valueOf(0.0),
                 Set.of("tag1"),
                 "cover-url",
                 null,
                 null,
-                1L
-            )
-        );
+                missingUserId
+        ));
     }
+
+    @FunctionalInterface
+    private interface ThrowingRunnable { void run() throws Exception; }
 }

@@ -20,7 +20,7 @@ public class GetWorksByUserIdTest {
 
     private ObtainWorkByIdPort obtainWorkByIdPort;
     private GetWorksByUserId useCase;
-    
+
     private static final Long USER_ID = 1L;
     private static final Long WORK_ID_1 = 10L;
     private static final Long WORK_ID_2 = 20L;
@@ -33,31 +33,49 @@ public class GetWorksByUserIdTest {
         useCase = new GetWorksByUserId(obtainWorkByIdPort);
     }
 
+    private void givenUserHasWorks(Long userId, List<Work> works) {
+        when(obtainWorkByIdPort.getWorksByUserId(userId)).thenReturn(works);
+    }
+
+    private void givenUserHasNoWorks(Long userId) {
+        when(obtainWorkByIdPort.getWorksByUserId(userId)).thenReturn(Collections.emptyList());
+    }
+
+    private List<Work> whenGetWorks(Long userId) {
+        return useCase.execute(userId);
+    }
+
+    private void thenWorksReturned(List<Work> result, int expectedSize, List<String> expectedTitles, Long expectedCreatorId) {
+        assertFalse(result.isEmpty());
+        assertEquals(expectedSize, result.size());
+        for (int i = 0; i < expectedTitles.size(); i++) {
+            assertEquals(expectedTitles.get(i), result.get(i).getTitle());
+            assertEquals(expectedCreatorId, result.get(i).getCreator().getId());
+        }
+    }
+
+    private void thenWorksEmpty(List<Work> result) {
+        assertTrue(result.isEmpty());
+    }
+
     @Test
     public void when_UserHasWorks_ThenReturnWorksList() {
         Work work1 = createWork(WORK_ID_1, WORK_TITLE_1, USER_ID);
         Work work2 = createWork(WORK_ID_2, WORK_TITLE_2, USER_ID);
-        List<Work> expectedWorks = Arrays.asList(work1, work2);
-        
-        when(obtainWorkByIdPort.getWorksByUserId(USER_ID)).thenReturn(expectedWorks);
+        givenUserHasWorks(USER_ID, Arrays.asList(work1, work2));
 
-        List<Work> result = useCase.execute(USER_ID);
+        List<Work> result = whenGetWorks(USER_ID);
 
-        assertFalse(result.isEmpty());
-        assertEquals(2, result.size());
-        assertEquals(WORK_TITLE_1, result.get(0).getTitle());
-        assertEquals(WORK_TITLE_2, result.get(1).getTitle());
-        assertEquals(USER_ID, result.get(0).getCreator().getId());
-        assertEquals(USER_ID, result.get(1).getCreator().getId());
+        thenWorksReturned(result, 2, List.of(WORK_TITLE_1, WORK_TITLE_2), USER_ID);
     }
 
     @Test
     public void when_UserHasNoWorks_ThenReturnEmptyList() {
-        when(obtainWorkByIdPort.getWorksByUserId(USER_ID)).thenReturn(Collections.emptyList());
+        givenUserHasNoWorks(USER_ID);
 
-        List<Work> result = useCase.execute(USER_ID);
+        List<Work> result = whenGetWorks(USER_ID);
 
-        assertTrue(result.isEmpty());
+        thenWorksEmpty(result);
     }
 
     private Work createWork(Long id, String title, Long creatorId) {
@@ -66,18 +84,15 @@ public class GetWorksByUserIdTest {
         work.setTitle(title);
         work.setDescription("Description for " + title);
         work.setState("PUBLISHED");
-        
         User creator = new User();
         creator.setId(creatorId);
         creator.setUsername("user" + creatorId);
         work.setCreator(creator);
-        
         Language language = new Language();
         language.setId(1L);
         language.setName("Spanish");
         language.setCode("es");
         work.setOriginalLanguage(language);
-        
         return work;
     }
 }

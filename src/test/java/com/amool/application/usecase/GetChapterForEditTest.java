@@ -43,7 +43,6 @@ public class GetChapterForEditTest {
         loadChapterContentPort = Mockito.mock(LoadChapterContentPort.class);
         loadLanguagePort = Mockito.mock(LoadLanguagePort.class);
         obtainWorkByIdPort = Mockito.mock(ObtainWorkByIdPort.class);
-        
         useCase = new GetChapterForEdit(
             loadChapterPort,
             loadChapterContentPort,
@@ -52,56 +51,92 @@ public class GetChapterForEditTest {
         );
     }
 
+    private Chapter givenChapterExists(Long chapterId, Long workId) {
+        Chapter chapter = new Chapter();
+        chapter.setId(chapterId);
+        chapter.setWorkId(workId);
+        when(loadChapterPort.loadChapterForEdit(chapterId)).thenReturn(Optional.of(chapter));
+        return chapter;
+    }
+
+    private void givenChapterDoesNotExist(Long chapterId) {
+        when(loadChapterPort.loadChapterForEdit(chapterId)).thenReturn(Optional.empty());
+    }
+
+    private Language givenWorkWithOriginalLanguage(Long workId, String workTitle, String languageCode) {
+        Work work = new Work();
+        work.setId(workId);
+        work.setTitle(workTitle);
+        Language language = new Language();
+        language.setCode(languageCode);
+        work.setOriginalLanguage(language);
+        when(obtainWorkByIdPort.obtainWorkById(workId)).thenReturn(Optional.of(work));
+        return language;
+    }
+
+    private void givenAvailableLanguages(Long workId, Long chapterId, List<String> codes) {
+        when(loadChapterContentPort.getAvailableLanguages(workId.toString(), chapterId.toString())).thenReturn(codes);
+        when(loadLanguagePort.getLanguagesByCodes(anyList())).thenReturn(codes.stream().map(code -> {
+            Language lang = new Language();
+            lang.setCode(code);
+            return lang;
+        }).toList());
+    }
+
+    private void givenChapterContent(Long workId, Long chapterId, String languageCode, String content) {
+        Map<String, String> contentMap = new HashMap<>();
+        contentMap.put(languageCode, content);
+        ChapterContent chapterContent = new ChapterContent(workId.toString(), chapterId.toString(), contentMap, languageCode);
+        when(loadChapterContentPort.loadContent(anyString(), anyString(), eq(languageCode))).thenReturn(Optional.of(chapterContent));
+    }
+
+    private Optional<ChapterResponseDto> whenGetChapterForEdit(Long chapterId, String languageCode) {
+        return useCase.execute(chapterId, languageCode);
+    }
+
+    private void thenChapterDtoPresent(Optional<ChapterResponseDto> result) {
+        assertTrue(result.isPresent(), "Se esperaba capítulo presente");
+    }
+
+    private void thenChapterDtoEmpty(Optional<ChapterResponseDto> result) {
+        assertTrue(result.isEmpty(), "Se esperaba resultado vacío");
+    }
+
+    private void thenChapterBasics(ChapterResponseDto dto, Long expectedChapterId, String expectedWorkTitle) {
+        assertEquals(expectedChapterId, dto.getId());
+        assertEquals(expectedWorkTitle, dto.getWorkName());
+    }
+
+    private void thenAvailableLanguagesSize(ChapterResponseDto dto, int expectedSize) {
+        assertEquals(expectedSize, dto.getAvailableLanguages().size());
+    }
+
+    private void thenDefaultLanguageCodeIs(ChapterResponseDto dto, String expectedCode) {
+        assertEquals(expectedCode, dto.getLanguageDefaultCode().getCode());
+    }
+
     @Test
     public void when_ChapterExists_ThenReturnChapterForEdit() {
-        Chapter chapter = new Chapter();
-        chapter.setId(CHAPTER_ID);
-        chapter.setWorkId(WORK_ID);
+        givenChapterExists(CHAPTER_ID, WORK_ID);
+        Language originalLanguage = givenWorkWithOriginalLanguage(WORK_ID, WORK_TITLE, LANGUAGE_CODE);
+        givenAvailableLanguages(WORK_ID, CHAPTER_ID, List.of(LANGUAGE_CODE));
+        givenChapterContent(WORK_ID, CHAPTER_ID, LANGUAGE_CODE, CHAPTER_CONTENT);
 
-        Work work = new Work();
-        work.setId(WORK_ID);
-        work.setTitle(WORK_TITLE);
-        Language originalLanguage = new Language();
-        originalLanguage.setCode(LANGUAGE_CODE);
-        work.setOriginalLanguage(originalLanguage);
+        Optional<ChapterResponseDto> result = whenGetChapterForEdit(CHAPTER_ID, LANGUAGE_CODE);
 
-        when(loadChapterPort.loadChapterForEdit(CHAPTER_ID))
-            .thenReturn(Optional.of(chapter));
-
-        when(loadChapterContentPort.getAvailableLanguages(WORK_ID.toString(), CHAPTER_ID.toString()))
-            .thenReturn(List.of(LANGUAGE_CODE));
-
-        when(loadLanguagePort.getLanguagesByCodes(anyList()))
-            .thenReturn(List.of(originalLanguage));
-
-        Map<String, String> contentMap = new HashMap<>();
-        contentMap.put(LANGUAGE_CODE, CHAPTER_CONTENT);
-        ChapterContent chapterContent = new ChapterContent(WORK_ID.toString(), CHAPTER_ID.toString(), contentMap, LANGUAGE_CODE);
-        when(loadChapterContentPort.loadContent(anyString(), anyString(), eq(LANGUAGE_CODE)))
-            .thenReturn(Optional.of(chapterContent));
-
-        when(obtainWorkByIdPort.obtainWorkById(WORK_ID))
-            .thenReturn(Optional.of(work));
-
-        Optional<ChapterResponseDto> result = useCase.execute(CHAPTER_ID, LANGUAGE_CODE);
-
-        assertTrue(result.isPresent());
+        thenChapterDtoPresent(result);
         ChapterResponseDto dto = result.get();
-        assertEquals(CHAPTER_ID, dto.getId());
-        assertEquals(WORK_TITLE, dto.getWorkName());
-        assertEquals(1, dto.getAvailableLanguages().size());
-        assertEquals(LANGUAGE_CODE, dto.getLanguageDefaultCode().getCode());
+        thenChapterBasics(dto, CHAPTER_ID, WORK_TITLE);
+        thenAvailableLanguagesSize(dto, 1);
+        thenDefaultLanguageCodeIs(dto, LANGUAGE_CODE);
     }
 
     @Test
     public void when_ChapterDoesNotExist_ThenReturnEmpty() {
-        when(loadChapterPort.loadChapterForEdit(CHAPTER_ID))
-            .thenReturn(Optional.empty());
+        givenChapterDoesNotExist(CHAPTER_ID);
 
-        Optional<ChapterResponseDto> result = useCase.execute(CHAPTER_ID, LANGUAGE_CODE);
+        Optional<ChapterResponseDto> result = whenGetChapterForEdit(CHAPTER_ID, LANGUAGE_CODE);
 
-        assertTrue(result.isEmpty());
+        thenChapterDtoEmpty(result);
     }
-
-   
 }

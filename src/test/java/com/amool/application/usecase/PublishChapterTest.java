@@ -10,6 +10,7 @@ import com.amool.domain.model.Work;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
+import org.junit.jupiter.api.function.Executable;
 
 import java.time.LocalDateTime;
 import java.util.NoSuchElementException;
@@ -60,107 +61,123 @@ public class PublishChapterTest {
     }
 
     @Test
-    public void when_ValidRequest_ThenPublishChapter() {
-        Mockito.when(obtainWorkByIdPort.obtainWorkById(workId))
-                .thenReturn(Optional.of(work));
-                
-        Mockito.when(loadChapterPort.loadChapter(workId, chapterId))
-                .thenReturn(Optional.of(chapter));
+    public void shouldPublishChapterWhenRequestIsValid() {
+        givenWorkOwnedBy(authenticatedUserId);
+        givenChapterWithStatus("DRAFT");
 
-        useCase.execute(workId, chapterId, authenticatedUserId);
+        whenPublishingChapter(authenticatedUserId);
 
+        thenChapterIsPublished();
+    }
+
+    @Test
+    public void shouldThrowSecurityExceptionWhenUserNotAuthenticated() {
+        thenThrows(SecurityException.class, publishingChapter(null));
+        thenNoPortsAreInvoked();
+    }
+
+    @Test
+    public void shouldThrowNoSuchElementWhenWorkNotFound() {
+        givenWorkDoesNotExist();
+
+        thenThrows(NoSuchElementException.class, publishingChapter(authenticatedUserId));
+        thenWorkLookupOccurs();
+        thenChapterLookupDoesNotOccur();
+        thenNoPublicationStatusUpdateOccurs();
+    }
+
+    @Test
+    public void shouldThrowSecurityExceptionWhenUserNotAuthorized() {
+        givenWorkOwnedBy(999L);
+
+        thenThrows(SecurityException.class, publishingChapter(authenticatedUserId));
+        thenWorkLookupOccurs();
+        thenChapterLookupDoesNotOccur();
+        thenNoPublicationStatusUpdateOccurs();
+    }
+
+    @Test
+    public void shouldThrowIllegalStateWhenChapterNotInDraft() {
+        givenWorkOwnedBy(authenticatedUserId);
+        givenChapterWithStatus("PUBLISHED");
+
+        thenThrows(IllegalStateException.class, publishingChapter(authenticatedUserId));
+        thenWorkLookupOccurs();
+        thenChapterLookupOccurs();
+        thenNoPublicationStatusUpdateOccurs();
+    }
+
+    @Test
+    public void shouldThrowNoSuchElementWhenChapterNotFound() {
+        givenWorkOwnedBy(authenticatedUserId);
+        givenChapterDoesNotExist();
+
+        thenThrows(NoSuchElementException.class, publishingChapter(authenticatedUserId));
+        thenWorkLookupOccurs();
+        thenChapterLookupOccurs();
+        thenNoPublicationStatusUpdateOccurs();
+    }
+
+    private void givenWorkOwnedBy(Long ownerId) {
+        User creator = new User();
+        creator.setId(ownerId);
+        work.setCreator(creator);
+        Mockito.when(obtainWorkByIdPort.obtainWorkById(workId)).thenReturn(Optional.of(work));
+    }
+
+    private void givenWorkDoesNotExist() {
+        Mockito.when(obtainWorkByIdPort.obtainWorkById(workId)).thenReturn(Optional.empty());
+    }
+
+    private void givenChapterWithStatus(String status) {
+        chapter.setPublicationStatus(status);
+        Mockito.when(loadChapterPort.loadChapter(workId, chapterId)).thenReturn(Optional.of(chapter));
+    }
+
+    private void givenChapterDoesNotExist() {
+        Mockito.when(loadChapterPort.loadChapter(workId, chapterId)).thenReturn(Optional.empty());
+    }
+
+    private void whenPublishingChapter(Long userId) {
+        useCase.execute(workId, chapterId, userId);
+    }
+
+    private Executable publishingChapter(Long userId) {
+        return () -> useCase.execute(workId, chapterId, userId);
+    }
+
+    private void thenChapterIsPublished() {
         verify(updateChapterStatusPort).updatePublicationStatus(
-            eq(workId), 
-            eq(chapterId), 
-            eq("PUBLISHED"), 
+            eq(workId),
+            eq(chapterId),
+            eq("PUBLISHED"),
             any(LocalDateTime.class)
         );
     }
 
-    @Test
-    public void when_UserNotAuthenticated_ThenThrowSecurityException() {
-        assertThrows(SecurityException.class, () -> 
-            useCase.execute(workId, chapterId, null)
-        );
-        
-        verifyNoInteractions();
+    private void thenThrows(Class<? extends Throwable> expectedException, Executable action) {
+        assertThrows(expectedException, action);
     }
 
-    @Test
-    public void when_WorkNotFound_ThenThrowNoSuchElementException() {
-        Mockito.when(obtainWorkByIdPort.obtainWorkById(workId))
-                .thenReturn(Optional.empty());
-
-        assertThrows(NoSuchElementException.class, () -> 
-            useCase.execute(workId, chapterId, authenticatedUserId)
-        );
-        
-        verify(obtainWorkByIdPort).obtainWorkById(workId);
-        verifyNoOtherInteractions();
-    }
-
-    @Test
-    public void when_UserNotAuthorized_ThenThrowSecurityException() {
-        User otherUser = new User();
-        otherUser.setId(999L);
-        work.setCreator(otherUser);
-        
-        Mockito.when(obtainWorkByIdPort.obtainWorkById(workId))
-                .thenReturn(Optional.of(work));
-
-        assertThrows(SecurityException.class, () -> 
-            useCase.execute(workId, chapterId, authenticatedUserId)
-        );
-        
-        verify(obtainWorkByIdPort).obtainWorkById(workId);
-        verifyNoOtherInteractions();
-    }
-
-    @Test
-    public void when_ChapterNotInDraft_ThenThrowIllegalStateException() {
-        chapter.setPublicationStatus("PUBLISHED");
-        
-        Mockito.when(obtainWorkByIdPort.obtainWorkById(workId))
-                .thenReturn(Optional.of(work));
-                
-        Mockito.when(loadChapterPort.loadChapter(workId, chapterId))
-                .thenReturn(Optional.of(chapter));
-
-        assertThrows(IllegalStateException.class, () -> 
-            useCase.execute(workId, chapterId, authenticatedUserId)
-        );
-        
-        verify(obtainWorkByIdPort).obtainWorkById(workId);
-        verify(loadChapterPort).loadChapter(workId, chapterId);
-        verifyNoOtherInteractions();
-    }
-
-    @Test
-    public void when_ChapterNotFound_ThenThrowNoSuchElementException() {
-        Mockito.when(obtainWorkByIdPort.obtainWorkById(workId))
-                .thenReturn(Optional.of(work));
-                
-        Mockito.when(loadChapterPort.loadChapter(workId, chapterId))
-                .thenReturn(Optional.empty());
-
-        assertThrows(NoSuchElementException.class, () -> 
-            useCase.execute(workId, chapterId, authenticatedUserId)
-        );
-        
-        verify(obtainWorkByIdPort).obtainWorkById(workId);
-        verify(loadChapterPort).loadChapter(workId, chapterId);
-        verifyNoOtherInteractions();
-    }
-
-    private void verifyNoInteractions() {
+    private void thenNoPortsAreInvoked() {
         verify(obtainWorkByIdPort, never()).obtainWorkById(any());
         verify(loadChapterPort, never()).loadChapter(any(), any());
-        verify(updateChapterStatusPort, never())
-            .updatePublicationStatus(any(), any(), any(), any());
+        thenNoPublicationStatusUpdateOccurs();
     }
-    
-    private void verifyNoOtherInteractions() {
-        verify(updateChapterStatusPort, never())
-            .updatePublicationStatus(any(), any(), any(), any());
+
+    private void thenWorkLookupOccurs() {
+        verify(obtainWorkByIdPort).obtainWorkById(workId);
+    }
+
+    private void thenChapterLookupOccurs() {
+        verify(loadChapterPort).loadChapter(workId, chapterId);
+    }
+
+    private void thenChapterLookupDoesNotOccur() {
+        verify(loadChapterPort, never()).loadChapter(any(), any());
+    }
+
+    private void thenNoPublicationStatusUpdateOccurs() {
+        verify(updateChapterStatusPort, never()).updatePublicationStatus(any(), any(), any(), any());
     }
 }
