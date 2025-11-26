@@ -2,7 +2,7 @@ package com.amool.application.usecase;
 
 import com.amool.adapters.in.rest.dtos.LikeResponseDto;
 import com.amool.application.port.out.LikePort;
-import com.amool.application.usecases.ToggleChapterLikeUseCase;
+import com.amool.application.usecases.ToggleChapterLike;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
@@ -15,11 +15,11 @@ import static org.mockito.Mockito.*;
 public class ToggleChapterLikeTest {
 
     private LikePort likePort;
-    private ToggleChapterLikeUseCase useCase;
+    private ToggleChapterLike useCase;
     @BeforeEach
     void setUp() {
         likePort = Mockito.mock(LikePort.class);
-        useCase = new ToggleChapterLikeUseCase(likePort);
+        useCase = new ToggleChapterLike(likePort);
     }
 
     @Test

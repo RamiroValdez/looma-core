@@ -2,9 +2,9 @@ package com.amool.adapters.in.rest.controllers;
 
 import com.amool.adapters.in.rest.dtos.WorkResponseDto;
 import com.amool.adapters.in.rest.mappers.WorkMapper;
-import com.amool.application.usecases.GetAuthenticatedUserWorksUseCase;
-import com.amool.application.usecases.UpdateBannerUseCase;
-import com.amool.application.usecases.UpdateCoverUseCase;
+import com.amool.application.usecases.GetAuthenticatedUserWorks;
+import com.amool.application.usecases.UpdateBanner;
+import com.amool.application.usecases.UpdateCover;
 import com.amool.domain.model.Work;
 import com.amool.security.JwtUserPrincipal;
 
@@ -28,17 +28,17 @@ import com.amool.domain.exception.UnauthorizedAccessException;
 @RequestMapping("/api/my-works")
 public class MyWorksController {
 
-    private final GetAuthenticatedUserWorksUseCase getAuthenticatedUserWorksUseCase;
-    private final UpdateCoverUseCase updateCoverUseCase;
-    private final UpdateBannerUseCase updateBannerUseCase;
+    private final GetAuthenticatedUserWorks getAuthenticatedUserWorks;
+    private final UpdateCover updateCover;
+    private final UpdateBanner updateBanner;
 
     public MyWorksController(
-            GetAuthenticatedUserWorksUseCase getAuthenticatedUserWorksUseCase,
-            UpdateCoverUseCase updateCoverUseCase,
-            UpdateBannerUseCase updateBannerUseCase) {
-        this.getAuthenticatedUserWorksUseCase = getAuthenticatedUserWorksUseCase;
-        this.updateCoverUseCase = updateCoverUseCase;
-        this.updateBannerUseCase = updateBannerUseCase;
+            GetAuthenticatedUserWorks getAuthenticatedUserWorks,
+            UpdateCover updateCover,
+            UpdateBanner updateBanner) {
+        this.getAuthenticatedUserWorks = getAuthenticatedUserWorks;
+        this.updateCover = updateCover;
+        this.updateBanner = updateBanner;
     }
     
     @GetMapping("/{userId}")
@@ -47,7 +47,7 @@ public class MyWorksController {
             @PathVariable Long userId, 
             @AuthenticationPrincipal JwtUserPrincipal principal) {
         try {
-            List<Work> works = getAuthenticatedUserWorksUseCase.execute(principal.getUserId());
+            List<Work> works = getAuthenticatedUserWorks.execute(principal.getUserId());
             List<WorkResponseDto> response = works.stream()
                     .map(WorkMapper::toDto)
                     .collect(Collectors.toList());
@@ -65,7 +65,7 @@ public class MyWorksController {
             @AuthenticationPrincipal JwtUserPrincipal principal
     ) {
         try {
-            this.updateCoverUseCase.execute(workId, coverFile, principal.getUserId(),optionalData);
+            this.updateCover.execute(workId, coverFile, principal.getUserId(),optionalData);
             return ResponseEntity.noContent().build();
         } catch (IllegalArgumentException e) {
             return ResponseEntity.notFound().build();
@@ -86,7 +86,7 @@ public class MyWorksController {
             @AuthenticationPrincipal JwtUserPrincipal principal
     ) {
         try {
-            this.updateBannerUseCase.execute(workId, bannerFile, principal.getUserId());
+            this.updateBanner.execute(workId, bannerFile, principal.getUserId());
             return ResponseEntity.noContent().build();
         } catch (IllegalArgumentException e) {
             return ResponseEntity.notFound().build();

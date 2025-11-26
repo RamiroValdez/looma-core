@@ -32,13 +32,13 @@ import static org.mockito.Mockito.*;
 public class ChapterControllerTest {
 
     private ChapterController chapterController;
-    private GetChapterWithContentUseCase getChapterWithContentUseCase;
-    private DeleteChapterUseCase deleteChapterUseCase;
-    private PublishChapterUseCase publishChapterUseCase;
-    private SchedulePublicationUseCase schedulePublicationUseCase;
-    private CancelScheduledPublicationUseCase cancelScheduledPublicationUseCase;
-    private UpdateChapterContentUseCase updateChapterContentUseCase;
-    private ToggleChapterLikeUseCase toggleChapterLikeUseCase;
+    private GetChapterWithContent getChapterWithContent;
+    private DeleteChapter deleteChapter;
+    private PublishChapter publishChapter;
+    private SchedulePublication schedulePublication;
+    private CancelScheduledPublication cancelScheduledPublication;
+    private UpdateChapterContent updateChapterContent;
+    private ToggleChapterLike toggleChapterLike;
     private CreateWorkNotification createWorkNotification;
 
     private static final Long TEST_WORK_ID = 1L;
@@ -50,23 +50,23 @@ public class ChapterControllerTest {
 
     @BeforeEach
     public void setUp() {
-        getChapterWithContentUseCase = Mockito.mock(GetChapterWithContentUseCase.class);
-        deleteChapterUseCase = Mockito.mock(DeleteChapterUseCase.class);
-        publishChapterUseCase = Mockito.mock(PublishChapterUseCase.class);
-        schedulePublicationUseCase = Mockito.mock(SchedulePublicationUseCase.class);
-        cancelScheduledPublicationUseCase = Mockito.mock(CancelScheduledPublicationUseCase.class);
-        updateChapterContentUseCase = Mockito.mock(UpdateChapterContentUseCase.class);
-        toggleChapterLikeUseCase = Mockito.mock(ToggleChapterLikeUseCase.class);
+        getChapterWithContent = Mockito.mock(GetChapterWithContent.class);
+        deleteChapter = Mockito.mock(DeleteChapter.class);
+        publishChapter = Mockito.mock(PublishChapter.class);
+        schedulePublication = Mockito.mock(SchedulePublication.class);
+        cancelScheduledPublication = Mockito.mock(CancelScheduledPublication.class);
+        updateChapterContent = Mockito.mock(UpdateChapterContent.class);
+        toggleChapterLike = Mockito.mock(ToggleChapterLike.class);
         createWorkNotification = Mockito.mock(CreateWorkNotification.class);
 
         chapterController = new ChapterController(
-                getChapterWithContentUseCase,
-                deleteChapterUseCase,
-                publishChapterUseCase,
-                schedulePublicationUseCase,
-                cancelScheduledPublicationUseCase,
-                updateChapterContentUseCase,
-                toggleChapterLikeUseCase,
+                getChapterWithContent,
+                deleteChapter,
+                publishChapter,
+                schedulePublication,
+                cancelScheduledPublication,
+                updateChapterContent,
+                toggleChapterLike,
                 createWorkNotification
         );
 
@@ -439,12 +439,12 @@ public class ChapterControllerTest {
 
     private void givenChapterExists() {
         ChapterWithContentResult result = createChapterWithContentResult();
-        when(getChapterWithContentUseCase.execute(TEST_WORK_ID, TEST_CHAPTER_ID, TEST_LANGUAGE))
+        when(getChapterWithContent.execute(TEST_WORK_ID, TEST_CHAPTER_ID, TEST_LANGUAGE))
                 .thenReturn(Optional.of(result));
     }
 
     private void givenChapterDoesNotExist() {
-        when(getChapterWithContentUseCase.execute(TEST_WORK_ID, TEST_CHAPTER_ID, TEST_LANGUAGE))
+        when(getChapterWithContent.execute(TEST_WORK_ID, TEST_CHAPTER_ID, TEST_LANGUAGE))
                 .thenReturn(Optional.empty());
     }
 
@@ -468,7 +468,7 @@ public class ChapterControllerTest {
 
     private void givenContentUpdateWillSucceed() {
         ChapterContent updatedContent = createChapterContent();
-        when(updateChapterContentUseCase.execute(
+        when(updateChapterContent.execute(
                 TEST_WORK_ID.toString(),
                 TEST_CHAPTER_ID.toString(),
                 TEST_LANGUAGE,
@@ -478,27 +478,27 @@ public class ChapterControllerTest {
     }
 
     private void givenContentUpdateWillBeForbidden() {
-        when(updateChapterContentUseCase.execute(any(), any(), any(), any(), any()))
+        when(updateChapterContent.execute(any(), any(), any(), any(), any()))
                 .thenThrow(new SecurityException("Not authorized"));
     }
 
     private void givenChapterCanBeDeleted() {
-        doNothing().when(deleteChapterUseCase).execute(TEST_WORK_ID, TEST_CHAPTER_ID, TEST_USER_ID);
+        doNothing().when(deleteChapter).execute(TEST_WORK_ID, TEST_CHAPTER_ID, TEST_USER_ID);
     }
 
     private void givenChapterToDeleteDoesNotExist() {
         doThrow(new NoSuchElementException("Chapter not found"))
-                .when(deleteChapterUseCase).execute(TEST_WORK_ID, TEST_CHAPTER_ID, TEST_USER_ID);
+                .when(deleteChapter).execute(TEST_WORK_ID, TEST_CHAPTER_ID, TEST_USER_ID);
     }
 
     private void givenChapterDeleteWillBeForbidden() {
         doThrow(new SecurityException("Not authorized"))
-                .when(deleteChapterUseCase).execute(TEST_WORK_ID, TEST_CHAPTER_ID, TEST_USER_ID);
+                .when(deleteChapter).execute(TEST_WORK_ID, TEST_CHAPTER_ID, TEST_USER_ID);
     }
 
     private void givenChapterDeleteWillFailDueToIllegalState() {
         doThrow(new IllegalStateException("Cannot delete published chapter"))
-                .when(deleteChapterUseCase).execute(TEST_WORK_ID, TEST_CHAPTER_ID, TEST_USER_ID);
+                .when(deleteChapter).execute(TEST_WORK_ID, TEST_CHAPTER_ID, TEST_USER_ID);
     }
 
     private void givenUserIsAuthenticated() {
@@ -510,23 +510,23 @@ public class ChapterControllerTest {
     }
 
     private void givenChapterCanBePublished() {
-        doNothing().when(publishChapterUseCase).execute(TEST_WORK_ID, TEST_CHAPTER_ID, TEST_USER_ID);
+        doNothing().when(publishChapter).execute(TEST_WORK_ID, TEST_CHAPTER_ID, TEST_USER_ID);
         when(createWorkNotification.execute(TEST_WORK_ID, TEST_USER_ID, TEST_CHAPTER_ID)).thenReturn(true);
     }
 
     private void givenChapterToPublishDoesNotExist() {
         doThrow(new NoSuchElementException("Chapter not found"))
-                .when(publishChapterUseCase).execute(TEST_WORK_ID, TEST_CHAPTER_ID, TEST_USER_ID);
+                .when(publishChapter).execute(TEST_WORK_ID, TEST_CHAPTER_ID, TEST_USER_ID);
     }
 
     private void givenChapterPublishWillBeForbidden() {
         doThrow(new SecurityException("Not authorized"))
-                .when(publishChapterUseCase).execute(TEST_WORK_ID, TEST_CHAPTER_ID, TEST_USER_ID);
+                .when(publishChapter).execute(TEST_WORK_ID, TEST_CHAPTER_ID, TEST_USER_ID);
     }
 
     private void givenChapterIsAlreadyPublished() {
         doThrow(new IllegalStateException("Chapter already published"))
-                .when(publishChapterUseCase).execute(TEST_WORK_ID, TEST_CHAPTER_ID, TEST_USER_ID);
+                .when(publishChapter).execute(TEST_WORK_ID, TEST_CHAPTER_ID, TEST_USER_ID);
     }
 
     private SchedulePublicationRequestDto givenValidScheduleRequest() {
@@ -538,7 +538,7 @@ public class ChapterControllerTest {
     }
 
     private void givenChapterCanBeScheduled() {
-        doNothing().when(schedulePublicationUseCase).execute(
+        doNothing().when(schedulePublication).execute(
                 eq(TEST_WORK_ID),
                 eq(TEST_CHAPTER_ID),
                 any(Instant.class),
@@ -548,52 +548,52 @@ public class ChapterControllerTest {
 
     private void givenSchedulePublicationWillBeForbidden() {
         doThrow(new SecurityException("Not authorized"))
-                .when(schedulePublicationUseCase).execute(any(), any(), any(), any());
+                .when(schedulePublication).execute(any(), any(), any(), any());
     }
 
     private void givenChapterToScheduleDoesNotExist() {
         doThrow(new NoSuchElementException("Chapter not found"))
-                .when(schedulePublicationUseCase).execute(any(), any(), any(), any());
+                .when(schedulePublication).execute(any(), any(), any(), any());
     }
 
     private void givenScheduleDateIsInThePast() {
         doThrow(new IllegalArgumentException("Date must be in the future"))
-                .when(schedulePublicationUseCase).execute(any(), any(), any(), any());
+                .when(schedulePublication).execute(any(), any(), any(), any());
     }
 
     private void givenChapterScheduleWillFailDueToIllegalState() {
         doThrow(new IllegalStateException("Chapter already published"))
-                .when(schedulePublicationUseCase).execute(any(), any(), any(), any());
+                .when(schedulePublication).execute(any(), any(), any(), any());
     }
 
     private void givenScheduleCanBeCancelled() {
-        doNothing().when(cancelScheduledPublicationUseCase).execute(TEST_WORK_ID, TEST_CHAPTER_ID, TEST_USER_ID);
+        doNothing().when(cancelScheduledPublication).execute(TEST_WORK_ID, TEST_CHAPTER_ID, TEST_USER_ID);
     }
 
     private void givenScheduleToCancelDoesNotExist() {
         doThrow(new NoSuchElementException("Schedule not found"))
-                .when(cancelScheduledPublicationUseCase).execute(TEST_WORK_ID, TEST_CHAPTER_ID, TEST_USER_ID);
+                .when(cancelScheduledPublication).execute(TEST_WORK_ID, TEST_CHAPTER_ID, TEST_USER_ID);
     }
 
     private void givenCancelScheduleWillBeForbidden() {
         doThrow(new SecurityException("Not authorized"))
-                .when(cancelScheduledPublicationUseCase).execute(TEST_WORK_ID, TEST_CHAPTER_ID, TEST_USER_ID);
+                .when(cancelScheduledPublication).execute(TEST_WORK_ID, TEST_CHAPTER_ID, TEST_USER_ID);
     }
 
     private void givenCancelScheduleWillFailDueToIllegalState() {
         doThrow(new IllegalStateException("Cannot cancel"))
-                .when(cancelScheduledPublicationUseCase).execute(TEST_WORK_ID, TEST_CHAPTER_ID, TEST_USER_ID);
+                .when(cancelScheduledPublication).execute(TEST_WORK_ID, TEST_CHAPTER_ID, TEST_USER_ID);
     }
 
     private void givenChapterCanBeLiked() {
         LikeResponseDto response = new LikeResponseDto(TEST_WORK_ID, 5L, true);
-        when(toggleChapterLikeUseCase.execute(TEST_CHAPTER_ID, TEST_USER_ID))
+        when(toggleChapterLike.execute(TEST_CHAPTER_ID, TEST_USER_ID))
                 .thenReturn(response);
     }
 
     private void givenChapterCanBeUnliked() {
         LikeResponseDto response = new LikeResponseDto(TEST_WORK_ID, 4L, false);
-        when(toggleChapterLikeUseCase.execute(TEST_CHAPTER_ID, TEST_USER_ID))
+        when(toggleChapterLike.execute(TEST_CHAPTER_ID, TEST_USER_ID))
                 .thenReturn(response);
     }
 
@@ -701,11 +701,11 @@ public class ChapterControllerTest {
     }
 
     private void thenGetChapterUseCaseWasInvoked() {
-        verify(getChapterWithContentUseCase).execute(TEST_WORK_ID, TEST_CHAPTER_ID, TEST_LANGUAGE);
+        verify(getChapterWithContent).execute(TEST_WORK_ID, TEST_CHAPTER_ID, TEST_LANGUAGE);
     }
 
     private void thenUpdateContentUseCaseWasInvoked() {
-        verify(updateChapterContentUseCase).execute(
+        verify(updateChapterContent).execute(
                 TEST_WORK_ID.toString(),
                 TEST_CHAPTER_ID.toString(),
                 TEST_LANGUAGE,
@@ -715,19 +715,19 @@ public class ChapterControllerTest {
     }
 
     private void thenUpdateContentUseCaseWasNotInvoked() {
-        verify(updateChapterContentUseCase, never()).execute(any(), any(), any(), any(), any());
+        verify(updateChapterContent, never()).execute(any(), any(), any(), any(), any());
     }
 
     private void thenDeleteChapterUseCaseWasInvoked() {
-        verify(deleteChapterUseCase).execute(TEST_WORK_ID, TEST_CHAPTER_ID, TEST_USER_ID);
+        verify(deleteChapter).execute(TEST_WORK_ID, TEST_CHAPTER_ID, TEST_USER_ID);
     }
 
     private void thenPublishChapterUseCaseWasInvoked() {
-        verify(publishChapterUseCase).execute(TEST_WORK_ID, TEST_CHAPTER_ID, TEST_USER_ID);
+        verify(publishChapter).execute(TEST_WORK_ID, TEST_CHAPTER_ID, TEST_USER_ID);
     }
 
     private void thenPublishChapterUseCaseWasNotInvoked() {
-        verify(publishChapterUseCase, never()).execute(any(), any(), any());
+        verify(publishChapter, never()).execute(any(), any(), any());
     }
 
     private void thenWorkNotificationWasCreated() {
@@ -735,7 +735,7 @@ public class ChapterControllerTest {
     }
 
     private void thenSchedulePublicationUseCaseWasInvoked() {
-        verify(schedulePublicationUseCase).execute(
+        verify(schedulePublication).execute(
                 eq(TEST_WORK_ID),
                 eq(TEST_CHAPTER_ID),
                 any(Instant.class),
@@ -744,7 +744,7 @@ public class ChapterControllerTest {
     }
 
     private void thenCancelScheduledPublicationUseCaseWasInvoked() {
-        verify(cancelScheduledPublicationUseCase).execute(TEST_WORK_ID, TEST_CHAPTER_ID, TEST_USER_ID);
+        verify(cancelScheduledPublication).execute(TEST_WORK_ID, TEST_CHAPTER_ID, TEST_USER_ID);
     }
 
     private void thenResponseContainsLikeData(ResponseEntity<LikeResponseDto> response, boolean isLiked) {
@@ -755,6 +755,6 @@ public class ChapterControllerTest {
     }
 
     private void thenToggleChapterLikeUseCaseWasInvoked() {
-        verify(toggleChapterLikeUseCase).execute(TEST_CHAPTER_ID, TEST_USER_ID);
+        verify(toggleChapterLike).execute(TEST_CHAPTER_ID, TEST_USER_ID);
     }
 }

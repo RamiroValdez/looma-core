@@ -10,7 +10,6 @@ import software.amazon.awssdk.services.s3.S3Client;
 import software.amazon.awssdk.services.s3.model.PutObjectRequest;
 import software.amazon.awssdk.services.s3.model.S3Exception;
 import software.amazon.awssdk.services.s3.presigner.S3Presigner;
-import software.amazon.awssdk.services.s3.presigner.model.PresignedGetObjectRequest;
 import software.amazon.awssdk.core.sync.RequestBody;
 
 import java.io.ByteArrayInputStream;
@@ -32,53 +31,78 @@ class AwsS3AdapterTest {
     @Mock
     private MultipartFile multipartFile;
 
-    @Mock
-    private PresignedGetObjectRequest presignedRequest;
-
     private AwsS3Adapter awsS3Adapter;
+
+    private static final String DEFAULT_FILE_NAME = "test-file.jpg";
 
     @BeforeEach
     void setUp() {
         awsS3Adapter = new AwsS3Adapter(s3Client, s3Presigner, "test-bucket", "us-east-1");
     }
 
-    @Test
-    void uploadPublicFile_ThrowsRuntimeException() throws IOException {
-        String fileName = "test-file.jpg";
+    // --- Helpers: Given ---
+    private void givenValidImageMultipartFile() throws IOException {
         when(multipartFile.getContentType()).thenReturn("image/jpeg");
         when(multipartFile.getSize()).thenReturn(1024L);
         when(multipartFile.getInputStream()).thenReturn(new ByteArrayInputStream("test".getBytes()));
-        when(s3Client.putObject(any(PutObjectRequest.class), any(RequestBody.class)))
-                .thenThrow(new RuntimeException("S3 error"));
+    }
 
-        RuntimeException exception = assertThrows(RuntimeException.class,
-                () -> awsS3Adapter.uploadPublicFile(fileName, multipartFile));
-        assertEquals("S3 error", exception.getMessage());
+    private void givenMultipartFileInputStreamThrows(IOException ioException) throws IOException {
+        when(multipartFile.getContentType()).thenReturn("image/jpeg");
+        when(multipartFile.getSize()).thenReturn(1024L);
+        when(multipartFile.getInputStream()).thenThrow(ioException);
+    }
+
+    private void givenS3PutObjectThrows(RuntimeException exception) {
+        when(s3Client.putObject(any(PutObjectRequest.class), any(RequestBody.class)))
+                .thenThrow(exception);
+    }
+
+    // --- Helpers: When ---
+    private <T extends Throwable> T whenUploadingPublicFileExpecting(Class<T> exceptionClass) {
+        return assertThrows(exceptionClass, () -> awsS3Adapter.uploadPublicFile(DEFAULT_FILE_NAME, multipartFile));
+    }
+
+    // --- Helpers: Then ---
+    private void thenMessageIs(Throwable exception, String expectedMessage) {
+        assertEquals(expectedMessage, exception.getMessage());
+    }
+
+    @Test
+    void uploadPublicFile_ThrowsRuntimeException() throws IOException {
+        // Given
+        givenValidImageMultipartFile();
+        givenS3PutObjectThrows(new RuntimeException("S3 error"));
+
+        // When
+        RuntimeException exception = whenUploadingPublicFileExpecting(RuntimeException.class);
+
+        // Then
+        thenMessageIs(exception, "S3 error");
     }
 
     @Test
     void uploadPublicFile_ThrowsS3Exception() throws IOException {
-        String fileName = "test-file.jpg";
-        when(multipartFile.getContentType()).thenReturn("image/jpeg");
-        when(multipartFile.getSize()).thenReturn(1024L);
-        when(multipartFile.getInputStream()).thenReturn(new ByteArrayInputStream("test".getBytes()));
-        when(s3Client.putObject(any(PutObjectRequest.class), any(RequestBody.class)))
-                .thenThrow(S3Exception.builder().message("Bucket not found").statusCode(404).build());
+        // Given
+        givenValidImageMultipartFile();
+        givenS3PutObjectThrows(S3Exception.builder().message("Bucket not found").statusCode(404).build());
 
-        S3Exception exception = assertThrows(S3Exception.class,
-                () -> awsS3Adapter.uploadPublicFile(fileName, multipartFile));
-        assertEquals("Bucket not found", exception.getMessage());
+        // When
+        S3Exception exception = whenUploadingPublicFileExpecting(S3Exception.class);
+
+        // Then
+        thenMessageIs(exception, "Bucket not found");
     }
 
     @Test
     void uploadPublicFile_ThrowsIOExceptionFromInputStream() throws IOException {
-        String fileName = "test-file.jpg";
-        when(multipartFile.getContentType()).thenReturn("image/jpeg");
-        when(multipartFile.getSize()).thenReturn(1024L);
-        when(multipartFile.getInputStream()).thenThrow(new IOException("File read error"));
+        // Given
+        givenMultipartFileInputStreamThrows(new IOException("File read error"));
 
-        IOException exception = assertThrows(IOException.class,
-                () -> awsS3Adapter.uploadPublicFile(fileName, multipartFile));
-        assertEquals("File read error", exception.getMessage());
+        // When
+        IOException exception = whenUploadingPublicFileExpecting(IOException.class);
+
+        // Then
+        thenMessageIs(exception, "File read error");
     }
 }

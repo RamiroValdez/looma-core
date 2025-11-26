@@ -4,7 +4,7 @@ import com.amool.adapters.in.rest.dtos.AuthResponse;
 import com.amool.adapters.in.rest.dtos.LoginRequest;
 import com.amool.adapters.in.rest.dtos.UserDto;
 import com.amool.application.usecases.GetUserPhoto;
-import com.amool.application.usecases.LoginUseCase;
+import com.amool.application.usecases.Login;
 import com.amool.domain.model.User;
 import com.amool.security.JwtService;
 import com.amool.security.JwtUserPrincipal;
@@ -27,7 +27,7 @@ import static org.mockito.Mockito.*;
 public class LoginControllerTest {
 
     private LoginController controller;
-    private LoginUseCase loginUseCase;
+    private Login login;
     private JwtService jwtService;
     private GetUserPhoto getUserPhoto;
 
@@ -41,10 +41,10 @@ public class LoginControllerTest {
 
     @BeforeEach
     void setUp() {
-        loginUseCase = Mockito.mock(LoginUseCase.class);
+        login = Mockito.mock(Login.class);
         jwtService = Mockito.mock(JwtService.class);
         getUserPhoto = Mockito.mock(GetUserPhoto.class);
-        controller = new LoginController(loginUseCase, jwtService, getUserPhoto );
+        controller = new LoginController(login, jwtService, getUserPhoto );
     }
 
 
@@ -120,11 +120,11 @@ public class LoginControllerTest {
     }
 
     private void givenLoginSucceedsWith(User user) {
-        when(loginUseCase.execute(anyString(), anyString())).thenReturn(Optional.of(user));
+        when(login.execute(anyString(), anyString())).thenReturn(Optional.of(user));
     }
 
     private void givenLoginFails() {
-        when(loginUseCase.execute(anyString(), anyString())).thenReturn(Optional.empty());
+        when(login.execute(anyString(), anyString())).thenReturn(Optional.empty());
     }
 
     private void givenJwtWillReturnToken(String token) {
@@ -165,7 +165,7 @@ public class LoginControllerTest {
     }
 
     private void thenLoginWasCalledWith(String email, String password) {
-        verify(loginUseCase, times(1)).execute(eq(email), eq(password));
+        verify(login, times(1)).execute(eq(email), eq(password));
     }
 
     private void thenTokenWasGeneratedWithClaimsFor(User user) {

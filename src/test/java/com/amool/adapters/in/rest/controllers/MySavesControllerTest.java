@@ -1,9 +1,9 @@
 package com.amool.adapters.in.rest.controllers;
 
 import com.amool.adapters.in.rest.dtos.SaveWorkResponseDto;
-import com.amool.application.usecases.GetSavedWorksUseCase;
-import com.amool.application.usecases.IsWorkSavedUseCase;
-import com.amool.application.usecases.ToggleSaveWorkUseCase;
+import com.amool.application.usecases.GetSavedWorks;
+import com.amool.application.usecases.IsWorkSaved;
+import com.amool.application.usecases.ToggleSaveWork;
 import com.amool.domain.model.Work;
 import com.amool.security.JwtUserPrincipal;
 import org.junit.jupiter.api.BeforeEach;
@@ -22,19 +22,19 @@ import static org.mockito.Mockito.*;
 public class MySavesControllerTest {
 
     private MySavesController controller;
-    private ToggleSaveWorkUseCase toggleSaveWorkUseCase;
-    private IsWorkSavedUseCase isWorkSavedUseCase;
-    private GetSavedWorksUseCase getSavedWorksUseCase;
+    private ToggleSaveWork toggleSaveWork;
+    private IsWorkSaved isWorkSaved;
+    private GetSavedWorks getSavedWorks;
 
     private static final Long USER_ID = 42L;
     private static final Long WORK_ID = 5L;
 
     @BeforeEach
     void setUp() {
-        toggleSaveWorkUseCase = Mockito.mock(ToggleSaveWorkUseCase.class);
-        isWorkSavedUseCase = Mockito.mock(IsWorkSavedUseCase.class);
-        getSavedWorksUseCase = Mockito.mock(GetSavedWorksUseCase.class);
-        controller = new MySavesController(toggleSaveWorkUseCase, isWorkSavedUseCase, getSavedWorksUseCase);
+        toggleSaveWork = Mockito.mock(ToggleSaveWork.class);
+        isWorkSaved = Mockito.mock(IsWorkSaved.class);
+        getSavedWorks = Mockito.mock(GetSavedWorks.class);
+        controller = new MySavesController(toggleSaveWork, isWorkSaved, getSavedWorks);
     }
 
     @Test
@@ -85,7 +85,7 @@ public class MySavesControllerTest {
     }
 
     private void givenIsWorkSavedWillReturn(boolean isSaved) {
-        when(isWorkSavedUseCase.execute(eq(USER_ID), eq(WORK_ID))).thenReturn(isSaved);
+        when(isWorkSaved.execute(eq(USER_ID), eq(WORK_ID))).thenReturn(isSaved);
     }
 
     private Work givenWork(Long id, String title) {
@@ -100,7 +100,7 @@ public class MySavesControllerTest {
     }
 
     private void givenGetSavedWorksWillReturn(List<Work> works) {
-        when(getSavedWorksUseCase.execute(eq(USER_ID))).thenReturn(works);
+        when(getSavedWorks.execute(eq(USER_ID))).thenReturn(works);
     }
 
     private ResponseEntity<?> whenTogglingSave(JwtUserPrincipal principal, Long workId) {
@@ -128,12 +128,12 @@ public class MySavesControllerTest {
     }
 
     private void thenToggleAndCheckWereCalled(Long userId, Long workId) {
-        verify(toggleSaveWorkUseCase, times(1)).execute(eq(userId), eq(workId));
-        verify(isWorkSavedUseCase, times(1)).execute(eq(userId), eq(workId));
+        verify(toggleSaveWork, times(1)).execute(eq(userId), eq(workId));
+        verify(isWorkSaved, times(1)).execute(eq(userId), eq(workId));
     }
 
     private void thenIsSavedWasCalled(Long userId, Long workId) {
-        verify(isWorkSavedUseCase, times(1)).execute(eq(userId), eq(workId));
+        verify(isWorkSaved, times(1)).execute(eq(userId), eq(workId));
     }
 
     private void thenBodyIsSameInstance(ResponseEntity<List<Work>> response, List<Work> expected) {
@@ -142,6 +142,6 @@ public class MySavesControllerTest {
     }
 
     private void thenGetSavedWorksWasCalled(Long userId) {
-        verify(getSavedWorksUseCase, times(1)).execute(eq(userId));
+        verify(getSavedWorks, times(1)).execute(eq(userId));
     }
 }

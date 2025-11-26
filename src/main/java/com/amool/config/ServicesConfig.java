@@ -11,7 +11,7 @@ import java.util.List;
 @Configuration
 public class ServicesConfig {
 
-    private final AwsS3Port awsS3Port;
+    private final FilesStoragePort filesStoragePort;
     private final ChatClient.Builder chatClientBuilder;
     private final SubscriptionPersistencePort subscriptionPersistencePort;
     private final List<PaymentProviderPort> paymentProviders;
@@ -19,14 +19,14 @@ public class ServicesConfig {
     private final UpdateChapterStatusPort updateChapterStatusPort;
     private final HttpDownloadPort httpDownloadPort;
 
-    public ServicesConfig(AwsS3Port awsS3Port,
+    public ServicesConfig(FilesStoragePort filesStoragePort,
                           ChatClient.Builder chatClientBuilder,
                           SubscriptionPersistencePort subscriptionPersistencePort,
                           List<PaymentProviderPort> paymentProviders,
                           FindChaptersDueForPublicationPort findChaptersDueForPublicationPort,
                           UpdateChapterStatusPort updateChapterStatusPort,
                           HttpDownloadPort httpDownloadPort) {
-        this.awsS3Port = awsS3Port;
+        this.filesStoragePort = filesStoragePort;
         this.chatClientBuilder = chatClientBuilder;
         this.subscriptionPersistencePort = subscriptionPersistencePort;
         this.paymentProviders = paymentProviders;
@@ -37,7 +37,7 @@ public class ServicesConfig {
 
     @Bean
     public ImagesService uploaderService() {
-        return new ImagesService(awsS3Port, httpDownloadPort);
+        return new ImagesService(filesStoragePort, httpDownloadPort);
     }
 
     @Bean

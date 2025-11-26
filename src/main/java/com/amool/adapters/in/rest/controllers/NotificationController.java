@@ -7,24 +7,24 @@ import org.springframework.web.bind.annotation.*;
 
 import com.amool.adapters.in.rest.dtos.NotificationDto;
 import com.amool.adapters.in.rest.mappers.NotificationMapper;
-import com.amool.application.usecases.ObtainNotificationsUseCase;
-import com.amool.application.usecases.UpdateNotificationReadUseCase;
+import com.amool.application.usecases.ObtainNotifications;
+import com.amool.application.usecases.UpdateNotificationRead;
 
 @RestController
 @RequestMapping("/api/notification")
 public class NotificationController {
 
-    private final ObtainNotificationsUseCase obtainNotificationsUseCase;
-    private final UpdateNotificationReadUseCase updateNotificationRead;
+    private final ObtainNotifications obtainNotifications;
+    private final UpdateNotificationRead updateNotificationRead;
 
-    public NotificationController(ObtainNotificationsUseCase obtainNotificationsUseCase, UpdateNotificationReadUseCase updateNotificationRead) {
-        this.obtainNotificationsUseCase = obtainNotificationsUseCase;
+    public NotificationController(ObtainNotifications obtainNotifications, UpdateNotificationRead updateNotificationRead) {
+        this.obtainNotifications = obtainNotifications;
         this.updateNotificationRead = updateNotificationRead;
     }
 
     @GetMapping("/{userId}")
     public List<NotificationDto> getNotifications(@PathVariable Long userId) {
-        return obtainNotificationsUseCase.execute(userId).stream()
+        return obtainNotifications.execute(userId).stream()
             .map(NotificationMapper::toDto)
             .toList();
     }

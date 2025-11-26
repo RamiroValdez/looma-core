@@ -1,9 +1,9 @@
 package com.amool.adapters.in.rest.controllers;
 
-import com.amool.application.usecases.ExtractTextFromFileUseCase;
-import com.amool.application.usecases.GetChapterForEditUseCase;
-import com.amool.application.usecases.UpdateChapterUseCase;
-import com.amool.application.usecases.ValidateChapterAccessUseCase;
+import com.amool.application.usecases.ExtractTextFromFile;
+import com.amool.application.usecases.GetChapterForEdit;
+import com.amool.application.usecases.UpdateChapter;
+import com.amool.application.usecases.ValidateChapterAccess;
 import com.amool.security.JwtUserPrincipal;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
@@ -26,20 +26,20 @@ import java.util.Map;
 @RequestMapping("/api/edit-chapter")
 public class EditChapterController {
 
-    private final GetChapterForEditUseCase getChapterForEditUseCase;
-    private final UpdateChapterUseCase updateChapterUseCase;
-    private final ExtractTextFromFileUseCase extractTextFromFileUseCase;
-    private final ValidateChapterAccessUseCase validateChapterAccessUseCase;
+    private final GetChapterForEdit getChapterForEdit;
+    private final UpdateChapter updateChapter;
+    private final ExtractTextFromFile extractTextFromFile;
+    private final ValidateChapterAccess validateChapterAccess;
 
     public EditChapterController(
-            GetChapterForEditUseCase getChapterForEditUseCase,
-            UpdateChapterUseCase updateChapterUseCase,
-            ExtractTextFromFileUseCase extractTextFromFileUseCase,
-            ValidateChapterAccessUseCase validateChapterAccessUseCase) {
-        this.getChapterForEditUseCase = getChapterForEditUseCase;
-        this.updateChapterUseCase = updateChapterUseCase;
-        this.extractTextFromFileUseCase = extractTextFromFileUseCase;
-        this.validateChapterAccessUseCase = validateChapterAccessUseCase;
+            GetChapterForEdit getChapterForEdit,
+            UpdateChapter updateChapter,
+            ExtractTextFromFile extractTextFromFile,
+            ValidateChapterAccess validateChapterAccess) {
+        this.getChapterForEdit = getChapterForEdit;
+        this.updateChapter = updateChapter;
+        this.extractTextFromFile = extractTextFromFile;
+        this.validateChapterAccess = validateChapterAccess;
     }
 
     @GetMapping("/{chapterId}")
@@ -53,8 +53,8 @@ public class EditChapterController {
             return ResponseEntity.status(HttpStatus.FORBIDDEN).build();
         }
 
-        ValidateChapterAccessUseCase.ChapterAccessResult accessResult =
-                validateChapterAccessUseCase.validateAccess(chapterId, userId);
+        ValidateChapterAccess.ChapterAccessResult accessResult =
+                validateChapterAccess.validateAccess(chapterId, userId);
 
         if (!accessResult.isChapterFound()) {
             return ResponseEntity.notFound().build();
@@ -64,7 +64,7 @@ public class EditChapterController {
             return ResponseEntity.status(HttpStatus.FORBIDDEN).build();
         }
 
-        return getChapterForEditUseCase.execute(chapterId, language)
+        return getChapterForEdit.execute(chapterId, language)
                 .map(ResponseEntity::ok)
                 .orElseGet(() -> ResponseEntity.notFound().build());
     }
@@ -80,8 +80,8 @@ public class EditChapterController {
             return ResponseEntity.status(HttpStatus.FORBIDDEN).build();
         }
 
-        ValidateChapterAccessUseCase.ChapterAccessResult accessResult =
-                validateChapterAccessUseCase.validateAccess(chapterId, userId);
+        ValidateChapterAccess.ChapterAccessResult accessResult =
+                validateChapterAccess.validateAccess(chapterId, userId);
 
         if (!accessResult.isChapterFound()) {
             return ResponseEntity.notFound().build();
@@ -91,7 +91,7 @@ public class EditChapterController {
             return ResponseEntity.status(HttpStatus.FORBIDDEN).build();
         }
 
-        boolean updated = updateChapterUseCase.execute(chapterId, updateRequest);
+        boolean updated = updateChapter.execute(chapterId, updateRequest);
         return updated ? ResponseEntity.ok("Capítulo actualizado") : ResponseEntity.notFound().build();
     }
 
@@ -106,8 +106,8 @@ public class EditChapterController {
             throw new SecurityException("Usuario no autenticado");
         }
 
-        ValidateChapterAccessUseCase.ChapterAccessResult accessResult =
-                validateChapterAccessUseCase.validateAccess(chapterId, userId);
+        ValidateChapterAccess.ChapterAccessResult accessResult =
+                validateChapterAccess.validateAccess(chapterId, userId);
 
         if (!accessResult.isChapterFound()) {
             throw new java.util.NoSuchElementException("Capítulo no encontrado");
@@ -124,7 +124,7 @@ public class EditChapterController {
         UpdateChapterRequest update = new UpdateChapterRequest();
         update.setPrice(request.price());
 
-        boolean updated = updateChapterUseCase.execute(chapterId, update);
+        boolean updated = updateChapter.execute(chapterId, update);
         if (!updated) {
             throw new java.util.NoSuchElementException("Capítulo no encontrado");
         }
@@ -139,7 +139,7 @@ public class EditChapterController {
         }
 
         try {
-            String text = extractTextFromFileUseCase.execute(file.getBytes(), file.getOriginalFilename());
+            String text = extractTextFromFile.execute(file.getBytes(), file.getOriginalFilename());
             return ResponseEntity.ok(new FileTextResponseDto(text));
         } catch (IllegalArgumentException e) {
             return handleFileExtractionError(e);
