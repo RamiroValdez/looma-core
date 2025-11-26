@@ -1,6 +1,6 @@
 package com.amool.application.usecase;
 
-import com.amool.application.port.out.AwsS3Port;
+import com.amool.application.port.out.FilesStoragePort;
 import com.amool.application.usecases.ObtainObjectsInPath;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -16,7 +16,7 @@ import static org.mockito.Mockito.when;
 
 public class ObtainObjectsInPathTest {
 
-    private AwsS3Port awsS3Port;
+    private FilesStoragePort filesStoragePort;
     private ObtainObjectsInPath useCase;
     
     private static final String TEST_PATH = "test/path/";
@@ -26,8 +26,8 @@ public class ObtainObjectsInPathTest {
 
     @BeforeEach
     public void setUp() {
-        awsS3Port = Mockito.mock(AwsS3Port.class);
-        useCase = new ObtainObjectsInPath(awsS3Port);
+        filesStoragePort = Mockito.mock(FilesStoragePort.class);
+        useCase = new ObtainObjectsInPath(filesStoragePort);
     }
 
     @Test
@@ -62,12 +62,12 @@ public class ObtainObjectsInPathTest {
 
     private List<S3Object> givenObjectsInPath(String path, S3Object... objects) {
         List<S3Object> objectList = Arrays.asList(objects);
-        when(awsS3Port.obtainObjectsInPath(path)).thenReturn(objectList);
+        when(filesStoragePort.obtainObjectsInPath(path)).thenReturn(objectList);
         return objectList;
     }
 
     private void givenEmptyPath(String path) {
-        when(awsS3Port.obtainObjectsInPath(path)).thenReturn(Collections.emptyList());
+        when(filesStoragePort.obtainObjectsInPath(path)).thenReturn(Collections.emptyList());
     }
 
     private List<S3Object> whenObtainingObjects(String path) {

@@ -7,7 +7,7 @@ import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.*;
 
-import com.amool.application.port.out.AwsS3Port;
+import com.amool.application.port.out.FilesStoragePort;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
@@ -28,13 +28,13 @@ public class ObtainWorkListTest {
 
     private ObtainWorkList obtainWorkList;
     private WorkPort workPort;
-    private AwsS3Port awsS3Port;
+    private FilesStoragePort filesStoragePort;
     
     @BeforeEach
     public void setUp() {
         workPort = Mockito.mock(WorkPort.class);
-        awsS3Port = Mockito.mock(AwsS3Port.class);
-        obtainWorkList = new ObtainWorkList(workPort, awsS3Port);
+        filesStoragePort = Mockito.mock(FilesStoragePort.class);
+        obtainWorkList = new ObtainWorkList(workPort, filesStoragePort);
     }
 
     @Test

@@ -1,6 +1,6 @@
 package com.amool.application.usecases;
 
-import com.amool.application.port.out.AwsS3Port;
+import com.amool.application.port.out.FilesStoragePort;
 import com.amool.application.port.out.ObtainWorkByIdPort;
 import com.amool.domain.model.Category;
 import com.amool.domain.model.Work;
@@ -11,11 +11,11 @@ import java.util.List;
 public class GetAuthenticatedUserWorks {
 
     private final ObtainWorkByIdPort obtainWorkByIdPort;
-    private final AwsS3Port awsS3Port;
+    private final FilesStoragePort filesStoragePort;
 
-    public GetAuthenticatedUserWorks(ObtainWorkByIdPort obtainWorkByIdPort, AwsS3Port awsS3Port) {
+    public GetAuthenticatedUserWorks(ObtainWorkByIdPort obtainWorkByIdPort, FilesStoragePort filesStoragePort) {
         this.obtainWorkByIdPort = obtainWorkByIdPort;
-        this.awsS3Port = awsS3Port;
+        this.filesStoragePort = filesStoragePort;
     }
 
     public List<Work> execute(Long authenticatedUserId) {
@@ -26,8 +26,8 @@ public class GetAuthenticatedUserWorks {
         List<Work> work = this.obtainWorkByIdPort.getWorksByUserId(authenticatedUserId);
 
         work.forEach(it -> {
-            it.setBanner(this.awsS3Port.obtainPublicUrl(it.getBanner()));
-            it.setCover(this.awsS3Port.obtainPublicUrl(it.getCover()));
+            it.setBanner(this.filesStoragePort.obtainPublicUrl(it.getBanner()));
+            it.setCover(this.filesStoragePort.obtainPublicUrl(it.getCover()));
             it.getCategories().sort(Comparator.comparing(Category::getName));
         });
 

@@ -1,6 +1,6 @@
 package com.amool.application.usecases;
 
-import com.amool.application.port.out.AwsS3Port;
+import com.amool.application.port.out.FilesStoragePort;
 import com.amool.application.port.out.SaveWorkPort;
 import com.amool.domain.model.Work;
 
@@ -10,11 +10,11 @@ import java.util.stream.Collectors;
 public class GetSavedWorks {
 
     private final SaveWorkPort saveWorkPort;
-    private final AwsS3Port awsS3Port;
+    private final FilesStoragePort filesStoragePort;
 
-    public GetSavedWorks(SaveWorkPort saveWorkPort, AwsS3Port awsS3Port) {
+    public GetSavedWorks(SaveWorkPort saveWorkPort, FilesStoragePort filesStoragePort) {
         this.saveWorkPort = saveWorkPort;
-        this.awsS3Port = awsS3Port;
+        this.filesStoragePort = filesStoragePort;
     }
 
     public List<Work> execute(Long userId) {
@@ -40,7 +40,7 @@ public class GetSavedWorks {
         Object value = field.get(work);
         if (value instanceof String) {
             String key = (String) value;
-            String publicUrl = awsS3Port.obtainPublicUrl(key);
+            String publicUrl = filesStoragePort.obtainPublicUrl(key);
             field.set(work, publicUrl);
         }
     }

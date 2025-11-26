@@ -16,7 +16,7 @@ public class PublishingSchedulerJob {
         this.publishingSchedulerService = publishingSchedulerService;
     }
 
-    @Scheduled(fixedDelay = 15000)
+    @Scheduled(fixedDelay = 15000, initialDelay = 10000)
     public void run() {
         int count = publishingSchedulerService.publishDueChapters(100);
         if (count > 0) {

@@ -1,17 +1,16 @@
 package com.amool.application.usecase;
 
-import com.amool.application.port.out.AwsS3Port;
+import com.amool.application.port.out.FilesStoragePort;
 import com.amool.application.usecases.ObtainPresignedUrl;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.mockito.ArgumentMatchers.anyString;
 
 public class ObtainPresignedUrlTest {
 
-    private AwsS3Port awsS3Port;
+    private FilesStoragePort filesStoragePort;
     private ObtainPresignedUrl useCase;
 
     private static final String VALID_FILE_NAME = "test-file.txt";
@@ -21,8 +20,8 @@ public class ObtainPresignedUrlTest {
 
     @BeforeEach
     public void setUp() {
-        awsS3Port = Mockito.mock(AwsS3Port.class);
-        useCase = new ObtainPresignedUrl(awsS3Port);
+        filesStoragePort = Mockito.mock(FilesStoragePort.class);
+        useCase = new ObtainPresignedUrl(filesStoragePort);
     }
 
     @Test
@@ -56,7 +55,7 @@ public class ObtainPresignedUrlTest {
     }
 
     private void givenPresignedUrlResponse(String fileName, String url) {
-        Mockito.when(awsS3Port.obtainFilePresignedUrl(fileName)).thenReturn(url);
+        Mockito.when(filesStoragePort.obtainFilePresignedUrl(fileName)).thenReturn(url);
     }
 
     private String whenObtainingPresignedUrl(String fileName) {
@@ -68,6 +67,6 @@ public class ObtainPresignedUrlTest {
     }
 
     private void thenPortRequestedUrlFor(String fileName) {
-        Mockito.verify(awsS3Port, Mockito.times(1)).obtainFilePresignedUrl(fileName);
+        Mockito.verify(filesStoragePort, Mockito.times(1)).obtainFilePresignedUrl(fileName);
     }
 }

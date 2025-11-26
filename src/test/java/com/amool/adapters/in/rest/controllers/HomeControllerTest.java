@@ -1,6 +1,6 @@
 package com.amool.adapters.in.rest.controllers;
 
-import com.amool.application.port.out.AwsS3Port;
+import com.amool.application.port.out.FilesStoragePort;
 import org.mockito.Mockito;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -24,12 +24,12 @@ public class HomeControllerTest {
 
     private static final Long TEST_USER_ID = 1L;
 
-    private AwsS3Port awsS3Port;
+    private FilesStoragePort filesStoragePort;
 
     @BeforeEach
     public void setUp() {
         workPort = Mockito.mock(WorkPort.class);
-        obtainWorkList = new ObtainWorkList(workPort, awsS3Port);
+        obtainWorkList = new ObtainWorkList(workPort, filesStoragePort);
         homeController = new HomeController(obtainWorkList);
     }
 

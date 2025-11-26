@@ -1,6 +1,6 @@
 package com.amool.adapters.out.awsapi;
 
-import com.amool.application.port.out.AwsS3Port;
+import com.amool.application.port.out.FilesStoragePort;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 import org.springframework.web.multipart.MultipartFile;
@@ -18,7 +18,7 @@ import java.time.Duration;
 import java.util.List;
 
 @Component
-public class AwsS3Adapter implements AwsS3Port {
+public class AwsS3Adapter implements FilesStoragePort {
 
     private final S3Client s3Client;
     private final S3Presigner s3Presigner;

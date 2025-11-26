@@ -1,6 +1,6 @@
 package com.amool.application.usecase;
 
-import com.amool.application.port.out.AwsS3Port;
+import com.amool.application.port.out.FilesStoragePort;
 import com.amool.application.port.out.ObtainWorkByIdPort;
 import com.amool.application.usecases.GetAuthenticatedUserWorks;
 import com.amool.domain.model.User;
@@ -20,7 +20,7 @@ import static org.mockito.Mockito.*;
 public class GetAuthenticatedUserWorksTest {
 
     private ObtainWorkByIdPort obtainWorkByIdPort;
-    private AwsS3Port awsS3Port;
+    private FilesStoragePort filesStoragePort;
     private GetAuthenticatedUserWorks useCase;
 
     private static final Long AUTHENTICATED_USER_ID = 1L;
@@ -28,14 +28,14 @@ public class GetAuthenticatedUserWorksTest {
     @BeforeEach
     void setUp() {
         obtainWorkByIdPort = Mockito.mock(ObtainWorkByIdPort.class);
-        awsS3Port = Mockito.mock(AwsS3Port.class);
+        filesStoragePort = Mockito.mock(FilesStoragePort.class);
         
         useCase = new GetAuthenticatedUserWorks(
             obtainWorkByIdPort,
-            awsS3Port
+                filesStoragePort
         );
 
-        when(awsS3Port.obtainPublicUrl(anyString()))
+        when(filesStoragePort.obtainPublicUrl(anyString()))
             .thenAnswer(invocation -> "https://s3.url/" + invocation.getArgument(0));
     }
 
@@ -73,11 +73,11 @@ public class GetAuthenticatedUserWorksTest {
     }
 
     private void thenS3UrlsResolved(int timesExpected) {
-        verify(awsS3Port, times(timesExpected)).obtainPublicUrl(anyString());
+        verify(filesStoragePort, times(timesExpected)).obtainPublicUrl(anyString());
     }
 
     private void thenNoS3Interactions() {
-        verify(awsS3Port, never()).obtainPublicUrl(anyString());
+        verify(filesStoragePort, never()).obtainPublicUrl(anyString());
     }
 
     private void thenNoRepositoryInteractions() {

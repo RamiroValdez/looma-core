@@ -2,7 +2,7 @@ package com.amool.application.usecases;
 
 import com.amool.application.port.out.ObtainWorkByIdPort;
 import com.amool.application.port.out.LoadChapterContentPort;
-import com.amool.application.port.out.AwsS3Port;
+import com.amool.application.port.out.FilesStoragePort;
 import com.amool.application.port.out.HttpDownloadPort;
 import com.amool.application.port.out.WorkPort;
 import com.amool.application.port.out.SubscriptionQueryPort;
@@ -31,7 +31,7 @@ public class ExportEpub {
 
     private final ObtainWorkByIdPort obtainWorkByIdPort;
     private final LoadChapterContentPort loadChapterContentPort;
-    private final AwsS3Port awsS3Port;
+    private final FilesStoragePort filesStoragePort;
     private final HttpDownloadPort httpDownloadPort;
     private final WorkPort workPort;
     private final SubscriptionQueryPort subscriptionQueryPort;
@@ -39,13 +39,13 @@ public class ExportEpub {
 
     public ExportEpub(ObtainWorkByIdPort obtainWorkByIdPort,
                       LoadChapterContentPort loadChapterContentPort,
-                      AwsS3Port awsS3Port,
+                      FilesStoragePort filesStoragePort,
                       HttpDownloadPort httpDownloadPort,
                       WorkPort workPort,
                       SubscriptionQueryPort subscriptionQueryPort) {
         this.obtainWorkByIdPort = obtainWorkByIdPort;
         this.loadChapterContentPort = loadChapterContentPort;
-        this.awsS3Port = awsS3Port;
+        this.filesStoragePort = filesStoragePort;
         this.httpDownloadPort = httpDownloadPort;
         this.workPort = workPort;
         this.subscriptionQueryPort = subscriptionQueryPort;
@@ -96,7 +96,7 @@ public class ExportEpub {
         boolean canUseCache = fullAccess && work.getHasEpub() != null && work.getHasEpub() && work.getLengthEpub() != null && work.getLengthEpub().equals(publishedChapters.size());
         if (canUseCache) {
             fileName = sanitizedTitle + ".epub";
-            return awsS3Port.obtainFilePresignedUrl(basePath + fileName);
+            return filesStoragePort.obtainFilePresignedUrl(basePath + fileName);
         }
 
         // Si acceso completo pero cache inválido generamos full; si acceso parcial generamos archivo diferenciado.
@@ -125,7 +125,7 @@ public class ExportEpub {
         // Cover
         if (work.getCover() != null) {
             try {
-                Resource cover = new Resource(downloadImage(awsS3Port.obtainPublicUrl(work.getCover())), "cover.png");
+                Resource cover = new Resource(downloadImage(filesStoragePort.obtainPublicUrl(work.getCover())), "cover.png");
                 book.setCoverImage(cover);
             } catch (Exception ignored) {}
         }
@@ -170,8 +170,8 @@ public class ExportEpub {
     private String saveAndReturnEpubURL(Book book, String fullPath) {
         try {
             byte[] bytes = epubBytes(book);
-            awsS3Port.uploadPrivateByte(fullPath, "application/epub+zip", bytes);
-            return awsS3Port.obtainFilePresignedUrl(fullPath);
+            filesStoragePort.uploadPrivateByte(fullPath, "application/epub+zip", bytes);
+            return filesStoragePort.obtainFilePresignedUrl(fullPath);
         } catch (IOException e) {
             throw new RuntimeException("Error saving epub", e);
         }

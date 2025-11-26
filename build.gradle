@@ -59,6 +59,8 @@ dependencies {
     testImplementation 'de.flapdoodle.embed:de.flapdoodle.embed.mongo:4.12.2'
     implementation 'io.documentnode:epub4j-core:4.2.1'
     implementation 'com.vladsch.flexmark:flexmark-all:0.64.8'
+    implementation 'org.flywaydb:flyway-core:11.17.2'
+    implementation 'org.flywaydb:flyway-database-postgresql:11.17.2'
     compileOnly 'org.projectlombok:lombok'
     annotationProcessor 'org.projectlombok:lombok'
 }

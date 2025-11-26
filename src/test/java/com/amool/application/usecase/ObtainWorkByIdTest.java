@@ -1,6 +1,6 @@
 package com.amool.application.usecase;
 
-import com.amool.application.port.out.AwsS3Port;
+import com.amool.application.port.out.FilesStoragePort;
 import com.amool.application.port.out.LikePort;
 import com.amool.application.port.out.ObtainWorkByIdPort;
 import com.amool.application.usecases.ObtainWorkById;
@@ -39,7 +39,7 @@ public class ObtainWorkByIdTest {
     private ObtainWorkByIdPort obtainWorkByIdPort;
     
     @Mock
-    private AwsS3Port awsS3Port;
+    private FilesStoragePort filesStoragePort;
 
     @Mock
     LikePort likePort;
@@ -60,8 +60,8 @@ public class ObtainWorkByIdTest {
         });
         
         obtainWorkById = new ObtainWorkById(
-                obtainWorkByIdPort, 
-                awsS3Port,
+                obtainWorkByIdPort,
+                filesStoragePort,
                 likePort);
     }
     
@@ -100,7 +100,7 @@ public class ObtainWorkByIdTest {
     }
 
     private void givenPublicUrl(String assetKey, String url) {
-        when(awsS3Port.obtainPublicUrl(assetKey)).thenReturn(url);
+        when(filesStoragePort.obtainPublicUrl(assetKey)).thenReturn(url);
     }
 
     private void givenWorkDoesNotExist(Long workId) {
@@ -133,7 +133,7 @@ public class ObtainWorkByIdTest {
     private void thenWorkDependenciesVerified(Long workId, String... assetKeys) {
         verify(obtainWorkByIdPort).obtainWorkById(workId);
         for (String assetKey : assetKeys) {
-            verify(awsS3Port).obtainPublicUrl(assetKey);
+            verify(filesStoragePort).obtainPublicUrl(assetKey);
         }
     }
 
@@ -143,7 +143,7 @@ public class ObtainWorkByIdTest {
     }
 
     private void thenNoAssetLookupOccurs() {
-        verifyNoInteractions(awsS3Port);
+        verifyNoInteractions(filesStoragePort);
     }
 
     private Work buildWork(Long workId, String bannerKey, String coverKey, String... categoryNames) {

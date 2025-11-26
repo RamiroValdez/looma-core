@@ -1,11 +1,3 @@
--- =============================================================================
--- Script de inicialización de datos para Looma Core
--- Base de datos: PostgreSQL
--- Este script está escrito de forma idempotente: si ya existen los registros
--- no se volverán a insertar en ejecuciones posteriores.
--- =============================================================================
-CREATE EXTENSION IF NOT EXISTS pgcrypto;
--- -----------------------------------------------------------------------------
 -- CATEGORÍAS LITERARIAS (idempotente)
 -- -----------------------------------------------------------------------------
 INSERT INTO category (name)
@@ -91,16 +83,5 @@ SELECT 'ca', 'Catalán'    WHERE NOT EXISTS (SELECT 1 FROM language WHERE code =
 INSERT INTO language (code, name)
 SELECT 'gl', 'Gallego'    WHERE NOT EXISTS (SELECT 1 FROM language WHERE code = 'gl');
 
--- -----------------------------------------------------------------------------
--- USUARIO DE PRUEBA (idempotente)
--- Se asume que username y/o email son únicos; se evita duplicar por username.
--- La tabla se llama "user" (entre comillas) tal como se usó en el proyecto.
--- -----------------------------------------------------------------------------
-INSERT INTO "user" (name, surname, username, email, password, photo, money, enabled, verification_code, verification_expires_at)
-SELECT 'Juan', 'Pérez', 'jperez', 'juanperez@gmail.com', crypt('Password1234', gen_salt('bf')), 'none', 100.00, true, '123456', '2025-12-31 23:59:59'
-WHERE NOT EXISTS (SELECT 1 FROM "user" WHERE username = 'jperez' OR email = 'juanperez@gmail.com');
-
--- -----------------------------------------------------------------------------
--- FIN DEL SCRIPT
 -- -----------------------------------------------------------------------------
 

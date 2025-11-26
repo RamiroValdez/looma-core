@@ -1,17 +1,17 @@
 package com.amool.application.usecases;
 
-import com.amool.application.port.out.AwsS3Port;
+import com.amool.application.port.out.FilesStoragePort;
 
 public class ObtainPresignedUrl {
 
-    private final AwsS3Port awsS3Port;
+    private final FilesStoragePort filesStoragePort;
 
-    public ObtainPresignedUrl(AwsS3Port awsS3Port) {
-        this.awsS3Port = awsS3Port;
+    public ObtainPresignedUrl(FilesStoragePort filesStoragePort) {
+        this.filesStoragePort = filesStoragePort;
     }
 
     public String execute(String fileName) {
-        return this.awsS3Port.obtainFilePresignedUrl(fileName);
+        return this.filesStoragePort.obtainFilePresignedUrl(fileName);
     }
 
 }

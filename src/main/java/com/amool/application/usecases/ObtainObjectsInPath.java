@@ -1,20 +1,20 @@
 package com.amool.application.usecases;
 
-import com.amool.application.port.out.AwsS3Port;
+import com.amool.application.port.out.FilesStoragePort;
 import software.amazon.awssdk.services.s3.model.S3Object;
 
 import java.util.List;
 
 public class ObtainObjectsInPath {
 
-    private final AwsS3Port awsS3Port;
+    private final FilesStoragePort filesStoragePort;
 
-    public ObtainObjectsInPath(AwsS3Port awsS3Port) {
-        this.awsS3Port = awsS3Port;
+    public ObtainObjectsInPath(FilesStoragePort filesStoragePort) {
+        this.filesStoragePort = filesStoragePort;
     }
 
     public List<S3Object> execute(String path) {
-        return this.awsS3Port.obtainObjectsInPath(path);
+        return this.filesStoragePort.obtainObjectsInPath(path);
     }
 
 }

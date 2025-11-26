@@ -2,7 +2,7 @@ package com.amool.application.usecases;
 
 import com.amool.application.port.out.ObtainWorkByIdPort;
 import com.amool.application.port.out.LoadChapterContentPort;
-import com.amool.application.port.out.AwsS3Port;
+import com.amool.application.port.out.FilesStoragePort;
 import com.amool.application.port.out.HttpDownloadPort;
 import com.amool.application.port.out.WorkPort;
 import com.amool.application.port.out.SubscriptionQueryPort;
@@ -31,7 +31,7 @@ import java.util.stream.Collectors;
 public class ExportPdf {
     private final ObtainWorkByIdPort obtainWorkByIdPort;
     private final LoadChapterContentPort loadChapterContentPort;
-    private final AwsS3Port awsS3Port;
+    private final FilesStoragePort filesStoragePort;
     private final HttpDownloadPort httpDownloadPort;
     private final WorkPort workPort;
     private final SubscriptionQueryPort subscriptionQueryPort;
@@ -39,13 +39,13 @@ public class ExportPdf {
 
     public ExportPdf(ObtainWorkByIdPort obtainWorkByIdPort,
                      LoadChapterContentPort loadChapterContentPort,
-                     AwsS3Port awsS3Port,
+                     FilesStoragePort filesStoragePort,
                      HttpDownloadPort httpDownloadPort,
                      WorkPort workPort,
                      SubscriptionQueryPort subscriptionQueryPort) {
         this.obtainWorkByIdPort = obtainWorkByIdPort;
         this.loadChapterContentPort = loadChapterContentPort;
-        this.awsS3Port = awsS3Port;
+        this.filesStoragePort = filesStoragePort;
         this.httpDownloadPort = httpDownloadPort;
         this.workPort = workPort;
         this.subscriptionQueryPort = subscriptionQueryPort;
@@ -90,7 +90,7 @@ public class ExportPdf {
         boolean canUseCache = fullAccess && work.getHasPdf() != null && work.getHasPdf() && work.getLengthPdf() != null && work.getLengthPdf().equals(publishedChapters.size());
         if (canUseCache) {
             filename = sanitizeFileName(work.getTitle()) + ".pdf";
-            return awsS3Port.obtainFilePresignedUrl(pathBase + "/" + filename);
+            return filesStoragePort.obtainFilePresignedUrl(pathBase + "/" + filename);
         }
 
         boolean generatingFull = fullAccess; // Si tiene acceso completo generamos versión completa
@@ -111,7 +111,7 @@ public class ExportPdf {
 
         try {
             byte[] bytes = pdfBytes(work, chaptersToInclude, parsed);
-            awsS3Port.uploadPrivateByte(s3Path, "application/pdf", bytes);
+            filesStoragePort.uploadPrivateByte(s3Path, "application/pdf", bytes);
 
             if (generatingFull) {
                 work.setHasPdf(true);
@@ -119,7 +119,7 @@ public class ExportPdf {
                 workPort.updateWork(work);
             }
 
-            return awsS3Port.obtainFilePresignedUrl(s3Path);
+            return filesStoragePort.obtainFilePresignedUrl(s3Path);
         } catch (Exception e) {
             throw new RuntimeException("Error generating PDF", e);
         }
@@ -162,7 +162,7 @@ public class ExportPdf {
 
     if (work.getCover() != null && !work.getCover().isEmpty()) {
         try {
-            byte[] img = downloadImage(awsS3Port.obtainPublicUrl(work.getCover()));
+            byte[] img = downloadImage(filesStoragePort.obtainPublicUrl(work.getCover()));
             if (img != null && img.length > 0) {
                 String mime = detectImageMime(img);
                 String b64 = Base64.getEncoder().encodeToString(img);

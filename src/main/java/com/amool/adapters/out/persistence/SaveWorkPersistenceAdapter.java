@@ -22,15 +22,9 @@ import java.util.Optional;
 @Transactional
 public class SaveWorkPersistenceAdapter implements SaveWorkPort {
 
-    private final UserPersistenceAdapter userPersistenceAdapter;
-    private final WorksPersistenceAdapter worksPersistenceAdapter;
     private final EntityManager entityManager;
 
-    public SaveWorkPersistenceAdapter(UserPersistenceAdapter userPersistenceAdapter, 
-                                    WorksPersistenceAdapter worksPersistenceAdapter,
-                                    EntityManager entityManager) {
-        this.userPersistenceAdapter = userPersistenceAdapter;
-        this.worksPersistenceAdapter = worksPersistenceAdapter;
+    public SaveWorkPersistenceAdapter(EntityManager entityManager) {
         this.entityManager = entityManager;
     }
 

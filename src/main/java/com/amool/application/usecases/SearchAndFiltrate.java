@@ -1,6 +1,6 @@
 package com.amool.application.usecases;
 
-import com.amool.application.port.out.AwsS3Port;
+import com.amool.application.port.out.FilesStoragePort;
 import com.amool.application.port.out.WorkPort;
 import com.amool.domain.model.Work;
 import com.amool.domain.model.WorkSearchFilter;
@@ -15,11 +15,11 @@ import java.util.stream.Collectors;
 public class SearchAndFiltrate {
 
     private final WorkPort workPort;
-    private final AwsS3Port awsS3Port;
+    private final FilesStoragePort filesStoragePort;
 
-    public SearchAndFiltrate(WorkPort workPort, AwsS3Port awsS3Port) {
+    public SearchAndFiltrate(WorkPort workPort, FilesStoragePort filesStoragePort) {
         this.workPort = workPort;
-        this.awsS3Port = awsS3Port;
+        this.filesStoragePort = filesStoragePort;
     }
 
   public Page<Work> execute(WorkSearchFilter filter, Pageable pageable) {
@@ -48,7 +48,7 @@ public class SearchAndFiltrate {
       Object value = field.get(work);
       if (value instanceof String) {
           String key = (String) value;
-          String publicUrl = awsS3Port.obtainPublicUrl(key);
+          String publicUrl = filesStoragePort.obtainPublicUrl(key);
           field.set(work, publicUrl);
       }
   }

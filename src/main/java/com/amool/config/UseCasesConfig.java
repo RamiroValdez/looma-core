@@ -11,7 +11,7 @@ import org.springframework.web.client.RestTemplate;
 @Configuration
 public class UseCasesConfig {
 
-    private final AwsS3Port awsS3Port;
+    private final FilesStoragePort filesStoragePort;
     private final AuthenticateUserPort authPort;
     private final CategoryPort categoryPort;
     private final FormatPort formatPort;
@@ -56,7 +56,7 @@ public class UseCasesConfig {
     private final ChatAIPort chatAIPort;
 
     public UseCasesConfig(
-            AwsS3Port awsS3Port,
+            FilesStoragePort filesStoragePort,
             AuthenticateUserPort authPort,
             CategoryPort categoryPort,
             FormatPort formatPort,
@@ -101,7 +101,7 @@ public class UseCasesConfig {
             PaymentSessionLinkPort paymentSessionLinkPort,
             UserPreferencesPort userPreferencesPort
             ) {
-        this.awsS3Port = awsS3Port;
+        this.filesStoragePort = filesStoragePort;
         this.authPort = authPort;
         this.categoryPort = categoryPort;
         this.formatPort = formatPort;
@@ -148,12 +148,12 @@ public class UseCasesConfig {
 
     @Bean
     public ObtainObjectsInPath obtainObjectsInPathUseCase() {
-        return new ObtainObjectsInPath(awsS3Port);
+        return new ObtainObjectsInPath(filesStoragePort);
     }
 
     @Bean
     public ObtainPresignedUrl obtainPresignedUrlUseCase() {
-        return new ObtainPresignedUrl(awsS3Port);
+        return new ObtainPresignedUrl(filesStoragePort);
     }
 
     @Bean
@@ -269,14 +269,14 @@ public class UseCasesConfig {
 
     @Bean
     public GetUserById getUserByIdUseCase() {
-        return new GetUserById(loadUserPort, awsS3Port);
+        return new GetUserById(loadUserPort, filesStoragePort);
     }
 
     @Bean
     public ObtainWorkById obtainWorkByIdUseCase() {
         return new ObtainWorkById(
                 obtainWorkByIdPort,
-                awsS3Port,
+                filesStoragePort,
                 likePort);
     }
 
@@ -289,7 +289,7 @@ public class UseCasesConfig {
     public GetAuthenticatedUserWorks getAuthenticatedUserWorksUseCase() {
         return new GetAuthenticatedUserWorks(
                 obtainWorkByIdPort,
-                awsS3Port);
+                filesStoragePort);
     }
 
     @Bean
@@ -323,7 +323,7 @@ public class UseCasesConfig {
 
     @Bean
     public SearchAndFiltrate searchAndFiltrateUseCase() {
-        return new SearchAndFiltrate(workPort, awsS3Port);
+        return new SearchAndFiltrate(workPort, filesStoragePort);
     }
 
     @Bean
@@ -333,7 +333,7 @@ public class UseCasesConfig {
 
      @Bean
     public GetSavedWorks getSavedWorksUseCase() {
-    return new GetSavedWorks(saveWorkPort, awsS3Port);
+    return new GetSavedWorks(saveWorkPort, filesStoragePort);
 }
 
     @Bean
@@ -419,7 +419,7 @@ public class UseCasesConfig {
 
     @Bean
     public ObtainWorkList obtainWorkListUseCase() {
-        return new ObtainWorkList(workPort, awsS3Port);
+        return new ObtainWorkList(workPort, filesStoragePort);
     }
 
     @Bean
@@ -513,7 +513,7 @@ public class UseCasesConfig {
         return new ExportEpub(
                 obtainWorkByIdPort,
                 loadChapterContentPort,
-                awsS3Port,
+                filesStoragePort,
                 httpDownloadPort,
                 workPort,
                 subscriptionQueryPort
@@ -526,7 +526,7 @@ public class UseCasesConfig {
         return new ExportPdf(
                 obtainWorkByIdPort,
                 loadChapterContentPort,
-                awsS3Port,
+                filesStoragePort,
                 httpDownloadPort,
                 workPort,
                 subscriptionQueryPort
@@ -574,7 +574,7 @@ public class UseCasesConfig {
 
     @Bean
     public GetUserPhoto getUserPhoto() {
-        return new GetUserPhoto(awsS3Port, loadUserPort);
+        return new GetUserPhoto(filesStoragePort, loadUserPort);
     }
 
     @Bean
@@ -589,6 +589,6 @@ public class UseCasesConfig {
 
     @Bean
     public GetSubscriptions getSubscriptions() {
-        return new GetSubscriptions(subscriptionPersistencePort, awsS3Port);
+        return new GetSubscriptions(subscriptionPersistencePort, filesStoragePort);
     }
 }

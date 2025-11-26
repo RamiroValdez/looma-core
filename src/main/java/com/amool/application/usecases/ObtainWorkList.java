@@ -4,7 +4,7 @@ import java.time.LocalDateTime;
 import java.util.*;
 import java.util.stream.Collectors;
 
-import com.amool.application.port.out.AwsS3Port;
+import com.amool.application.port.out.FilesStoragePort;
 import com.amool.application.port.out.WorkPort;
 import com.amool.domain.model.Chapter;
 import com.amool.domain.model.Work;
@@ -12,11 +12,11 @@ import com.amool.domain.model.Work;
 public class ObtainWorkList {
 
     private final WorkPort workPort;
-    private final AwsS3Port awsS3Port;
+    private final FilesStoragePort filesStoragePort;
 
-    public ObtainWorkList(WorkPort workPort, AwsS3Port awsS3Port) {
+    public ObtainWorkList(WorkPort workPort, FilesStoragePort filesStoragePort) {
         this.workPort = workPort;
-        this.awsS3Port = awsS3Port;
+        this.filesStoragePort = filesStoragePort;
     }
 
     public Map<String, List<Work>> execute(Long userId) {
@@ -57,7 +57,7 @@ public class ObtainWorkList {
         Object value = field.get(work);
         if (value instanceof String) {
             String key = (String) value;
-            String publicUrl = awsS3Port.obtainPublicUrl(key);
+            String publicUrl = filesStoragePort.obtainPublicUrl(key);
             field.set(work, publicUrl);
         }
     }
