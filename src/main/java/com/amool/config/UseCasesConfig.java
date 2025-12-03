@@ -47,7 +47,7 @@ public class UseCasesConfig {
     private final NotificationPort notificationPort;
     private final ObtainChapterByIdPort obtainChapterByIdPort;
     private final UserPreferencesPort userPreferencesPort;
-    private final HttpDownloadPort httpDownloadPort;
+    private final DownloadPort downloadPort;
     private final AnalyticsPort analyticsPort;
     private final UserAccountPort userAccountPort;
     private final EmailPort emailPort;
@@ -91,7 +91,7 @@ public class UseCasesConfig {
             ReadingProgressPort readingProgressPort,
             AnalyticsPort analyticsPort,
             NotificationPort notificationPort,
-            HttpDownloadPort httpDownloadPort,
+            DownloadPort downloadPort,
             ObtainChapterByIdPort obtainChapterByIdPort,
             PasswordEncoder passwordEncoder,
             ChatConversationPort chatConversationPort,
@@ -136,7 +136,7 @@ public class UseCasesConfig {
         this.readingProgressPort = readingProgressPort;
         this.notificationPort = notificationPort;
         this.obtainChapterByIdPort = obtainChapterByIdPort;
-        this.httpDownloadPort = httpDownloadPort;
+        this.downloadPort = downloadPort;
         this.analyticsPort = analyticsPort;
         this.chatConversationPort = chatConversationPort;
         this.chatAIPort = chatAIPort;
@@ -514,7 +514,7 @@ public class UseCasesConfig {
                 obtainWorkByIdPort,
                 loadChapterContentPort,
                 filesStoragePort,
-                httpDownloadPort,
+                downloadPort,
                 workPort,
                 subscriptionQueryPort
         );
@@ -527,7 +527,7 @@ public class UseCasesConfig {
                 obtainWorkByIdPort,
                 loadChapterContentPort,
                 filesStoragePort,
-                httpDownloadPort,
+                downloadPort,
                 workPort,
                 subscriptionQueryPort
         );

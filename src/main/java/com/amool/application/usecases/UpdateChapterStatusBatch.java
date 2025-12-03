@@ -1,4 +1,4 @@
-package com.amool.application.service;
+package com.amool.application.usecases;
 
 import com.amool.application.port.out.FindChaptersDueForPublicationPort;
 import com.amool.application.port.out.UpdateChapterStatusPort;
@@ -6,13 +6,13 @@ import com.amool.application.port.out.UpdateChapterStatusPort;
 import java.time.Instant;
 import java.time.LocalDateTime;
 
-public class PublishingSchedulerService {
+public class UpdateChapterStatusBatch {
 
     private final FindChaptersDueForPublicationPort findChaptersDueForPublicationPort;
     private final UpdateChapterStatusPort updateChapterStatusPort;
 
-    public PublishingSchedulerService(FindChaptersDueForPublicationPort findChaptersDueForPublicationPort,
-                                      UpdateChapterStatusPort updateChapterStatusPort) {
+    public UpdateChapterStatusBatch(FindChaptersDueForPublicationPort findChaptersDueForPublicationPort,
+                                    UpdateChapterStatusPort updateChapterStatusPort) {
         this.findChaptersDueForPublicationPort = findChaptersDueForPublicationPort;
         this.updateChapterStatusPort = updateChapterStatusPort;
     }

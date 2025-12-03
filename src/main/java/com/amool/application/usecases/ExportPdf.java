@@ -3,7 +3,7 @@ package com.amool.application.usecases;
 import com.amool.application.port.out.ObtainWorkByIdPort;
 import com.amool.application.port.out.LoadChapterContentPort;
 import com.amool.application.port.out.FilesStoragePort;
-import com.amool.application.port.out.HttpDownloadPort;
+import com.amool.application.port.out.DownloadPort;
 import com.amool.application.port.out.WorkPort;
 import com.amool.application.port.out.SubscriptionQueryPort;
 import com.amool.domain.model.Work;
@@ -32,7 +32,7 @@ public class ExportPdf {
     private final ObtainWorkByIdPort obtainWorkByIdPort;
     private final LoadChapterContentPort loadChapterContentPort;
     private final FilesStoragePort filesStoragePort;
-    private final HttpDownloadPort httpDownloadPort;
+    private final DownloadPort downloadPort;
     private final WorkPort workPort;
     private final SubscriptionQueryPort subscriptionQueryPort;
     private static final String PDFPATH = "works/{workId}/pdf";
@@ -40,13 +40,13 @@ public class ExportPdf {
     public ExportPdf(ObtainWorkByIdPort obtainWorkByIdPort,
                      LoadChapterContentPort loadChapterContentPort,
                      FilesStoragePort filesStoragePort,
-                     HttpDownloadPort httpDownloadPort,
+                     DownloadPort downloadPort,
                      WorkPort workPort,
                      SubscriptionQueryPort subscriptionQueryPort) {
         this.obtainWorkByIdPort = obtainWorkByIdPort;
         this.loadChapterContentPort = loadChapterContentPort;
         this.filesStoragePort = filesStoragePort;
-        this.httpDownloadPort = httpDownloadPort;
+        this.downloadPort = downloadPort;
         this.workPort = workPort;
         this.subscriptionQueryPort = subscriptionQueryPort;
     }
@@ -211,7 +211,7 @@ public class ExportPdf {
 
     private byte[] downloadImage(String url) {
         try {
-            return httpDownloadPort.downloadImage(url);
+            return downloadPort.downloadImage(url);
         } catch (Exception e) {
             return new byte[0];
         }

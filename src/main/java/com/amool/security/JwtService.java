@@ -17,7 +17,7 @@ import org.springframework.stereotype.Service;
 @Service
 public class JwtService {
 
-    private static final long EXP_SECONDS = 3600;
+    private static final long EXP_SECONDS = 14400;
 
     @Value("${JWT_SECRET:}")
     private String secretBase64;

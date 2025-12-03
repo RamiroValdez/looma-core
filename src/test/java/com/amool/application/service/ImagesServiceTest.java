@@ -1,7 +1,7 @@
 package com.amool.application.service;
 
 import com.amool.application.port.out.FilesStoragePort;
-import com.amool.application.port.out.HttpDownloadPort;
+import com.amool.application.port.out.DownloadPort;
 import com.amool.domain.model.InMemoryMultipartFile;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
@@ -28,13 +28,13 @@ class ImagesServiceTest {
     FilesStoragePort filesStoragePort;
 
     @Mock
-    HttpDownloadPort httpDownloadPort;
+    DownloadPort downloadPort;
 
     ImagesService imagesService;
 
     @BeforeEach
     void setUp() throws Exception {
-        imagesService = new ImagesService(filesStoragePort, httpDownloadPort);
+        imagesService = new ImagesService(filesStoragePort, downloadPort);
     }
 
     @Nested
@@ -132,11 +132,11 @@ class ImagesServiceTest {
             String url = "https://example.com/x.png";
             String workId = "w-2";
             byte[] bytes = new byte[]{9, 8, 7};
-            when(httpDownloadPort.downloadImage(url)).thenReturn(bytes);
+            when(downloadPort.downloadImage(url)).thenReturn(bytes);
 
             String ruta = imagesService.downloadAndUploadCoverImage(url, workId);
 
-            verify(httpDownloadPort, times(1)).downloadImage(url);
+            verify(downloadPort, times(1)).downloadImage(url);
 
             verificarRutaGeneradaYSubida(ruta, "works/" + workId + "/cover/", "png");
 

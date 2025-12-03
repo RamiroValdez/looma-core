@@ -1,6 +1,6 @@
 package com.amool.adapters.out.dowloadImages;
 
-import com.amool.application.port.out.HttpDownloadPort;
+import com.amool.application.port.out.DownloadPort;
 import org.springframework.stereotype.Component;
 
 import java.io.IOException;
@@ -10,11 +10,11 @@ import java.net.http.HttpRequest;
 import java.net.http.HttpResponse;
 
 @Component
-public class HttpDownloadAdapter implements HttpDownloadPort {
+public class DownloadAdapter implements DownloadPort {
 
     private final HttpClient httpClient;
 
-    public HttpDownloadAdapter() {
+    public DownloadAdapter() {
         this.httpClient = HttpClient.newHttpClient();
     }
 

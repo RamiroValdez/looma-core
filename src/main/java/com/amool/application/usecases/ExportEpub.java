@@ -3,7 +3,7 @@ package com.amool.application.usecases;
 import com.amool.application.port.out.ObtainWorkByIdPort;
 import com.amool.application.port.out.LoadChapterContentPort;
 import com.amool.application.port.out.FilesStoragePort;
-import com.amool.application.port.out.HttpDownloadPort;
+import com.amool.application.port.out.DownloadPort;
 import com.amool.application.port.out.WorkPort;
 import com.amool.application.port.out.SubscriptionQueryPort;
 import com.amool.domain.model.Work;
@@ -26,13 +26,14 @@ import io.documentnode.epub4j.domain.Book;
 import io.documentnode.epub4j.domain.Resource;
 import io.documentnode.epub4j.epub.EpubWriter;
 import io.documentnode.epub4j.domain.Author;
+import org.jetbrains.annotations.NotNull;
 
 public class ExportEpub {
 
     private final ObtainWorkByIdPort obtainWorkByIdPort;
     private final LoadChapterContentPort loadChapterContentPort;
     private final FilesStoragePort filesStoragePort;
-    private final HttpDownloadPort httpDownloadPort;
+    private final DownloadPort downloadPort;
     private final WorkPort workPort;
     private final SubscriptionQueryPort subscriptionQueryPort;
     private static final String EPUBPATH = "works/{workId}/epub";
@@ -40,36 +41,25 @@ public class ExportEpub {
     public ExportEpub(ObtainWorkByIdPort obtainWorkByIdPort,
                       LoadChapterContentPort loadChapterContentPort,
                       FilesStoragePort filesStoragePort,
-                      HttpDownloadPort httpDownloadPort,
+                      DownloadPort downloadPort,
                       WorkPort workPort,
                       SubscriptionQueryPort subscriptionQueryPort) {
         this.obtainWorkByIdPort = obtainWorkByIdPort;
         this.loadChapterContentPort = loadChapterContentPort;
         this.filesStoragePort = filesStoragePort;
-        this.httpDownloadPort = httpDownloadPort;
+        this.downloadPort = downloadPort;
         this.workPort = workPort;
         this.subscriptionQueryPort = subscriptionQueryPort;
     }
 
     // Se agrega userId para validar acceso.
     public String execute(Long workId, Long userId) {
-        Optional<Work> workOpt = obtainWorkByIdPort.obtainWorkById(workId);
-        if (workOpt.isEmpty()) {
-            throw new RuntimeException("Work not found");
-        }
-        Work work = workOpt.get();
 
-        // Filtrar capítulos publicados.
-        List<Chapter> publishedChapters = work.getChapters().stream()
-                .filter(ch -> ch.getPublicationStatus() != null && ch.getPublicationStatus().equals("PUBLISHED"))
-                .collect(Collectors.toList());
+        Work work = getWork(workId);
 
-        Long authorId = work.getCreator() != null ? work.getCreator().getId() : null;
-        boolean isOwner = authorId != null && authorId.equals(userId);
-        boolean subscribedToAuthor = authorId != null && subscriptionQueryPort.isSubscribedToAuthor(userId, authorId);
-        boolean subscribedToWork = subscriptionQueryPort.isSubscribedToWork(userId, workId);
+        List<Chapter> publishedChapters = filterPublished(work);
 
-        boolean fullAccess = isOwner || subscribedToAuthor || subscribedToWork;
+        boolean fullAccess = isFullAccess(workId, userId, work);
 
         List<Long> unlockedChapterIds = subscriptionQueryPort.unlockedChapters(userId, workId);
 
@@ -113,6 +103,31 @@ public class ExportEpub {
         }
 
         return epubUrl;
+    }
+
+    private boolean isFullAccess(Long workId, Long userId, Work work) {
+        Long authorId = work.getCreator() != null ? work.getCreator().getId() : null;
+        boolean isOwner = authorId != null && authorId.equals(userId);
+        boolean subscribedToAuthor = authorId != null && subscriptionQueryPort.isSubscribedToAuthor(userId, authorId);
+        boolean subscribedToWork = subscriptionQueryPort.isSubscribedToWork(userId, workId);
+
+        boolean fullAccess = isOwner || subscribedToAuthor || subscribedToWork;
+        return fullAccess;
+    }
+
+    private static @NotNull List<Chapter> filterPublished(Work work) {
+        return work.getChapters().stream()
+                .filter(ch -> ch.getPublicationStatus() != null && ch.getPublicationStatus().equals("PUBLISHED"))
+                .collect(Collectors.toList());
+    }
+
+    private @NotNull Work getWork(Long workId) {
+        Optional<Work> workOpt = obtainWorkByIdPort.obtainWorkById(workId);
+        if (workOpt.isEmpty()) {
+            throw new RuntimeException("Work not found");
+        }
+        Work work = workOpt.get();
+        return work;
     }
 
     private Book createEpub(List<Chapter> chaptersToInclude, Work work) {
@@ -186,7 +201,7 @@ public class ExportEpub {
 
     private byte[] downloadImage(String url) {
         try {
-            return httpDownloadPort.downloadImage(url);
+            return downloadPort.downloadImage(url);
         } catch (Exception e) {
             return new byte[0];
         }
