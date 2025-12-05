@@ -1,7 +1,7 @@
 package com.amool.adapters.in.rest.controllers;
 
-import com.amool.application.usecases.ExtractPaymentIdFromWebhookUseCase;
-import com.amool.application.usecases.ProcessMercadoPagoWebhookUseCase;
+import com.amool.application.usecases.ExtractPaymentIdFromWebhook;
+import com.amool.application.usecases.ProcessMercadoPagoWebhook;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -11,13 +11,13 @@ import java.util.Map;
 @RequestMapping("/api/payments/webhook/mercadopago")
 public class MercadoPagoWebhookController {
 
-    private final ExtractPaymentIdFromWebhookUseCase extractPaymentIdUseCase;
-    private final ProcessMercadoPagoWebhookUseCase processMercadoPagoWebhookUseCase;
+    private final ExtractPaymentIdFromWebhook extractPaymentIdUseCase;
+    private final ProcessMercadoPagoWebhook processMercadoPagoWebhook;
 
-    public MercadoPagoWebhookController(ExtractPaymentIdFromWebhookUseCase extractPaymentIdUseCase,
-                                       ProcessMercadoPagoWebhookUseCase processMercadoPagoWebhookUseCase) {
+    public MercadoPagoWebhookController(ExtractPaymentIdFromWebhook extractPaymentIdUseCase,
+                                        ProcessMercadoPagoWebhook processMercadoPagoWebhook) {
         this.extractPaymentIdUseCase = extractPaymentIdUseCase;
-        this.processMercadoPagoWebhookUseCase = processMercadoPagoWebhookUseCase;
+        this.processMercadoPagoWebhook = processMercadoPagoWebhook;
     }
 
     @PostMapping
@@ -37,15 +37,15 @@ public class MercadoPagoWebhookController {
 
     private ResponseEntity<?> process(String type, String topic, String id, Map<String, Object> body) {
         try {
-            ExtractPaymentIdFromWebhookUseCase.ExtractPaymentIdResult extractResult =
+            ExtractPaymentIdFromWebhook.ExtractPaymentIdResult extractResult =
                 extractPaymentIdUseCase.execute(id, body);
 
             if (!extractResult.isSuccess()) {
                 return ResponseEntity.badRequest().body(extractResult.getErrorMessage());
             }
 
-            ProcessMercadoPagoWebhookUseCase.ProcessMercadoPagoWebhookResult result =
-                processMercadoPagoWebhookUseCase.execute(
+            ProcessMercadoPagoWebhook.ProcessMercadoPagoWebhookResult result =
+                processMercadoPagoWebhook.execute(
                     extractResult.getPaymentId(),
                     extractResult.getExternalReference(),
                     null

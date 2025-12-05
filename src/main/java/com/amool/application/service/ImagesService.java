@@ -1,7 +1,7 @@
 package com.amool.application.service;
 
-import com.amool.application.port.out.AwsS3Port;
-import com.amool.application.port.out.HttpDownloadPort;
+import com.amool.application.port.out.FilesStoragePort;
+import com.amool.application.port.out.DownloadPort;
 import com.amool.domain.model.InMemoryMultipartFile;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -13,21 +13,20 @@ import static com.google.common.io.Files.getFileExtension;
 
 public class ImagesService {
 
-    private final AwsS3Port awsS3Port;
-    private final HttpDownloadPort httpDownloadPort;
+    private final FilesStoragePort filesStoragePort;
+    private final DownloadPort downloadPort;
     private final String WORK_COVER_PATH = "works/{workId}/cover/";
     private final String WORK_BANNER_PATH = "works/{workId}/banner/";
 
-    public ImagesService(AwsS3Port awsS3Port, HttpDownloadPort httpDownloadPort) {
-        this.httpDownloadPort = httpDownloadPort;
-        this.awsS3Port = awsS3Port;
+    public ImagesService(FilesStoragePort filesStoragePort, DownloadPort downloadPort) {
+        this.downloadPort = downloadPort;
+        this.filesStoragePort = filesStoragePort;
     }
 
-
     public String downloadAndUploadCoverImage(String url, String workId) throws IOException, InterruptedException {
-        byte[] imageBytes = httpDownloadPort.downloadImage(url);
+        byte[] imageBytes = downloadPort.downloadImage(url);
 
-        MultipartFile multipartFile = new InMemoryMultipartFile(
+        InMemoryMultipartFile multipartFile = new InMemoryMultipartFile(
                 "cover",
                 "cover.png",
                 "image/png",
@@ -36,7 +35,6 @@ public class ImagesService {
 
         return uploadCoverImage(multipartFile, workId);
     }
-
 
     public String uploadBannerImage(MultipartFile file, String workId) throws IOException {
 
@@ -47,7 +45,7 @@ public class ImagesService {
         String fileName = UUID.randomUUID() + "." + getFileExtension(Objects.requireNonNull(file.getOriginalFilename()));
         String filePath = WORK_BANNER_PATH.replace("{workId}", workId) + fileName;
 
-        Boolean result = this.awsS3Port.uploadPublicFile(filePath, file);
+        Boolean result = this.filesStoragePort.uploadPublicFile(filePath, file);
 
         if(result) {
             return filePath;
@@ -66,7 +64,7 @@ public class ImagesService {
         String fileName = UUID.randomUUID()+ "." + getFileExtension(Objects.requireNonNull(file.getOriginalFilename()));
         String filePath = WORK_COVER_PATH.replace("{workId}", workId) + fileName;
 
-        this.awsS3Port.uploadPublicFile(filePath,file);
+        this.filesStoragePort.uploadPublicFile(filePath,file);
 
         return filePath;
     }
@@ -80,7 +78,7 @@ public class ImagesService {
         String fileName = UUID.randomUUID()+ "." + getFileExtension(Objects.requireNonNull(file.getOriginalFilename()));
         String filePath = "users/" + userId + "/profile/" + fileName;
 
-        this.awsS3Port.uploadPublicFile(filePath,file);
+        this.filesStoragePort.uploadPublicFile(filePath,file);
 
         return filePath;
     }
@@ -88,7 +86,7 @@ public class ImagesService {
     public void deleteImage(String filePath) {
         if (filePath == null) return;
         if ("none".equalsIgnoreCase(filePath)) return;
-        this.awsS3Port.deleteObject(filePath);
+        this.filesStoragePort.deleteObject(filePath);
     }
 
 }

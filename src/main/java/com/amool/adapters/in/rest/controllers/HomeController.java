@@ -8,22 +8,22 @@ import org.springframework.web.bind.annotation.RestController;
 
 import com.amool.adapters.in.rest.dtos.WorkListDto;
 import com.amool.adapters.in.rest.mappers.WorkListMapper;
-import com.amool.application.usecases.ObtainWorkListUseCase;
+import com.amool.application.usecases.ObtainWorkList;
 
 @RestController
 @RequestMapping("/api/home")
 public class HomeController {
 
-    private final ObtainWorkListUseCase obtainWorkListUseCase;
+    private final ObtainWorkList obtainWorkList;
 
-    public HomeController(ObtainWorkListUseCase obtainWorkListUseCase) {
-        this.obtainWorkListUseCase = obtainWorkListUseCase;
+    public HomeController(ObtainWorkList obtainWorkList) {
+        this.obtainWorkList = obtainWorkList;
     }
 
     @GetMapping("/work-list/{userId}")
     public Map<String, List<WorkListDto>> getWorkList(@PathVariable Long userId) {
         Map<String, List<WorkListDto>> workList = new HashMap<>();
-        obtainWorkListUseCase.execute(userId).forEach((category, works) -> 
+        obtainWorkList.execute(userId).forEach((category, works) ->
             workList.put(category, works.stream()
                 .map(WorkListMapper::toDto)
                 .toList()

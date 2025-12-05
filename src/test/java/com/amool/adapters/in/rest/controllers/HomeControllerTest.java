@@ -1,6 +1,6 @@
 package com.amool.adapters.in.rest.controllers;
 
-import com.amool.application.port.out.AwsS3Port;
+import com.amool.application.port.out.FilesStoragePort;
 import org.mockito.Mockito;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -14,23 +14,23 @@ import org.junit.jupiter.api.Test;
 
 import com.amool.adapters.in.rest.dtos.WorkListDto;
 import com.amool.application.port.out.WorkPort;
-import com.amool.application.usecases.ObtainWorkListUseCase;
+import com.amool.application.usecases.ObtainWorkList;
 
 public class HomeControllerTest {
 
     private HomeController homeController;
-    private ObtainWorkListUseCase obtainWorkListUseCase;
+    private ObtainWorkList obtainWorkList;
     private WorkPort workPort;
 
     private static final Long TEST_USER_ID = 1L;
 
-    private AwsS3Port awsS3Port;
+    private FilesStoragePort filesStoragePort;
 
     @BeforeEach
     public void setUp() {
         workPort = Mockito.mock(WorkPort.class);
-        obtainWorkListUseCase = new ObtainWorkListUseCase(workPort, awsS3Port);
-        homeController = new HomeController(obtainWorkListUseCase);
+        obtainWorkList = new ObtainWorkList(workPort, filesStoragePort);
+        homeController = new HomeController(obtainWorkList);
     }
 
     @Test

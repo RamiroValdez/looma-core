@@ -1,9 +1,9 @@
 package com.amool.adapters.in.rest.controllers;
 
 import com.amool.adapters.in.rest.dtos.*;
-import com.amool.application.usecases.GetUserRatingUseCase;
-import com.amool.application.usecases.GetWorkRatingsUseCase;
-import com.amool.application.usecases.RateWorkUseCase;
+import com.amool.application.usecases.GetUserRating;
+import com.amool.application.usecases.GetWorkRatings;
+import com.amool.application.usecases.RateWork;
 import com.amool.security.JwtUserPrincipal;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
@@ -26,9 +26,9 @@ import java.util.Optional;
 @Tag(name = "Ratings", description = "APIs para gestionar las calificaciones de las obras")
 public class RatingController {
 
-    private final RateWorkUseCase rateWorkUseCase;
-    private final GetUserRatingUseCase getUserRatingUseCase;
-    private final GetWorkRatingsUseCase getWorkRatingsUseCase;
+    private final RateWork rateWork;
+    private final GetUserRating getUserRating;
+    private final GetWorkRatings getWorkRatings;
 
     @Operation(summary = "Calificar una obra", 
               description = "Califica una obra con un valor entre 0.5 y 5.0")
@@ -47,7 +47,7 @@ public class RatingController {
         Long userId = userPrincipal.getUserId();
         Double ratingValue = request.getRating();
         
-        Double averageRating = rateWorkUseCase.execute(workId, userId, ratingValue);
+        Double averageRating = rateWork.execute(workId, userId, ratingValue);
         
         RatingResponse response = new RatingResponse(
             workId,
@@ -65,7 +65,7 @@ public class RatingController {
             @PathVariable Long workId,
             @PageableDefault(size = 10) Pageable pageable) {
         
-        Integer workRatings = getWorkRatingsUseCase.execute(workId, pageable);
+        Integer workRatings = getWorkRatings.execute(workId, pageable);
         
         return ResponseEntity.ok(workRatings);
     }
@@ -76,7 +76,7 @@ public class RatingController {
             @PathVariable Long workId,
             @AuthenticationPrincipal JwtUserPrincipal userPrincipal) {
 
-        Optional<Double> result = getUserRatingUseCase.execute(workId, userPrincipal.getUserId());
+        Optional<Double> result = getUserRating.execute(workId, userPrincipal.getUserId());
 
         return ResponseEntity.ok(result.orElse(null));
     }

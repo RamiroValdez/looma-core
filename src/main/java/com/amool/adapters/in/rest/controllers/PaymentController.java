@@ -2,7 +2,7 @@ package com.amool.adapters.in.rest.controllers;
 
 import com.amool.adapters.in.rest.dtos.SubscribeRequest;
 import com.amool.adapters.in.rest.dtos.PaymentInitResponse;
-import com.amool.application.usecases.StartSubscriptionFlowUseCase;
+import com.amool.application.usecases.StartSubscriptionFlow;
 import com.amool.domain.model.PaymentInitResult;
 import com.amool.security.JwtUserPrincipal;
 import jakarta.validation.Valid;
@@ -16,10 +16,10 @@ import org.springframework.http.HttpStatus;
 @RequestMapping("/api/payments")
 public class PaymentController {
 
-    private final StartSubscriptionFlowUseCase startSubscriptionFlowUseCase;
+    private final StartSubscriptionFlow startSubscriptionFlow;
 
-    public PaymentController(StartSubscriptionFlowUseCase startSubscriptionFlowUseCase) {
-        this.startSubscriptionFlowUseCase = startSubscriptionFlowUseCase;
+    public PaymentController(StartSubscriptionFlow startSubscriptionFlow) {
+        this.startSubscriptionFlow = startSubscriptionFlow;
     }
 
     @PostMapping("/subscribe")
@@ -30,9 +30,9 @@ public class PaymentController {
         }
         Long userId = principal.getUserId();
 
-        StartSubscriptionFlowUseCase.Result result;
+        StartSubscriptionFlow.Result result;
         try {
-            result = startSubscriptionFlowUseCase.execute(
+            result = startSubscriptionFlow.execute(
                     userId,
                     request.subscriptionType(),
                     request.targetId(),

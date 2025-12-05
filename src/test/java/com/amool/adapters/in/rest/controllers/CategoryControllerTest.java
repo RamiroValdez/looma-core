@@ -15,20 +15,20 @@ import org.springframework.http.ResponseEntity;
 
 import com.amool.adapters.in.rest.dtos.CategoryDto;
 import com.amool.application.port.out.CategoryPort;
-import com.amool.application.usecases.ObtainAllCategoriesUseCase;
+import com.amool.application.usecases.ObtainAllCategories;
 import com.amool.domain.model.Category;
 
 public class CategoryControllerTest {
 
     private CategoryController categoryController;
-    private ObtainAllCategoriesUseCase obtainAllCategoriesUseCase;
+    private ObtainAllCategories obtainAllCategories;
     private CategoryPort categoryPort;
 
     @BeforeEach
     public void setUp() {
         categoryPort = Mockito.mock(CategoryPort.class);
-        obtainAllCategoriesUseCase = new ObtainAllCategoriesUseCase(categoryPort);
-        categoryController = new CategoryController(obtainAllCategoriesUseCase);
+        obtainAllCategories = new ObtainAllCategories(categoryPort);
+        categoryController = new CategoryController(obtainAllCategories);
     }
 
     @Test

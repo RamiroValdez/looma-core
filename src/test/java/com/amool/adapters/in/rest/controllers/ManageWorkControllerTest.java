@@ -4,10 +4,10 @@ import com.amool.adapters.in.rest.dtos.CreateEmptyChapterRequest;
 import com.amool.adapters.in.rest.dtos.CreateEmptyChapterResponse;
 import com.amool.adapters.in.rest.dtos.WorkResponseDto;
 import com.amool.adapters.in.rest.dtos.UpdateWorkDto;
-import com.amool.application.usecases.CreateEmptyChapterUseCase;
-import com.amool.application.usecases.GetWorkPermissionsUseCase;
-import com.amool.application.usecases.ObtainWorkByIdUseCase;
-import com.amool.application.usecases.UpdateWorkUseCase;
+import com.amool.application.usecases.CreateEmptyChapter;
+import com.amool.application.usecases.GetWorkPermissions;
+import com.amool.application.usecases.ObtainWorkById;
+import com.amool.application.usecases.UpdateWork;
 import com.amool.domain.model.Chapter;
 import com.amool.domain.model.User;
 import com.amool.domain.model.Work;
@@ -34,21 +34,21 @@ import static org.mockito.Mockito.*;
 public class ManageWorkControllerTest {
 
     private ManageWorkController controller;
-    private ObtainWorkByIdUseCase obtainWorkByIdUseCase;
-    private CreateEmptyChapterUseCase createEmptyChapterUseCase;
-    private GetWorkPermissionsUseCase getWorkPermissionsUseCase;
-    private UpdateWorkUseCase updateWorkUseCase;
+    private ObtainWorkById obtainWorkById;
+    private CreateEmptyChapter createEmptyChapter;
+    private GetWorkPermissions getWorkPermissions;
+    private UpdateWork updateWork;
 
     private static final Long USER_ID = 10L;
     private static final Long WORK_ID = 100L;
 
     @BeforeEach
     void setUp() {
-        obtainWorkByIdUseCase = Mockito.mock(ObtainWorkByIdUseCase.class);
-        createEmptyChapterUseCase = Mockito.mock(CreateEmptyChapterUseCase.class);
-        getWorkPermissionsUseCase = Mockito.mock(GetWorkPermissionsUseCase.class);
-        updateWorkUseCase = Mockito.mock(UpdateWorkUseCase.class);
-        controller = new ManageWorkController(obtainWorkByIdUseCase, createEmptyChapterUseCase, getWorkPermissionsUseCase, updateWorkUseCase);
+        obtainWorkById = Mockito.mock(ObtainWorkById.class);
+        createEmptyChapter = Mockito.mock(CreateEmptyChapter.class);
+        getWorkPermissions = Mockito.mock(GetWorkPermissions.class);
+        updateWork = Mockito.mock(UpdateWork.class);
+        controller = new ManageWorkController(obtainWorkById, createEmptyChapter, getWorkPermissions, updateWork);
         SecurityContextHolder.clearContext();
     }
 
@@ -112,14 +112,14 @@ public class ManageWorkControllerTest {
     void updateWork_shouldReturnTrue_onSuccess() {
         JwtUserPrincipal principal = givenAuthenticatedUser(USER_ID);
         UpdateWorkDto request = new UpdateWorkDto(new BigDecimal("9.99"), "PUBLISHED", Set.of("t1","t2"), Set.of());
-        when(updateWorkUseCase.execute(eq(WORK_ID), eq(new BigDecimal("9.99")), eq(Set.of("t1","t2")), eq(Set.of()), eq("PUBLISHED")))
+        when(updateWork.execute(eq(WORK_ID), eq(new BigDecimal("9.99")), eq(Set.of("t1","t2")), eq(Set.of()), eq("PUBLISHED")))
                 .thenReturn(true);
 
         ResponseEntity<Boolean> response = controller.updateWork(WORK_ID, request, principal);
 
         thenShouldReturnOk(response);
         assertTrue(Boolean.TRUE.equals(response.getBody()));
-        verify(updateWorkUseCase, times(1)).execute(eq(WORK_ID), eq(new BigDecimal("9.99")), eq(Set.of("t1","t2")), eq(Set.of()), eq("PUBLISHED"));
+        verify(updateWork, times(1)).execute(eq(WORK_ID), eq(new BigDecimal("9.99")), eq(Set.of("t1","t2")), eq(Set.of()), eq("PUBLISHED"));
     }
 
     @Test
@@ -127,7 +127,7 @@ public class ManageWorkControllerTest {
     void updateWork_shouldReturnBadRequest_onException() {
         JwtUserPrincipal principal = givenAuthenticatedUser(USER_ID);
         UpdateWorkDto request = new UpdateWorkDto(new BigDecimal("5.00"), "DRAFT", Set.of(), Set.of());
-        when(updateWorkUseCase.execute(anyLong(), any(), anySet(), anySet(), anyString())).thenThrow(new RuntimeException("error"));
+        when(updateWork.execute(anyLong(), any(), anySet(), anySet(), anyString())).thenThrow(new RuntimeException("error"));
 
         ResponseEntity<Boolean> response = controller.updateWork(WORK_ID, request, principal);
 
@@ -154,15 +154,15 @@ public class ManageWorkControllerTest {
     }
 
     private void givenWorkFound(Work work, Long userId) {
-        when(obtainWorkByIdUseCase.execute(eq(work.getId()), eq(userId))).thenReturn(Optional.of(work));
+        when(obtainWorkById.execute(eq(work.getId()), eq(userId))).thenReturn(Optional.of(work));
     }
 
     private void givenWorkNotFound(Long userId) {
-        when(obtainWorkByIdUseCase.execute(eq(WORK_ID), eq(userId))).thenReturn(Optional.empty());
+        when(obtainWorkById.execute(eq(WORK_ID), eq(userId))).thenReturn(Optional.empty());
     }
 
     private void givenPermissionsForUser(Work work, Long userId, boolean subAuthor, boolean subWork, List<Long> unlocked) {
-        when(getWorkPermissionsUseCase.execute(eq(work), eq(userId)))
+        when(getWorkPermissions.execute(eq(work), eq(userId)))
                 .thenReturn(WorkPermissions.createUser(subAuthor, subWork, unlocked));
     }
 
@@ -177,11 +177,11 @@ public class ManageWorkControllerTest {
     private void givenCreateEmptyChapterSucceeds(Long chapterId) {
         Chapter c = new Chapter();
         c.setId(chapterId);
-        when(createEmptyChapterUseCase.execute(anyLong(), anyLong(), anyString())).thenReturn(c);
+        when(createEmptyChapter.execute(anyLong(), anyLong(), anyString())).thenReturn(c);
     }
 
     private void givenCreateEmptyChapterFails(Exception e) {
-        when(createEmptyChapterUseCase.execute(anyLong(), anyLong(), anyString())).thenThrow(e);
+        when(createEmptyChapter.execute(anyLong(), anyLong(), anyString())).thenThrow(e);
     }
 
     private ResponseEntity<WorkResponseDto> whenGettingWorkById(Long workId, JwtUserPrincipal principal) {
@@ -224,12 +224,12 @@ public class ManageWorkControllerTest {
     }
 
     private void thenUseCasesWereCalledForGet(Work work, Long userId) {
-        verify(obtainWorkByIdUseCase, times(1)).execute(eq(work.getId()), eq(userId));
-        verify(getWorkPermissionsUseCase, times(1)).execute(eq(work), eq(userId));
+        verify(obtainWorkById, times(1)).execute(eq(work.getId()), eq(userId));
+        verify(getWorkPermissions, times(1)).execute(eq(work), eq(userId));
     }
 
     private void thenPermissionsUseCaseNotCalled() {
-        verify(getWorkPermissionsUseCase, never()).execute(any(), anyLong());
+        verify(getWorkPermissions, never()).execute(any(), anyLong());
     }
 
     private void thenChapterIdIs(CreateEmptyChapterResponse body, Long expectedId) {

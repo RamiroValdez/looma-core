@@ -1,6 +1,6 @@
 package com.amool.adapters.in.rest.controllers;
 
-import com.amool.application.usecases.CreateLanguageVersionUseCase;
+import com.amool.application.usecases.CreateLanguageVersion;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -26,7 +26,7 @@ public class TranslationControllerTest {
     private MockMvc mockMvc;
 
     @MockitoBean
-    private CreateLanguageVersionUseCase createLanguageVersionUseCase;
+    private CreateLanguageVersion createLanguageVersion;
 
     private static final String SOURCE = "en";
     private static final String TARGET = "es";
@@ -76,21 +76,21 @@ public class TranslationControllerTest {
     }
 
     private void givenCreateVersionSucceedsWith(String result) {
-        when(createLanguageVersionUseCase.execute(eq(SOURCE), eq(TARGET), eq(ORIGINAL))).thenReturn(result);
+        when(createLanguageVersion.execute(eq(SOURCE), eq(TARGET), eq(ORIGINAL))).thenReturn(result);
     }
 
     private void givenCreateVersionThrowsIllegalArgument() {
-        when(createLanguageVersionUseCase.execute(eq(SOURCE), eq(TARGET), eq(ORIGINAL)))
+        when(createLanguageVersion.execute(eq(SOURCE), eq(TARGET), eq(ORIGINAL)))
                 .thenThrow(new IllegalArgumentException("invalid"));
     }
 
     private void givenCreateVersionThrowsNotFound() {
-        when(createLanguageVersionUseCase.execute(eq(SOURCE), eq(TARGET), eq(ORIGINAL)))
+        when(createLanguageVersion.execute(eq(SOURCE), eq(TARGET), eq(ORIGINAL)))
                 .thenThrow(new java.util.NoSuchElementException("not found"));
     }
 
     private void givenCreateVersionThrowsForbidden() {
-        doThrow(new SecurityException("forbidden")).when(createLanguageVersionUseCase)
+        doThrow(new SecurityException("forbidden")).when(createLanguageVersion)
                 .execute(eq(SOURCE), eq(TARGET), eq(ORIGINAL));
     }
 
@@ -119,7 +119,7 @@ public class TranslationControllerTest {
     }
 
     private void thenUseCaseWasCalledWith(String source, String target, String original) {
-        verify(createLanguageVersionUseCase).execute(eq(source), eq(target), eq(original));
+        verify(createLanguageVersion).execute(eq(source), eq(target), eq(original));
     }
 
     private String asJson(String source, String target, String original) {

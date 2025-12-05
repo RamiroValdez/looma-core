@@ -4,8 +4,8 @@ import com.amool.adapters.in.rest.dtos.CreateWorkDto;
 import com.amool.adapters.in.rest.dtos.TagSuggestionRequestDto;
 import com.amool.adapters.in.rest.dtos.TagSuggestionResponseDto;
 import com.amool.application.usecases.CreateAuthorNotification;
-import com.amool.application.usecases.CreateWorkUseCase;
-import com.amool.application.usecases.SuggestTagsUseCase;
+import com.amool.application.usecases.CreateWork;
+import com.amool.application.usecases.SuggestTags;
 import com.amool.security.JwtUserPrincipal;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
@@ -27,8 +27,8 @@ import static org.mockito.Mockito.*;
 public class CreateWorkControllerTest {
 
     private CreateWorkController createWorkController;
-    private CreateWorkUseCase createWorkUseCase;
-    private SuggestTagsUseCase suggestTagsUseCase;
+    private CreateWork createWork;
+    private SuggestTags suggestTags;
     private CreateAuthorNotification createAuthorNotification;
 
     private static final Long TEST_USER_ID = 100L;
@@ -46,13 +46,13 @@ public class CreateWorkControllerTest {
 
     @BeforeEach
     public void setUp() {
-        createWorkUseCase = Mockito.mock(CreateWorkUseCase.class);
-        suggestTagsUseCase = Mockito.mock(SuggestTagsUseCase.class);
+        createWork = Mockito.mock(CreateWork.class);
+        suggestTags = Mockito.mock(SuggestTags.class);
         createAuthorNotification = Mockito.mock(CreateAuthorNotification.class);
 
         createWorkController = new CreateWorkController(
-                createWorkUseCase,
-                suggestTagsUseCase,
+                createWork,
+                suggestTags,
                 createAuthorNotification
         );
 
@@ -93,7 +93,7 @@ public class CreateWorkControllerTest {
 
         thenResponseIsOk(response);
         thenResponseContainsWorkId(response, TEST_WORK_ID);
-        verify(createWorkUseCase).execute(
+        verify(createWork).execute(
                 eq(TEST_TITLE),
                 eq(TEST_DESCRIPTION),
                 eq(TEST_CATEGORY_IDS),
@@ -133,7 +133,7 @@ public class CreateWorkControllerTest {
         ResponseEntity<Long> response = whenSaveWork(workDto, null, bannerFile);
 
         thenResponseIsOk(response);
-        verify(createWorkUseCase).execute(
+        verify(createWork).execute(
                 anyString(),
                 anyString(),
                 anyList(),
@@ -202,7 +202,7 @@ public class CreateWorkControllerTest {
         ResponseEntity<TagSuggestionResponseDto> response = whenSuggestTags(request);
 
         thenResponseIsOk(response);
-        verify(suggestTagsUseCase).execute(
+        verify(suggestTags).execute(
                 eq(TEST_DESCRIPTION),
                 eq(TEST_TITLE),
                 eq(Set.of())
@@ -219,7 +219,7 @@ public class CreateWorkControllerTest {
         ResponseEntity<TagSuggestionResponseDto> response = whenSuggestTags(request);
 
         thenResponseIsOk(response);
-        verify(suggestTagsUseCase).execute(
+        verify(suggestTags).execute(
                 eq(TEST_DESCRIPTION),
                 eq(TEST_TITLE),
                 eq(existingTags)
@@ -272,7 +272,7 @@ public class CreateWorkControllerTest {
     }
 
     private void givenWorkCreationWillSucceed() throws Exception {
-        when(createWorkUseCase.execute(
+        when(createWork.execute(
                 anyString(),
                 anyString(),
                 anyList(),
@@ -288,7 +288,7 @@ public class CreateWorkControllerTest {
     }
 
     private void givenWorkCreationWillFail() throws Exception {
-        when(createWorkUseCase.execute(
+        when(createWork.execute(
                 anyString(),
                 anyString(),
                 anyList(),
@@ -345,7 +345,7 @@ public class CreateWorkControllerTest {
 
     private List<String> givenTagSuggestionsWillBeReturned() {
         List<String> suggestions = List.of("fantasy", "adventure", "magic", "epic");
-        when(suggestTagsUseCase.execute(anyString(), anyString(), anySet()))
+        when(suggestTags.execute(anyString(), anyString(), anySet()))
                 .thenReturn(suggestions);
         return suggestions;
     }
@@ -385,7 +385,7 @@ public class CreateWorkControllerTest {
     }
 
     private void thenCreateWorkUseCaseWasInvoked() throws Exception {
-        verify(createWorkUseCase, times(1)).execute(
+        verify(createWork, times(1)).execute(
                 anyString(),
                 anyString(),
                 anyList(),
@@ -409,11 +409,11 @@ public class CreateWorkControllerTest {
     }
 
     private void thenSuggestTagsUseCaseWasInvoked() {
-        verify(suggestTagsUseCase, times(1)).execute(anyString(), anyString(), anySet());
+        verify(suggestTags, times(1)).execute(anyString(), anyString(), anySet());
     }
 
     private void thenSuggestTagsUseCaseWasNotInvoked() {
-        verify(suggestTagsUseCase, never()).execute(anyString(), anyString(), anySet());
+        verify(suggestTags, never()).execute(anyString(), anyString(), anySet());
     }
 }
 

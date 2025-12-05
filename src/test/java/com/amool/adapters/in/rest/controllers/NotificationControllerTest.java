@@ -1,8 +1,8 @@
 package com.amool.adapters.in.rest.controllers;
 
 import com.amool.adapters.in.rest.dtos.NotificationDto;
-import com.amool.application.usecases.ObtainNotificationsUseCase;
-import com.amool.application.usecases.UpdateNotificationReadUseCase;
+import com.amool.application.usecases.ObtainNotifications;
+import com.amool.application.usecases.UpdateNotificationRead;
 import com.amool.domain.model.Notification;
 import com.amool.domain.model.Notification.NotificationType;
 import org.junit.jupiter.api.BeforeEach;
@@ -22,17 +22,17 @@ import static org.mockito.Mockito.*;
 public class NotificationControllerTest {
 
     private NotificationController controller;
-    private ObtainNotificationsUseCase obtainNotificationsUseCase;
-    private UpdateNotificationReadUseCase updateNotificationReadUseCase;
+    private ObtainNotifications obtainNotifications;
+    private UpdateNotificationRead updateNotificationRead;
 
     private static final Long USER_ID = 99L;
     private static final Long NOTIF_ID = 123L;
 
     @BeforeEach
     void setUp() {
-        obtainNotificationsUseCase = Mockito.mock(ObtainNotificationsUseCase.class);
-        updateNotificationReadUseCase = Mockito.mock(UpdateNotificationReadUseCase.class);
-        controller = new NotificationController(obtainNotificationsUseCase, updateNotificationReadUseCase);
+        obtainNotifications = Mockito.mock(ObtainNotifications.class);
+        updateNotificationRead = Mockito.mock(UpdateNotificationRead.class);
+        controller = new NotificationController(obtainNotifications, updateNotificationRead);
     }
 
 
@@ -120,15 +120,15 @@ public class NotificationControllerTest {
     }
 
     private void givenUseCaseReturnsNotifications(List<Notification> notifications) {
-        when(obtainNotificationsUseCase.execute(eq(USER_ID))).thenReturn(notifications);
+        when(obtainNotifications.execute(eq(USER_ID))).thenReturn(notifications);
     }
 
     private void givenUpdateReadWillReturn(boolean value) {
-        when(updateNotificationReadUseCase.execute(eq(NOTIF_ID))).thenReturn(value);
+        when(updateNotificationRead.execute(eq(NOTIF_ID))).thenReturn(value);
     }
 
     private void givenUpdateReadWillThrow(RuntimeException ex) {
-        when(updateNotificationReadUseCase.execute(eq(NOTIF_ID))).thenThrow(ex);
+        when(updateNotificationRead.execute(eq(NOTIF_ID))).thenThrow(ex);
     }
 
     private List<NotificationDto> whenGettingNotifications(Long userId) {
@@ -167,10 +167,10 @@ public class NotificationControllerTest {
     }
 
     private void thenObtainUseCaseWasCalled(Long userId) {
-        verify(obtainNotificationsUseCase, times(1)).execute(eq(userId));
+        verify(obtainNotifications, times(1)).execute(eq(userId));
     }
 
     private void thenUpdateReadUseCaseWasCalled(Long notificationId) {
-        verify(updateNotificationReadUseCase, times(1)).execute(eq(notificationId));
+        verify(updateNotificationRead, times(1)).execute(eq(notificationId));
     }
 }

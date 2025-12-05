@@ -3,8 +3,8 @@ package com.amool.adapters.in.rest.controllers;
 import com.amool.adapters.in.rest.dtos.UpdateUserDto;
 import com.amool.adapters.in.rest.dtos.UserDto;
 import com.amool.adapters.in.rest.mappers.UserRestMapper;
-import com.amool.application.usecases.GetUserByIdUseCase;
-import com.amool.application.usecases.UpdateUserUseCase;
+import com.amool.application.usecases.GetUserById;
+import com.amool.application.usecases.UpdateUser;
 import com.amool.security.JwtUserPrincipal;
 
 import org.springframework.http.MediaType;
@@ -12,7 +12,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 
-import com.amool.application.usecases.SetUserPreferencesUseCase;
+import com.amool.application.usecases.SetUserPreferences;
 import com.amool.adapters.in.rest.dtos.PreferencesRequest;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -27,20 +27,20 @@ import jakarta.validation.Valid;
 @RequestMapping("/api/users")
 public class UserController {
 
-    private final GetUserByIdUseCase getUserByIdUseCase;
-    private final UpdateUserUseCase updateUserUseCase;
-    private final SetUserPreferencesUseCase setUserPreferencesUseCase;
+    private final GetUserById getUserById;
+    private final UpdateUser updateUser;
+    private final SetUserPreferences setUserPreferences;
 
-    public UserController(GetUserByIdUseCase getUserByIdUseCase, UpdateUserUseCase updateUserUseCase,
-            SetUserPreferencesUseCase setUserPreferencesUseCase) {
-        this.getUserByIdUseCase = getUserByIdUseCase;
-        this.updateUserUseCase = updateUserUseCase;
-        this.setUserPreferencesUseCase = setUserPreferencesUseCase;
+    public UserController(GetUserById getUserById, UpdateUser updateUser,
+                          SetUserPreferences setUserPreferences) {
+        this.getUserById = getUserById;
+        this.updateUser = updateUser;
+        this.setUserPreferences = setUserPreferences;
     }
 
     @GetMapping("/{id:\\d+}")
     public ResponseEntity<UserDto> getById(@PathVariable("id") Long id) {
-        return getUserByIdUseCase.execute(id)
+        return getUserById.execute(id)
                 .map(UserRestMapper::toDto)
                 .map(ResponseEntity::ok)
                 .orElseGet(() -> ResponseEntity.notFound().build());
@@ -56,7 +56,7 @@ public class UserController {
 
         String newPassword = form.hasNewPassword() ? form.getNewPassword() : null;
 
-        boolean ok = updateUserUseCase.execute(
+        boolean ok = updateUser.execute(
                 UserRestMapper.updateUserToDomain(form),
                 newPassword);
 
@@ -64,7 +64,7 @@ public class UserController {
             return ResponseEntity.badRequest().build();
         }
 
-        return getUserByIdUseCase.execute(form.getId())
+        return getUserById.execute(form.getId())
                 .map(UserRestMapper::toDto)
                 .map(ResponseEntity::ok)
                 .orElseGet(() -> ResponseEntity.badRequest().build());
@@ -76,7 +76,7 @@ public class UserController {
         if (principal == null || principal.getUserId() == null) {
             return ResponseEntity.status(401).build();
         }
-        setUserPreferencesUseCase.execute(principal.getUserId(), req.genres());
+        setUserPreferences.execute(principal.getUserId(), req.genres());
         return ResponseEntity.accepted().build();
     }
 

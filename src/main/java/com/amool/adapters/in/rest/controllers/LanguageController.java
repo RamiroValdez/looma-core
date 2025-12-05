@@ -1,6 +1,6 @@
 package com.amool.adapters.in.rest.controllers;
 
-import com.amool.application.usecases.GetAllLanguagesUseCase;
+import com.amool.application.usecases.GetAllLanguages;
 import com.amool.domain.model.Language;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -13,14 +13,14 @@ import java.util.List;
 @RequestMapping("/api/languages")
 public class LanguageController {
 
-    private final GetAllLanguagesUseCase getAllLanguagesUseCase;
+    private final GetAllLanguages getAllLanguages;
 
-    public LanguageController(GetAllLanguagesUseCase getAllLanguagesUseCase) {
-        this.getAllLanguagesUseCase = getAllLanguagesUseCase;
+    public LanguageController(GetAllLanguages getAllLanguages) {
+        this.getAllLanguages = getAllLanguages;
     }
 
     @GetMapping("/obtain-all")
     public ResponseEntity<List<Language>> getAllLanguages() {
-        return ResponseEntity.ok(getAllLanguagesUseCase.execute());
+        return ResponseEntity.ok(getAllLanguages.execute());
     }
 }

@@ -1,7 +1,7 @@
 package com.amool.adapters.in.rest.controllers;
 
-import com.amool.application.usecases.GetAllWorksUseCase;
-import com.amool.application.usecases.ToggleWorkLikeUseCase;
+import com.amool.application.usecases.GetAllWorks;
+import com.amool.application.usecases.ToggleWorkLike;
 import com.amool.adapters.in.rest.dtos.LikeResponseDto;
 import com.amool.domain.model.Work;
 import com.amool.security.JwtUserPrincipal;
@@ -34,8 +34,8 @@ public class WorkControllerTest {
     @Autowired
     private MockMvc mockMvc;
 
-    @MockitoBean private GetAllWorksUseCase getAllWorksUseCase;
-    @MockitoBean private ToggleWorkLikeUseCase toggleWorkLikeUseCase;
+    @MockitoBean private GetAllWorks getAllWorks;
+    @MockitoBean private ToggleWorkLike toggleWorkLike;
 
     private static final Long USER_ID = 77L;
 
@@ -116,7 +116,7 @@ public class WorkControllerTest {
     }
 
     private void givenWorksExist(List<Work> works) {
-        when(getAllWorksUseCase.execute()).thenReturn(works);
+        when(getAllWorks.execute()).thenReturn(works);
     }
 
     private Work givenWork(Long id, String title) {
@@ -132,21 +132,21 @@ public class WorkControllerTest {
     }
 
     private void givenToggleLikeSucceeds(Long workId, LikeResponseDto dto) {
-        when(toggleWorkLikeUseCase.execute(eq(workId), eq(USER_ID))).thenReturn(dto);
+        when(toggleWorkLike.execute(eq(workId), eq(USER_ID))).thenReturn(dto);
     }
 
     private void givenToggleLikeThrowsNotFound(Long workId) {
-        when(toggleWorkLikeUseCase.execute(eq(workId), eq(USER_ID)))
+        when(toggleWorkLike.execute(eq(workId), eq(USER_ID)))
                 .thenThrow(new java.util.NoSuchElementException("not found"));
     }
 
     private void givenToggleLikeThrowsForbidden(Long workId) {
-        when(toggleWorkLikeUseCase.execute(eq(workId), eq(USER_ID)))
+        when(toggleWorkLike.execute(eq(workId), eq(USER_ID)))
                 .thenThrow(new SecurityException("forbidden"));
     }
 
     private void givenToggleLikeThrowsBadRequest(Long workId) {
-        when(toggleWorkLikeUseCase.execute(eq(workId), eq(USER_ID)))
+        when(toggleWorkLike.execute(eq(workId), eq(USER_ID)))
                 .thenThrow(new IllegalArgumentException("bad"));
     }
 
@@ -185,10 +185,10 @@ public class WorkControllerTest {
     }
 
     private void thenGetAllWorksUseCaseWasCalled() {
-        verify(getAllWorksUseCase).execute();
+        verify(getAllWorks).execute();
     }
 
     private void thenToggleLikeUseCaseWasCalled(Long workId) {
-        verify(toggleWorkLikeUseCase).execute(eq(workId), eq(USER_ID));
+        verify(toggleWorkLike).execute(eq(workId), eq(USER_ID));
     }
 }

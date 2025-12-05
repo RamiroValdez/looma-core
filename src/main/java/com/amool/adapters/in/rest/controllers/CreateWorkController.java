@@ -4,8 +4,8 @@ import com.amool.adapters.in.rest.dtos.CreateWorkDto;
 import com.amool.adapters.in.rest.dtos.TagSuggestionRequestDto;
 import com.amool.adapters.in.rest.dtos.TagSuggestionResponseDto;
 import com.amool.application.usecases.CreateAuthorNotification;
-import com.amool.application.usecases.CreateWorkUseCase;
-import com.amool.application.usecases.SuggestTagsUseCase;
+import com.amool.application.usecases.CreateWork;
+import com.amool.application.usecases.SuggestTags;
 import com.amool.security.JwtUserPrincipal;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
@@ -20,14 +20,14 @@ import org.springframework.util.StringUtils;
 @RequestMapping("/api/create-work")
 public class CreateWorkController {
 
-    private final CreateWorkUseCase createWorkUseCase;
-    private final SuggestTagsUseCase suggestTagsUseCase;
+    private final CreateWork createWork;
+    private final SuggestTags suggestTags;
     private final CreateAuthorNotification createAuthorNotification;
 
 
-    public CreateWorkController(CreateWorkUseCase createWorkUseCase, SuggestTagsUseCase suggestTagsUseCase, CreateAuthorNotification createAuthorNotification) {
-        this.createWorkUseCase = createWorkUseCase;
-        this.suggestTagsUseCase = suggestTagsUseCase;
+    public CreateWorkController(CreateWork createWork, SuggestTags suggestTags, CreateAuthorNotification createAuthorNotification) {
+        this.createWork = createWork;
+        this.suggestTags = suggestTags;
         this.createAuthorNotification = createAuthorNotification;
     }
 
@@ -40,7 +40,7 @@ public class CreateWorkController {
             @AuthenticationPrincipal JwtUserPrincipal principal
             ) {
                 try {
-                    Long result = this.createWorkUseCase.execute(
+                    Long result = this.createWork.execute(
                             createWorkDto.title(),
                             createWorkDto.description(),
                             createWorkDto.categoryIds(),
@@ -69,7 +69,7 @@ public class CreateWorkController {
             return ResponseEntity.badRequest().build();
         }
 
-        var suggestions = suggestTagsUseCase.execute(
+        var suggestions = suggestTags.execute(
                 request.description(),
                 request.title(),
                 request.existingTags() == null ? Set.of() : request.existingTags()

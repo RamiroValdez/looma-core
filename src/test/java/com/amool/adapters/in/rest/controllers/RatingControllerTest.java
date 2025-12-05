@@ -1,8 +1,8 @@
 package com.amool.adapters.in.rest.controllers;
 
-import com.amool.application.usecases.GetUserRatingUseCase;
-import com.amool.application.usecases.GetWorkRatingsUseCase;
-import com.amool.application.usecases.RateWorkUseCase;
+import com.amool.application.usecases.GetUserRating;
+import com.amool.application.usecases.GetWorkRatings;
+import com.amool.application.usecases.RateWork;
 import com.amool.security.JwtUserPrincipal;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
@@ -32,9 +32,9 @@ public class RatingControllerTest {
     @Autowired
     private MockMvc mockMvc;
 
-    @MockitoBean private RateWorkUseCase rateWorkUseCase;
-    @MockitoBean private GetUserRatingUseCase getUserRatingUseCase;
-    @MockitoBean private GetWorkRatingsUseCase getWorkRatingsUseCase;
+    @MockitoBean private RateWork rateWork;
+    @MockitoBean private GetUserRating getUserRating;
+    @MockitoBean private GetWorkRatings getWorkRatings;
 
     private static final long WORK_ID = 1L;
     private static final long USER_ID = 100L;
@@ -142,30 +142,30 @@ public class RatingControllerTest {
     }
 
     private void givenRateSucceeds(double requestRating, double average) {
-        when(rateWorkUseCase.execute(eq(WORK_ID), eq(USER_ID), eq(requestRating))).thenReturn(average);
+        when(rateWork.execute(eq(WORK_ID), eq(USER_ID), eq(requestRating))).thenReturn(average);
     }
 
     private void givenRateThrowsIllegalArgument(double requestRating) {
-        when(rateWorkUseCase.execute(eq(WORK_ID), eq(USER_ID), eq(requestRating)))
+        when(rateWork.execute(eq(WORK_ID), eq(USER_ID), eq(requestRating)))
                 .thenThrow(new IllegalArgumentException("invalid step"));
     }
 
     private void givenRateThrowsNotFound(double requestRating) {
-        when(rateWorkUseCase.execute(eq(WORK_ID), eq(USER_ID), eq(requestRating)))
+        when(rateWork.execute(eq(WORK_ID), eq(USER_ID), eq(requestRating)))
                 .thenThrow(new java.util.NoSuchElementException("not found"));
     }
 
     private void givenRateThrowsForbidden(double requestRating) {
-        doThrow(new SecurityException("Forbidden")).when(rateWorkUseCase)
+        doThrow(new SecurityException("Forbidden")).when(rateWork)
                 .execute(eq(WORK_ID), eq(USER_ID), eq(requestRating));
     }
 
     private void givenTotalRatingsIs(int total) {
-        when(getWorkRatingsUseCase.execute(eq(WORK_ID), any())).thenReturn(total);
+        when(getWorkRatings.execute(eq(WORK_ID), any())).thenReturn(total);
     }
 
     private void givenUserRatingIs(Optional<Double> rating) {
-        when(getUserRatingUseCase.execute(eq(WORK_ID), eq(USER_ID))).thenReturn(rating);
+        when(getUserRating.execute(eq(WORK_ID), eq(USER_ID))).thenReturn(rating);
     }
 
     private ResultActions whenClientRates(double rating) throws Exception {
@@ -220,19 +220,19 @@ public class RatingControllerTest {
     }
 
     private void thenRateUseCaseWasCalledWith(double rating) {
-        verify(rateWorkUseCase).execute(WORK_ID, USER_ID, rating);
+        verify(rateWork).execute(WORK_ID, USER_ID, rating);
     }
 
     private void thenRateUseCaseWasNotInvoked() {
-        verify(rateWorkUseCase, never()).execute(anyLong(), anyLong(), anyDouble());
+        verify(rateWork, never()).execute(anyLong(), anyLong(), anyDouble());
     }
 
     private void thenGetWorkRatingsUseCaseWasCalled() {
-        verify(getWorkRatingsUseCase).execute(eq(WORK_ID), any());
+        verify(getWorkRatings).execute(eq(WORK_ID), any());
     }
 
     private void thenGetUserRatingUseCaseWasCalled() {
-        verify(getUserRatingUseCase).execute(WORK_ID, USER_ID);
+        verify(getUserRating).execute(WORK_ID, USER_ID);
     }
 
     private String bodyWithRating(double rating) {

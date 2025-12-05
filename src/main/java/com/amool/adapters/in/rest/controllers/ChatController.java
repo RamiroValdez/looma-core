@@ -1,8 +1,8 @@
 package com.amool.adapters.in.rest.controllers;
 
 import com.amool.adapters.in.rest.dtos.ChatRequestDto;
-import com.amool.application.usecases.GetChatConversationUseCase;
-import com.amool.application.usecases.ProcessChatMessageUseCase;
+import com.amool.application.usecases.GetChatConversation;
+import com.amool.application.usecases.ProcessChatMessage;
 import com.amool.domain.model.ChatMessage;
 import com.amool.security.JwtUserPrincipal;
 import org.springframework.http.ResponseEntity;
@@ -15,21 +15,21 @@ import java.util.List;
 @RequestMapping("/api/chat")
 public class ChatController {
 
-    private final ProcessChatMessageUseCase processChatMessageUseCase;
-    private final GetChatConversationUseCase getChatConversationUseCase;
+    private final ProcessChatMessage processChatMessage;
+    private final GetChatConversation getChatConversation;
 
     public ChatController(
-            ProcessChatMessageUseCase processChatMessageUseCase,
-            GetChatConversationUseCase getChatConversationUseCase) {
-        this.processChatMessageUseCase = processChatMessageUseCase;
-        this.getChatConversationUseCase = getChatConversationUseCase;
+            ProcessChatMessage processChatMessage,
+            GetChatConversation getChatConversation) {
+        this.processChatMessage = processChatMessage;
+        this.getChatConversation = getChatConversation;
     }
 
     @PostMapping("/message")
     public ResponseEntity<List<ChatMessage>> sendMessage(
             @RequestBody ChatRequestDto request,
             @AuthenticationPrincipal JwtUserPrincipal user) {
-        List<ChatMessage> response = processChatMessageUseCase.execute(
+        List<ChatMessage> response = processChatMessage.execute(
                 user.getUserId(),
                 request.getChapterId(),
                 request.getMessage(),
@@ -43,7 +43,7 @@ public class ChatController {
             @PathVariable Long chapterId,
             @AuthenticationPrincipal JwtUserPrincipal user) {
         return ResponseEntity.ok(
-            getChatConversationUseCase.execute(user.getUserId(), chapterId)
+            getChatConversation.execute(user.getUserId(), chapterId)
         );
     }
 }

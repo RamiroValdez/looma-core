@@ -11,7 +11,7 @@ import org.springframework.web.client.RestTemplate;
 @Configuration
 public class UseCasesConfig {
 
-    private final AwsS3Port awsS3Port;
+    private final FilesStoragePort filesStoragePort;
     private final AuthenticateUserPort authPort;
     private final CategoryPort categoryPort;
     private final FormatPort formatPort;
@@ -47,7 +47,7 @@ public class UseCasesConfig {
     private final NotificationPort notificationPort;
     private final ObtainChapterByIdPort obtainChapterByIdPort;
     private final UserPreferencesPort userPreferencesPort;
-    private final HttpDownloadPort httpDownloadPort;
+    private final DownloadPort downloadPort;
     private final AnalyticsPort analyticsPort;
     private final UserAccountPort userAccountPort;
     private final EmailPort emailPort;
@@ -56,7 +56,7 @@ public class UseCasesConfig {
     private final ChatAIPort chatAIPort;
 
     public UseCasesConfig(
-            AwsS3Port awsS3Port,
+            FilesStoragePort filesStoragePort,
             AuthenticateUserPort authPort,
             CategoryPort categoryPort,
             FormatPort formatPort,
@@ -91,7 +91,7 @@ public class UseCasesConfig {
             ReadingProgressPort readingProgressPort,
             AnalyticsPort analyticsPort,
             NotificationPort notificationPort,
-            HttpDownloadPort httpDownloadPort,
+            DownloadPort downloadPort,
             ObtainChapterByIdPort obtainChapterByIdPort,
             PasswordEncoder passwordEncoder,
             ChatConversationPort chatConversationPort,
@@ -101,7 +101,7 @@ public class UseCasesConfig {
             PaymentSessionLinkPort paymentSessionLinkPort,
             UserPreferencesPort userPreferencesPort
             ) {
-        this.awsS3Port = awsS3Port;
+        this.filesStoragePort = filesStoragePort;
         this.authPort = authPort;
         this.categoryPort = categoryPort;
         this.formatPort = formatPort;
@@ -136,7 +136,7 @@ public class UseCasesConfig {
         this.readingProgressPort = readingProgressPort;
         this.notificationPort = notificationPort;
         this.obtainChapterByIdPort = obtainChapterByIdPort;
-        this.httpDownloadPort = httpDownloadPort;
+        this.downloadPort = downloadPort;
         this.analyticsPort = analyticsPort;
         this.chatConversationPort = chatConversationPort;
         this.chatAIPort = chatAIPort;
@@ -147,33 +147,33 @@ public class UseCasesConfig {
     }
 
     @Bean
-    public ObtainObjectsInPathUseCase obtainObjectsInPathUseCase() {
-        return new ObtainObjectsInPathUseCase(awsS3Port);
+    public ObtainObjectsInPath obtainObjectsInPathUseCase() {
+        return new ObtainObjectsInPath(filesStoragePort);
     }
 
     @Bean
-    public ObtainPresignedUrlUseCase obtainPresignedUrlUseCase() {
-        return new ObtainPresignedUrlUseCase(awsS3Port);
+    public ObtainPresignedUrl obtainPresignedUrlUseCase() {
+        return new ObtainPresignedUrl(filesStoragePort);
     }
 
     @Bean
-    public ObtainAllCategoriesUseCase obtainAllCategoriesUseCase() {
-        return new ObtainAllCategoriesUseCase(categoryPort);
+    public ObtainAllCategories obtainAllCategoriesUseCase() {
+        return new ObtainAllCategories(categoryPort);
     }
 
     @Bean
-    public ObtainAllFormatsUseCase obtainAllFormatsUseCase() {
-        return  new ObtainAllFormatsUseCase(formatPort);
+    public ObtainAllFormats obtainAllFormatsUseCase() {
+        return  new ObtainAllFormats(formatPort);
     }
 
     @Bean
-    public CreateEmptyChapterUseCase createEmptyChapterUseCase(){
-        return new CreateEmptyChapterUseCase(loadLanguagePort, saveChapterPort, saveChapterContentPort);
+    public CreateEmptyChapter createEmptyChapterUseCase(){
+        return new CreateEmptyChapter(loadLanguagePort, saveChapterPort, saveChapterContentPort);
     }
 
     @Bean
-    public CancelScheduledPublicationUseCase cancelScheduledPublicationUseCase() {
-        return new CancelScheduledPublicationUseCase(
+    public CancelScheduledPublication cancelScheduledPublicationUseCase() {
+        return new CancelScheduledPublication(
                 obtainWorkByIdPort,
                 loadChapterPort,
                 updateChapterStatusPort
@@ -181,8 +181,8 @@ public class UseCasesConfig {
     }
 
     @Bean
-    public DeleteChapterUseCase deleteChapterUseCase() {
-        return new DeleteChapterUseCase(
+    public DeleteChapter deleteChapterUseCase() {
+        return new DeleteChapter(
                 loadChapterPort,
                 deleteChapterContentPort,
                 deleteChapterPort,
@@ -191,13 +191,13 @@ public class UseCasesConfig {
     }
 
     @Bean
-    public GetChapterWithContentUseCase getChapterWithContentUseCase() {
-        return new GetChapterWithContentUseCase(loadChapterPort, loadChapterContentPort);
+    public GetChapterWithContent getChapterWithContentUseCase() {
+        return new GetChapterWithContent(loadChapterPort, loadChapterContentPort);
     }
 
     @Bean
-    public GetChapterForEditUseCase getChapterForEditUseCase() {
-        return new GetChapterForEditUseCase(
+    public GetChapterForEdit getChapterForEditUseCase() {
+        return new GetChapterForEdit(
                 loadChapterPort,
                 loadChapterContentPort,
                 loadLanguagePort,
@@ -206,8 +206,8 @@ public class UseCasesConfig {
     }
 
     @Bean
-    public PublishChapterUseCase publishChapterUseCase() {
-        return new PublishChapterUseCase(
+    public PublishChapter publishChapterUseCase() {
+        return new PublishChapter(
                 loadChapterPort,
                 obtainWorkByIdPort,
                 updateChapterStatusPort
@@ -215,8 +215,8 @@ public class UseCasesConfig {
     }
 
     @Bean
-    public SchedulePublicationUseCase schedulePublicationUseCase() {
-        return new SchedulePublicationUseCase(
+    public SchedulePublication schedulePublicationUseCase() {
+        return new SchedulePublication(
                 obtainWorkByIdPort,
                 loadChapterPort,
                 updateChapterStatusPort
@@ -224,8 +224,8 @@ public class UseCasesConfig {
     }
 
     @Bean
-    public UpdateChapterUseCase updateChapterUseCase(){
-        return new UpdateChapterUseCase(
+    public UpdateChapter updateChapterUseCase(){
+        return new UpdateChapter(
                 loadChapterPort,
                 updateChapterPort,
                 saveChapterContentPort
@@ -233,76 +233,76 @@ public class UseCasesConfig {
     }
 
     @Bean
-    public LoginUseCase loginUseCase() {
-        return new LoginUseCase(authPort);
+    public Login loginUseCase() {
+        return new Login(authPort);
     }
 
     @Bean
-    public ExtractTextFromFileUseCase extractTextToFileUseCase() {
-        return new ExtractTextFromFileUseCase();
+    public ExtractTextFromFile extractTextToFileUseCase() {
+        return new ExtractTextFromFile();
     }
 
     @Bean
-    public GenerateImageUrlUseCase generateImageUrlUseCase() {
-        return new GenerateImageUrlUseCase(openAIImagePort);
+    public GenerateImageUrl generateImageUrlUseCase() {
+        return new GenerateImageUrl(openAIImagePort);
     }
 
     @Bean
-    public GetAllLanguagesUseCase getAllLanguagesUseCase() {
-        return new GetAllLanguagesUseCase(loadLanguagePort);
+    public GetAllLanguages getAllLanguagesUseCase() {
+        return new GetAllLanguages(loadLanguagePort);
     }
 
     @Bean
-    public GetMatchTagsUseCase getMatchTagsUseCase() {
-        return new GetMatchTagsUseCase(tagPort);
+    public GetMatchTags getMatchTagsUseCase() {
+        return new GetMatchTags(tagPort);
     }
 
     @Bean
-    public SuggestTagsUseCase suggestTagsUseCase() {
-        return new SuggestTagsUseCase(tagSuggestionPort);
+    public SuggestTags suggestTagsUseCase() {
+        return new SuggestTags(tagSuggestionPort);
     }
 
     @Bean
-    public CreateLanguageVersionUseCase createLanguageVersionUseCase() {
-        return new CreateLanguageVersionUseCase(openAIPort, googleTranslatePort);
+    public CreateLanguageVersion createLanguageVersionUseCase() {
+        return new CreateLanguageVersion(openAIPort, googleTranslatePort);
     }
 
     @Bean
-    public GetUserByIdUseCase getUserByIdUseCase() {
-        return new GetUserByIdUseCase(loadUserPort, awsS3Port);
+    public GetUserById getUserByIdUseCase() {
+        return new GetUserById(loadUserPort, filesStoragePort);
     }
 
     @Bean
-    public ObtainWorkByIdUseCase obtainWorkByIdUseCase() {
-        return new ObtainWorkByIdUseCase(
+    public ObtainWorkById obtainWorkByIdUseCase() {
+        return new ObtainWorkById(
                 obtainWorkByIdPort,
-                awsS3Port,
+                filesStoragePort,
                 likePort);
     }
 
     @Bean
-    public GetWorksByUserIdUseCase getWorksByUserIdUseCase() {
-        return new GetWorksByUserIdUseCase(obtainWorkByIdPort);
+    public GetWorksByUserId getWorksByUserIdUseCase() {
+        return new GetWorksByUserId(obtainWorkByIdPort);
     }
 
     @Bean
-    public GetAuthenticatedUserWorksUseCase getAuthenticatedUserWorksUseCase() {
-        return new GetAuthenticatedUserWorksUseCase(
+    public GetAuthenticatedUserWorks getAuthenticatedUserWorksUseCase() {
+        return new GetAuthenticatedUserWorks(
                 obtainWorkByIdPort,
-                awsS3Port);
+                filesStoragePort);
     }
 
     @Bean
-    public UpdateCoverUseCase updateCoverUseCase() {
-        return new UpdateCoverUseCase(
+    public UpdateCover updateCoverUseCase() {
+        return new UpdateCover(
                 obtainWorkByIdPort,
                 imagesService,
                 workPort);
     }
 
     @Bean
-    public CreateWorkUseCase createWorkUseCase() {
-        return new CreateWorkUseCase(
+    public CreateWork createWorkUseCase() {
+        return new CreateWork(
                 workPort,
                 obtainWorkByIdPort,
                 tagPort,
@@ -314,73 +314,73 @@ public class UseCasesConfig {
     }
 
     @Bean
-    public UpdateBannerUseCase updateBannerUseCase() {
-        return new UpdateBannerUseCase(
+    public UpdateBanner updateBannerUseCase() {
+        return new UpdateBanner(
                 obtainWorkByIdPort,
                 imagesService,
                 workPort);
     }
 
     @Bean
-    public SearchAndFiltrateUseCase searchAndFiltrateUseCase() {
-        return new SearchAndFiltrateUseCase(workPort, awsS3Port);
+    public SearchAndFiltrate searchAndFiltrateUseCase() {
+        return new SearchAndFiltrate(workPort, filesStoragePort);
     }
 
     @Bean
-    public IsWorkSavedUseCase isWorkSavedUseCase() {
-        return new IsWorkSavedUseCase(saveWorkPort);
+    public IsWorkSaved isWorkSavedUseCase() {
+        return new IsWorkSaved(saveWorkPort);
     }
 
      @Bean
-    public GetSavedWorksUseCase getSavedWorksUseCase() {
-    return new GetSavedWorksUseCase(saveWorkPort, awsS3Port);
+    public GetSavedWorks getSavedWorksUseCase() {
+    return new GetSavedWorks(saveWorkPort, filesStoragePort);
 }
 
     @Bean
-    public ToggleSaveWorkUseCase toggleSaveWorkUseCase() {
-        return new ToggleSaveWorkUseCase(saveWorkPort);
+    public ToggleSaveWork toggleSaveWorkUseCase() {
+        return new ToggleSaveWork(saveWorkPort);
     }
 
     @Bean
-    public GetAllWorksUseCase getAllWorksUseCase() {
-        return new GetAllWorksUseCase(workPort);
+    public GetAllWorks getAllWorksUseCase() {
+        return new GetAllWorks(workPort);
     }
 
     @Bean
-    public RateWorkUseCase rateWorkUseCase() {
-        return new RateWorkUseCase(ratingPort);
+    public RateWork rateWorkUseCase() {
+        return new RateWork(ratingPort);
     }
 
     @Bean
-    public GetUserRatingUseCase getUserRatingUseCase() {
-        return new GetUserRatingUseCase(ratingPort);
+    public GetUserRating getUserRatingUseCase() {
+        return new GetUserRating(ratingPort);
     }
 
     @Bean
-    public GetWorkRatingsUseCase getWorkRatingsUseCase() {
-        return new GetWorkRatingsUseCase(ratingPort);
+    public GetWorkRatings getWorkRatingsUseCase() {
+        return new GetWorkRatings(ratingPort);
     }
 
     @Bean
-    public ToggleWorkLikeUseCase toggleWorkLikeUseCase() {
-        return new ToggleWorkLikeUseCase(likePort);
+    public ToggleWorkLike toggleWorkLikeUseCase() {
+        return new ToggleWorkLike(likePort);
     }
 
     @Bean
-    public ToggleChapterLikeUseCase toggleChapterLikeUseCase() {
-        return new ToggleChapterLikeUseCase(likePort);
+    public ToggleChapterLike toggleChapterLikeUseCase() {
+        return new ToggleChapterLike(likePort);
     }
 
     @Bean
-    public UpdateChapterContentUseCase updateChapterContentUseCase() {
-        return new UpdateChapterContentUseCase(
+    public UpdateChapterContent updateChapterContentUseCase() {
+        return new UpdateChapterContent(
                 saveChapterContentPort,
                 loadWorkOwnershipPort);
     }
 
     @Bean
-    public ValidateChapterAccessUseCase validateChapterAccessUseCase() {
-        return new ValidateChapterAccessUseCase(
+    public ValidateChapterAccess validateChapterAccessUseCase() {
+        return new ValidateChapterAccess(
                 loadChapterPort,
                 obtainWorkByIdPort,
                 subscriptionQueryPort
@@ -388,23 +388,23 @@ public class UseCasesConfig {
     }
 
     @Bean
-    public GetWorkPermissionsUseCase getWorkPermissionsUseCase() {
-        return new GetWorkPermissionsUseCase(subscriptionQueryPort);
+    public GetWorkPermissions getWorkPermissionsUseCase() {
+        return new GetWorkPermissions(subscriptionQueryPort);
     }
 
     @Bean
-    public ExtractPaymentIdFromWebhookUseCase extractPaymentIdFromWebhookUseCase() {
-        return new ExtractPaymentIdFromWebhookUseCase();
+    public ExtractPaymentIdFromWebhook extractPaymentIdFromWebhookUseCase() {
+        return new ExtractPaymentIdFromWebhook();
     }
 
     @Bean
-    public SubscribeUserUseCase subscribeUserUseCase() {
-        return new SubscribeUserUseCase(subscriptionPersistencePort);
+    public SubscribeUser subscribeUserUseCase() {
+        return new SubscribeUser(subscriptionPersistencePort);
     }
 
     @Bean
-    public ProcessMercadoPagoWebhookUseCase processMercadoPagoWebhookUseCase() {
-        return new ProcessMercadoPagoWebhookUseCase(
+    public ProcessMercadoPagoWebhook processMercadoPagoWebhookUseCase() {
+        return new ProcessMercadoPagoWebhook(
                 restTemplate,
                 paymentAuditPort,
                 userBalancePort,
@@ -418,13 +418,13 @@ public class UseCasesConfig {
     }
 
     @Bean
-    public ObtainWorkListUseCase obtainWorkListUseCase() {
-        return new ObtainWorkListUseCase(workPort, awsS3Port);
+    public ObtainWorkList obtainWorkListUseCase() {
+        return new ObtainWorkList(workPort, filesStoragePort);
     }
 
     @Bean
-    public UpdateReadingProgressUseCase updateReadingProgressUseCase() {
-        return new UpdateReadingProgressUseCase(readingProgressPort);
+    public UpdateReadingProgress updateReadingProgressUseCase() {
+        return new UpdateReadingProgress(readingProgressPort);
     }
 
     @Bean
@@ -442,59 +442,59 @@ public class UseCasesConfig {
         return new CreateAuthorNotification(notificationPort, loadUserPort, obtainWorkByIdPort, emailPort);
     }
     @Bean
-    public ObtainNotificationsUseCase obtainNotificationsUseCase() {
-        return new ObtainNotificationsUseCase(notificationPort);
+    public ObtainNotifications obtainNotificationsUseCase() {
+        return new ObtainNotifications(notificationPort);
     }
 
     @Bean
-    public UpdateNotificationReadUseCase updateNotificationReadUseCase() {
-        return new UpdateNotificationReadUseCase(notificationPort);
+    public UpdateNotificationRead updateNotificationReadUseCase() {
+        return new UpdateNotificationRead(notificationPort);
     }
 
     @Bean
-    public SetUserPreferencesUseCase setUserPreferencesUseCase() {
-        return new SetUserPreferencesUseCase(userPreferencesPort);
+    public SetUserPreferences setUserPreferencesUseCase() {
+        return new SetUserPreferences(userPreferencesPort);
     }
 
     @Bean
-    public UpdateUserUseCase updateUserUseCase() {
-        return new UpdateUserUseCase(loadUserPort, imagesService);
+    public UpdateUser updateUserUseCase() {
+        return new UpdateUser(loadUserPort, imagesService);
     }
 
 
 
     @Bean
-    public GetLikesPerWorkUseCase getLikesPerWorkUseCase() {
-        return new GetLikesPerWorkUseCase(analyticsPort);
+    public GetLikesPerWork getLikesPerWorkUseCase() {
+        return new GetLikesPerWork(analyticsPort);
     }
 
     @Bean
-    public GetLikesPerChapterUseCase getLikesPerChapterUseCase() {
-        return new GetLikesPerChapterUseCase(analyticsPort);
+    public GetLikesPerChapter getLikesPerChapterUseCase() {
+        return new GetLikesPerChapter(analyticsPort);
     }
 
     @Bean
-    public GetRatingsPerWorkUseCase getRatingsPerWorkUseCase() {
-        return new GetRatingsPerWorkUseCase(analyticsPort);
+    public GetRatingsPerWork getRatingsPerWorkUseCase() {
+        return new GetRatingsPerWork(analyticsPort);
     }
 
     @Bean
-    public GetSavesPerWorkUseCase getSavesPerWorkUseCase() {
-        return new GetSavesPerWorkUseCase(analyticsPort);
+    public GetSavesPerWork getSavesPerWorkUseCase() {
+        return new GetSavesPerWork(analyticsPort);
     }
     @Bean
-    public ProcessChatMessageUseCase processChatMessageUseCase() {
-        return new ProcessChatMessageUseCase(chatConversationPort, chatAIPort);
-    }
-
-    @Bean
-    public GetChatConversationUseCase getChatConversationUseCase() {
-        return new GetChatConversationUseCase(chatConversationPort);
+    public ProcessChatMessage processChatMessageUseCase() {
+        return new ProcessChatMessage(chatConversationPort, chatAIPort);
     }
 
     @Bean
-    public StartSubscriptionFlowUseCase startSubscriptionFlowUseCase(java.util.List<PaymentProviderPort> paymentProviders) {
-        return new StartSubscriptionFlowUseCase(
+    public GetChatConversation getChatConversationUseCase() {
+        return new GetChatConversation(chatConversationPort);
+    }
+
+    @Bean
+    public StartSubscriptionFlow startSubscriptionFlowUseCase(java.util.List<PaymentProviderPort> paymentProviders) {
+        return new StartSubscriptionFlow(
                 obtainWorkByIdPort,
                 loadChapterPort,
                 subscribeUserUseCase(),
@@ -505,16 +505,16 @@ public class UseCasesConfig {
 
 
     @Bean
-    public GetSuscribersPerAuthorUseCase getSuscribersPerAuthorUseCase() {
-        return new GetSuscribersPerAuthorUseCase(analyticsPort);
+    public GetSuscribersPerAuthor getSuscribersPerAuthorUseCase() {
+        return new GetSuscribersPerAuthor(analyticsPort);
     }
     @Bean
-    public ExportEpubUseCase exportEpubUseCase() {
-        return new ExportEpubUseCase(
+    public ExportEpub exportEpubUseCase() {
+        return new ExportEpub(
                 obtainWorkByIdPort,
                 loadChapterContentPort,
-                awsS3Port,
-                httpDownloadPort,
+                filesStoragePort,
+                downloadPort,
                 workPort,
                 subscriptionQueryPort
         );
@@ -522,20 +522,20 @@ public class UseCasesConfig {
 
 
     @Bean
-    public ExportPdfUseCase exportPdfUseCase() {
-        return new ExportPdfUseCase(
+    public ExportPdf exportPdfUseCase() {
+        return new ExportPdf(
                 obtainWorkByIdPort,
                 loadChapterContentPort,
-                awsS3Port,
-                httpDownloadPort,
+                filesStoragePort,
+                downloadPort,
                 workPort,
                 subscriptionQueryPort
         );
     }
 
     @Bean
-    public UpdateWorkUseCase updateWorkUseCase() {
-        return new UpdateWorkUseCase(
+    public UpdateWork updateWorkUseCase() {
+        return new UpdateWork(
                 workPort,
                 obtainWorkByIdPort,
                 tagPort,
@@ -544,37 +544,37 @@ public class UseCasesConfig {
     }
 
     @Bean
-    public GetSuscribersPerWorkUseCase getSuscribersPerWorkUseCase() {
-        return new GetSuscribersPerWorkUseCase(analyticsPort);
+    public GetSuscribersPerWork getSuscribersPerWorkUseCase() {
+        return new GetSuscribersPerWork(analyticsPort);
     }
 
     @Bean
-    public GetTotalPerAuthorUseCase getTotalPerAuthorUseCase() {
-        return new GetTotalPerAuthorUseCase(analyticsPort);
+    public GetTotalPerAuthor getTotalPerAuthorUseCase() {
+        return new GetTotalPerAuthor(analyticsPort);
     }
 
     @Bean
-    public GetTotalPerWorkUseCase getTotalPerWorkUseCase() {
-        return new GetTotalPerWorkUseCase(analyticsPort);
+    public GetTotalPerWork getTotalPerWorkUseCase() {
+        return new GetTotalPerWork(analyticsPort);
     }
 
     @Bean
-    public GetTotalSuscribersUseCase getTotalSuscribersUseCase() {
-        return new GetTotalSuscribersUseCase(analyticsPort, obtainWorkByIdPort);
+    public GetTotalSuscribers getTotalSuscribersUseCase() {
+        return new GetTotalSuscribers(analyticsPort, obtainWorkByIdPort);
     }
     @Bean
-    public StartRegistrationUseCase startRegistrationUseCase() {
-        return new StartRegistrationUseCase(userAccountPort, emailPort);
+    public StartRegistration startRegistrationUseCase() {
+        return new StartRegistration(userAccountPort, emailPort);
     }
 
     @Bean
-    public VerifyRegistrationUseCase verifyRegistrationUseCase() {
-        return new VerifyRegistrationUseCase(userAccountPort);
+    public VerifyRegistration verifyRegistrationUseCase() {
+        return new VerifyRegistration(userAccountPort);
     }
 
     @Bean
     public GetUserPhoto getUserPhoto() {
-        return new GetUserPhoto(awsS3Port, loadUserPort);
+        return new GetUserPhoto(filesStoragePort, loadUserPort);
     }
 
     @Bean
@@ -589,6 +589,6 @@ public class UseCasesConfig {
 
     @Bean
     public GetSubscriptions getSubscriptions() {
-        return new GetSubscriptions(subscriptionPersistencePort, awsS3Port);
+        return new GetSubscriptions(subscriptionPersistencePort, filesStoragePort);
     }
 }

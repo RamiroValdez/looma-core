@@ -1,6 +1,6 @@
 package com.amool.adapters.in.rest.controllers;
 
-import com.amool.application.usecases.GetAllLanguagesUseCase;
+import com.amool.application.usecases.GetAllLanguages;
 import com.amool.domain.model.Language;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
@@ -17,12 +17,12 @@ import static org.mockito.Mockito.*;
 public class LanguageControllerTest {
 
     private LanguageController languageController;
-    private GetAllLanguagesUseCase getAllLanguagesUseCase;
+    private GetAllLanguages getAllLanguages;
 
     @BeforeEach
     void setUp() {
-        getAllLanguagesUseCase = Mockito.mock(GetAllLanguagesUseCase.class);
-        languageController = new LanguageController(getAllLanguagesUseCase);
+        getAllLanguages = Mockito.mock(GetAllLanguages.class);
+        languageController = new LanguageController(getAllLanguages);
     }
 
     @Test
@@ -79,11 +79,11 @@ public class LanguageControllerTest {
     }
 
     private void givenUseCaseWillReturn(List<Language> languages) {
-        when(getAllLanguagesUseCase.execute()).thenReturn(languages);
+        when(getAllLanguages.execute()).thenReturn(languages);
     }
 
     private void givenUseCaseWillReturnNull() {
-        when(getAllLanguagesUseCase.execute()).thenReturn(null);
+        when(getAllLanguages.execute()).thenReturn(null);
     }
 
     private ResponseEntity<List<Language>> whenGettingAllLanguages() {
@@ -117,6 +117,6 @@ public class LanguageControllerTest {
     }
 
     private void thenUseCaseWasCalledOnce() {
-        verify(getAllLanguagesUseCase, times(1)).execute();
+        verify(getAllLanguages, times(1)).execute();
     }
 }

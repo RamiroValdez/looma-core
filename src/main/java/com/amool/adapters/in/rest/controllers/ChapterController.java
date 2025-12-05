@@ -27,13 +27,13 @@ import org.slf4j.LoggerFactory;
 @RequiredArgsConstructor
 public class ChapterController {
 
-    private final GetChapterWithContentUseCase getChapterWithContentUseCase;
-    private final DeleteChapterUseCase deleteChapterUseCase;
-    private final PublishChapterUseCase publishChapterUseCase;
-    private final SchedulePublicationUseCase schedulePublicationUseCase;
-    private final CancelScheduledPublicationUseCase cancelScheduledPublicationUseCase;
-    private final UpdateChapterContentUseCase updateChapterContentUseCase;
-    private final ToggleChapterLikeUseCase toggleChapterLikeUseCase;
+    private final GetChapterWithContent getChapterWithContent;
+    private final DeleteChapter deleteChapter;
+    private final PublishChapter publishChapter;
+    private final SchedulePublication schedulePublication;
+    private final CancelScheduledPublication cancelScheduledPublication;
+    private final UpdateChapterContent updateChapterContent;
+    private final ToggleChapterLike toggleChapterLike;
     private final CreateWorkNotification createWorkNotification;
     private static final java.time.ZoneId AR = java.time.ZoneId.of("America/Argentina/Buenos_Aires");
     private static final Logger log = LoggerFactory.getLogger(ChapterController.class);
@@ -51,7 +51,7 @@ public class ChapterController {
 
     private Optional<ChapterWithContentResult> executeGetChapter(
             String workId, String chapterId, String language) {
-        return getChapterWithContentUseCase.execute(Long.valueOf(workId), Long.valueOf(chapterId), language);
+        return getChapterWithContent.execute(Long.valueOf(workId), Long.valueOf(chapterId), language);
     }
 
     private ResponseEntity<ChapterWithContentDto> mapToResponse(
@@ -80,7 +80,7 @@ public class ChapterController {
         }
 
         try {
-            ChapterContent updated = updateChapterContentUseCase.execute(
+            ChapterContent updated = updateChapterContent.execute(
                     request.workId(),
                     request.chapterId(),
                     request.language(),
@@ -101,7 +101,7 @@ public class ChapterController {
             @AuthenticationPrincipal JwtUserPrincipal userPrincipal) {
 
         try {
-            deleteChapterUseCase.execute(
+            deleteChapter.execute(
                     Long.valueOf(workId),
                     Long.valueOf(chapterId),
                     userPrincipal.getUserId()
@@ -128,7 +128,7 @@ public class ChapterController {
         }
 
         try {
-            publishChapterUseCase.execute(Long.valueOf(workId), Long.valueOf(chapterId), principal.getUserId());
+            publishChapter.execute(Long.valueOf(workId), Long.valueOf(chapterId), principal.getUserId());
             this.createWorkNotification.execute(Long.valueOf(workId), principal.getUserId(), Long.valueOf(chapterId));
             return ResponseEntity.noContent().build();
 
@@ -165,7 +165,7 @@ public class ChapterController {
             }
             java.time.LocalDateTime persistedLocal = java.time.LocalDateTime.ofInstant(when, AR);
             log.debug("Will persist local AR time: {} (computed from Instant)", persistedLocal);
-            schedulePublicationUseCase.execute(Long.valueOf(workId), Long.valueOf(chapterId), when, principal.getUserId());
+            schedulePublication.execute(Long.valueOf(workId), Long.valueOf(chapterId), when, principal.getUserId());
             return ResponseEntity.noContent().build();
         } catch (java.time.format.DateTimeParseException e) {
             return ResponseEntity.badRequest().build();
@@ -191,7 +191,7 @@ public class ChapterController {
         }
 
         try {
-            cancelScheduledPublicationUseCase.execute(Long.valueOf(workId), Long.valueOf(chapterId), principal.getUserId());
+            cancelScheduledPublication.execute(Long.valueOf(workId), Long.valueOf(chapterId), principal.getUserId());
             return ResponseEntity.noContent().build();
         } catch (NoSuchElementException e) {
             return ResponseEntity.notFound().build();
@@ -209,7 +209,7 @@ public class ChapterController {
             @AuthenticationPrincipal JwtUserPrincipal userPrincipal) {
     
         Long userId = userPrincipal.getUserId();
-        LikeResponseDto response = toggleChapterLikeUseCase.execute(chapterId, userId);
+        LikeResponseDto response = toggleChapterLike.execute(chapterId, userId);
         return ResponseEntity.ok(response);
     }
 

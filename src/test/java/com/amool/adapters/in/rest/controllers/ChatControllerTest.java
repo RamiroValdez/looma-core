@@ -1,8 +1,8 @@
 package com.amool.adapters.in.rest.controllers;
 
 import com.amool.adapters.in.rest.dtos.ChatRequestDto;
-import com.amool.application.usecases.GetChatConversationUseCase;
-import com.amool.application.usecases.ProcessChatMessageUseCase;
+import com.amool.application.usecases.GetChatConversation;
+import com.amool.application.usecases.ProcessChatMessage;
 import com.amool.domain.model.ChatMessage;
 import com.amool.security.JwtUserPrincipal;
 import org.junit.jupiter.api.BeforeEach;
@@ -24,8 +24,8 @@ import static org.mockito.Mockito.*;
 public class ChatControllerTest {
 
     private ChatController chatController;
-    private ProcessChatMessageUseCase processChatMessageUseCase;
-    private GetChatConversationUseCase getChatConversationUseCase;
+    private ProcessChatMessage processChatMessage;
+    private GetChatConversation getChatConversation;
 
     private static final Long TEST_USER_ID = 100L;
     private static final Long TEST_CHAPTER_ID = 10L;
@@ -37,12 +37,12 @@ public class ChatControllerTest {
 
     @BeforeEach
     public void setUp() {
-        processChatMessageUseCase = Mockito.mock(ProcessChatMessageUseCase.class);
-        getChatConversationUseCase = Mockito.mock(GetChatConversationUseCase.class);
+        processChatMessage = Mockito.mock(ProcessChatMessage.class);
+        getChatConversation = Mockito.mock(GetChatConversation.class);
 
         chatController = new ChatController(
-                processChatMessageUseCase,
-                getChatConversationUseCase
+                processChatMessage,
+                getChatConversation
         );
 
         testUserPrincipal = new JwtUserPrincipal(
@@ -77,7 +77,7 @@ public class ChatControllerTest {
         ResponseEntity<List<ChatMessage>> response = whenSendMessage(request);
 
         thenResponseIsOk(response);
-        verify(processChatMessageUseCase).execute(
+        verify(processChatMessage).execute(
                 eq(TEST_USER_ID),
                 eq(TEST_CHAPTER_ID),
                 eq(""),
@@ -94,7 +94,7 @@ public class ChatControllerTest {
         ResponseEntity<List<ChatMessage>> response = whenSendMessage(request);
 
         thenResponseIsOk(response);
-        verify(processChatMessageUseCase).execute(
+        verify(processChatMessage).execute(
                 eq(TEST_USER_ID),
                 eq(TEST_CHAPTER_ID),
                 eq(TEST_MESSAGE),
@@ -133,7 +133,7 @@ public class ChatControllerTest {
 
         whenGetConversation();
 
-        verify(getChatConversationUseCase).execute(TEST_USER_ID, TEST_CHAPTER_ID);
+        verify(getChatConversation).execute(TEST_USER_ID, TEST_CHAPTER_ID);
     }
 
 
@@ -171,7 +171,7 @@ public class ChatControllerTest {
                         LocalDateTime.now()
                 )
         );
-        when(processChatMessageUseCase.execute(
+        when(processChatMessage.execute(
                 eq(TEST_USER_ID),
                 eq(TEST_CHAPTER_ID),
                 anyString(),
@@ -187,13 +187,13 @@ public class ChatControllerTest {
                 new ChatMessage(TEST_USER_ID, TEST_CHAPTER_ID, "¿Algo más?", true, LocalDateTime.now().minusMinutes(2)),
                 new ChatMessage(TEST_USER_ID, TEST_CHAPTER_ID, "No, eso es todo.", false, LocalDateTime.now().minusMinutes(1))
         );
-        when(getChatConversationUseCase.execute(TEST_USER_ID, TEST_CHAPTER_ID))
+        when(getChatConversation.execute(TEST_USER_ID, TEST_CHAPTER_ID))
                 .thenReturn(conversation);
         return conversation;
     }
 
     private void givenNoConversationExists() {
-        when(getChatConversationUseCase.execute(TEST_USER_ID, TEST_CHAPTER_ID))
+        when(getChatConversation.execute(TEST_USER_ID, TEST_CHAPTER_ID))
                 .thenReturn(Collections.emptyList());
     }
 
@@ -237,7 +237,7 @@ public class ChatControllerTest {
     }
 
     private void thenProcessMessageUseCaseWasInvoked() {
-        verify(processChatMessageUseCase, times(1)).execute(
+        verify(processChatMessage, times(1)).execute(
                 eq(TEST_USER_ID),
                 eq(TEST_CHAPTER_ID),
                 anyString(),
@@ -246,6 +246,6 @@ public class ChatControllerTest {
     }
 
     private void thenGetConversationUseCaseWasInvoked() {
-        verify(getChatConversationUseCase, times(1)).execute(TEST_USER_ID, TEST_CHAPTER_ID);
+        verify(getChatConversation, times(1)).execute(TEST_USER_ID, TEST_CHAPTER_ID);
     }
 }

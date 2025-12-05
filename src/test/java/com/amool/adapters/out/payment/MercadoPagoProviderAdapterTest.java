@@ -40,6 +40,7 @@ public class MercadoPagoProviderAdapterTest {
     private PaymentSessionLinkPort paymentSessionLinkPort;
 
     private MercadoPagoProviderAdapter adapter;
+    private static final String PREFERENCES_URL = "https://api.mercadopago.com/checkout/preferences";
 
     @BeforeEach
     void setup() {
@@ -60,73 +61,109 @@ public class MercadoPagoProviderAdapterTest {
 
     @Test
     void startCheckout_withHttpReturnUrl_buildsBackUrlsWithoutAutoReturn() {
-        Mockito.when(userQueryPort.existsById(2L)).thenReturn(true);
-        Mockito.when(userQueryPort.findNameById(2L)).thenReturn("Autor X");
-        User u = new User();
-        u.setId(2L);
-        u.setPrice(new BigDecimal("1000"));
-        Mockito.when(loadUserPort.getById(2L)).thenReturn(Optional.of(u));
+        givenAuthorExists(2L, "Autor X", new BigDecimal("1000"));
+        expectPreferenceCreation("pref_123", "https://mp/init");
 
-        server.expect(once(), requestTo("https://api.mercadopago.com/checkout/preferences"))
-                .andExpect(method(POST))
-                .andRespond(withSuccess("{\n  \"id\": \"pref_123\",\n  \"init_point\": \"https://mp/init\"\n}", MediaType.APPLICATION_JSON));
+        PaymentInitResult result = startAuthorCheckout(1L, 2L, "http://localhost:5173/work/1");
 
-        PaymentInitResult result = adapter.startCheckout(1L, SubscriptionType.AUTHOR, 2L, "http://localhost:5173/work/1");
-        assertThat(result).isNotNull();
-        assertThat(result.getRedirectUrl()).isEqualTo("https://mp/init");
-        server.verify();
+        thenRedirectUrlIs(result, "https://mp/init");
+        thenPreferenceCreationVerified();
     }
 
     @Test
     void startCheckout_withHttpsReturnUrl_setsAutoReturn() {
-        Mockito.when(userQueryPort.existsById(2L)).thenReturn(true);
-        Mockito.when(userQueryPort.findNameById(2L)).thenReturn("Autor X");
-        User u = new User();
-        u.setId(2L);
-        u.setPrice(new BigDecimal("1200"));
-        Mockito.when(loadUserPort.getById(2L)).thenReturn(Optional.of(u));
+        givenAuthorExists(2L, "Autor X", new BigDecimal("1200"));
+        expectPreferenceCreation("pref_456", "https://mp/init2");
 
-        server.expect(once(), requestTo("https://api.mercadopago.com/checkout/preferences"))
-                .andExpect(method(POST))
-                .andRespond(withSuccess("{\n  \"id\": \"pref_456\",\n  \"init_point\": \"https://mp/init2\"\n}", MediaType.APPLICATION_JSON));
+        PaymentInitResult result = startAuthorCheckout(1L, 2L, "https://example.com/return");
 
-        PaymentInitResult result = adapter.startCheckout(1L, SubscriptionType.AUTHOR, 2L, "https://example.com/return");
-        assertThat(result.getRedirectUrl()).isEqualTo("https://mp/init2");
-        server.verify();
+        thenRedirectUrlIs(result, "https://mp/init2");
+        thenPreferenceCreationVerified();
     }
 
     @Test
     void startCheckout_workValidatesOwnerAndTitle() {
-        Work w = new Work();
-        w.setId(10L); w.setTitle("Mi Obra"); w.setPrice(BigDecimal.valueOf(2000.0));
-        User creator = new User();
-        creator.setId(99L);
-        w.setCreator(creator);
-        Mockito.when(obtainWorkByIdPort.obtainWorkById(10L)).thenReturn(java.util.Optional.of(w));
+        givenWorkExists(10L, "Mi Obra", BigDecimal.valueOf(2000.0), 99L);
+        expectPreferenceCreation("pref_789", "https://mp/init3");
 
-        server.expect(once(), requestTo("https://api.mercadopago.com/checkout/preferences"))
-                .andExpect(method(POST))
-                .andRespond(withSuccess("{\n  \"id\": \"pref_789\",\n  \"init_point\": \"https://mp/init3\"\n}", MediaType.APPLICATION_JSON));
+        PaymentInitResult result = startWorkCheckout(1L, 10L);
 
-        PaymentInitResult result = adapter.startCheckout(1L, SubscriptionType.WORK, 10L);
-        assertThat(result.getExternalReference()).isEqualTo("pref_789");
-        server.verify();
+        thenExternalReferenceIs(result, "pref_789");
+        thenPreferenceCreationVerified();
     }
 
     @Test
     void startCheckout_chapterResolvesWorkAndTitle() {
-        Chapter c = new Chapter();
-        c.setId(7L); c.setTitle("Cap 1"); c.setPrice(BigDecimal.valueOf(300.0)); c.setWorkId(10L);
-        Mockito.when(loadChapterPort.loadChapterForEdit(7L)).thenReturn(java.util.Optional.of(c));
-        Work w = new Work(); w.setId(10L); w.setTitle("Mi Obra"); User cr = new User(); cr.setId(55L); w.setCreator(cr);
-        Mockito.when(obtainWorkByIdPort.obtainWorkById(10L)).thenReturn(java.util.Optional.of(w));
+        givenChapterExists(7L, 10L, "Cap 1", BigDecimal.valueOf(300.0));
+        givenWorkExists(10L, "Mi Obra", null, 55L);
+        expectPreferenceCreation("pref_321", "https://mp/init4");
 
-        server.expect(once(), requestTo("https://api.mercadopago.com/checkout/preferences"))
+        PaymentInitResult result = startChapterCheckout(2L, 7L);
+
+        thenExternalReferenceIs(result, "pref_321");
+        thenPreferenceCreationVerified();
+    }
+
+    private void givenAuthorExists(long authorId, String authorName, BigDecimal price) {
+        Mockito.when(userQueryPort.existsById(authorId)).thenReturn(true);
+        Mockito.when(userQueryPort.findNameById(authorId)).thenReturn(authorName);
+        User author = new User();
+        author.setId(authorId);
+        author.setPrice(price);
+        Mockito.when(loadUserPort.getById(authorId)).thenReturn(Optional.of(author));
+    }
+
+    private void givenWorkExists(long workId, String title, BigDecimal price, long creatorId) {
+        Work work = new Work();
+        work.setId(workId);
+        work.setTitle(title);
+        if (price != null) {
+            work.setPrice(price);
+        }
+        User creator = new User();
+        creator.setId(creatorId);
+        work.setCreator(creator);
+        Mockito.when(obtainWorkByIdPort.obtainWorkById(workId)).thenReturn(Optional.of(work));
+    }
+
+    private void givenChapterExists(long chapterId, long workId, String title, BigDecimal price) {
+        Chapter chapter = new Chapter();
+        chapter.setId(chapterId);
+        chapter.setWorkId(workId);
+        chapter.setTitle(title);
+        chapter.setPrice(price);
+        Mockito.when(loadChapterPort.loadChapterForEdit(chapterId)).thenReturn(Optional.of(chapter));
+    }
+
+    private void expectPreferenceCreation(String preferenceId, String initPointUrl) {
+        String payload = String.format("{\n  \"id\": \"%s\",\n  \"init_point\": \"%s\"\n}", preferenceId, initPointUrl);
+        server.expect(once(), requestTo(PREFERENCES_URL))
                 .andExpect(method(POST))
-                .andRespond(withSuccess("{\n  \"id\": \"pref_321\",\n  \"init_point\": \"https://mp/init4\"\n}", MediaType.APPLICATION_JSON));
+                .andRespond(withSuccess(payload, MediaType.APPLICATION_JSON));
+    }
 
-        PaymentInitResult result = adapter.startCheckout(2L, SubscriptionType.CHAPTER, 7L);
-        assertThat(result.getExternalReference()).isEqualTo("pref_321");
+    private PaymentInitResult startAuthorCheckout(long buyerId, long authorId, String returnUrl) {
+        return adapter.startCheckout(buyerId, SubscriptionType.AUTHOR, authorId, returnUrl);
+    }
+
+    private PaymentInitResult startWorkCheckout(long buyerId, long workId) {
+        return adapter.startCheckout(buyerId, SubscriptionType.WORK, workId);
+    }
+
+    private PaymentInitResult startChapterCheckout(long buyerId, long chapterId) {
+        return adapter.startCheckout(buyerId, SubscriptionType.CHAPTER, chapterId);
+    }
+
+    private void thenRedirectUrlIs(PaymentInitResult result, String expectedUrl) {
+        assertThat(result).isNotNull();
+        assertThat(result.getRedirectUrl()).isEqualTo(expectedUrl);
+    }
+
+    private void thenExternalReferenceIs(PaymentInitResult result, String expectedReference) {
+        assertThat(result.getExternalReference()).isEqualTo(expectedReference);
+    }
+
+    private void thenPreferenceCreationVerified() {
         server.verify();
     }
 }

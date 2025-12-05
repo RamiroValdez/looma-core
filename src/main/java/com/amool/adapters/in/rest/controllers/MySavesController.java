@@ -1,9 +1,9 @@
 package com.amool.adapters.in.rest.controllers;
 
 import com.amool.adapters.in.rest.dtos.SaveWorkResponseDto;
-import com.amool.application.usecases.GetSavedWorksUseCase;
-import com.amool.application.usecases.IsWorkSavedUseCase;
-import com.amool.application.usecases.ToggleSaveWorkUseCase;
+import com.amool.application.usecases.GetSavedWorks;
+import com.amool.application.usecases.IsWorkSaved;
+import com.amool.application.usecases.ToggleSaveWork;
 import com.amool.domain.model.Work;
 import com.amool.security.JwtUserPrincipal;
 import org.springframework.http.ResponseEntity;
@@ -16,17 +16,17 @@ import java.util.List;
 @RequestMapping("/api/saved-works")
 public class MySavesController {
 
-    private final ToggleSaveWorkUseCase toggleSaveWorkUseCase;
-    private final IsWorkSavedUseCase isWorkSavedUseCase;
-    private final GetSavedWorksUseCase getSavedWorksUseCase;
+    private final ToggleSaveWork toggleSaveWork;
+    private final IsWorkSaved isWorkSaved;
+    private final GetSavedWorks getSavedWorks;
 
     public MySavesController(
-            ToggleSaveWorkUseCase toggleSaveWorkUseCase,
-            IsWorkSavedUseCase isWorkSavedUseCase,
-            GetSavedWorksUseCase getSavedWorksUseCase) {
-        this.toggleSaveWorkUseCase = toggleSaveWorkUseCase;
-        this.isWorkSavedUseCase = isWorkSavedUseCase;
-        this.getSavedWorksUseCase = getSavedWorksUseCase;
+            ToggleSaveWork toggleSaveWork,
+            IsWorkSaved isWorkSaved,
+            GetSavedWorks getSavedWorks) {
+        this.toggleSaveWork = toggleSaveWork;
+        this.isWorkSaved = isWorkSaved;
+        this.getSavedWorks = getSavedWorks;
     }
 
     @PostMapping("/{workId}/toggle")
@@ -35,9 +35,9 @@ public class MySavesController {
             @PathVariable Long workId) {
         
         Long userId = userDetails.getUserId();
-        toggleSaveWorkUseCase.execute(userId, workId);
+        toggleSaveWork.execute(userId, workId);
         
-        boolean isSaved = isWorkSavedUseCase.execute(userId, workId);
+        boolean isSaved = isWorkSaved.execute(userId, workId);
         return ResponseEntity.ok().body(
             new SaveWorkResponseDto(workId, isSaved)
         );
@@ -49,7 +49,7 @@ public class MySavesController {
             @PathVariable Long workId) {
         
         Long userId = userDetails.getUserId();
-        boolean isSaved = isWorkSavedUseCase.execute(userId, workId);
+        boolean isSaved = isWorkSaved.execute(userId, workId);
         
         return ResponseEntity.ok().body(
             new SaveWorkResponseDto(workId, isSaved)
@@ -61,7 +61,7 @@ public class MySavesController {
             @AuthenticationPrincipal JwtUserPrincipal userDetails) {
         
         Long userId = userDetails.getUserId();
-        List<Work> savedWorks = getSavedWorksUseCase.execute(userId);
+        List<Work> savedWorks = getSavedWorks.execute(userId);
         
         return ResponseEntity.ok(savedWorks);
     }

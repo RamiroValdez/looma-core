@@ -3,135 +3,94 @@ package com.amool.adapters.out.persistence;
 import com.amool.adapters.out.persistence.entity.CategoryEntity;
 import com.amool.domain.model.Category;
 import jakarta.persistence.EntityManager;
-import jakarta.persistence.TypedQuery;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.mockito.InjectMocks;
-import org.mockito.Mock;
-import org.mockito.MockitoAnnotations;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.test.context.ActiveProfiles;
+import org.springframework.transaction.annotation.Transactional;
 
-import java.util.Arrays;
-import java.util.Collections;
 import java.util.List;
+import java.util.Optional;
 
-import static org.junit.jupiter.api.Assertions.*;
-import static org.mockito.ArgumentMatchers.anyString;
-import static org.mockito.ArgumentMatchers.eq;
-import static org.mockito.Mockito.*;
+import static org.assertj.core.api.Assertions.assertThat;
 
+@SpringBootTest
+@ActiveProfiles("test")
+@Transactional
 public class CategoryPersistenceAdapterTest {
 
-    @Mock
+    @Autowired
+    private CategoryPersistenceAdapter adapter;
+
+    @Autowired
     private EntityManager entityManager;
 
-    @Mock
-    private TypedQuery<CategoryEntity> typedQuery;
-
-    @InjectMocks
-    private CategoryPersistenceAdapter categoryPersistenceAdapter;
+    private List<Category> categoriesResult;
+    private Optional<Category> categoryByIdResult;
+    private Long persistedId1;
+    private Long persistedId2;
 
     @BeforeEach
-    public void setup() {
-        MockitoAnnotations.openMocks(this);
+    void cleanData() {
+        entityManager.createQuery("DELETE FROM CategoryEntity").executeUpdate();
     }
 
     @Test
-    public void findAllCategories_ShouldReturnCategories_WhenCategoriesExist() {
-        CategoryEntity entity1 = new CategoryEntity();
-        entity1.setId(1L);
-        entity1.setName("Fiction");
+    void should_find_all_categories_mapped_to_domain() {
+        persistedId1 = givenCategory("Ficción");
+        persistedId2 = givenCategory("No Ficción");
 
-        CategoryEntity entity2 = new CategoryEntity();
-        entity2.setId(2L);
-        entity2.setName("Science");
+        whenFindAllCategories();
 
-        List<CategoryEntity> entities = Arrays.asList(entity1, entity2);
-
-        when(entityManager.createQuery(anyString(), eq(CategoryEntity.class))).thenReturn(typedQuery);
-        when(typedQuery.getResultList()).thenReturn(entities);
-
-        List<Category> result = categoryPersistenceAdapter.findAllCategories();
-
-        assertNotNull(result);
-        assertEquals(2, result.size());
-
-        List<String> categoryNames = result.stream()
-                .map(Category::getName)
-                .toList();
-        assertTrue(categoryNames.contains("Fiction"));
-        assertTrue(categoryNames.contains("Science"));
-
-        verify(entityManager, times(1)).createQuery(anyString(), eq(CategoryEntity.class));
-        verify(typedQuery, times(1)).getResultList();
+        thenCategoriesHasSize(2);
+        thenCategoriesContainNames("Ficción", "No Ficción");
     }
 
     @Test
-    public void findAllCategories_ShouldReturnEmptyList_WhenNoCategoriesExist() {
-        when(entityManager.createQuery(anyString(), eq(CategoryEntity.class))).thenReturn(typedQuery);
-        when(typedQuery.getResultList()).thenReturn(Collections.emptyList());
+    void should_get_category_by_id_when_exists_and_empty_when_not_exists() {
+        persistedId1 = givenCategory("Ciencia");
+        Long nonExistingId = 999999L;
 
-        List<Category> result = categoryPersistenceAdapter.findAllCategories();
+        whenGetCategoryById(persistedId1);
 
-        assertNotNull(result);
-        assertTrue(result.isEmpty());
-        verify(entityManager, times(1)).createQuery(anyString(), eq(CategoryEntity.class));
-        verify(typedQuery, times(1)).getResultList();
+        thenCategoryByIdIsPresentWithName("Ciencia");
+
+        whenGetCategoryById(nonExistingId);
+        thenCategoryByIdIsEmpty();
     }
 
-    @Test
-    public void findAllCategories_ShouldReturnAllCategories_WhenCategoriesExist() {
-        CategoryEntity entity1 = new CategoryEntity();
-        entity1.setId(1L);
-        entity1.setName("Adventure");
 
-        CategoryEntity entity2 = new CategoryEntity();
-        entity2.setId(2L);
-        entity2.setName("Biography");
-
-        CategoryEntity entity3 = new CategoryEntity();
-        entity3.setId(3L);
-        entity3.setName("Comedy");
-
-        List<CategoryEntity> entities = Arrays.asList(entity1, entity2, entity3);
-
-        when(entityManager.createQuery(anyString(), eq(CategoryEntity.class))).thenReturn(typedQuery);
-        when(typedQuery.getResultList()).thenReturn(entities);
-
-        List<Category> result = categoryPersistenceAdapter.findAllCategories();
-
-        assertNotNull(result);
-        assertEquals(3, result.size());
-
-        List<String> categoryNames = result.stream()
-                .map(Category::getName)
-                .toList();
-        assertTrue(categoryNames.contains("Adventure"));
-        assertTrue(categoryNames.contains("Biography"));
-        assertTrue(categoryNames.contains("Comedy"));
-
-        verify(entityManager, times(1)).createQuery(
-            "SELECT c FROM CategoryEntity c",
-            CategoryEntity.class
-        );
+    private Long givenCategory(String name) {
+        CategoryEntity e = new CategoryEntity();
+        e.setName(name);
+        entityManager.persist(e);
+        entityManager.flush();
+        return e.getId();
     }
 
-    @Test
-    public void findAllCategories_ShouldMapEntityToDomainCorrectly() {
-        CategoryEntity entity = new CategoryEntity();
-        entity.setId(42L);
-        entity.setName("Test Category");
+    private void whenFindAllCategories() {
+        categoriesResult = adapter.findAllCategories();
+    }
 
-        List<CategoryEntity> entities = Collections.singletonList(entity);
+    private void whenGetCategoryById(Long id) {
+        categoryByIdResult = adapter.getCategoryById(id);
+    }
 
-        when(entityManager.createQuery(anyString(), eq(CategoryEntity.class))).thenReturn(typedQuery);
-        when(typedQuery.getResultList()).thenReturn(entities);
+    private void thenCategoriesHasSize(int expected) {
+        assertThat(categoriesResult).hasSize(expected);
+    }
 
-        List<Category> result = categoryPersistenceAdapter.findAllCategories();
+    private void thenCategoriesContainNames(String... names) {
+        assertThat(categoriesResult.stream().map(Category::getName)).containsExactlyInAnyOrder(names);
+    }
 
-        assertNotNull(result);
-        assertEquals(1, result.size());
-        Category category = result.get(0);
-        assertEquals(42L, category.getId());
-        assertEquals("Test Category", category.getName());
+    private void thenCategoryByIdIsPresentWithName(String expectedName) {
+        assertThat(categoryByIdResult).isPresent();
+        assertThat(categoryByIdResult.get().getName()).isEqualTo(expectedName);
+    }
+
+    private void thenCategoryByIdIsEmpty() {
+        assertThat(categoryByIdResult).isEmpty();
     }
 }

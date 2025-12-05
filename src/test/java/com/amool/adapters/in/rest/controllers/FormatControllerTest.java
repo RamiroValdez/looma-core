@@ -1,7 +1,7 @@
 package com.amool.adapters.in.rest.controllers;
 
 import com.amool.adapters.in.rest.dtos.FormatDto;
-import com.amool.application.usecases.ObtainAllFormatsUseCase;
+import com.amool.application.usecases.ObtainAllFormats;
 import com.amool.domain.model.Format;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
@@ -18,12 +18,12 @@ import static org.mockito.Mockito.*;
 public class FormatControllerTest {
 
     private FormatController formatController;
-    private ObtainAllFormatsUseCase obtainAllFormatsUseCase;
+    private ObtainAllFormats obtainAllFormats;
 
     @BeforeEach
     public void setUp() {
-        obtainAllFormatsUseCase = Mockito.mock(ObtainAllFormatsUseCase.class);
-        formatController = new FormatController(obtainAllFormatsUseCase);
+        obtainAllFormats = Mockito.mock(ObtainAllFormats.class);
+        formatController = new FormatController(obtainAllFormats);
     }
 
     @Test
@@ -77,11 +77,11 @@ public class FormatControllerTest {
     }
 
     private void givenUseCaseWillReturn(List<Format> formats) {
-        when(obtainAllFormatsUseCase.execute()).thenReturn(formats);
+        when(obtainAllFormats.execute()).thenReturn(formats);
     }
 
     private void givenUseCaseWillReturnNull() {
-        when(obtainAllFormatsUseCase.execute()).thenReturn(null);
+        when(obtainAllFormats.execute()).thenReturn(null);
     }
 
     private ResponseEntity<List<FormatDto>> whenClientRequestsAllFormats() {
@@ -107,6 +107,6 @@ public class FormatControllerTest {
     }
 
     private void thenUseCaseWasCalledOnce() {
-        verify(obtainAllFormatsUseCase, times(1)).execute();
+        verify(obtainAllFormats, times(1)).execute();
     }
 }
